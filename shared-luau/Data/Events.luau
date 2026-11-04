@@ -1,0 +1,75 @@
+--!strict
+-- Dynamic market events. Modifiers are multiplicative and clamped by Balance.Market.modifierClamp.
+-- demand: per-category demand multiplier ; supply: resource price multiplier ; trend: additive trend shift
+local Events = {}
+
+Events.list = {
+	{ id = "crypto_boom", name = "Crypto Boom", durationQ = 2, baseSeverity = 0.7, shock = false,
+		categories = { "PC" }, regions = { "NA", "EU", "ASIA", "EMERGING" },
+		demand = { PC = 1.35 }, supply = { gpu = 1.5, silicon_wafers = 1.15 }, trend = { gaming = 0.1 },
+		recovery = { PC = 0.85 }, text = "Mining farms are buying every GPU in sight. Prices surge, gamers grumble." },
+	{ id = "lithium_shortage", name = "Lithium Shortage", durationQ = 2, baseSeverity = 0.6, shock = false,
+		categories = { "Smartphone", "Laptop", "Wearable" }, regions = { "ASIA", "EMERGING" },
+		demand = {}, supply = { lithium = 1.8, battery_materials = 1.5 }, trend = { battery = 0.15, sustainability = 0.05 },
+		recovery = {}, text = "Mine closures squeeze lithium supply. Battery costs climb." },
+	{ id = "semi_crisis", name = "Semiconductor Crisis", durationQ = 3, baseSeverity = 0.8, shock = true,
+		categories = { "Smartphone", "PC", "Laptop", "Console" }, regions = { "NA", "EU", "ASIA", "EMERGING" },
+		demand = { Console = 1.1 }, supply = { silicon_wafers = 1.7, memory_chips = 1.4, advanced_packaging = 1.3 }, trend = {},
+		recovery = { silicon_wafers = 0.9 }, text = "Fabs are booked solid for a year. Chip prices spike; companies with own fabs smile." },
+	{ id = "aaa_release", name = "Major AAA Game Release", durationQ = 1, baseSeverity = 0.5, shock = false,
+		categories = { "PC", "Console", "Laptop" }, regions = { "NA", "EU", "ASIA" },
+		demand = { PC = 1.2, Console = 1.3, Laptop = 1.1 }, supply = {}, trend = { gaming = 0.2 },
+		recovery = {}, text = "The year's biggest game launches. Everyone wants more frames." },
+	{ id = "recession", name = "Global Recession", durationQ = 3, baseSeverity = 0.8, shock = true,
+		categories = { "Smartphone", "PC", "Laptop", "Console", "Wearable" }, regions = { "NA", "EU", "ASIA", "EMERGING" },
+		demand = { Smartphone = 0.8, PC = 0.75, Laptop = 0.8, Console = 0.85, Wearable = 0.7 }, supply = { copper = 0.9, aluminum = 0.9 },
+		trend = { sustainability = -0.05 }, priceSensitivity = 1.25, recovery = { Smartphone = 1.1, PC = 1.1 },
+		text = "Consumers tighten belts. Budget segments hold up; premium sales fall." },
+	{ id = "ai_breakthrough", name = "AI Breakthrough", durationQ = 3, baseSeverity = 0.7, shock = true,
+		categories = { "Smartphone", "PC", "Laptop", "Wearable" }, regions = { "NA", "EU", "ASIA", "EMERGING" },
+		demand = { PC = 1.1 }, supply = { advanced_packaging = 1.2 }, trend = { ai = 0.3, cloud = 0.1 },
+		recovery = {}, text = "A new model runs on-device. NPU TOPS become a headline spec." },
+	{ id = "supply_collapse", name = "Supply Chain Collapse", durationQ = 2, baseSeverity = 0.75, shock = false,
+		categories = { "Smartphone", "PC", "Laptop", "Console", "Wearable" }, regions = { "ASIA", "EMERGING" },
+		demand = {}, supply = { glass = 1.3, display_panels = 1.4, memory_chips = 1.2, rare_earth = 1.5 }, logisticsMult = 1.6, trend = {},
+		recovery = {}, text = "Ports are jammed and freight rates triple. Logistics centers earn their keep." },
+	{ id = "trade_restrictions", name = "Trade Restrictions", durationQ = 4, baseSeverity = 0.6, shock = false,
+		categories = { "Smartphone", "PC", "Laptop" }, regions = { "ASIA", "NA" },
+		demand = { Smartphone = 0.92 }, supply = { silicon_wafers = 1.2, rare_earth = 1.4 }, taxMult = 1.3, trend = {},
+		recovery = {}, text = "New tariffs between major blocs raise costs for cross-border supply chains." },
+	{ id = "new_display_tech", name = "New Display Technology", durationQ = 2, baseSeverity = 0.5, shock = false,
+		categories = { "Smartphone", "Laptop", "Wearable" }, regions = { "NA", "EU", "ASIA" },
+		demand = {}, supply = { display_panels = 0.9 }, trend = { display = 0.25 },
+		recovery = {}, text = "Reviewers obsess over panels. Old LCDs look dated overnight." },
+	{ id = "console_exclusive", name = "Popular Console Exclusive", durationQ = 2, baseSeverity = 0.6, shock = false,
+		categories = { "Console" }, regions = { "NA", "EU", "ASIA" },
+		demand = { Console = 1.4 }, supply = {}, trend = { gaming = 0.15 },
+		recovery = { Console = 0.9 }, text = "A console exclusive goes viral. Shelves empty." },
+	{ id = "energy_crisis", name = "Energy Crisis", durationQ = 2, baseSeverity = 0.7, shock = false,
+		categories = { "PC", "Smartphone", "Laptop", "Console", "Wearable" }, regions = { "EU", "ASIA" },
+		demand = { PC = 0.9 }, supply = {}, energyMult = 2.2, trend = { battery = 0.2, sustainability = 0.15 },
+		recovery = {}, text = "Electricity prices double. Fabs and server rooms feel it first." },
+	{ id = "new_standard", name = "New Manufacturing Standard", durationQ = 2, baseSeverity = 0.5, shock = false,
+		categories = { "Smartphone", "PC", "Laptop" }, regions = { "NA", "EU", "ASIA", "EMERGING" },
+		demand = {}, supply = { advanced_packaging = 0.85, silicon_wafers = 0.95 }, yieldBonus = 0.04, trend = {},
+		recovery = {}, text = "An industry consortium publishes a new packaging standard. Yields improve everywhere." },
+	{ id = "battery_gen", name = "New Battery Generation", durationQ = 3, baseSeverity = 0.6, shock = true,
+		categories = { "Smartphone", "Laptop", "Wearable" }, regions = { "NA", "EU", "ASIA", "EMERGING" },
+		demand = { Wearable = 1.15 }, supply = { battery_materials = 0.85 }, trend = { battery = 0.3 },
+		recovery = {}, text = "Solid-state cells reach volume. Battery life becomes the headline." },
+	{ id = "cloud_shift", name = "Mass Shift to Cloud Computing", durationQ = 4, baseSeverity = 0.6, shock = true,
+		categories = { "PC", "Laptop" }, regions = { "NA", "EU" },
+		demand = { PC = 0.85, Laptop = 1.1 }, supply = {}, trend = { cloud = 0.3, portable = 0.1 },
+		recovery = {}, text = "Thin clients and cloud gaming make raw local horsepower matter less." },
+	{ id = "new_competitor", name = "New Competitor Emerges", durationQ = 4, baseSeverity = 0.5, shock = true,
+		categories = { "Smartphone" }, regions = { "ASIA", "EMERGING" },
+		demand = {}, supply = {}, npcBoost = 0.15, trend = {},
+		recovery = {}, text = "A well-funded startup floods emerging markets with cheap phones." },
+}
+
+Events.byId = {}
+for _, e in ipairs(Events.list) do
+	Events.byId[e.id] = e
+end
+
+return Events
