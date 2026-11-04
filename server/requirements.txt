@@ -1,0 +1,2 @@
+websockets>=13.0
+lupa>=2.0

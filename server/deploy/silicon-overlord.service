@@ -1,0 +1,31 @@
+# systemd unit for the Silicon Overlord Online game server.
+# Install: sudo cp server/deploy/silicon-overlord.service /etc/systemd/system/
+#          sudo systemctl daemon-reload && sudo systemctl enable --now silicon-overlord
+# Assumes the repository is cloned to /opt/silicon-overlord with a virtualenv in /opt/silicon-overlord/venv
+# and a system user "silicon" (see docs/DEPLOY.md).
+[Unit]
+Description=Silicon Overlord Online game server
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=silicon
+Group=silicon
+WorkingDirectory=/opt/silicon-overlord
+ExecStart=/opt/silicon-overlord/venv/bin/python server/main.py --port 7350 --data /opt/silicon-overlord/server/data
+Environment=PYTHONUNBUFFERED=1
+# SIGTERM -> the server saves every company before exiting
+KillSignal=SIGTERM
+TimeoutStopSec=30
+Restart=always
+RestartSec=3
+# hardening
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=full
+ProtectHome=true
+ReadWritePaths=/opt/silicon-overlord/server/data
+
+[Install]
+WantedBy=multi-user.target

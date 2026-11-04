@@ -211,8 +211,25 @@ end
 startSome(3)
 for _ = 1, 6 do Sim.tickDay(c) end
 c.research.points = math.max(c.research.points or 0, 140)
+-- a third device in development (production screen: progress, bugs, quality)
+Balance.Development.daysBase = 30
+local ok3, r3 = Actions.createBlueprint(c, 1, "Nebula Mini", "BudgetPhone")
+if ok3 then
+  local bp3 = c.blueprints[r3.id]
+  local spec3 = require(S.Data.DeviceSpecs).bySubtype[bp3.subtype]
+  local all3 = {}
+  for _, s in ipairs(spec3.slots) do all3[#all3 + 1] = s.slot end
+  bp3.slots = DesignWizard.quickPick(c, bp3, all3, "cheap")
+  bp3.options.bodyColorHex = "#C8324B"
+  bp3.priceUSD = 199
+  c.finance.cash = math.max(c.finance.cash, 2000000)
+  Actions.publishBlueprint(c, 1, bp3.id)
+  for _ = 1, 9 do Sim.tickDay(c) end
+end
 -- a second, unpublished draft for the designer
 local ok2, r2 = Actions.createBlueprint(c, 1, "Nebula Two", "PremiumFlagship")
+-- screenshots look better with a healthy bank account
+c.finance.cash = 1846500
 c.audit = {}
 return c
 """
