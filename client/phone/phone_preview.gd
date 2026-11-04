@@ -74,7 +74,7 @@ func _build_env(world: Node3D) -> void:
 	env.reflected_light_source = Environment.REFLECTION_SOURCE_SKY
 	env.tonemap_mode = Environment.TONE_MAPPER_FILMIC
 	env.tonemap_exposure = 1.05
-	env.glow_enabled = true
+	env.glow_enabled = false
 	env.glow_intensity = 0.55
 	env.glow_bloom = 0.04
 	env.glow_hdr_threshold = 0.9
@@ -109,22 +109,22 @@ func _build_env(world: Node3D) -> void:
 	world.add_child(rim_b)
 	if pedestal:
 		var disc := CylinderMesh.new()
-		disc.top_radius = 1.05
-		disc.bottom_radius = 1.1
+		disc.top_radius = 0.78
+		disc.bottom_radius = 0.82
 		disc.height = 0.06
 		disc.radial_segments = 64
 		var dm := StandardMaterial3D.new()
-		dm.albedo_color = Color(0.05, 0.06, 0.1)
-		dm.metallic = 0.6
-		dm.roughness = 0.25
+		dm.albedo_color = Color(0.035, 0.045, 0.08)
+		dm.metallic = 0.3
+		dm.roughness = 0.55
 		var d := MeshInstance3D.new()
 		d.mesh = disc
 		d.material_override = dm
 		d.position = Vector3(0, -0.95, 0)
 		world.add_child(d)
 		var ring := TorusMesh.new()
-		ring.inner_radius = 1.05
-		ring.outer_radius = 1.09
+		ring.inner_radius = 0.78
+		ring.outer_radius = 0.805
 		ring.rings = 64
 		_ped_ring = MeshInstance3D.new()
 		_ped_ring.mesh = ring
@@ -150,7 +150,8 @@ func show_params(p: Dictionary) -> void:
 	_device = Builder.build(p)
 	_pivot.add_child(_device)
 	var ext := Builder.extents(p)
-	_target_dist = clampf(maxf(ext.x, ext.y) * 2.25 + 0.6, 2.2, 7.5)
+	var e := maxf(ext.x, ext.y)
+	_target_dist = clampf(e * 2.45 + 0.7, 2.2, 8.5) if stage_style == "hero" else clampf(e * 2.9 + 0.8, 2.4, 9.0)
 	if not _dragging:
 		distance = _target_dist
 	_update_cam()

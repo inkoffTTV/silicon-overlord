@@ -245,6 +245,7 @@ func _furniture() -> void:
 	_pallet_table(g, Vector3(2.95, 0, 1.7))
 	fridge(g, Vector3(W - 0.36, 0, -1.25), -90.0)
 	_water_heater(g, Vector3(W - 0.35, 0, -D + 0.35))
+	_podium(g, Vector3(-0.15, 0, D - 0.45))
 	# rug
 	kit.box(g, Vector3(1.8, 0.01, 2.4), Vector3(2.7, 0.005, 1.7), Mats.m("carpet", Color(1.6, 0.9, 0.7)), Vector3.ZERO, false, 0.0, false)
 
@@ -289,6 +290,19 @@ func _workbench(g: Node3D, p: Vector3) -> void:
 	# clamp light / power strip
 	kit.box(b, Vector3(0.4, 0.04, 0.06), Vector3(-0.6, 0.92, -0.28), Mats.m("plastic_white"), Vector3.ZERO, false, 0.01)
 	kit.box(b, Vector3(0.01, 0.01, 0.004), Vector3(-0.43, 0.94, -0.25), Mats.glow(Color(1, 0.2, 0.1), 5.0), Vector3.ZERO, false, 0.0, false)
+
+## Cardboard keynote podium by the roll-up door: "stage_launch" (launch event for a finished prototype).
+func _podium(g: Node3D, p: Vector3) -> void:
+	var ia := kit.interactable(g, "stage_launch", "garage_podium", "Launch event", p, 180.0)
+	kit.box(ia, Vector3(0.6, 1.05, 0.45), Vector3(0, 0.525, 0), Mats.m("plywood"), Vector3.ZERO, false, 0.02)
+	kit.box(ia, Vector3(0.7, 0.04, 0.5), Vector3(0, 1.08, 0.03), Mats.m("plywood", Color(0.85, 0.8, 0.75)), Vector3(-12, 0, 0), false, 0.01)
+	kit.box(ia, Vector3(0.5, 0.36, 0.004), Vector3(0, 0.66, 0.227), Mats.m("paper", Color(0.15, 0.15, 0.18)), Vector3.ZERO, false, 0.0, false)
+	kit.label(ia, "KEYNOTE", Vector3(0, 0.7, 0.231), 72, Color(0.95, 0.8, 0.25), Vector3.ZERO, 0.0016, true)
+	kit.label(ia, "(soon)", Vector3(0, 0.6, 0.231), 40, Color(0.8, 0.8, 0.8), Vector3.ZERO, 0.0016, true)
+	# goose-neck mic
+	kit.box(ia, Vector3(0.012, 0.3, 0.012), Vector3(0.15, 1.24, 0.0), Mats.m("steel_dark"), Vector3(-25, 0, 0), false, 0.0)
+	kit.cyl(ia, 0.022, 0.07, Vector3(0.15, 1.38, 0.07), Mats.m("plastic_black"), Vector3(-60, 0, 0), 8)
+	kit.ia_shape(ia, Vector3(0.7, 1.15, 0.5), Vector3(0, 0.575, 0))
 
 func _tv_cabinet(g: Node3D, p: Vector3) -> void:
 	var c := kit.node(g, p, -90.0)
@@ -411,7 +425,7 @@ func _props() -> void:
 	prop("box_heavy", Vector3(-3.3, 0.25, 2.1), Vector3(0, 5, 0))
 	prop("box_s", Vector3(-2.55, 1.15, 3.05), Vector3(0, 20, 0))
 	prop("crate", Vector3(-3.3, 0.22, 1.2), Vector3(0, -10, 0))
-	prop("cone", Vector3(-0.2, 0.24, 2.4))
+	prop("cone", Vector3(-0.95, 0.24, 2.2))
 	prop("trash_bin", Vector3(-1.95, 0.2, -0.3))
 	prop("bottle", Vector3(-1.9, 1.0, -2.9))
 	prop("book", Vector3(-3.6, 0.8, -1.25), Vector3(0, 80, 0), 1)
@@ -420,7 +434,7 @@ func _props() -> void:
 	prop("box_s", Vector3(W - 0.36, 1.86, -1.4))
 
 func _viewpoints() -> void:
-	kit.viewpoint(self, "overview", Vector3(3.5, 2.45, 3.1), Vector3(-1.3, 0.7, -1.6), 74.0)
+	kit.viewpoint(self, "overview", Vector3(-3.3, 2.35, 2.6), Vector3(1.6, 0.7, -1.4), 76.0)
 	kit.viewpoint(self, "spawn", Vector3(0.9, 1.6, 2.3), Vector3(0.9 - sin(deg_to_rad(18.0)) * 3.0, 1.35, 2.3 - cos(deg_to_rad(18.0)) * 3.0), 75.0)
 	kit.viewpoint(self, "desk", Vector3(-2.35, 1.55, 0.45), Vector3(-3.7, 0.95, -1.0), 70.0)
 	kit.viewpoint(self, "workbench", Vector3(-1.1, 1.65, -1.0), Vector3(-2.7, 1.2, -3.4), 70.0)

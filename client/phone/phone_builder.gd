@@ -175,6 +175,8 @@ static func body_look(p: Dictionary) -> Dictionary:
 		if tex == "carbon":
 			m.albedo_texture = _texture(tex)
 			m.uv1_scale = Vector3(3, 3, 1)
+		else:
+			m.uv1_scale = Vector3(1, 3, 1)
 	if fl.get("rim", false):
 		m.rim_enabled = true
 		m.rim = 0.8
@@ -286,13 +288,10 @@ static func _screen_material(root: Node3D, p: Dictionary, sw: float, sh: float) 
 	hs.setup(Vector2i(px_w, int(px_w * sh / sw)))
 	var t: Array = PANEL_TINT.get(p.get("displayPanel", "IPS"), PANEL_TINT.IPS)
 	var m := StandardMaterial3D.new()
-	m.albedo_color = Color(0.02, 0.02, 0.025)
-	m.emission_enabled = true
-	m.emission_texture = hs.get_texture()
-	m.emission = Color.WHITE
-	m.emission_energy_multiplier = 0.95 * float(t[1])
-	m.roughness = 0.05
-	m.metallic_specular = 0.8
+	m.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	var bright := clampf(0.78 * float(t[1]), 0.4, 1.0)
+	m.albedo_color = Color(bright, bright, bright)
+	hs.target_material = m
 	m.texture_filter = BaseMaterial3D.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS_ANISOTROPIC
 	return m
 
@@ -368,6 +367,11 @@ static func _camera_island(root: Node3D, p: Dictionary, w: float, h: float, d: f
 	var org2 := _island_origin(p.get("cameraLayout", "topLeft"), w, h)
 	if shape == "bar":
 		org2.x = 0
+	var ext_w := maxf(iw, ih) if shape == "circle" else iw
+	var ext_h := maxf(iw, ih) if shape == "circle" else ih
+	var max_x := maxf(0.0, w / 2 - ext_w / 2 - 0.035)
+	org2.x = clampf(org2.x, -max_x, max_x)
+	org2.y = minf(org2.y, h / 2 - ext_h / 2 - 0.035)
 	var back_z := o.z - d / 2
 	var island_col := darken(body_col, 0.72).lerp(Color(0.12, 0.12, 0.14), 0.35)
 	var island_mat := _mat(island_col, 0.7, 0.25, 0.5)

@@ -31,12 +31,34 @@ func _ready() -> void:
 static func read_quality() -> String:
 	var cfg := ConfigFile.new()
 	if cfg.load(SETTINGS) == OK:
-		var q := str(cfg.get_value("graphics", "quality", "lo-fi"))
+		var q := str(cfg.get_value("graphics", "quality", "lo-fi")).to_lower()
+		if q in ["lofi", "lo_fi", "lo-fi"]:
+			return "lo-fi"
 		if PRESETS.has(q):
 			return q
 	return "lo-fi"
 
+var _poll := 0.0
+var _mtime := 0
+
+## The UI writes the setting to user://settings.cfg; pick changes up without coupling to UI code.
+func _process(dt: float) -> void:
+	_poll += dt
+	if _poll < 1.0:
+		return
+	_poll = 0.0
+	if not FileAccess.file_exists(SETTINGS):
+		return
+	var mt := FileAccess.get_modified_time(SETTINGS)
+	if mt != _mtime:
+		_mtime = mt
+		var q := read_quality()
+		if q != quality:
+			apply_quality(q)
+
 func apply_quality(q: String) -> void:
+	if q == "lofi":
+		q = "lo-fi"
 	if not PRESETS.has(q):
 		q = "lo-fi"
 	quality = q

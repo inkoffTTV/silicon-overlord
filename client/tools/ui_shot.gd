@@ -8,7 +8,6 @@ extends SceneTree
 ##          pause, quick, phone (3D preview only). --world loads main.tscn behind the UI (default: dark backdrop).
 
 const D := preload("res://ui/lib/gdata.gd")
-const UIRoot := preload("res://ui/ui_root.gd")
 
 var args := {}
 
@@ -18,6 +17,10 @@ func _initialize() -> void:
 			var kv := a.substr(2).split("=", true, 1)
 			args[kv[0]] = kv[1] if kv.size() > 1 else "1"
 	_run.call_deferred()
+	# watchdog: never hang a CI/shot run
+	create_timer(float(args.get("timeout", "90"))).timeout.connect(func() -> void:
+		push_error("ui_shot: timeout")
+		quit(2))
 
 func _run() -> void:
 	var Game: Node = root.get_node_or_null("Game")
@@ -75,7 +78,7 @@ func _run() -> void:
 		{"userId": 2, "name": "Мира", "color": "#E85CC4", "role": "Cofounder", "online": true},
 		{"userId": 3, "name": "Sam", "color": "#3DD68C", "role": "Cofounder", "online": false}]
 	Net.set("mock_handler", _mock)
-	var ui: Node = UIRoot.new()
+	var ui: Node = load("res://ui/ui_root.gd").new()
 	ui.set("force_lang", lang)
 	root.add_child(ui)
 	if not st.is_empty():
@@ -112,11 +115,36 @@ func _run() -> void:
 			ui.call("debug_pause")
 		"quick":
 			ui.call("debug_quick")
+		"phone":
+			ui.queue_free()
+			var pv: Control = load("res://phone/phone_preview.gd").new()
+			pv.set("stage_style", str(args.get("style", "studio")))
+			var cl := CanvasLayer.new()
+			root.add_child(cl)
+			cl.add_child(pv)
+			pv.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+			var W = load("res://ui/lib/wizard.gd")
+			var B = load("res://phone/phone_builder.gd")
+			var bps: Dictionary = st.get("blueprints", {})
+			var bp: Dictionary = bps.get(str(args.get("bp", "bp_20_1")), bps.values()[0])
+			for k in args:
+				if k.begins_with("opt."):
+					bp.options[k.substr(4)] = args[k] if not args[k].is_valid_float() else float(args[k])
+				if k.begins_with("slot."):
+					bp.slots[k.substr(5)] = args[k]
+			var p: Dictionary = B.params_from_blueprint(bp, func(id: String) -> Dictionary: return W.resolve(st, id), {"initial": "N", "name": "Nebula", "colorA": "#4F8CFF", "colorB": "#B15CFF"})
+			pv.call("show_params", p)
+			await process_frame
+			pv.call("set_view", str(args.get("view", "auto")))
 	var wait := float(args.get("wait", "1.2"))
 	await create_timer(wait).timeout
 	for i in 6:
 		await process_frame
 	await RenderingServer.frame_post_draw
+	if args.has("dump_home"):
+		var hs := root.find_child("HomeScreen", true, false)
+		if hs:
+			(hs as SubViewport).get_texture().get_image().save_png(out.get_base_dir() + "/t_home.png")
 	var img := root.get_texture().get_image()
 	img.save_png(out)
 	print("saved ", out)

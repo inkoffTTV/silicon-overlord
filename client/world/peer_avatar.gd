@@ -184,7 +184,7 @@ func _process(delta: float) -> void:
 	global_position = gp
 	_yaw = lerp_angle(_yaw, target_yaw, k)
 	_pitch = lerpf(_pitch, target_pitch, k)
-	rotation.y = _yaw
+	rotation.y = _yaw + PI  # model faces +Z, player yaw 0 faces -Z
 	head.rotation.x = clampf(_pitch, -0.9, 0.9) * 0.6
 	var horiz: float = Vector2(gp.x - prev.x, gp.z - prev.z).length() / maxf(delta, 0.0001)
 	_speed = lerpf(_speed, horiz, 1.0 - exp(-8.0 * delta))

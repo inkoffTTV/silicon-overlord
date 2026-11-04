@@ -135,19 +135,19 @@ static func theme() -> Theme:
 	_button_style(t, "BtnFlat", Color(1, 1, 1, 0.0), Color(1, 1, 1, 0.07), Color(1, 1, 1, 0.12), MUTED)
 	# segmented / toggle buttons: pressed = selected
 	_button_style(t, "BtnSeg", Color(1, 1, 1, 0.0), Color(1, 1, 1, 0.06), PANEL_HI, MUTED)
-	t.set_stylebox("pressed", "BtnSeg", sbox(Color("#2B3557"), 9, Color(ACCENT, 0.0), 0, 10, 7))
-	t.set_stylebox("hover_pressed", "BtnSeg", sbox(Color("#2F3A60"), 9, Color(ACCENT, 0.0), 0, 10, 7))
+	t.set_stylebox("pressed", "BtnSeg", sbox(Color("#2B3557"), 9, Color(ACCENT, 0.0), 0, 14, 8))
+	t.set_stylebox("hover_pressed", "BtnSeg", sbox(Color("#2F3A60"), 9, Color(ACCENT, 0.0), 0, 14, 8))
 	t.set_color("font_pressed_color", "BtnSeg", TEXT)
 	t.set_color("font_hover_pressed_color", "BtnSeg", TEXT)
 	# speed buttons: pressed = filled accent
 	_button_style(t, "BtnSpeed", Color(1, 1, 1, 0.04), Color(1, 1, 1, 0.1), ACCENT, MUTED)
-	t.set_stylebox("pressed", "BtnSpeed", sbox(ACCENT, 9, Color(), 0, 8, 6))
-	t.set_stylebox("hover_pressed", "BtnSpeed", sbox(ACCENT.lightened(0.1), 9, Color(), 0, 8, 6))
+	t.set_stylebox("pressed", "BtnSpeed", sbox(ACCENT, 9, Color(), 0, 14, 8))
+	t.set_stylebox("hover_pressed", "BtnSpeed", sbox(ACCENT.lightened(0.1), 9, Color(), 0, 14, 8))
 	t.set_color("font_pressed_color", "BtnSpeed", Color.WHITE)
 	t.set_color("font_hover_pressed_color", "BtnSpeed", Color.WHITE)
 	# option rows (designer)
 	_button_style(t, "BtnRow", Color(PANEL_ALT, 0.75), Color("#212A42"), Color("#1E2740"), TEXT, Color(BORDER, 0.55))
-	var rp := sbox(Color("#18264A"), 12, ACCENT, 2, 12, 10)
+	var rp := sbox(Color("#18264A"), 10, ACCENT, 2, 12, 10)
 	t.set_stylebox("pressed", "BtnRow", rp)
 	t.set_stylebox("hover_pressed", "BtnRow", rp)
 	t.set_color("font_pressed_color", "BtnRow", TEXT)
@@ -276,11 +276,11 @@ static func lbl(text: String, size: int = SM, color: Color = TEXT, weight: Strin
 	return l
 
 ## Wrapped paragraph. Give it a width via its container (size_flags fill) — it grows in height.
-static func para(text: String, size: int = SM, color: Color = MUTED, weight: String = "medium") -> Label:
+static func para(text: String, size: int = SM, color: Color = MUTED, weight: String = "medium", min_w: float = 40) -> Label:
 	var l := lbl(text, size, color, weight)
 	l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	l.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	l.custom_minimum_size.x = 40
+	l.custom_minimum_size.x = min_w
 	return l
 
 ## One-line label that trims with an ellipsis instead of growing.
@@ -388,6 +388,8 @@ static func icon_tile(name: String, color: Color, size: float = 34, radius: int 
 	var p := PanelContainer.new()
 	p.add_theme_stylebox_override("panel", sbox(Color(color, 0.18), radius, Color(color, 0.35), 1, 0, 0))
 	p.custom_minimum_size = Vector2(size, size)
+	p.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	p.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	p.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	var c := CenterContainer.new()
 	c.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -404,6 +406,8 @@ static func avatar(initial: String, col: Color, size: float = 30, col_b: Color =
 		sb.set_border_width_all(2)
 	p.add_theme_stylebox_override("panel", sb)
 	p.custom_minimum_size = Vector2(size, size)
+	p.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	p.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	p.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	var l := lbl(initial, int(size * 0.45), Color.WHITE, "bold")
 	l.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER

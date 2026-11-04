@@ -38,6 +38,7 @@ POS_REFILL = 15.0
 MAX_QUEUE = 2000              # outgoing frames buffered for a slow client before it is dropped
 CHAT_MAX = 200
 NAME_MAX = 20
+CREATE_COOLDOWN = 5.0         # seconds between two "create" from one connection
 
 
 def now():
@@ -116,6 +117,7 @@ class Conn:
         self.pos_bucket = Bucket(POS_CAPACITY, POS_REFILL)
         self.pos = None
         self.closed = False
+        self.last_create = -1e9
         self.addr = getattr(ws, "remote_address", None)
 
     def send(self, obj):
@@ -147,7 +149,7 @@ class Room:
 
 class GameServer:
     def __init__(self, data_dir, autosave_seconds=60.0, idle_unload_seconds=60.0, tick_seconds=0.1,
-                 peers_hz=10.0, stats_seconds=300.0):
+                 peers_hz=10.0, stats_seconds=300.0, housekeeping_seconds=5.0):
         self.store = Store(data_dir)
         self.lua = LuaHost(load_profile=self.store.load_profile)
         self.autosave_seconds = autosave_seconds
@@ -156,6 +158,7 @@ class GameServer:
         self.peers_interval = 1.0 / peers_hz
         self.stats_seconds = stats_seconds
         self.boards_seconds = 30.0
+        self.housekeeping_seconds = housekeeping_seconds
         self.rooms = {}            # company id -> Room
         self.players = {}          # pid -> Conn (one live connection per player)
         self.profiles_dirty = {}   # pid -> latest profile dict to write
@@ -506,6 +509,10 @@ class GameServer:
             conn.send({"t": "error", "message": "Company name: 1-24 letters, digits or spaces"})
             return
         mode = "cofounder" if company.get("mode") == "cofounder" else "solo"
+        if now() - conn.last_create < CREATE_COOLDOWN:
+            conn.send({"t": "error", "message": "Wait a few seconds before creating another company"})
+            return
+        conn.last_create = now()
 
         def color(v, default):
             return v if isinstance(v, str) and re.fullmatch(r"#[0-9A-Fa-f]{6}", v) else default
@@ -581,6 +588,8 @@ class GameServer:
             self.dispatch()
             conn.send({"t": "error", "message": str(err)})
             return
+        # profile.companyId is the source of "last company" (saved with the profile) -> keep both in sync
+        self.lua.call("setProfileCompany", conn.pid, room.id)
         self.store.set_last_company(conn.pid, room.id)
         self.send_joined(conn, room)
         self.dispatch()
@@ -629,21 +638,20 @@ class GameServer:
             return
         try:
             ok, data = self.lcall("act", conn.pid, action, self.lua.to_lua(args))
-        except LuaError:
+            if ok:
+                frame = {"t": "res", "id": aid, "ok": True}
+                d = lua_to_py(data)
+                if d is not None:
+                    frame["data"] = d
+            else:
+                frame = {"t": "res", "id": aid, "ok": False,
+                         "error": str(lua_to_py(data) if data is not None else "Failed")}
+            conn.send(frame)
+        except LuaError:  # already logged by lcall
             conn.send({"t": "res", "id": aid, "ok": False, "error": "Internal error"})
-            return
         except Exception:
             log.exception("act %s failed", action)
             conn.send({"t": "res", "id": aid, "ok": False, "error": "Internal error"})
-            return
-        if ok:
-            frame = {"t": "res", "id": aid, "ok": True}
-            d = lua_to_py(data)
-            if d is not None:
-                frame["data"] = d
-        else:
-            frame = {"t": "res", "id": aid, "ok": False, "error": str(lua_to_py(data) if data is not None else "Failed")}
-        conn.send(frame)
 
     def on_speed(self, conn, msg):
         speed = msg.get("speed")
@@ -760,7 +768,7 @@ class GameServer:
         last_boards = now()
         last_stats = now()
         while True:
-            await asyncio.sleep(5)
+            await asyncio.sleep(self.housekeeping_seconds)
             t = now()
             try:
                 self.flush_profiles()

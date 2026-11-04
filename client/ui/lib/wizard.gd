@@ -256,7 +256,7 @@ static func display_facets(state: Dictionary, draft: Dictionary, rows: Array) ->
 					any_av = true
 					if not best.available or r.unitCost < best.unitCost:
 						best = r
-			var sel := not cur.is_empty() and _facet_value(cur, facet) == v
+			var sel: bool = not cur.is_empty() and _facet_value(cur, facet) == v
 			list.append({"label": facet_label(facet, v), "value": v, "rows": g, "available": any_av, "selected": sel, "best": best})
 		out[facet] = list
 	return out
@@ -312,7 +312,7 @@ static func pick_size(state: Dictionary, draft: Dictionary, rows: Array, inch: f
 	var best_score := -INF
 	for r in rows:
 		if r.available and is_equal_approx(snappedf(U.num(r.component.get("sizeInch", 0)), 0.01), inch):
-			var score := -r.unitCost / 1000.0
+			var score: float = -r.unitCost / 1000.0
 			if not cur.is_empty():
 				for f in ["resolution", "refresh", "panel"]:
 					if _facet_value(r.component, f) == _facet_value(cur, f):
@@ -518,3 +518,43 @@ static func blank_draft(state: Dictionary, subtype: String) -> Dictionary:
 			req.append(s.slot)
 	bp.slots = quick_pick(state, bp, req, "cheap")
 	return bp
+
+# ---------------------------------------------------------------- cosmetics (Finishes.isItemUnlocked)
+static func finish_unlocked(state: Dictionary, item: Dictionary) -> Array:
+	if item.is_empty():
+		return [false, "Unknown"]
+	if U.dict(state.get("unlockedFinishes", {})).has(str(item.get("id", ""))):
+		return [true, ""]
+	var u: Variant = item.get("unlock", null)
+	if not (u is Dictionary) or str(u.get("kind", "free")) == "free":
+		return [true, ""]
+	match str(u.kind):
+		"daily_streak":
+			var daily := U.dict(state.get("daily", {}))
+			var best := U.num(daily.get("bestStreak", daily.get("streak", 0)))
+			if best >= U.num(u.get("value", 0)):
+				return [true, ""]
+			return [false, "Daily rewards: %d-day streak" % int(U.num(u.get("value", 0)))]
+		"milestone":
+			if U.dict(state.get("milestones", {})).has(str(u.get("id", ""))):
+				return [true, ""]
+			return [false, "Milestone: " + str(u.get("id", ""))]
+		"room":
+			var room := U.dict(U.dict(U.dict(state.get("hq", {})).get("rooms", {})).get(str(u.get("id", "")), {}))
+			if U.num(room.get("level", 0)) >= U.num(u.get("level", 1), 1):
+				return [true, ""]
+			return [false, "Build the %s (level %d)" % [str(u.get("id", "")), int(U.num(u.get("level", 1), 1))]]
+		"founder":
+			var d := U.dict(state.get("daily", {}))
+			if d.get("founderFinish", false) or (U.num(d.get("dayIndex", 0)) >= 7 and U.num(d.get("streak", 0)) >= 7):
+				return [true, ""]
+			return [false, "Day 7 of your first daily-rewards week"]
+		"rp":
+			return [false, "Token finish: %d research points" % int(U.num(u.get("cost", 0)))]
+	return [false, "Locked"]
+
+## Thinnest screen border your best display tech allows (inches).
+static func min_bezel(state: Dictionary, draft: Dictionary) -> float:
+	var d := resolve(state, str(U.dict(draft.get("slots", {})).get("Display", "")))
+	var gen := U.num(d.get("generation", 1), 1)
+	return maxf(0.08, 0.3 - 0.035 * (gen - 1))

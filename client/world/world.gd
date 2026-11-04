@@ -18,6 +18,8 @@ const LEVELS := {
 const STAGE_OFFSET := Vector3(0, 0, -400)
 
 signal level_built(level: int)
+## emitted when the launch show on the stage is over (camera is back on the player)
+signal launch_finished(product_name: String)
 
 var env: Environment
 var world_env: WorldEnvironment
@@ -256,17 +258,31 @@ func _on_launch_show(product_id: String) -> void:
 
 ## Asks the phone module for a 3D model if it offers one, else returns null (stage uses its own).
 func _product_model(product: Dictionary) -> Node3D:
-	# Contract requested in docs/REQUESTS.md: res://phone/phone_model.gd  static func build(product: Dictionary) -> Node3D
-	var path := "res://phone/phone_model.gd"
-	if not ResourceLoader.exists(path):
+	# Uses the UI agent's parametric builder (res://phone/phone_builder.gd) when present.
+	const BUILDER := "res://phone/phone_builder.gd"
+	const WIZARD := "res://ui/lib/wizard.gd"
+	if product.is_empty() or not ResourceLoader.exists(BUILDER):
 		return null
-	var sc: Script = load(path)
-	for m in sc.get_script_method_list():
-		if m.get("name") == "build":
-			var res: Variant = sc.call("build", product)
-			if res is Node3D:
-				return res
-	return null
+	var st: Dictionary = Game.state
+	var bps: Variant = st.get("blueprints", {})
+	var bp: Variant = bps.get(str(product.get("blueprintId", ""))) if bps is Dictionary else null
+	if not (bp is Dictionary):
+		bp = {"name": product.get("name", ""), "category": product.get("category", "Smartphone")}
+	var builder: Script = load(BUILDER)
+	var wizard: Script = load(WIZARD) if ResourceLoader.exists(WIZARD) else null
+	var resolve := func(id: String) -> Dictionary:
+		if wizard:
+			var r: Variant = wizard.call("resolve", st, id)
+			return r if r is Dictionary else {}
+		return {}
+	var logo: Dictionary = st.get("logo", {}) if st.get("logo") is Dictionary else {}
+	var brand := {"initial": str(st.get("name", "?")).substr(0, 1), "name": st.get("name", ""),
+		"colorA": logo.get("colorA", "#4F8CFF"), "colorB": logo.get("colorB", "#B15CFF")}
+	var params: Variant = builder.call("params_from_blueprint", bp, resolve, brand)
+	if not (params is Dictionary):
+		return null
+	var res: Variant = builder.call("build", params)
+	return res if res is Node3D else null
 
 func play_launch(product_name: String, model: Node3D = null) -> void:
 	if _show_running:
@@ -283,3 +299,4 @@ func play_launch(product_name: String, model: Node3D = null) -> void:
 		if p.has_method("make_camera_current"):
 			p.make_camera_current()
 	_show_running = false
+	launch_finished.emit(product_name)

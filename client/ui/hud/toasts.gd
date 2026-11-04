@@ -43,10 +43,10 @@ func show_toast(kind: String, title: String, body: String = "") -> void:
 	var v := U.vbox(2)
 	v.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	h.add_child(v)
-	var t := U.para(title, U.SM, U.TEXT, "bold")
+	var t := U.para(title, U.SM, U.TEXT, "bold", 270)
 	v.add_child(t)
 	if body != "":
-		v.add_child(U.para(body, U.XS + 1, U.MUTED))
+		v.add_child(U.para(body, U.XS + 1, U.MUTED, "medium", 270))
 	card.gui_input.connect(func(e: InputEvent) -> void:
 		if e is InputEventMouseButton and e.pressed:
 			_dismiss(card))

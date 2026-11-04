@@ -12,12 +12,19 @@ var on := true
 const ICON_COLORS := ["#FF6B6B", "#F7B731", "#20BF6B", "#45AAF2", "#A55EEA", "#FD9644", "#2BCBBA", "#EB3B5A",
 	"#4B7BEC", "#26DE81", "#FED330", "#778CA3", "#FC5C65", "#0FB9B1", "#8854D0", "#F5F6FA"]
 
+## material whose emission shows this screen; assigned once the viewport is in the tree
+var target_material: StandardMaterial3D
+
 func setup(px: Vector2i) -> void:
 	size = px
 	transparent_bg = false
 	disable_3d = true
-	render_target_update_mode = SubViewport.UPDATE_ONCE
 	_build()
+
+func _ready() -> void:
+	render_target_update_mode = SubViewport.UPDATE_ONCE
+	if target_material:
+		target_material.albedo_texture = get_texture()
 
 func redraw() -> void:
 	for c in get_children():

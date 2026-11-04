@@ -84,8 +84,10 @@ func _build() -> void:
 	pv.spin_speed = 0.45
 	pv.anchor_left = 0.44
 	pv.anchor_right = 0.98
-	pv.anchor_top = 0.06
-	pv.anchor_bottom = 0.94
+	pv.anchor_top = 0.04
+	pv.anchor_bottom = 0.86
+	pv.yaw = -0.25
+	pv.pitch = 0.12
 	add_child(pv)
 	_preview = pv
 	_update_hero()
@@ -107,15 +109,16 @@ func _build() -> void:
 	(badge.get_child(0).get_child(0) as Control).set("color", Color.WHITE)
 	badge_row.add_child(badge)
 	badge_row.add_child(U.caps(L.t("ONLINE CO-OP TECH TYCOON"), U.MUTED, 11))
-	var t1 := U.lbl("SILICON", 58, U.TEXT, "black")
-	t1.add_theme_constant_override("line_spacing", -12)
-	col.add_child(t1)
-	var t2 := U.lbl("OVERLORD", 58, Color("#8FB2FF"), "black")
-	t2.add_theme_color_override("font_shadow_color", Color(0.35, 0.45, 1.0, 0.55))
-	t2.add_theme_constant_override("shadow_outline_size", 18)
+	var tv := U.vbox(-26)
+	col.add_child(tv)
+	var t1 := U.lbl("SILICON", 60, U.TEXT, "black")
+	tv.add_child(t1)
+	var t2 := U.lbl("OVERLORD", 60, Color("#86A9FF"), "black")
+	t2.add_theme_color_override("font_shadow_color", Color(0.3, 0.42, 1.0, 0.28))
+	t2.add_theme_constant_override("shadow_outline_size", 10)
 	t2.add_theme_constant_override("shadow_offset_x", 0)
-	t2.add_theme_constant_override("shadow_offset_y", 0)
-	col.add_child(t2)
+	t2.add_theme_constant_override("shadow_offset_y", 2)
+	tv.add_child(t2)
 	var bar := ColorRect.new()
 	bar.color = U.ACCENT
 	bar.custom_minimum_size = Vector2(110, 4)
@@ -124,17 +127,14 @@ func _build() -> void:
 	col.add_child(U.para(L.t("Start in a garage. Design phones together. Out-think rivals."), U.MD, Color(U.TEXT, 0.85)))
 	col.add_child(U.gap(6))
 	# pages
-	var stack := Control.new()
-	stack.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	var stack := U.vbox(0)
 	col.add_child(stack)
 	_pages["home"] = _page_home()
 	_pages["create"] = _page_create()
 	_pages["join"] = _page_join()
 	_pages["settings"] = _page_settings()
 	for k in _pages:
-		var p: Control = _pages[k]
-		p.set_anchors_and_offsets_preset(Control.PRESET_TOP_WIDE)
-		stack.add_child(p)
+		stack.add_child(_pages[k])
 	# status card (errors / progress)
 	_status_card = PanelContainer.new()
 	_status_card.add_theme_stylebox_override("panel", U.sbox(Color(U.DANGER, 0.12), 10, Color(U.DANGER, 0.45), 1, 12, 10))

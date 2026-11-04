@@ -47,6 +47,9 @@ Everything below the table keeps working as written; these are additions/clarifi
     `chat` text is trimmed to 200 characters (control characters removed).
 15. `GET /health` on the same port answers `200 ok` (for monitoring). The WebSocket endpoint is `/ws` (also `/`).
 16. `error {message}` is used for every failed non-act message (bad JSON, hello first, unknown code, ...).
+17. A player may own several companies (unlike Roblox): `create` always founds a new one (max one per 5 s per
+    connection) and `resume` returns to the company you entered last; older ones are entered by their room code.
+    One live connection per token: a new `hello` with the same token replaces the old socket.
 
 Endpoint: `ws://<host>:7350/ws` (later `wss://` behind a reverse proxy). One JSON object per frame,
 field `t` = message type. Numbers are JSON numbers; Lua maps with non-string keys are sent with string keys.

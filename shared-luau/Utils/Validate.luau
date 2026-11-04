@@ -19,15 +19,23 @@ function Validate.string(v: any, maxLen: number): boolean
 end
 
 function Validate.name(v: any, maxLen: number): boolean
-	if not Validate.string(v, maxLen) then
+	-- maxLen counts characters, not bytes: a Cyrillic letter is 2 bytes in UTF-8
+	if type(v) ~= "string" then
 		return false
 	end
 	local s = v :: string
-	if #s == 0 then
+	if #s == 0 or #s > maxLen * 4 then
 		return false
 	end
-	-- letters, digits, spaces and a few punctuation marks; no control chars
-	return string.find(s, "^[%w%s%-%._'&!]+$") ~= nil
+	local chars = utf8.len(s)
+	if chars == nil or chars > maxLen then
+		return false
+	end
+	if string.find(s, "%c") then
+		return false
+	end
+	-- ASCII letters, digits, spaces and a few punctuation marks; any UTF-8 letter (bytes >= 128)
+	return string.find(s, "^[%w%s%-%._'&!\128-\255]+$") ~= nil
 end
 
 function Validate.oneOf(v: any, list: { string }): boolean

@@ -9,7 +9,11 @@ extends SceneTree
 ##   --frames=N            frames to wait per view (default 45)
 ##   --quality=lo-fi|clean post-processing preset
 ##   --peers               spawn three fake peers (avatars) in front of the camera
-##   --show=0.5,3,6.5      run world.play_launch("Nebula One") and capture the stage camera at these seconds
+##   --show=12,3,3,25      run world.play_launch("Nebula One"); capture each phase (lights, 3, 1, reveal) after N frames
+##   --level=N             build HQ level N (fakes Game.state.hq.level)
+##   --hide-ui             hide main.tscn's UI layer (world-only shots of the real game scene)
+##   --dark                switch off every light except the player's flashlight (debug)
+##   --flashlight          turn the local player's flashlight on
 ##   --player              also capture the player's own camera ("player" view)
 ## Output dir may also come from env SHOT_DIR.
 
@@ -49,6 +53,10 @@ func _run() -> void:
 	var prefix: String = args.get("prefix", scene_path.get_file().get_basename())
 	var frames := int(args.get("frames", "45"))
 	var out := _out_dir()
+	if args.has("level"):
+		var game := root.get_node_or_null("/root/Game")
+		if game:
+			game.state = {"hq": {"level": int(args["level"]), "rooms": {}}, "time": {"year": 2016, "day": 85}}
 	var scene: Node = load(scene_path).instantiate()
 	root.add_child(scene)
 	await _wait(5)
@@ -78,6 +86,21 @@ func _run() -> void:
 	if args.has("peers"):
 		_spawn_peers(views)
 
+	if args.has("hide-ui"):
+		var ui := scene.get_node_or_null("UI")
+		if ui and "visible" in ui:
+			ui.visible = false
+		var bus := root.get_node_or_null("/root/Bus")
+		if bus:
+			bus.ui_modal_changed.emit(false)
+	if args.has("flashlight"):
+		for p in get_nodes_in_group("local_player"):
+			if p.get("flashlight"):
+				p.flashlight.visible = true
+	if args.has("dark"):
+		for l in scene.find_children("*", "Light3D", true, false):
+			if l.name != "Flashlight":
+				l.visible = false
 	for vp in views:
 		cam.global_transform = vp.global_transform
 		cam.fov = float(vp.get_meta("fov", 70.0))
@@ -93,15 +116,16 @@ func _run() -> void:
 				await _save(out.path_join("%s_player.png" % prefix))
 
 	if args.has("show") and world:
-		var times: Array = Array(str(args["show"]).split(",")).map(func(t: String) -> float: return float(t))
+		# capture one frame per show phase (software rendering is too slow for wall-clock timing)
+		var delays: Array = Array(str(args["show"]).split(",")).map(func(t: String) -> int: return int(t))
 		world.play_launch("Nebula One", null)
-		var t0 := Time.get_ticks_msec()
-		var idx := 0
-		for t in times:
-			while (Time.get_ticks_msec() - t0) / 1000.0 < t:
+		var st: Node = world.get_stage()
+		var phases := ["lights", "count3", "count1", "reveal"]
+		for i in phases.size():
+			while str(st.get("phase")) != phases[i]:
 				await process_frame
-			idx += 1
-			await _save(out.path_join("%s_show_%d.png" % [prefix, idx]))
+			await _wait(int(delays[i]) if i < delays.size() else 10)
+			await _save(out.path_join("%s_show_%d_%s.png" % [prefix, i + 1, phases[i]]))
 	quit(0)
 
 func _spawn_peers(views: Array) -> void:

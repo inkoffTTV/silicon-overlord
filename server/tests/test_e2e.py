@@ -291,5 +291,39 @@ class E2E(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(res["t"], "error")
 
 
+    async def test_autosave_and_idle_unload(self):
+        await self.server.stop()
+        self.server = await GameServer(self.dir, autosave_seconds=0.5, idle_unload_seconds=0.5,
+                                       housekeeping_seconds=0.2).start("127.0.0.1", 0)
+        self.url = "ws://127.0.0.1:%d/ws" % self.server.port
+        a = await self.client("Saver")
+        await a.hello()
+        j = await a.create("Autosave Inc")
+        cid = j["companyId"]
+        v0 = self.server.store.company_meta(cid)["version"]
+        await a.speed(8)
+        await a.wait_for(lambda: a.state["time"]["elapsedDays"] >= 6, 5, "days")
+        await asyncio.sleep(1.0)
+        self.assertGreater(self.server.store.company_meta(cid)["version"], v0, "autosave while playing")
+        # clock pauses when nobody is online, then the company is unloaded
+        await a.send({"t": "leave"})
+        await a.wait_for(lambda: a.left is not None, 5, "left")
+        day = self.server.lua.to_py(self.server.lua.call("meta", cid))["elapsedDays"]
+        await asyncio.sleep(0.4)
+        meta = self.server.lua.to_py(self.server.lua.call("meta", cid))
+        if meta is not None:
+            self.assertEqual(meta["elapsedDays"], day, "clock must pause with no members")
+        for _ in range(50):
+            if cid not in self.server.rooms:
+                break
+            await asyncio.sleep(0.1)
+        self.assertNotIn(cid, self.server.rooms, "idle company unloaded")
+        self.assertEqual(self.server.store.company_meta(cid)["version"],
+                         self.server.store.load_company_state(cid)["stateVersion"])
+        r = await a.resume()
+        self.assertEqual(r["t"], "joined")
+        self.assertEqual(a.state["time"]["elapsedDays"], day)
+
+
 if __name__ == "__main__":
     unittest.main()
