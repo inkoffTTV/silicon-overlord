@@ -15,6 +15,13 @@ static func _json(name: String) -> Variant:
 			v = parsed
 	else:
 		push_warning("GData: missing ui/data/%s.json" % name)
+	# Lua exports an empty list as {}: normalise the list fields the UI iterates
+	if v is Dictionary and (v as Dictionary).get("list") is Array:
+		for item in v.list:
+			if item is Dictionary:
+				for k in ["prerequisites", "unlocks", "categories", "slots", "formFactors"]:
+					if item.get(k) is Dictionary:
+						item[k] = (item[k] as Dictionary).values()
 	_cache[name] = v
 	return v
 

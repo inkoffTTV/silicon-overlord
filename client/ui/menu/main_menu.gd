@@ -33,6 +33,7 @@ var _preview: Control
 var _logo_holder: CenterContainer
 var _mode_note: Label
 var _settings: Node
+var _continue_box: VBoxContainer
 
 func _ready() -> void:
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
@@ -41,8 +42,23 @@ func _ready() -> void:
 	_color_b = str(Prefs.get_profile("color_b", _color_b))
 	_build()
 	Net.status_changed.connect(_on_net_status)
+	Net.welcomed.connect(_update_continue)
 	_on_net_status(Net.status, Net.detail)
 	show_page("home")
+	# say hello in the background: the server tells us whether "Continue" will work
+	if not Net.is_online() and not Net.mock_handler.is_valid():
+		Net.ensure_connected()
+
+func _update_continue() -> void:
+	if _continue_box == null:
+		return
+	U.clear(_continue_box)
+	var last := str(Prefs.get_profile("last_code", ""))
+	var can := Net.last_company != "" if Net.is_online() else (Net.token != "" and last != "")
+	if can:
+		var cont := U.btn(L.f("Continue · {code}", {"code": last}) if last != "" else L.t("Continue"), "BtnWhite", "play", 0, 54)
+		cont.pressed.connect(_on_continue)
+		_continue_box.add_child(cont)
 
 func _build() -> void:
 	# backdrop: deep gradient, opaque on the left, the world shows through on the right
@@ -190,11 +206,9 @@ func _page_home() -> Control:
 	_name_edit.text_changed.connect(func(t: String) -> void: Net.set_player_name(t))
 	v.add_child(_name_edit)
 	v.add_child(U.gap(2))
-	var last := str(Prefs.get_profile("last_code", ""))
-	if Net.token != "" or last != "":
-		var cont := U.btn(L.f("Continue · {code}", {"code": last}) if last != "" else L.t("Continue"), "BtnWhite", "play", 0, 54)
-		cont.pressed.connect(_on_continue)
-		v.add_child(cont)
+	_continue_box = U.vbox(0)
+	v.add_child(_continue_box)
+	_update_continue()
 	var row := U.hbox(10)
 	v.add_child(row)
 	var newb := U.btn(L.t("New company"), "BtnPrimary" if Net.token == "" else "", "plus", 0, 46)

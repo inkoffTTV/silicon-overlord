@@ -37,6 +37,8 @@ end
   - `apply_quality("lo-fi" | "clean")` — not needed: the world re-reads `user://settings.cfg [graphics] quality`
     once a second, accepts `"lofi"`, `"lo-fi"` and `"clean"`.
 - The garage now also has a `stage_launch` interactable (cardboard KEYNOTE podium by the roll-up door).
+- The player draws its own small centre reticle (dot / interact ring / grab ring, own CanvasLayer at layer 0,
+  hidden while a modal is open) — no need for a crosshair in the HUD.
 - Player releases the mouse and stops on `Bus.ui_modal_changed(true)`; Esc also frees the mouse; a click recaptures
   it when no modal is open. Keys used by the player besides `core/inputs.gd`: Q / middle mouse = throw held prop,
   mouse wheel = hold distance (only while holding).

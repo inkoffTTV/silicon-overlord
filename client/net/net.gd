@@ -19,6 +19,8 @@ signal members_changed(list: Array)
 signal chat_received(user_id: int, name: String, text: String)
 signal latency_changed(ms: int)
 signal profile_changed(profile: Dictionary)
+signal boards_changed(boards: Dictionary)
+signal welcomed()
 
 const PROTOCOL_VERSION := 1
 const ACT_TIMEOUT := 10.0
@@ -48,6 +50,9 @@ var token := ""
 var player_name := ""
 var latency_ms := -1
 var profile: Dictionary = {}
+## company id the server would resume (welcome.lastCompany), "" when none
+var last_company := ""
+var boards: Dictionary = {}
 ## Tests/screenshots: Callable(action: String, args: Dictionary) -> Dictionary replaces the socket for act().
 var mock_handler: Callable
 
@@ -320,7 +325,9 @@ func _on_text(text: String) -> void:
 			if msg.has("name"):
 				player_name = str(msg.name)
 			Prefs.set_profile("token", token)
+			last_company = str(msg.get("lastCompany", "")) if msg.get("lastCompany") != null else ""
 			_set_status("online", "")
+			welcomed.emit()
 			if _hello:
 				_hello.finish({"ok": true})
 			if _stay_in_company:
@@ -348,7 +355,19 @@ func _on_text(text: String) -> void:
 		"sections":
 			var data: Variant = msg.get("data", {})
 			if data is Dictionary:
-				Game.apply_sections(data)
+				# a null value means the key was cleared on the server (e.g. loan after repayment)
+				var removed := []
+				var keep := {}
+				for k in data:
+					if data[k] == null:
+						removed.append(k)
+						Game.state.erase(k)
+					else:
+						keep[k] = data[k]
+				if not keep.is_empty():
+					Game.apply_sections(keep)
+				if not removed.is_empty():
+					Bus.state_changed.emit(removed)
 		"res":
 			var id := int(msg.get("id", -1))
 			if _pending.has(id):
@@ -371,7 +390,12 @@ func _on_text(text: String) -> void:
 			chat_received.emit(int(msg.get("userId", 0)), str(msg.get("name", "?")), str(msg.get("text", "")))
 		"left":
 			_stay_in_company = false
-			_on_left(str(msg.get("reason", "")))
+			var reason := str(msg.get("reason", ""))
+			if reason == "replaced":
+				Bus.notify.emit("warning", L.t("Opened in another window"), L.t("This account just joined from another window, so this one left the company."))
+			elif reason == "sold":
+				Bus.notify.emit("info", L.t("Company sold"), "")
+			_on_left(reason)
 		"error":
 			var em := L.t(str(msg.get("message", "Error")))
 			if _join and not _join.fired:
@@ -384,6 +408,9 @@ func _on_text(text: String) -> void:
 				latency_ms = int((_now() - float(_ping_sent[n])) * 1000.0)
 				_ping_sent.erase(n)
 				latency_changed.emit(latency_ms)
+		"boards":
+			boards = msg
+			boards_changed.emit(msg)
 		"profile":
 			var p: Variant = msg.get("profile", msg.get("data", {}))
 			if p is Dictionary:

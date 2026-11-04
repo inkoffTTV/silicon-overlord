@@ -105,4 +105,4 @@ antenna, hoodie tinted by the player's colour, mitten hands, stubby legs; name t
 ## Screenshots
 `xvfb-run -a -s "-screen 0 1600x900x24" <godot> --path client -s res://tools/shot.gd -- --scene=res://world/world.tscn --out=tools/shots`
 Options: `--views=a,b`, `--level=2`, `--peers`, `--show=10,2,2,14`, `--quality=clean`, `--hide-ui --player --flashlight`
-(with `main.tscn`), `--dark`. Viewpoints are `Marker3D`s in group `viewpoint` created by each level/stage.
+and `--grab=box_m` (with `main.tscn`), `--dark`. Viewpoints are `Marker3D`s in group `viewpoint` created by each level/stage.
