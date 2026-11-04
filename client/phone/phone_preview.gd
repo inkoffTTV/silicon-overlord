@@ -16,6 +16,8 @@ var spin_speed := 0.35
 var stage_style := "studio" # "studio" (designer) | "hero" (menu, neon rim lights) | "plain"
 var pedestal := true
 var accent := Color("#4F8CFF")
+## camera distance multiplier (smaller = the device fills more of the view)
+var fit := 1.0
 
 var _vp: SubViewport
 var _cam: Camera3D
@@ -151,7 +153,7 @@ func show_params(p: Dictionary) -> void:
 	_pivot.add_child(_device)
 	var ext := Builder.extents(p)
 	var e := maxf(ext.x, ext.y)
-	_target_dist = clampf(e * 2.45 + 0.7, 2.2, 8.5) if stage_style == "hero" else clampf(e * 2.9 + 0.8, 2.4, 9.0)
+	_target_dist = clampf(e * 2.45 + 0.7, 2.2, 8.5) if stage_style == "hero" else clampf(e * 2.9 + 0.8, 2.4, 9.0) * fit
 	if not _dragging:
 		distance = _target_dist
 	_update_cam()

@@ -558,3 +558,17 @@ static func min_bezel(state: Dictionary, draft: Dictionary) -> float:
 	var d := resolve(state, str(U.dict(draft.get("slots", {})).get("Display", "")))
 	var gen := U.num(d.get("generation", 1), 1)
 	return maxf(0.08, 0.3 - 0.035 * (gen - 1))
+
+const SUBTYPE_NAMES := {"BudgetPhone": "Budget phone", "MidrangePhone": "Midrange phone", "PremiumFlagship": "Premium flagship", "FoldablePhone": "Foldable phone"}
+
+## "GamingLaptop" -> "Gaming Laptop" (phones get friendly names); translate with L.t
+static func subtype_name(s: String) -> String:
+	if SUBTYPE_NAMES.has(s):
+		return SUBTYPE_NAMES[s]
+	var out := ""
+	for i in s.length():
+		var ch := s[i]
+		if i > 0 and ch == ch.to_upper() and ch != ch.to_lower():
+			out += " "
+		out += ch
+	return out

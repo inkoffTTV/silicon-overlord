@@ -12,6 +12,7 @@ extends SceneTree
 ##   --show=12,3,3,25      run world.play_launch("Nebula One"); capture each phase (lights, 3, 1, reveal) after N frames
 ##   --level=N             build HQ level N (fakes Game.state.hq.level)
 ##   --hide-ui             hide main.tscn's UI layer (world-only shots of the real game scene)
+##   --grab=box_m          (main.tscn) walk the player up to a prop of that kind and hold it
 ##   --dark                switch off every light except the player's flashlight (debug)
 ##   --flashlight          turn the local player's flashlight on
 ##   --player              also capture the player's own camera ("player" view)
@@ -108,6 +109,8 @@ func _run() -> void:
 		await _wait(frames)
 		await _save(out.path_join("%s_%s.png" % [prefix, vp.get_meta("vp_name", vp.name)]))
 
+	if args.has("grab"):
+		await _grab_demo(str(args["grab"]))
 	if args.has("player"):
 		for p in get_nodes_in_group("local_player"):
 			if p.has_method("make_camera_current"):
@@ -144,3 +147,25 @@ func _spawn_peers(views: Array) -> void:
 		var p := base + off
 		list.append({"userId": 100 + i, "name": names[i], "color": cols[i], "p": [p.x, p.y, p.z], "yaw": yaw + PI + (i - 1) * 0.4, "pitch": -0.1 * i, "anim": ["idle", "walk", "crouch"][i]})
 	bus.peers_changed.emit(list)
+
+func _grab_demo(kind: String) -> void:
+	var player: Node = get_first_node_in_group("local_player")
+	if player == null:
+		return
+	var target: RigidBody3D = null
+	for b in get_nodes_in_group("grabbable"):
+		if str(b.get_meta("prop", "")) == kind:
+			target = b
+			break
+	if target == null:
+		return
+	var tp := target.global_position
+	var stand: Vector3 = tp + (player.global_position - tp).normalized() * 1.2
+	player.global_position = Vector3(stand.x, 0.05, stand.z)
+	await _wait(4)
+	var d: Vector3 = tp - player.cam.global_position
+	player.set_look(atan2(-d.x, -d.z), atan2(d.y, Vector2(d.x, d.z).length()))
+	await _wait(3)
+	player.try_grab()
+	player.set_look(player.yaw + 0.5, -0.05)
+	await _wait(20)

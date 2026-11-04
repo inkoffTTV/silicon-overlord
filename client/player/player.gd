@@ -3,6 +3,7 @@ extends CharacterBody3D
 ## WASD move, mouse look, Shift sprint, Space jump, Ctrl/C crouch, E interact, F flashlight.
 ## LMB hold = grab prop with a springy physics hold, RMB (while holding) = rotate it with the mouse,
 ## mouse wheel = hold distance, Q or MMB = throw, release LMB = drop (keeps momentum: swing to fling).
+## Draws a small reticle (dot / interact ring / grab ring) and a faint grab beam while holding.
 ## Raycasts (<= 2.5 m) nodes in group "interactable" (meta kind/id/prompt) -> Bus.focus_changed / Bus.interact.
 ## Every 0.1 s calls Net.send_pos(position, yaw, pitch, anim) if Net has that method.
 
@@ -28,6 +29,7 @@ const STRENGTH := 300.0       # max hold force (N): heavy things sag and drag
 const THROW_POWER := 55.0     # impulse budget (N*s), split by mass
 const BREAK_DIST := 1.6       # hold breaks if the object is stuck this far from the hold point
 const NET_INTERVAL := 0.1
+const Reticle := preload("res://player/reticle.gd")
 
 @export var mouse_sensitivity := 0.0022
 @export var invert_y := false
@@ -53,6 +55,10 @@ var _rot_input := Vector2.ZERO
 
 var focus: Node = null
 var _focus_prompt := ""
+var _aim_grabbable := false
+var reticle: Control
+var hud: CanvasLayer
+var beam: MeshInstance3D
 
 var _eye := EYE_STAND
 var _bob_t := 0.0
@@ -102,6 +108,29 @@ func _ready() -> void:
 	flashlight.visible = false
 	add_child(flashlight)
 	flashlight.top_level = true
+	# reticle (between the post-FX layer -1 and the UI layer 1)
+	hud = CanvasLayer.new()
+	hud.name = "PlayerHUD"
+	hud.layer = 0
+	add_child(hud)
+	reticle = Reticle.new()
+	hud.add_child(reticle)
+	# faint "grab beam" from the hand to the grabbed point
+	beam = MeshInstance3D.new()
+	beam.name = "GrabBeam"
+	var bm := BoxMesh.new()
+	bm.size = Vector3(0.006, 0.006, 1.0)
+	beam.mesh = bm
+	var mat := StandardMaterial3D.new()
+	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	mat.blend_mode = BaseMaterial3D.BLEND_MODE_ADD
+	mat.albedo_color = Color(0.45, 0.85, 1.0, 0.5)
+	beam.material_override = mat
+	beam.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	beam.visible = false
+	add_child(beam)
+	beam.top_level = true
 	Bus.ui_modal_changed.connect(_on_modal_changed)
 	_capture_mouse(not Bus.modal_open)
 
@@ -286,6 +315,30 @@ func _physics_process(dt: float) -> void:
 
 func _process(dt: float) -> void:
 	_update_head(dt)
+	_update_feedback()
+
+func _update_feedback() -> void:
+	if hud:
+		hud.visible = _input_allowed()
+	if reticle:
+		if held:
+			reticle.mode = Reticle.Mode.HOLD
+		elif focus:
+			reticle.mode = Reticle.Mode.INTERACT
+		elif _aim_grabbable:
+			reticle.mode = Reticle.Mode.GRAB
+		else:
+			reticle.mode = Reticle.Mode.IDLE
+	if beam:
+		beam.visible = held != null and is_instance_valid(held)
+		if beam.visible:
+			var b := cam.global_basis
+			var a := cam.global_position + b.x * 0.22 - b.y * 0.2 - b.z * 0.35
+			var t := held.to_global(hold_local)
+			var d := t - a
+			if d.length() > 0.02:
+				var up := Vector3.UP if absf(d.normalized().y) < 0.98 else Vector3.RIGHT
+				beam.global_transform = Transform3D(Basis.looking_at(d, up).scaled_local(Vector3(1, 1, d.length())), (a + t) * 0.5)
 
 func _set_crouch(on: bool) -> void:
 	if on == crouching:
@@ -355,10 +408,14 @@ static func find_interactable(n: Node) -> Node:
 
 func _update_focus() -> void:
 	var f: Node = null
+	_aim_grabbable = false
 	if _input_allowed() and held == null:
-		var hit := _ray(REACH)
+		var hit := _ray(GRAB_REACH)
 		if not hit.is_empty():
-			f = find_interactable(hit.collider)
+			var c: Object = hit.collider
+			_aim_grabbable = c is RigidBody3D and c.is_in_group("grabbable")
+			if cam.global_position.distance_to(hit.position) <= REACH:
+				f = find_interactable(c)
 	var prompt := str(f.get_meta("prompt", "")) if f else ""
 	focus = f
 	if prompt != _focus_prompt:
