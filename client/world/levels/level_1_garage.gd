@@ -16,12 +16,17 @@ const Shipping := preload("res://world/live/shipping.gd")
 const DevBench := preload("res://world/live/dev_bench.gd")
 const BenchView := preload("res://world/live/bench_view.gd")
 const HQ := preload("res://world/live/hq_state.gd")
+const RepairShop := preload("res://world/live/repair_shop.gd")
 
 var loft: Node3D
 var dock: Node3D
 var shipping: Node3D
 var dev_bench: Node3D
 var bench_view: Node3D
+## iteration 3: the repair shop (sign, shop door, light switch, counter, repair bench, customers, devices)
+var shop: Node3D
+## title screen: build the garage as scenery only (no state-driven parts, no interactables)
+var decor_only := false
 
 func _build() -> void:
 	_shell()
@@ -142,6 +147,7 @@ func _window(g: Node3D) -> void:
 	kit.box(g, Vector3(1.8, 0.04, 0.06), Vector3(2.4, 1.55, z), frame, Vector3.ZERO, false, 0.008)
 	var glass := kit.box(g, Vector3(1.76, 1.26, 0.006), Vector3(2.4, 1.55, z + 0.01), Mats.glass(Color(0.55, 0.62, 0.7, 0.10)), Vector3.ZERO, true, 0.0, false)
 	glass.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	kit.shape(Vector3(1.8, 1.3, 0.2), Transform3D(Basis(), Vector3(2.4, 1.55, z)))  # thick invisible pane
 	# venetian blinds, half lowered, slats tilted -> striped light shafts
 	var bz := z - 0.12
 	kit.box(g, Vector3(1.82, 0.05, 0.06), Vector3(2.4, 2.17, bz), Mats.m("plastic_white"), Vector3.ZERO, false, 0.01)
@@ -158,9 +164,12 @@ func _window(g: Node3D) -> void:
 # ------------------------------------------------------------------ outside (seen through the window)
 func _outside() -> void:
 	var o := kit.node(self, Vector3.ZERO, 0.0, "Outside")
-	kit.box(o, Vector3(40, 0.2, 6), Vector3(0, -0.12, D + 3.2), Mats.m("concrete_floor", Color(0.9, 0.9, 0.95)), Vector3.ZERO, false, 0.0)
-	kit.box(o, Vector3(60, 0.2, 2), Vector3(0, -0.08, 7.3), Mats.m("sidewalk"), Vector3.ZERO, false, 0.0)
-	kit.box(o, Vector3(60, 0.2, 8), Vector3(0, -0.22, 12.3), Mats.m("asphalt"), Vector3.ZERO, false, 0.0)
+	# ground the player can walk on outside MUST collide (0.2.0 bug: the driveway had no collision -> fell out of the world)
+	kit.box(o, Vector3(40, 0.2, 6), Vector3(0, -0.12, D + 3.2), Mats.m("concrete_floor", Color(0.9, 0.9, 0.95)), Vector3.ZERO, true, 0.0)
+	kit.box(o, Vector3(60, 0.2, 2), Vector3(0, -0.08, 7.3), Mats.m("sidewalk"), Vector3.ZERO, true, 0.0)
+	kit.box(o, Vector3(60, 0.2, 8), Vector3(0, -0.22, 12.3), Mats.m("asphalt"), Vector3.ZERO, true, 0.0)
+	# thick safety slab under the whole lot (catches anything that slips past a seam)
+	kit.shape(Vector3(80, 1.0, 60), Transform3D(Basis(), Vector3(0, -1.2, 8.0)))
 	for i in 10:
 		kit.box(o, Vector3(1.5, 0.01, 0.12), Vector3(-14 + i * 3.4, -0.115, 12.3), Mats.m("paper", Color(1.0, 0.9, 0.5), {"grime": 0.6}), Vector3.ZERO, false, 0.0, false)
 	kit.box(o, Vector3(60, 0.2, 2), Vector3(0, -0.08, 17.3), Mats.m("sidewalk"), Vector3.ZERO, false, 0.0)
@@ -186,6 +195,12 @@ func _outside() -> void:
 	kit.shape(Vector3(0.2, 4.0, 6.0), Transform3D(Basis(), Vector3(-6.2, 2.0, D + 3.0)))
 	kit.shape(Vector3(0.2, 4.0, 6.0), Transform3D(Basis(), Vector3(5.0, 2.0, D + 3.0)))
 	kit.shape(Vector3(11.4, 4.0, 0.2), Transform3D(Basis(), Vector3(-0.6, 2.0, D + 5.9)))
+	# close the gaps between the side bounds and the garage front corners (else you could walk round the garage)
+	kit.shape(Vector3(2.2, 4.0, 0.3), Transform3D(Basis(), Vector3(-5.2, 2.0, D + 0.1)))
+	kit.shape(Vector3(1.0, 4.0, 0.3), Transform3D(Basis(), Vector3(4.6, 2.0, D + 0.1)))
+	# taller invisible bounds so a jump from the van roof cannot clear them
+	for b in [[Vector3(0.2, 3.0, 6.4), Vector3(-6.2, 5.5, D + 3.0)], [Vector3(0.2, 3.0, 6.4), Vector3(5.0, 5.5, D + 3.0)], [Vector3(11.6, 3.0, 0.2), Vector3(-0.6, 5.5, D + 5.9)]]:
+		kit.shape(b[0], Transform3D(Basis(), b[1]))
 	# flood lamp over the door, outside: lights the van's back
 	var fl := kit.node(o, Vector3(-1.5, 2.95, D + 0.2), 0.0, "FloodLamp")
 	kit.box(fl, Vector3(0.3, 0.16, 0.12), Vector3(0, 0, 0.06), Mats.m("steel_dark"), Vector3(-25, 0, 0), false, 0.02)
@@ -312,7 +327,7 @@ func _furniture() -> void:
 	# coffee table: a pallet with a crate
 	_pallet_table(g, Vector3(2.95, 0, 1.45))
 	fridge(g, Vector3(W - 0.36, 0, -D + 0.5), -90.0)
-	_podium(g, Vector3(1.05, 0, D - 0.55))
+	_podium(g, Vector3(1.62, 0, D - 0.6))
 	# spare desk under the window (a design hire works here on a laptop)
 	_spare_desk(g, Vector3(3.05, 0, D - 0.48))
 	# job board by the house door
@@ -478,7 +493,7 @@ func _props() -> void:
 	prop("router", Vector3(W - 0.25, 0.55, 1.2), Vector3(0, 90, 0))
 	prop("ball", Vector3(-0.6, 0.15, 0.5))
 	# boxes (junk) around
-	prop("box_m", Vector3(-0.9, 0.2, 0.9), Vector3(0, 30, 0))
+	prop("box_m", Vector3(-0.15, 0.2, 0.2), Vector3(0, 30, 0))
 	prop("box_l", Vector3(2.3, 0.26, -2.75), Vector3(0, 12, 0))
 	prop("box_m", Vector3(2.35, 0.75, -2.75), Vector3(0, -8, 0))
 	prop("box_heavy", Vector3(-1.9, 0.25, -0.05), Vector3(0, 5, 0))
@@ -621,6 +636,13 @@ func _gable_triangle(g: Node3D, z: float, base_y: float, mat: Material) -> void:
 
 # ------------------------------------------------------------------ live (state-driven) parts
 func _live() -> void:
+	shop = RepairShop.new()
+	shop.level = self
+	shop.kit = kit
+	shop.decor_only = decor_only
+	live_root.add_child(shop)
+	if decor_only:
+		return
 	loft = Loft.new()
 	loft.name = "Loft"
 	loft.level = self
@@ -660,7 +682,7 @@ func _staff_slots() -> void:
 	add_slot("overflow", Vector3(-2.45, 0, 0.75), -70.0, "sit_idle", 0.44)
 	add_slot("overflow", Vector3(-0.2, 0, 1.55), 160.0, "sit_idle", 0.44)
 	add_slot("overflow", Vector3(0.75, 0, -2.6), 200.0, "sit_idle", 0.44)
-	add_slot("overflow", Vector3(2.75, 0, -1.9), -120.0, "sit_idle", 0.44)
+	add_slot("overflow", Vector3(2.45, 0, 0.15), -110.0, "sit_idle", 0.44)
 
 func staff_slots() -> Dictionary:
 	var out := super.staff_slots()

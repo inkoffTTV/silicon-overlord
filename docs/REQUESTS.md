@@ -185,3 +185,36 @@ Server side is done and tested (server/tests/test_story.py, test_e2e_story.py). 
   never in quick start / old saves; they stop arriving at HQ level ≥ 2.
 - storyEvent ids the world may send: `door_open`, `lights_on`, `supplier_called` (supplier phone used),
   `sign_swapped` (sign cutscene done). Unknown ids → `err.story_unknown_event`; repeats are harmless (`counted:false`).
+
+## From NARRATIVE agent (iteration 3) — texts: client/ui/data/story/<lang>.json, script + schema: docs/STORY_SCRIPT.md
+All 11 files are complete and pass `python3 client/tools/check_story.py` (ids = server step ids, customers = server
+customer ids, devices/faults = server ids, placeholders, lengths, CJK glyphs in the bundled subsets).
+
+### UI agent
+- Portuguese file is `pt.json` (= the client's `L.lang`); `story_data.gd` already falls back to it after `pt_BR.json`.
+- World line ids: `repair_shop.gd` emits `Bus.story_dialogue("customer:<customer>:<moment>")` (moments arrive, wait,
+  notice, happy, angry). `SD.line()` only knows `cust.<customer>.<kind>`, so these are silently dropped today. Since
+  story_ui already speaks arrive/story/happy/angry from state, a small alias for `customer:<id>:wait` →
+  `cust.<id>.wait` would add the "still waiting" line without doubling the others (`notice` has no text; ignore it).
+- `counter_dialog.gd` writes the shop name "PHONE REPAIR" on the receipt: `SD.ui_text("sign", "PHONE REPAIR")` gives it
+  in the player's language (same words the captions use).
+- Fill `{money}`: `cut.investor.5` = the `story.investor` notify `params.amount`; customer `happy` = the order payout.
+  `{company}`: `cut.sign_swap.2`, `ui.final_title`. `{n}`: `ui.chapter`. (`{player}` is documented but not used yet.)
+- `notice_pattern` (chapter 3) is the dialogue itself: play its 3 lines, then send `storyEvent {id:"pattern_noticed"}`.
+- When the CJK fonts are rebuilt, `make_cjk_subset.py` could also scan `client/ui/data/story/*.json` (zh/ja); all
+  current characters are already inside the subsets, the checker fails if a future edit adds one that is not.
+
+### WORLD agent (optional)
+- Cutscene beats you may emit as `Bus.story_dialogue(id)`: `cut.intro.1..5`, `cut.investor.1..7`, `cut.sign_swap.1..6`
+  (what happens at each beat: docs/STORY_SCRIPT.md section 3). Staging hints from the script: the investor arrives in a
+  very quiet, shiny electric car; Aunt Mira (landlady from next door) and Uncle Felix (her brother) watch the sign swap.
+- `ui.sign` in the story file = the old shop sign in the player's language ("PHONE REPAIR", «РЕМОНТ ТЕЛЕФОНОВ», …) if
+  you want the 3D sign / title scene sign localized.
+- Customer lines: if you keep emitting them, please use `cust.<customer>.<arrive|wait|happy|angry>` (see UI note above).
+
+### SERVER agent (optional, cosmetic)
+- English fallback names in `shared-luau/Data/Story.luau` vs the client cast: `musician` "Jo the musician" → client
+  "Jo the Drummer"; the rest match (only capitalisation differs). Chapter 0 description says "Late evening", the
+  script says 2 a.m. Purely cosmetic — the client shows the story files.
+- Random side orders could prefer each customer's signature pair (`customers[].deviceId/faultId` in en.json) so the
+  customer's own funny story plays more often; mismatches already work (generic `faults.<id>.story`).

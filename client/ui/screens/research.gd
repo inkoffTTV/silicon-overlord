@@ -371,6 +371,7 @@ func _refresh_detail() -> void:
 		h.add_child(U.clip(L.t(str(t.get("name", ""))), U.SM, U.TEXT, "semibold"))
 		h.add_child(U.lbl("%d%%" % int(U.num(j.get("progress", 0)) * 100), U.SM, U.WARNING, "bold"))
 		v.add_child(U.bar(U.num(j.get("progress", 0)), U.WARNING, 5))
+		v.add_child(_boost_btn(str(j.get("techId", "")), 32))
 		_detail.add_child(c)
 	_detail.add_child(U.hsep())
 	if selected == "":
@@ -424,9 +425,29 @@ func _refresh_detail() -> void:
 			_detail.add_child(U.gap(4))
 			_detail.add_child(go)
 		"active":
+			_detail.add_child(_boost_btn(selected, 42))
+			_detail.add_child(U.para(L.t("Research points come from researchers (every day), finished techs, goals, the daily gift and repairs."), U.XS + 1, U.DIM, "medium", 300))
 			var cancel := U.btn(L.t("Cancel research"), "BtnDanger", "close", 0, 40)
 			cancel.pressed.connect(func() -> void: run("cancelResearch", {"techId": selected}))
 			_detail.add_child(cancel)
+
+## Spend research points: boostResearch {techId, points: 100} = +25 % progress (docs/ACTIONS.md "Research points").
+const BOOST_RP := 100
+
+func _boost_btn(tech_id: String, h: float) -> Button:
+	var rp := int(U.num(U.dict(state().get("research", {})).get("points", 0)))
+	var b := U.btn(L.f("Boost +25% · {n} RP", {"n": BOOST_RP}), "BtnPrimary" if h > 36 else "BtnGhost", "bolt", 0, h)
+	b.set_meta("boost", tech_id)
+	b.disabled = rp < BOOST_RP
+	b.tooltip_text = L.f("You have {n} RP", {"n": rp}) if rp >= BOOST_RP else L.f("Need {need} RP, you have {have}", {"need": BOOST_RP, "have": rp})
+	b.pressed.connect(func() -> void: boost(tech_id))
+	return b
+
+func boost(tech_id: String) -> void:
+	var r := await run("boostResearch", {"techId": tech_id, "points": BOOST_RP})
+	if r.get("ok", false):
+		sfx("research_done")
+		toast("success", L.t("Research boosted"), L.f("+25% on {tech}", {"tech": L.t(str(D.tech(tech_id).get("name", tech_id)))}))
 
 func _link_row(id: String) -> Button:
 	var t := D.tech(id)

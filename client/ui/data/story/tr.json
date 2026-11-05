@@ -1,0 +1,862 @@
+{
+ "lang": "tr",
+ "version": 1,
+ "speakers": {
+  "narrator": {
+   "name": "",
+   "voice": 901709
+  },
+  "radio": {
+   "name": "Gece Vardiyası FM",
+   "voice": 900977
+  },
+  "mira": {
+   "name": "Mira Teyze",
+   "voice": 900573
+  },
+  "felix": {
+   "name": "Felix Amca",
+   "voice": 901266
+  },
+  "zip": {
+   "name": "Zip",
+   "voice": 901509
+  },
+  "critic": {
+   "name": "Vera Benchmark",
+   "voice": 901258
+  }
+ },
+ "chapters": [
+  {
+   "id": 0,
+   "key": "workshop",
+   "title": "Atölye",
+   "subtitle": "Gece saat 2, bir garaj ve elle boyanmış bir tabela: TELEFON TAMİRİ",
+   "steps": [
+    {
+     "id": "intro_seen",
+     "optional": false,
+     "objective": "Garaja gel",
+     "hint": "",
+     "lines": []
+    },
+    {
+     "id": "door_open",
+     "optional": false,
+     "objective": "Dükkânın kapısını aç",
+     "hint": "Kapıya git ve E'ye bas. Çok mu karanlık? F el fenerini açar.",
+     "lines": [
+      {
+       "id": "step.door_open.1",
+       "speaker": "mira",
+       "text": "Kapı sıkışır. Kolu kaldırıp itin. Bu garaj özgüvene saygı duyar."
+      }
+     ]
+    },
+    {
+     "id": "lights_on",
+     "optional": false,
+     "objective": "Işıkları yak",
+     "hint": "Düğme kapının yanındaki duvarda. Ona bak ve E'ye bas.",
+     "lines": [
+      {
+       "id": "step.lights_on.1",
+       "speaker": "mira",
+       "text": "Işık olsun! Karanlıkta bir tamirhane, sadece korkunç bir garajdır."
+      },
+      {
+       "id": "step.lights_on.2",
+       "speaker": "mira",
+       "text": "Tamir masası, banko, zil. Buradaki en önemli alet zildir. Bana güvenin."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": 1,
+   "key": "first_customer",
+   "title": "İlk Müşteri",
+   "subtitle": "Biri yine bir şey düşürdü.",
+   "steps": [
+    {
+     "id": "take_device",
+     "optional": false,
+     "objective": "Cihazı bankodan al",
+     "hint": "Siparişi kabul etmek için bankoda E'ye bas, sonra cihazı tamir masasına taşı.",
+     "lines": [
+      {
+       "id": "step.take_device.1",
+       "speaker": "mira",
+       "text": "Dın-dın! İlk müşteriniz. Gülümseyin, korkunun kokusunu alırlar. Lehimin de."
+      }
+     ]
+    },
+    {
+     "id": "repair_device",
+     "optional": false,
+     "objective": "Tamir masasında onar",
+     "hint": "Tamir masasına koy ve E'ye bas: aç, arızayı bul, onar, kapat.",
+     "lines": [
+      {
+       "id": "step.repair_device.1",
+       "speaker": "mira",
+       "text": "Lamba açık, büyüteç aşağıda. Vidalar bardağa, cebe değil."
+      }
+     ]
+    },
+    {
+     "id": "get_paid",
+     "optional": false,
+     "objective": "Bankoda teslim et ve paranı al",
+     "hint": "Cihazı geri taşı ve bankoda E'ye bas. Özenli tamir daha çok kazandırır.",
+     "lines": [
+      {
+       "id": "step.get_paid.1",
+       "speaker": "mira",
+       "text": "Tamam mı? Şimdi en güzel kısım: mutlu bir yüz ve gerçek para."
+      }
+     ]
+    },
+    {
+     "id": "second_customer",
+     "optional": false,
+     "objective": "İkinci bir cihazı onar",
+     "hint": "Birlikte mi oynuyorsunuz? Biri sipariş alsın, diğeri tamir etsin. Kahramanlıktan hızlıdır.",
+     "lines": [
+      {
+       "id": "step.second_customer.1",
+       "speaker": "mira",
+       "text": "Bu sokakta haber çabuk yayılır. İşte bir müşteri daha."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": 2,
+   "key": "spare_parts",
+   "title": "Yedek Parçalar",
+   "subtitle": "İyi niyetle ekran tamir edilmez",
+   "steps": [
+    {
+     "id": "diagnose_part",
+     "optional": false,
+     "objective": "Yeni siparişi tamir masasına götür",
+     "hint": "Bankoda E'ye bas, sonra tamir masasındaki cihaza yakından bak.",
+     "lines": [
+      {
+       "id": "step.diagnose_part.1",
+       "speaker": "mira",
+       "text": "Ooo, bu çıtır çıtır olmuş. Buna tornavida yetmez, yeni bir parça lazım."
+      }
+     ]
+    },
+    {
+     "id": "call_supplier",
+     "optional": false,
+     "objective": "Duvardaki telefondan tedarikçiyi ara",
+     "hint": "Duvardaki telefonda E'ye bas. Satın alma ekranı açılır.",
+     "lines": [
+      {
+       "id": "step.call_supplier.1",
+       "speaker": "mira",
+       "text": "Ekran mı kalmadı? Cam, iyi niyetle tamir edilmez."
+      },
+      {
+       "id": "step.call_supplier.2",
+       "speaker": "mira",
+       "text": "Zip'i arayın. Zip her saatte açar. Zip'in hiç uyuduğundan emin değilim."
+      }
+     ]
+    },
+    {
+     "id": "buy_parts",
+     "optional": false,
+     "objective": "Satın alma ekranından parça al",
+     "hint": "Listede ekranları bul ve birkaç tane al. Şimdilik bir avuç yeter.",
+     "lines": [
+      {
+       "id": "step.buy_parts.1",
+       "speaker": "zip",
+       "text": "Zip Parça, Zip dinliyor! Ekran, batarya, şarj girişi. Ne bozuldu dostum?"
+      },
+      {
+       "id": "step.buy_parts.2",
+       "speaker": "zip",
+       "text": "Çayınız soğumadan teslim. Buzlu çaysa iş değişir, o zaman yarış olur."
+      }
+     ]
+    },
+    {
+     "id": "fit_part",
+     "optional": false,
+     "objective": "Yeni parçayı tak",
+     "hint": "Tamir masasına dön: yeni parça tamir sırasında takılır.",
+     "lines": [
+      {
+       "id": "step.fit_part.1",
+       "speaker": "mira",
+       "text": "Eski cam çıksın, yenisi girsin. Nazikçe. Benim sabrımdan bile ince."
+      }
+     ]
+    },
+    {
+     "id": "paid_with_part",
+     "optional": false,
+     "objective": "Cihazı teslim et ve paranı al",
+     "hint": "Fiyat parçayı karşılar, yani yine kârdasınız. İşte ticaret!",
+     "lines": [
+      {
+       "id": "step.paid_with_part.1",
+       "speaker": "mira",
+       "text": "Müşteriniz hâlâ bekliyor. Cesurca. O cesareti sınamayalım."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": 3,
+   "key": "same_fault",
+   "title": "Hep Aynı Arıza",
+   "subtitle": "Her telefon aynı yerden bozuluyor. İlginç…",
+   "steps": [
+    {
+     "id": "pattern_repair",
+     "optional": false,
+     "objective": "Bir şarj girişi daha onar",
+     "hint": "İki müşteri, iki bozuk giriş. Giriş kalmadı mı? Satın alma ekranından yenisini alın.",
+     "lines": [
+      {
+       "id": "step.pattern_repair.1",
+       "speaker": "mira",
+       "text": "Aynı anda iki müşteri, ikisinin de şarj girişi bozuk. Hımm."
+      }
+     ]
+    },
+    {
+     "id": "notice_pattern",
+     "optional": false,
+     "objective": "Bu tekrarı konuşun",
+     "hint": "Mira Teyze'yi dinleyin. Bu telefonlarda bir tuhaflık var.",
+     "lines": [
+      {
+       "id": "step.notice_pattern.1",
+       "speaker": "mira",
+       "text": "Aynı giriş, aynı boşluk, aynı model. Bu hafta üçüncüsü."
+      },
+      {
+       "id": "step.notice_pattern.2",
+       "speaker": "mira",
+       "text": "Telefonları hiç telefon düşürmeyen insanlar tasarlıyor. Siz her gün düşürüyorsunuz. Bu bir avantaj."
+      },
+      {
+       "id": "step.notice_pattern.3",
+       "speaker": "mira",
+       "text": "Onları tek tek onarıyorsunuz. Ya hiç bozulmayan bir tane yapsanız?"
+      }
+     ]
+    },
+    {
+     "id": "start_research",
+     "optional": false,
+     "objective": "Tahtada ilk araştırmayı başlat",
+     "hint": "Beyaz tahtada E'ye bas ve bir teknoloji seç. İlki bedava.",
+     "lines": [
+      {
+       "id": "step.start_research.1",
+       "speaker": "mira",
+       "text": "Bir telefonu onarmak tamirdir. Hepsini birden onarmaya araştırma denir."
+      }
+     ]
+    },
+    {
+     "id": "research_challenge",
+     "optional": true,
+     "objective": "Tahtada beyin fırtınası",
+     "hint": "Kısa bir mini oyun araştırmayı ilerletir. İsteğe bağlı ama eğlenceli.",
+     "lines": [
+      {
+       "id": "step.research_challenge.1",
+       "speaker": "mira",
+       "text": "Kalemler elinize! Önce kötü fikirler: iyilerin önünü kesiyorlar."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": 4,
+   "key": "own_phone",
+   "title": "Kendi Telefonumuz",
+   "subtitle": "Ya bozulmayan bir telefon yapsak?",
+   "steps": [
+    {
+     "id": "investor_seen",
+     "optional": false,
+     "objective": "Kapıdaki misafiri karşıla",
+     "hint": "",
+     "lines": []
+    },
+    {
+     "id": "design_phone",
+     "optional": false,
+     "objective": "Bilgisayarda ilk telefonunu tasarla",
+     "hint": "PC → Tasarım Stüdyosu. Varsayılanlar iş görür; müşterilerin nefret ettiği şeyleri düzeltin.",
+     "lines": [
+      {
+       "id": "step.design_phone.1",
+       "speaker": "felix",
+       "text": "Sallanan girişleri ve öğlene kadar biten bataryaları hatırlıyor musunuz? Oradan başlayın."
+      }
+     ]
+    },
+    {
+     "id": "publish_phone",
+     "optional": false,
+     "objective": "Tasarımı yayımla",
+     "hint": "Son adımda \"Geliştirmeye başla\"ya bas. Prototip yola çıktı bile.",
+     "lines": [
+      {
+       "id": "step.publish_phone.1",
+       "speaker": "mira",
+       "text": "Bir isim, bir fiyat ve bir düğme. Bu garajdaki en korkunç düğme."
+      }
+     ]
+    },
+    {
+     "id": "develop_phone",
+     "optional": false,
+     "objective": "Prototipin geliştirmesini bitir",
+     "hint": "Artık zaman akıyor: hızlandır ya da bilgisayarda hata avıyla yardım et.",
+     "lines": [
+      {
+       "id": "step.develop_phone.1",
+       "speaker": "felix",
+       "text": "Geliştirme çorba gibidir. Beş dakikada bir kapağını kaldırmayın."
+      }
+     ]
+    },
+    {
+     "id": "polish_challenge",
+     "optional": true,
+     "objective": "Bilgisayarda hata avı",
+     "hint": "Hızlı bir hata avı için bilgisayarın sandalyesine otur. İsteğe bağlı.",
+     "lines": [
+      {
+       "id": "step.polish_challenge.1",
+       "speaker": "felix",
+       "text": "Hata mı buldunuz? Güzel. Eleştirmenlerden önce sizin bulmanız iyi."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": 5,
+   "key": "first_batch",
+   "title": "İlk Parti",
+   "subtitle": "El yapımı, minik vida minik vida",
+   "steps": [
+    {
+     "id": "queue_batch",
+     "optional": false,
+     "objective": "Tezgâhta bir parti başlat",
+     "hint": "Üretim tezgâhında E'ye bas, telefonunu ve adedi seç. Malzemeler Satın alma ekranından alınır.",
+     "lines": [
+      {
+       "id": "step.queue_batch.1",
+       "speaker": "mira",
+       "text": "Elle montaj! Eski güzel günlerdeki gibi, ama daha az yanıkla. Umarım."
+      }
+     ]
+    },
+    {
+     "id": "first_crate",
+     "optional": false,
+     "objective": "İlk kasayı bekle",
+     "hint": "Biten telefonlar tezgâhın yanında kasalara paketlenir.",
+     "lines": [
+      {
+       "id": "step.first_crate.1",
+       "speaker": "mira",
+       "text": "O kasadaki her telefon sizin ellerinizden çıktı. Tuhaf bir his, değil mi?"
+      }
+     ]
+    },
+    {
+     "id": "ship_crate",
+     "optional": false,
+     "objective": "Bir kasayı kamyonete taşı",
+     "hint": "Kasayı al ve kamyonete koy. Özenli yükleme +%5 adet kazandırır.",
+     "lines": [
+      {
+       "id": "step.ship_crate.1",
+       "speaker": "felix",
+       "text": "Yavaş! O kasa bizim geleceğimiz. Ve benim yatırımım. Daha çok benim yatırımım."
+      }
+     ]
+    },
+    {
+     "id": "qc_challenge",
+     "optional": true,
+     "objective": "Tezgâhta kalite kontrolü",
+     "hint": "Kusurlu telefonları yakala, birkaç ekstra adet kazan. İsteğe bağlı.",
+     "lines": [
+      {
+       "id": "step.qc_challenge.1",
+       "speaker": "mira",
+       "text": "Her telefonu, müşteri onu düşürecekmiş gibi kontrol edin. Çünkü düşürecek."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": 6,
+   "key": "launch_night",
+   "title": "Lansman Gecesi",
+   "subtitle": "Spot ışıkları, eleştirmenler ve yepyeni bir tabela",
+   "steps": [
+    {
+     "id": "launch_phone",
+     "optional": false,
+     "objective": "Telefonunu sahnede tanıt",
+     "hint": "Hazır olunca sahnede E'ye basın. Eleştirmenler yerlerini aldı bile.",
+     "lines": [
+      {
+       "id": "step.launch_phone.1",
+       "speaker": "critic",
+       "text": "İyi akşamlar, ben Vera Benchmark. Üç bin inceleme. Her bir telefonu düşürdüm."
+      },
+      {
+       "id": "step.launch_phone.2",
+       "speaker": "critic",
+       "text": "Garajdan çıkma bir ekip mi? Bakalım cebimden sağ çıkacak mı. Ve merdivenlerimden."
+      }
+     ]
+    },
+    {
+     "id": "reviews_seen",
+     "optional": false,
+     "objective": "Eleştirmenlerin yorumlarını oku",
+     "hint": "Puan ne olursa olsun gerçek bir telefon çıkardınız. Çoğu insan sadece lafını eder.",
+     "lines": [
+      {
+       "id": "step.reviews_seen.1",
+       "speaker": "critic",
+       "text": "Aramızda kalsın: buraya gelirken iki kere düşürdüm. Saygı duyuyorum."
+      }
+     ]
+    },
+    {
+     "id": "sign_swapped",
+     "optional": false,
+     "objective": "Yeni şirket tabelasını as",
+     "hint": "Eski tabelanın inişini izleyin.",
+     "lines": [
+      {
+       "id": "step.sign_swapped.1",
+       "speaker": "mira",
+       "text": "Son bir şey, canlarım. O eski tabela artık size dar geliyor."
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "customers": [
+  {
+   "id": "grandma",
+   "voice": 900575,
+   "deviceId": "phone",
+   "faultId": "software_glitch",
+   "name": "Rosa Nine",
+   "device": "Telefon (torununun hediyesi)",
+   "fault": "Eski kocasını kendi kendine arıyor. 1979'da ayrıldılar",
+   "lines": {
+    "arrive": "İyi akşamlar yavrularım! Torunum bunun telefon olduğunu söylüyor. Ben daha çok ceviz kırıyorum.",
+    "story": "Kendi kendine eski kocamı arıyor! 1979'da ayrıldık. Adamcağız çok şaşkın.",
+    "wait": "Acele etmeyin. Börek getirdim. Yani, kendime getirdim.",
+    "happy": "Harika! Buyurun, {money}. Bir de börek. Torunuma cevizlerden bahsetmeyin.",
+    "angry": "Bizim zamanımızda tamir daha hızlıydı. Cevizler de daha yumuşaktı."
+   }
+  },
+  {
+   "id": "student",
+   "voice": 900621,
+   "deviceId": "phone",
+   "faultId": "stuck_button",
+   "name": "Öğrenci Max",
+   "device": "Çıkartmalarla kaplı telefon",
+   "fault": "Bin kez ertelenen alarmdan sonra yan tuş takıldı",
+   "lines": {
+    "arrive": "Selam… pardon, iki saat uyudum. Öğrenci bütçesiyle telefon tamir ediliyor mu?",
+    "story": "Alarmı o kadar çok erteledim ki tuş pes etti. Artık sonsuza dek takılı.",
+    "wait": "Gözlerimi bir saniyeliğine kapatacağım. Hazır olunca uyandırın. Ya da hiç.",
+    "happy": "Kahramansınız! Buyurun, {money}. Bu, haftalık hazır erişte bütçemin tamamıydı.",
+    "angry": "Bütün tamir boyunca uyuyabilirdim. Az kalsın uyuyordum."
+   }
+  },
+  {
+   "id": "courier",
+   "voice": 901656,
+   "deviceId": "phone",
+   "faultId": "cracked_screen",
+   "name": "Kurye Dina",
+   "device": "Bantla tutturulmuş telefon",
+   "fault": "9. kata pasta taşırken düşürdü. Pasta kurtuldu",
+   "lines": {
+    "arrive": "Çabuk, çabuk! Dört dakikam ve on bir paketim var.",
+    "story": "Dokuzuncu kata pasta taşıdım, telefonu son basamakta düşürdüm. Pasta kurtuldu!",
+    "wait": "Molam dört dakika. Kaldı üç. İki buçuk…",
+    "happy": "Yepyeni gibi! Buyurun, {money}. Beş yıldız, hem de hızlıca!",
+    "angry": "Çok yavaş! Şimdiye kırk pizza dağıtmıştım."
+   }
+  },
+  {
+   "id": "teacher",
+   "voice": 900906,
+   "deviceId": "phone",
+   "faultId": "broken_port",
+   "name": "Pell Öğretmen",
+   "device": "Çok aklı başında bir kılıfta telefon",
+   "fault": "Şarj girişi otuz yıllık tebeşir tozuyla dolu",
+   "lines": {
+    "arrive": "İyi akşamlar. Acele etmeyin lütfen. İlk öğrettiğim şey sabırdır. İkincisi imla.",
+    "story": "Şarj girişi tebeşir tozuyla dolu. Otuz yıl kara tahta başında. Sonunda tebeşir kazandı.",
+    "wait": "Beklerken küçük bir soru: kim bir telefonun üç parçasını sayabilir? Parmak kaldırın.",
+    "happy": "Mükemmel iş. Buyurun, {money}. Pekiyi, hem de ben neredeyse hiç vermem.",
+    "angry": "Bu tamire sonra not vereceğim. Zar zor geçer bekleyin."
+   }
+  },
+  {
+   "id": "gamer",
+   "voice": 901217,
+   "deviceId": "phone",
+   "faultId": "broken_port",
+   "name": "Oyuncu Kit",
+   "device": "RGB ışıklı oyuncu telefonu",
+   "fault": "\"Fırlatmadım, kendisi uçtu.\" Giriş kabloyla birlikte gitti",
+   "lines": {
+    "arrive": "Selam. Şimdi, önce şunu diyeyim: fırlatmadım. Kendisi uçtu.",
+    "story": "Kablo prizde kaldı, şarj girişi de sanki… onunla gitti. Hepsi lag yüzünden.",
+    "wait": "Burada Wi-Fi var mı? Öbür telefonum için soruyorum.",
+    "happy": "GG! Şarj oluyor! Buyurun, {money}. Bu bir haftalık öğle yemeği paramdı, bilginiz olsun.",
+    "angry": "Laaag. Babaannemin modemi bile daha hızlı."
+   }
+  },
+  {
+   "id": "barista",
+   "voice": 901011,
+   "deviceId": "watch",
+   "faultId": "water_damage",
+   "name": "Barista Lou",
+   "device": "Espresso kokan akıllı saat",
+   "fault": "Latte art yaparken süt potuna batırdı",
+   "lines": {
+    "arrive": "Selamlar! Size kahve getirdim. Yani kendime getirdim ama koklayabilirsiniz.",
+    "story": "Latteye kalp çiziyordum, bileğimi doğrudan süte daldırdım. Artık bu bir milkshake saati.",
+    "wait": "Bu, üçlü espressodan uzun sürdü. Ama kafeinsizden kısa. İyiyim.",
+    "happy": "Siz harikasınız! Buyurun, {money}. Bütün hafta size kapuçino bedava.",
+    "angry": "Kahvem soğudu. Kalbim de. Azıcık."
+   }
+  },
+  {
+   "id": "taxi_driver",
+   "voice": 901313,
+   "deviceId": "phone",
+   "faultId": "dead_battery",
+   "name": "Taksici Sam",
+   "device": "Torpido tutucusundaki telefon",
+   "fault": "Günde 16 saat navigasyon. Batarya bütün şehri gördü",
+   "lines": {
+    "arrive": "İyi akşamlar şefim! Taksici Sam. Şehirdeki her sokağı, her çukuru adıyla bilirim.",
+    "story": "Navigasyon günde on altı saat açık. Bu batarya şehri benden çok gördü.",
+    "wait": "Bir keresinde bu sokaktan ünlü bir şarkıcı taşımıştım. Kim olduğunu söyleyemem. Bir harfle başlıyor.",
+    "happy": "Hizmet süper! Buyurun, {money}. Bir yere gidecekseniz size yarı fiyatına.",
+    "angry": "Taksimetre işliyor dostlar! Yani, taksimde olsaydık işlerdi."
+   }
+  },
+  {
+   "id": "musician",
+   "voice": 900431,
+   "deviceId": "laptop",
+   "faultId": "cracked_screen",
+   "name": "Davulcu Jo",
+   "device": "Grup çıkartmalarıyla kaplı dizüstü",
+   "fault": "Solo sırasında baget uçtu. Doğrudan ekrana",
+   "lines": {
+    "arrive": "Yo! Ben Jo, davulcu. Merak etmeyin, davulları evde bıraktım. Çoğunu.",
+    "story": "Efsane bir solo, baget elimden kaydı ve dizüstünün ekranına uçtu. Ama hayatımın en iyi solosuydu.",
+    "wait": "Ba-dum-tıss. Pardon, beklerken her şeye ritim tutarım.",
+    "happy": "Kulağa harika geliyor! Buyurun, {money}. Hepiniz artık davetli listesindesiniz.",
+    "angry": "Bu tamir bizim basçıdan bile yavaş. Bu da az şey değil."
+   }
+  },
+  {
+   "id": "chef",
+   "voice": 901216,
+   "deviceId": "tablet",
+   "faultId": "broken_port",
+   "name": "Şef Arno",
+   "device": "Unlu kılıfta tarif tableti",
+   "fault": "Şarj girişi unla tıka basa dolu",
+   "lines": {
+    "arrive": "İyi akşamlar dostlarım! Şef Arno. Bunu size en iyi bıçağıma güvendiğim gibi emanet ediyorum.",
+    "story": "Tabletim mantı yaparken bana yardım etti. Şimdi şarj girişi unla tıka basa dolu.",
+    "wait": "Sabır hamur gibidir dostlarım. Kendi hâline bırakın, kabarır.",
+    "happy": "Parmak yedirten iş! Buyurun, {money}. Bana yemeğe gelin. Tabletler hamurdan uzak dursun.",
+    "angry": "Fazla pişti! Bu tamir gibi. Çok uzun sürdü dostlarım."
+   }
+  },
+  {
+   "id": "blogger",
+   "voice": 900873,
+   "deviceId": "phone",
+   "faultId": "cracked_screen",
+   "name": "Blogger Mia",
+   "device": "Üç halka ışıklı telefon",
+   "fault": "Selfie çubuğu tavan vantilatörüne karşı. Vantilatör kazandı",
+   "lines": {
+    "arrive": "Selaaam chat! Gerçek bir tamirhanedeyiz! Takipçilerime el sallayın!",
+    "story": "Selfie çubuğum tavan vantilatörüyle karşılaştı. Vantilatör kazandı. Tamir ederken sizi çekebilir miyim?",
+    "wait": "Bekleme içeriği! Çok otantik. Tamam, sıkıldım.",
+    "happy": "Bayıldım! Buyurun, {money}. Sizi her yerde etiketleyeceğim.",
+    "angry": "Takipten çıkıyorum. Duygusal olarak."
+   }
+  }
+ ],
+ "devices": {
+  "phone": "Telefon",
+  "tablet": "Tablet",
+  "laptop": "Dizüstü bilgisayar",
+  "watch": "Akıllı saat"
+ },
+ "faults": {
+  "cracked_screen": {
+   "name": "Kırık ekran",
+   "part": "screen",
+   "story": "Uzun hikâye. Keçi yogası. Bir keçi üstüne bastı. Keçi iyi."
+  },
+  "dead_battery": {
+   "name": "Bitmiş batarya",
+   "part": "battery",
+   "story": "Kırk bin adım saydı ve öldü. Bence sadece yoruldu."
+  },
+  "broken_port": {
+   "name": "Bozuk şarj girişi",
+   "part": "port",
+   "story": "Bir partide küçük bir çocuk onu muzla şarj etmeye çalıştı. Muz iyi."
+  },
+  "water_damage": {
+   "name": "Su hasarı",
+   "part": null,
+   "story": "Kutuda suya dayanıklı yazıyordu. Göl aynı fikirde değildi."
+  },
+  "software_glitch": {
+   "name": "Yazılım hatası",
+   "part": null,
+   "story": "Salıdan beri sadece Almanca konuşuyor. Ben konuşmuyorum. Ama o mutlu görünüyor."
+  },
+  "stuck_button": {
+   "name": "Takılan tuş",
+   "part": null,
+   "story": "Kedim bütün hafta üstünde uyudu. Tuş kediden önce pes etti."
+  }
+ },
+ "parts": {
+  "screen": "Yedek ekran",
+  "battery": "Yedek batarya",
+  "port": "Şarj girişi"
+ },
+ "cutscenes": {
+  "intro": {
+   "captions": [
+    {
+     "id": "cut.intro.1",
+     "speaker": "radio",
+     "text": "Gece Vardiyası FM, saat gece iki. Şu an bir yerlerde bir telefon küvete kaydı."
+    },
+    {
+     "id": "cut.intro.2",
+     "speaker": "radio",
+     "text": "Bir yerlerde de birkaç arkadaş bir garajda tamirhane açıyor. Bol şans, gece kuşları."
+    },
+    {
+     "id": "cut.intro.3",
+     "speaker": "narrator",
+     "text": "Sakin bir sokak. Kiralık bir garaj. Elle boyanmış bir tabela: TELEFON TAMİRİ."
+    },
+    {
+     "id": "cut.intro.4",
+     "speaker": "mira",
+     "text": "Garaj sizin, canlarım. Kira ucuz: ayda bir çaydanlığımı tamir edeceksiniz."
+    },
+    {
+     "id": "cut.intro.5",
+     "speaker": "narrator",
+     "text": "Bu gece dükkân açılıyor. Ya yarın? Henüz kimse bilmiyor."
+    }
+   ]
+  },
+  "investor": {
+   "captions": [
+    {
+     "id": "cut.investor.1",
+     "speaker": "narrator",
+     "text": "Kapının önünde çok sessiz bir araba duruyor. Elektrikli, pırıl pırıl ve belli ki pahalı."
+    },
+    {
+     "id": "cut.investor.2",
+     "speaker": "felix",
+     "text": "İyi akşamlar! Ben Felix, Mira'nın kardeşi. Gece ikide telefon tamir edip onlarla tatlı tatlı konuştuğunuzu söylüyor."
+    },
+    {
+     "id": "cut.investor.3",
+     "speaker": "felix",
+     "text": "Servetimi robot süpürgelerden yaptım. Hep kanepelerin altında sıkışıyorlardı, ben de bunu çözdüm."
+    },
+    {
+     "id": "cut.investor.4",
+     "speaker": "felix",
+     "text": "Şirketlere yatırım yapmam. Bir şeyin neden bozulduğunu görmek için onu açan insanlara yatırım yaparım."
+    },
+    {
+     "id": "cut.investor.5",
+     "speaker": "felix",
+     "text": "Buyurun, {money}. Kıramayacağım bir telefon yapın. Ben de çok ama çok uğraşacağım."
+    },
+    {
+     "id": "cut.investor.6",
+     "speaker": "mira",
+     "text": "Üç çaydanlığımı kırdı. İnanın bana, uğraşacak."
+    },
+    {
+     "id": "cut.investor.7",
+     "speaker": "narrator",
+     "text": "Takvim işlemeye başladı. Bugünden itibaren kira, rakipler ve maaşlar gerçek."
+    }
+   ]
+  },
+  "sign_swap": {
+   "captions": [
+    {
+     "id": "cut.sign_swap.1",
+     "speaker": "mira",
+     "text": "Eski tabelaya dikkat edin. Havyanızdan bile yaşlı."
+    },
+    {
+     "id": "cut.sign_swap.2",
+     "speaker": "narrator",
+     "text": "TELEFON TAMİRİ iniyor. {company} çıkıyor."
+    },
+    {
+     "id": "cut.sign_swap.3",
+     "speaker": "felix",
+     "text": "Aynı garaj, daha büyük planlar. Ben arabada olacağım. Biraz ağlayarak."
+    },
+    {
+     "id": "cut.sign_swap.4",
+     "speaker": "mira",
+     "text": "Bankoyu yine de saklayın. Eski müşteriler size yine kırık ekranlar getirecek."
+    },
+    {
+     "id": "cut.sign_swap.5",
+     "speaker": "radio",
+     "text": "Gece Vardiyası FM: sokağımızda yepyeni bir telefon şirketi. Gece iki hiç bu kadar parlak olmamıştı."
+    },
+    {
+     "id": "cut.sign_swap.6",
+     "speaker": "narrator",
+     "text": "Hikâye bitti. Garaj sizin. Şimdi kocaman bir şey kurun."
+    }
+   ]
+  }
+ },
+ "tips": [
+  "Mevcut hedef hafifçe parlar. Emin değilsen ışığı takip et.",
+  "Sol tık eşyaları tutar, sağ tık döndürür. Evet, fırlatabilirsin. Ama müşterilerin telefonlarını değil, lütfen.",
+  "F el fenerini açar. Garajdaki karanlık köşeler bilerek öyle.",
+  "E neredeyse her şeyde çalışır: kapılar, banko, masalar, bilgisayar, beyaz tahta ve kamyonet.",
+  "Tab, şirketin bütün ekranlarını içeren hızlı menüyü açar.",
+  "T sohbeti açar. Yazdığın her satırı karakterin yüksek sesle söyler.",
+  "Arkadaşlarını üst çubuktaki oda koduyla davet et. Bir şirketin en fazla dört kurucusu olabilir.",
+  "Birlikte mi oynuyorsunuz? Biri bankoda sipariş alsın, diğeri tamir etsin. Takım çalışması kahramanlığı yener.",
+  "Özenli tamir daha çok kazandırır: mini oyunun puanı müşterinin ne kadar ödeyeceğini belirler.",
+  "Ekran ya da batarya mı bitti? Garajdaki telefondan tedarikçiyi ara ve satın alma ekranından parça al.",
+  "Kasalar ancak gönderildikten sonra mağazalara ulaşır. +%5 adet için onları kamyonete taşı.",
+  "Garajda unutulan kasalar bir hafta sonra kendiliğinden gider, ama özenli yükleme bonusu olmadan.",
+  "Bilgisayar, tahta ve tezgâh görevleri işi hızlandırır. Her birinin bekleme süresi vardır.",
+  "Tasarım Stüdyosu her seçimden sonra eleştirmen tahminini gösterir. Yayımlamadan önce bir göz at.",
+  "Tedarik sözleşmeleri anlık fiyattan almaktan %10'a kadar ucuz olabilir.",
+  "Kurucu ortaklı bir şirkette büyük harcamaları tüm kurucular onaylamalıdır.",
+  "Geliştirmede bulunan hatalar araştırma puanıyla ya da zamanla bir hata ayıklayıcıyla düzeltilir.",
+  "İş panosundan eleman al. Mutlu çalışan daha iyi çalışır; az maaş alan ise… yaratıcı çalışır.",
+  "Tezgâh sadece başlangıç: ikinci katta gerçek üretim hatlarına yer var.",
+  "Rakipler de telefon çıkarıyor. Fiyatını belirlemeden önce onların fiyatlarına bak.",
+  "Hikâye modunda şirketin saati 4. bölümde başlar. O zamana kadar acele yok.",
+  "Hikâyeden sonra da tamir siparişleri gelir. Şirket garaja sığmayana dek küçük bir ek gelir.",
+  "Gerçek: tamirin %90'ı vida sökmektir. Kalan %10'u düşen vidayı aramaktır.",
+  "Müşteri \"hiçbir şey yapmadım, kendi bozuldu\" diyorsa, telefon suya düşmüştür.",
+  "İyi telefon, kendinin de alacağı telefondur. Harika telefon, babaannenin kullanabildiği telefondur.",
+  "Kahve oyun saatini hızlandırmaz. Sadece öyle hissettirir.",
+  "Bankodaki zil hiç tamir edilmedi. Gerek de yok. O mükemmel."
+ ],
+ "credits": {
+  "title": "Silicon Overlord Online",
+  "sections": [
+   {
+    "id": "idea",
+    "heading": "Fikir ve oyun tasarımı",
+    "lines": [
+     "inkoffTTV"
+    ]
+   },
+   {
+    "id": "made",
+    "heading": "Kod, grafik, ses ve metinler",
+    "lines": [
+     "inkoffTTV yönetiminde yapay zekâ ajanları (Anthropic'in Claude'u) tarafından yapıldı"
+    ]
+   },
+   {
+    "id": "tech",
+    "heading": "Kullanılanlar",
+    "lines": [
+     "Godot Engine 4.5 (MIT)",
+     "Python · lupa (Lua) · websockets",
+     "Inter · Noto Sans CJK (SIL OFL 1.1)",
+     "Tüm sesler ve müzikler bu oyun için sıfırdan sentezlendi"
+    ]
+   },
+   {
+    "id": "cast",
+    "heading": "Rol alanlar",
+    "lines": [
+     "Mira Teyze · Felix Amca · Zip · Vera Benchmark · Gece Vardiyası FM",
+     "Tamirhanenin tüm müşterileri ve çok sabırlı bir keçi"
+    ]
+   },
+   {
+    "id": "thanks",
+    "heading": "Teşekkürler",
+    "lines": [
+     "Telefonunu düşürüp yine de tamir edilebileceğine inanan herkese"
+    ]
+   }
+  ],
+  "closing": "Oynadığın için teşekkürler. Şimdi git, bir şey tamir et."
+ },
+ "ui": {
+  "chapter": "Bölüm {n}",
+  "optional": "İsteğe bağlı",
+  "story_complete": "Hikâye tamamlandı",
+  "final_title": "Tamirhane → {company}",
+  "final_sub": "Aynı garaj, yeni tabela. Arada bir hâlâ tamir siparişleri geliyor.",
+  "customer_waiting": "Bankoda bir müşteri bekliyor",
+  "sign": "TELEFON TAMİRİ"
+ }
+}

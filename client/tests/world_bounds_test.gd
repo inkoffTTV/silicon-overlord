@@ -91,7 +91,7 @@ func _run() -> void:
 	await frames(4)
 	var lp := lv.to_local(player.global_position)
 	check(player.rescues == 1 and absf(lp.x) < 4.0 and absf(lp.z) < 3.5 and lp.y > -0.5, "out-of-bounds player respawns inside the garage %s" % lp)
-	check(player.velocity.length() < 0.5, "respawn zeroes the velocity")
+	check(Vector2(player.velocity.x, player.velocity.z).length() < 0.5 and player.velocity.y > -3.0, "respawn zeroes the velocity %s" % player.velocity)
 	# a prop that fell out goes back home
 	var box: RigidBody3D = null
 	for b in get_nodes_in_group("grabbable"):

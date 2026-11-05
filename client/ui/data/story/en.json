@@ -856,6 +856,7 @@
   "story_complete": "Story complete",
   "final_title": "Repair shop → {company}",
   "final_sub": "Same garage, new sign. Repair orders still come in now and then.",
-  "customer_waiting": "A customer is waiting at the counter"
+  "customer_waiting": "A customer is waiting at the counter",
+  "sign": "PHONE REPAIR"
  }
 }

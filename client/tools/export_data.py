@@ -13,10 +13,12 @@ Writes client/ui/data/:
   finishes.json       Finishes (finishes, accents, lights, logos, wallpapers, colours)
   balance.json        the few Balance tables the UI shows (research cost/days, time, price references)
   locale.json         Locale phrase tables from the Roblox client (en keyed dict + ru phrase table)
+  goals.json          Goals.list (id, title, desc, badge, reward) — the 28 sequential goals (checks stay on the server)
+  daily.json          DailyRewards (7-day gift cycle, streak bonus)
   sample_state.json   a realistic CompanyState (created by CompanyFactory, a few weeks simulated,
                       one blueprint, one launched product) — used only by UI tests and screenshots.
 
-Usage:  python3 client/tools/export_data.py [--roblox /home/user/PhoneTycoon]
+Usage:  python3 client/tools/export_data.py [--roblox=/home/user/PhoneTycoon] [--only=goals,daily,balance,...]
 """
 import json
 import os
@@ -29,9 +31,12 @@ from luau_strip import strip  # noqa: E402
 from lupa import LuaRuntime  # noqa: E402
 
 ROBLOX = "/home/user/PhoneTycoon"
+ONLY = set()
 for a in sys.argv[1:]:
     if a.startswith("--roblox="):
         ROBLOX = a.split("=", 1)[1]
+    if a.startswith("--only="):
+        ONLY = set(a.split("=", 1)[1].split(","))
 OUT = os.path.join(ROOT, "client", "ui", "data")
 
 
@@ -108,7 +113,25 @@ def to_py(v, depth=0):
     return v
 
 
+def to_py_list(t):
+    out = []
+    i = 1
+    while t[i] is not None:
+        item = {}
+        for k in list(t[i].keys()):
+            v = t[i][k]
+            if type(v).__name__ == "_LuaTable":
+                item[str(k)] = to_py(v)
+            elif not callable(v):
+                item[str(k)] = v
+        out.append(item)
+        i += 1
+    return out
+
+
 def dump(name, data):
+    if ONLY and name.split(".")[0] not in ONLY:
+        return
     os.makedirs(OUT, exist_ok=True)
     path = os.path.join(OUT, name)
     with open(path, "w", encoding="utf-8") as f:
@@ -148,12 +171,21 @@ def main():
 
     balance = req("Config.Balance")
     bal = {}
-    for key in ("Research", "Time", "Market", "Production", "Development", "Start", "Employees"):
+    for key in ("Research", "Time", "Market", "Production", "Development", "Start", "Employees", "Story", "Challenges"):
         try:
             bal[key] = to_py(balance[key])
         except Exception:
             pass
     dump("balance.json", bal)
+
+    goals = req("Data.Goals")
+    glist = []
+    for g in to_py_list(goals.list):
+        glist.append({k: g.get(k) for k in ("id", "title", "desc", "badge", "reward")})
+    dump("goals.json", {"list": glist})
+
+    daily = req("Data.DailyRewards")
+    dump("daily.json", {"days": to_py(daily.days), "streakBonus": to_py(daily.streakBonus), "secondsPerDay": to_py(daily.secondsPerDay)})
 
     # ---- locale -------------------------------------------------------------------------
     try:
@@ -163,8 +195,9 @@ def main():
         print("locale export skipped:", e)
 
     # ---- sample state (tests & screenshots only) ----------------------------------------------
-    sample = L.execute(SAMPLE_LUA)
-    dump("sample_state.json", to_py(sample))
+    if not ONLY or "sample_state" in ONLY:
+        sample = L.execute(SAMPLE_LUA)
+        dump("sample_state.json", to_py(sample))
 
 
 SAMPLE_LUA = r"""

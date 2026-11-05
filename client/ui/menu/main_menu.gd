@@ -73,6 +73,10 @@ var _companies_error := ""
 var _settings: Node
 var _credits_layer: Control
 var _first_show := true
+var _logo_words: Array = []
+var _logo_tv: VBoxContainer
+var _logo_sub: Label
+var _logo_compact := false
 
 func _ready() -> void:
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
@@ -185,6 +189,7 @@ func _build_logo() -> Control:
 	tag.custom_minimum_size.x = 80
 	row.add_child(tag)
 	var tv := U.vbox(-34)
+	_logo_tv = tv
 	v.add_child(tv)
 	var t1 := U.lbl("SILICON", 78, U.TEXT, "black")
 	t1.add_theme_color_override("font_shadow_color", Color(0, 0, 0, 0.55))
@@ -197,7 +202,9 @@ func _build_logo() -> Control:
 	t2.add_theme_constant_override("shadow_offset_x", 0)
 	t2.add_theme_constant_override("shadow_offset_y", 0)
 	tv.add_child(t2)
+	_logo_words = [t1, t2]
 	var sub := U.lbl(L.t("From a garage repair shop to a phone empire"), U.MD, Color(U.TEXT, 0.78), "semibold")
+	_logo_sub = sub
 	sub.clip_text = true
 	sub.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	sub.custom_minimum_size.x = 80
@@ -571,7 +578,6 @@ func _page_new() -> Control:
 	v.add_child(_page_header(L.t("New company"), "play"))
 	v.add_child(U.para(L.t("How do you want to start?"), U.MD, Color(U.TEXT, 0.85), "semibold"))
 	var row := U.hbox(12)
-	row.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	v.add_child(row)
 	row.add_child(_choice_card("story", "wrench", U.GOLD, L.t("Story start"), L.t("RECOMMENDED"),
 		L.t("Open a tiny phone repair shop in a garage. Fix the neighbours' gadgets, learn the whole game together, then build your own phone."),
@@ -588,7 +594,9 @@ func _choice_card(kind: String, icon_name: String, col: Color, title_text: Strin
 	top.add_child(U.icon_tile(icon_name, col, 48, 12))
 	top.add_child(U.spacer())
 	if badge != "":
-		top.add_child(U.pill(badge, col, true))
+		var pl := U.pill(badge, col, true)
+		pl.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		top.add_child(pl)
 	var tl := U.lbl(title_text, U.XL, U.TEXT, "display")
 	tl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	tl.custom_minimum_size.x = 60
@@ -596,12 +604,12 @@ func _choice_card(kind: String, icon_name: String, col: Color, title_text: Strin
 	var d := U.para(desc, U.SM, Color(U.TEXT, 0.82), "medium", 200)
 	d.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	v.add_child(d)
+	v.add_child(U.gap(4))
 	v.add_child(U.para(foot, U.XS + 1, col.lightened(0.2), "semibold", 200))
 	var b := U.content_btn(v, "BtnRow", Vector2(16, 16))
 	b.focus_mode = Control.FOCUS_ALL
 	b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	b.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	b.custom_minimum_size.x = 200
+	b.custom_minimum_size = Vector2(200, 300)
 	b.set_meta("sfx", "confirm")
 	b.set_meta("start_kind", kind)
 	b.add_theme_stylebox_override("normal", U.sbox(Color(0.05, 0.065, 0.11, 0.9), 14, Color(col, 0.45), 1, 16, 16))
@@ -917,10 +925,22 @@ func show_page(p: String) -> void:
 			U.fade_in(c, 0.22, Vector2(26.0 * dir, 0))
 		else:
 			c.visible = false
+	_set_logo_compact(p != "home")
 	if p == "home" and _first_show:
 		_first_show = false
 		_intro_anim()
 	_focus_page.call_deferred(p)
+
+## Sub-pages need the room: the logo shrinks (and grows back on the home page).
+func _set_logo_compact(on: bool) -> void:
+	if on == _logo_compact:
+		return
+	_logo_compact = on
+	for w in _logo_words:
+		(w as Label).add_theme_font_size_override("font_size", 46 if on else 78)
+	_logo_tv.add_theme_constant_override("separation", -20 if on else -34)
+	_logo_sub.visible = not on
+	U.fade_in(_logo, 0.25)
 
 static func _depth(p: String) -> int:
 	return {"home": 0, "play": 1, "settings": 1, "credits": 1, "new": 2, "join": 2, "create": 3}.get(p, 0)

@@ -177,7 +177,7 @@ func _slide(cb: RigidBody3D, to: Transform3D, t: float) -> void:
 	tw.tween_property(cb, "global_basis", to.basis, t)
 
 func _kill_tween(cb: Node) -> void:
-	var old: Variant = cb.get_meta("slide_tween", null)
+	var old: Variant = cb.get_meta("slide_tween") if cb.has_meta("slide_tween") else null
 	if old is Tween and (old as Tween).is_valid():
 		(old as Tween).kill()
 

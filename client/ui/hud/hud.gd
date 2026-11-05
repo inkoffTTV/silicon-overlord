@@ -6,6 +6,7 @@ const U := preload("res://ui/lib/uit.gd")
 const L := preload("res://ui/lib/loc.gd")
 const F := preload("res://ui/lib/fmt.gd")
 const Tracker := preload("res://ui/story/objective_tracker.gd")
+const Goals := preload("res://ui/screens/goals.gd")
 ## speed -> hotkey (core/inputs.gd: 1/2/3/4 = 1x/2x/4x/8x, P or 0 = pause)
 const SPEED_KEYS := {0: "P", 1: "1", 2: "2", 4: "3", 8: "4"}
 
@@ -36,6 +37,12 @@ var _crate_label: Label
 var left_col: VBoxContainer
 var tracker: Control
 var _speed_locked := false
+var _rp_btn: Button
+var _goal_chip: PanelContainer
+var _goal_cap: Label
+var _goal_title: Label
+var _goal_reward: Label
+var _gift_chip: PanelContainer
 
 func _ready() -> void:
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
@@ -52,6 +59,7 @@ func _ready() -> void:
 	_build_prompt()
 	_build_banner()
 	_build_hints()
+	_build_goal_chip()
 	_build_dev_chip()
 	_build_crate_chip()
 	refresh()
@@ -112,6 +120,17 @@ func _build_bar() -> void:
 	_cash.custom_minimum_size.x = 104
 	_rp = _stat(h, "bulb", U.ACCENT_ALT, "RESEARCH PTS")
 	_rp.custom_minimum_size.x = 60
+	# the research-points chip explains where RP come from (tooltip) and opens Goals & gifts
+	var rp_box: Control = _rp.get_parent().get_parent()
+	var idx := rp_box.get_index()
+	h.remove_child(rp_box)
+	_rp_btn = U.content_btn(rp_box, "BtnFlat", Vector2(4, 0))
+	_rp_btn.mouse_default_cursor_shape = Control.CURSOR_HELP
+	_rp_btn.pressed.connect(func() -> void:
+		if ui_root:
+			ui_root.call("open_screen", "goals", ""))
+	h.add_child(_rp_btn)
+	h.move_child(_rp_btn, idx)
 	_team = _stat(h, "team", U.ACCENT, "TEAM")
 	_rep = _stat(h, "star", U.GOLD, "REPUTATION")
 	_vsep(h)
@@ -229,6 +248,50 @@ func _build_crate_chip() -> void:
 	v.add_child(hint)
 	_crate_chip.visible = false
 
+func _build_goal_chip() -> void:
+	_goal_chip = PanelContainer.new()
+	_goal_chip.add_theme_stylebox_override("panel", U.card_box(U.GLASS, Color(U.GOLD, 0.45), 10, 12))
+	_goal_chip.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_goal_chip.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+	_goal_chip.custom_minimum_size = Vector2(260, 0)
+	left_col.add_child(_goal_chip)
+	var v := U.vbox(3)
+	_goal_chip.add_child(v)
+	var h := U.hbox(8)
+	v.add_child(h)
+	h.add_child(U.icon("trophy", U.GOLD, 14))
+	_goal_cap = U.caps("", U.GOLD, 10)
+	h.add_child(_goal_cap)
+	_goal_title = U.clip("", U.SM, U.TEXT, "semibold")
+	_goal_title.custom_minimum_size.x = 230
+	v.add_child(_goal_title)
+	_goal_reward = U.clip("", U.XS, U.SUCCESS, "semibold")
+	v.add_child(_goal_reward)
+	_goal_chip.visible = false
+	_gift_chip = PanelContainer.new()
+	_gift_chip.add_theme_stylebox_override("panel", U.card_box(U.GLASS, Color(U.PINK, 0.5), 8, 12))
+	_gift_chip.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_gift_chip.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+	left_col.add_child(_gift_chip)
+	var gh := U.hbox(8)
+	_gift_chip.add_child(gh)
+	gh.add_child(U.icon("sparkle", U.PINK, 14))
+	gh.add_child(U.lbl(L.t("Daily gift is ready"), U.SM, U.TEXT, "semibold"))
+	gh.add_child(U.keycap("Tab"))
+	_gift_chip.visible = false
+
+func _refresh_goal(s: Dictionary) -> void:
+	var cg := Goals.current_goal(s)
+	var g: Dictionary = cg.goal
+	_goal_chip.visible = not g.is_empty() and not Tracker.active(s)
+	if _goal_chip.visible:
+		_goal_cap.text = U.upper(L.f("Goal {n} of {total}", {"n": int(cg.index), "total": int(cg.total)}))
+		_goal_title.text = L.t(str(g.get("title", "")))
+		_goal_reward.text = L.t("Reward") + ": " + Goals.reward_text(g)
+	_gift_chip.visible = s.has("daily") and Goals.daily_claimable(s)
+	if _rp_btn:
+		_rp_btn.tooltip_text = Goals.rp_tooltip(s)
+
 func _refresh_crates(s: Dictionary) -> void:
 	var crates := U.arr(U.dict(s.get("production", {})).get("crates", []))
 	_crate_chip.visible = not crates.is_empty()
@@ -279,6 +342,7 @@ func refresh() -> void:
 	_refresh_members()
 	_refresh_dev(s)
 	_refresh_crates(s)
+	_refresh_goal(s)
 
 func _refresh_dev(s: Dictionary) -> void:
 	var projects := U.arr(s.get("projects", {}))

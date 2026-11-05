@@ -36,6 +36,8 @@ func build_level() -> void:
 	props_root = kit.node(self, Vector3.ZERO, 0.0, "Props")
 	live_root = kit.node(self, Vector3.ZERO, 0.0, "Live")
 	_build()
+	if get("decor_only") == true:
+		return
 	staff = Staff.new()
 	staff.name = "Staff"
 	staff.level = self
@@ -439,8 +441,8 @@ func door_exit(parent: Node3D, pos: Vector3, rot_y: float, id: String = "door_1"
 		kit.box(ia, Vector3(0.07, h + 0.07, 0.03), Vector3(s * (w * 0.5 + 0.035), (h + 0.07) * 0.5, 0.05), Mats.m("wood", Color(1.4, 1.4, 1.4)), Vector3.ZERO, false, 0.008)
 	kit.box(ia, Vector3(w + 0.14, 0.07, 0.03), Vector3(0, h + 0.05, 0.05), Mats.m("wood", Color(1.4, 1.4, 1.4)), Vector3.ZERO, false, 0.008)
 	# warm light leaking under the door
-	kit.box(ia, Vector3(w - 0.04, 0.012, 0.02), Vector3(0, 0.006, -0.01), Mats.glow(leak, 6.0), Vector3.ZERO, false, 0.0, false)
-	kit.omni(ia, Vector3(0, 0.08, 0.2), leak, 0.35, 1.2, false, 1.5)
+	kit.box(ia, Vector3(w - 0.04, 0.012, 0.02), Vector3(0, 0.006, -0.01), Mats.glow(leak, 6.0), Vector3.ZERO, false, 0.0, false).set_meta("keep_lit", true)
+	kit.omni(ia, Vector3(0, 0.08, 0.2), leak, 0.35, 1.2, false, 1.5).set_meta("keep_lit", true)
 	kit.ia_shape(ia, Vector3(w, h, 0.08), Vector3(0, h * 0.5, 0))
 	return ia
 

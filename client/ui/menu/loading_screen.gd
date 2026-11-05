@@ -21,9 +21,12 @@ const TIPS := [
 	"Mini-games at the PC, the whiteboard and the bench give small real boosts.",
 	"Carry finished crates to the van: hand delivery adds +5% units.",
 	"Tab opens the quick menu, T opens the chat, Esc pauses.",
+	"Keys 1–4 set the game speed (1×, 2×, 4×, 8×); P or 0 pauses time.",
 	"Press F for the flashlight: the garage has dark corners.",
 	"Critics love a phone that does one thing really well.",
 ]
+
+const CONTROL_TIPS := ["Keys 1–4 set the game speed (1×, 2×, 4×, 8×); P or 0 pauses time.", "Tab opens the quick menu, T opens the chat, Esc pauses."]
 
 var _title: Label
 var _sub: Label
@@ -116,6 +119,10 @@ func _ready() -> void:
 	_tips = SD.tips()
 	if _tips.is_empty():
 		for t in TIPS:
+			_tips.append(L.t(t))
+	else:
+		# the story file's tips + the controls ones (keys change; the story file doesn't know them)
+		for t in CONTROL_TIPS:
 			_tips.append(L.t(t))
 	_tips.shuffle()
 	_show_tip()

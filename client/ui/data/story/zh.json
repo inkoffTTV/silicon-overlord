@@ -1,0 +1,862 @@
+{
+ "lang": "zh",
+ "version": 1,
+ "speakers": {
+  "narrator": {
+   "name": "",
+   "voice": 901709
+  },
+  "radio": {
+   "name": "夜班电台",
+   "voice": 900977
+  },
+  "mira": {
+   "name": "米拉阿姨",
+   "voice": 900573
+  },
+  "felix": {
+   "name": "菲利克斯叔叔",
+   "voice": 901266
+  },
+  "zip": {
+   "name": "小齐",
+   "voice": 901509
+  },
+  "critic": {
+   "name": "维拉·跑分",
+   "voice": 901258
+  }
+ },
+ "chapters": [
+  {
+   "id": 0,
+   "key": "workshop",
+   "title": "修理铺",
+   "subtitle": "凌晨两点，一间车库，一块手写招牌：手机维修",
+   "steps": [
+    {
+     "id": "intro_seen",
+     "optional": false,
+     "objective": "来到车库",
+     "hint": "",
+     "lines": []
+    },
+    {
+     "id": "door_open",
+     "optional": false,
+     "objective": "打开修理铺的门",
+     "hint": "走到门前按 E。太黑了？按 F 打开手电筒。",
+     "lines": [
+      {
+       "id": "step.door_open.1",
+       "speaker": "mira",
+       "text": "这门有点卡。把把手往上提，再推。这车库只认自信的人。"
+      }
+     ]
+    },
+    {
+     "id": "lights_on",
+     "optional": false,
+     "objective": "打开灯",
+     "hint": "开关在门边的墙上。看着它按 E。",
+     "lines": [
+      {
+       "id": "step.lights_on.1",
+       "speaker": "mira",
+       "text": "要有光！黑灯瞎火的修理铺，就只是个吓人的车库。"
+      },
+      {
+       "id": "step.lights_on.2",
+       "speaker": "mira",
+       "text": "维修台、柜台、服务铃。服务铃才是这里最重要的工具。信我。"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": 1,
+   "key": "first_customer",
+   "title": "第一位顾客",
+   "subtitle": "又有人把东西摔了。",
+   "steps": [
+    {
+     "id": "take_device",
+     "optional": false,
+     "objective": "从柜台拿起设备",
+     "hint": "在柜台按 E 接单，然后把设备拿到维修台。",
+     "lines": [
+      {
+       "id": "step.take_device.1",
+       "speaker": "mira",
+       "text": "叮叮！你们的第一位顾客。笑一笑，他们闻得到紧张。还有焊锡味。"
+      }
+     ]
+    },
+    {
+     "id": "repair_device",
+     "optional": false,
+     "objective": "在维修台修好它",
+     "hint": "放到维修台上按 E：拆开、找故障、修好、装回去。",
+     "lines": [
+      {
+       "id": "step.repair_device.1",
+       "speaker": "mira",
+       "text": "开灯，放下放大镜。螺丝放进小杯子里，别放口袋。"
+      }
+     ]
+    },
+    {
+     "id": "get_paid",
+     "optional": false,
+     "objective": "在柜台交还设备并收钱",
+     "hint": "把设备拿回去，在柜台按 E。修得越细致，收得越多。",
+     "lines": [
+      {
+       "id": "step.get_paid.1",
+       "speaker": "mira",
+       "text": "修好了？现在是最棒的部分：一张笑脸，还有真金白银。"
+      }
+     ]
+    },
+    {
+     "id": "second_customer",
+     "optional": false,
+     "objective": "再修好一台设备",
+     "hint": "一起玩？一个人在柜台接单，一个人修。比单打独斗快多了。",
+     "lines": [
+      {
+       "id": "step.second_customer.1",
+       "speaker": "mira",
+       "text": "这条街上消息传得快。瞧，又来一位。"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": 2,
+   "key": "spare_parts",
+   "title": "零件",
+   "subtitle": "光靠好心可修不好屏幕",
+   "steps": [
+    {
+     "id": "diagnose_part",
+     "optional": false,
+     "objective": "把新订单拿到维修台",
+     "hint": "在柜台按 E，然后在维修台上仔细看看这台设备。",
+     "lines": [
+      {
+       "id": "step.diagnose_part.1",
+       "speaker": "mira",
+       "text": "哎呀，这台都碎成这样了。光靠螺丝刀不行，得换个新零件。"
+      }
+     ]
+    },
+    {
+     "id": "call_supplier",
+     "optional": false,
+     "objective": "用墙上的电话联系供应商",
+     "hint": "对着墙上的电话按 E，会打开采购界面。",
+     "lines": [
+      {
+       "id": "step.call_supplier.1",
+       "speaker": "mira",
+       "text": "屏幕用完了？玻璃可不是靠好心就能修好的。"
+      },
+      {
+       "id": "step.call_supplier.2",
+       "speaker": "mira",
+       "text": "给小齐打电话。小齐什么时候都接。我都怀疑小齐从来不睡觉。"
+      }
+     ]
+    },
+    {
+     "id": "buy_parts",
+     "optional": false,
+     "objective": "在采购界面买零件",
+     "hint": "在列表里找到屏幕，买几块。现在有一小把就够了。",
+     "lines": [
+      {
+       "id": "step.buy_parts.1",
+       "speaker": "zip",
+       "text": "小齐零件，我是小齐！屏幕、电池、接口，啥坏了，朋友？"
+      },
+      {
+       "id": "step.buy_parts.2",
+       "speaker": "zip",
+       "text": "保证在你们的茶凉之前送到。要是冰茶，那就是赛跑了。"
+      }
+     ]
+    },
+    {
+     "id": "fit_part",
+     "optional": false,
+     "objective": "装上新零件",
+     "hint": "回到维修台：新零件会在维修时装上。",
+     "lines": [
+      {
+       "id": "step.fit_part.1",
+       "speaker": "mira",
+       "text": "旧玻璃拆下，新玻璃装上。轻一点，它比我的耐心还薄。"
+      }
+     ]
+    },
+    {
+     "id": "paid_with_part",
+     "optional": false,
+     "objective": "交还设备并收钱",
+     "hint": "修理费已经包含零件钱，所以你们还是赚的。这就是生意！",
+     "lines": [
+      {
+       "id": "step.paid_with_part.1",
+       "speaker": "mira",
+       "text": "顾客还在等着呢，很勇敢地等着。咱们别考验这份勇气了。"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": 3,
+   "key": "same_fault",
+   "title": "同样的毛病",
+   "subtitle": "每部手机都坏在同一个地方。有意思……",
+   "steps": [
+    {
+     "id": "pattern_repair",
+     "optional": false,
+     "objective": "再修好一个坏掉的充电口",
+     "hint": "两位顾客，两个坏充电口。接口用完了？去采购界面再买点。",
+     "lines": [
+      {
+       "id": "step.pattern_repair.1",
+       "speaker": "mira",
+       "text": "一下来了两位顾客，两个人的充电口都坏了。嗯……"
+      }
+     ]
+    },
+    {
+     "id": "notice_pattern",
+     "optional": false,
+     "objective": "聊聊这个规律",
+     "hint": "听听米拉阿姨的话。这些手机有点不对劲。",
+     "lines": [
+      {
+       "id": "step.notice_pattern.1",
+       "speaker": "mira",
+       "text": "同一个接口，同样松动，同一款机型。这周已经第三台了。"
+      },
+      {
+       "id": "step.notice_pattern.2",
+       "speaker": "mira",
+       "text": "设计手机的人从来不摔手机。你们天天都摔。这可是优势。"
+      },
+      {
+       "id": "step.notice_pattern.3",
+       "speaker": "mira",
+       "text": "你们一台一台地修。要是造一部根本不会坏的呢？"
+      }
+     ]
+    },
+    {
+     "id": "start_research",
+     "optional": false,
+     "objective": "在白板上开始第一项研究",
+     "hint": "在白板前按 E，选一项技术。第一项研究免费。",
+     "lines": [
+      {
+       "id": "step.start_research.1",
+       "speaker": "mira",
+       "text": "修好一部手机叫维修。一次修好所有手机，那叫研究。"
+      }
+     ]
+    },
+    {
+     "id": "research_challenge",
+     "optional": true,
+     "objective": "白板头脑风暴",
+     "hint": "一个小游戏就能推进研究。可选，但很好玩。",
+     "lines": [
+      {
+       "id": "step.research_challenge.1",
+       "speaker": "mira",
+       "text": "拿起马克笔！先说烂点子：它们正堵着门，好点子进不来。"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": 4,
+   "key": "own_phone",
+   "title": "我们自己的手机",
+   "subtitle": "要不，我们造一部摔不坏的？",
+   "steps": [
+    {
+     "id": "investor_seen",
+     "optional": false,
+     "objective": "到门口迎接来客",
+     "hint": "",
+     "lines": []
+    },
+    {
+     "id": "design_phone",
+     "optional": false,
+     "objective": "在电脑上设计你们的第一部手机",
+     "hint": "电脑 → 设计工作室。默认设置就能用；把顾客讨厌的地方改掉就行。",
+     "lines": [
+      {
+       "id": "step.design_phone.1",
+       "speaker": "felix",
+       "text": "还记得那些松动的接口和中午就没电的电池吗？就从那儿开始。"
+      }
+     ]
+    },
+    {
+     "id": "publish_phone",
+     "optional": false,
+     "objective": "发布设计",
+     "hint": "在最后一步按“开始研发”。原型机马上就上路。",
+     "lines": [
+      {
+       "id": "step.publish_phone.1",
+       "speaker": "mira",
+       "text": "一个名字、一个价格、一个按钮。这间车库里最吓人的按钮。"
+      }
+     ]
+    },
+    {
+     "id": "develop_phone",
+     "optional": false,
+     "objective": "完成原型机的研发",
+     "hint": "现在时间开始流动了：加快速度，或者在电脑前捉虫帮忙。",
+     "lines": [
+      {
+       "id": "step.develop_phone.1",
+       "speaker": "felix",
+       "text": "研发就像熬汤。别每五分钟就掀一次锅盖。"
+      }
+     ]
+    },
+    {
+     "id": "polish_challenge",
+     "optional": true,
+     "objective": "在电脑前捉虫",
+     "hint": "坐到电脑椅上来一局快速捉虫。可选。",
+     "lines": [
+      {
+       "id": "step.polish_challenge.1",
+       "speaker": "felix",
+       "text": "找到虫子了？很好。让你们先找到，总比让评测人找到强。"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": 5,
+   "key": "first_batch",
+   "title": "第一批货",
+   "subtitle": "纯手工，一颗小螺丝接一颗",
+   "steps": [
+    {
+     "id": "queue_batch",
+     "optional": false,
+     "objective": "在工作台开始一批生产",
+     "hint": "在工作台按 E，选择手机和数量。材料从采购界面来。",
+     "lines": [
+      {
+       "id": "step.queue_batch.1",
+       "speaker": "mira",
+       "text": "手工组装！跟过去一样，只是烫伤少一点。希望如此。"
+      }
+     ]
+    },
+    {
+     "id": "first_crate",
+     "optional": false,
+     "objective": "等待第一箱货",
+     "hint": "做好的手机会在工作台旁装箱。",
+     "lines": [
+      {
+       "id": "step.first_crate.1",
+       "speaker": "mira",
+       "text": "这箱里的每一部手机都是你们亲手做的。感觉很奇妙，对吧？"
+      }
+     ]
+    },
+    {
+     "id": "ship_crate",
+     "optional": false,
+     "objective": "把一箱货搬上货车",
+     "hint": "拿起箱子放进货车。轻拿轻放可多得 5% 数量。",
+     "lines": [
+      {
+       "id": "step.ship_crate.1",
+       "speaker": "felix",
+       "text": "轻点！这箱子是我们的未来。也是我的投资。主要是我的投资。"
+      }
+     ]
+    },
+    {
+     "id": "qc_challenge",
+     "optional": true,
+     "objective": "在工作台做质检",
+     "hint": "挑出有问题的手机，多赚几台。可选。",
+     "lines": [
+      {
+       "id": "step.qc_challenge.1",
+       "speaker": "mira",
+       "text": "检查每部手机时，就当顾客一定会摔它。因为他们真的会。"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": 6,
+   "key": "launch_night",
+   "title": "发布之夜",
+   "subtitle": "聚光灯、评测人和一块崭新的招牌",
+   "steps": [
+    {
+     "id": "launch_phone",
+     "optional": false,
+     "objective": "在舞台上发布你们的手机",
+     "hint": "准备好后在舞台前按 E。评测人已经就座了。",
+     "lines": [
+      {
+       "id": "step.launch_phone.1",
+       "speaker": "critic",
+       "text": "晚上好，我是维拉·跑分。评测过三千部手机，每一部我都摔过。"
+      },
+      {
+       "id": "step.launch_phone.2",
+       "speaker": "critic",
+       "text": "车库里出来的团队？看看它能不能活过我的口袋。还有我家的楼梯。"
+      }
+     ]
+    },
+    {
+     "id": "reviews_seen",
+     "optional": false,
+     "objective": "看看评测人怎么说",
+     "hint": "不管得了几分，你们都做出了一部真正的手机。大多数人只会嘴上说说。",
+     "lines": [
+      {
+       "id": "step.reviews_seen.1",
+       "speaker": "critic",
+       "text": "私下说一句：来的路上我已经摔了它两次。佩服。"
+      }
+     ]
+    },
+    {
+     "id": "sign_swapped",
+     "optional": false,
+     "objective": "挂上公司的新招牌",
+     "hint": "看着旧招牌被取下来。",
+     "lines": [
+      {
+       "id": "step.sign_swapped.1",
+       "speaker": "mira",
+       "text": "还有一件事，孩子们。那块旧招牌已经配不上你们了。"
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "customers": [
+  {
+   "id": "grandma",
+   "voice": 900575,
+   "deviceId": "phone",
+   "faultId": "software_glitch",
+   "name": "罗莎奶奶",
+   "device": "手机（孙子送的礼物）",
+   "fault": "自己给她前夫打电话。他们 1979 年就分开了",
+   "lines": {
+    "arrive": "晚上好，孩子们！我孙子说这是部手机。我主要拿它砸核桃。",
+    "story": "它自己给我前夫打电话！我们 1979 年就分开了。那老头可糊涂了。",
+    "wait": "不着急。我带了包子。嗯，是带给我自己的。",
+    "happy": "太好了！这是 {money}。再给你们一个包子。核桃的事别告诉我孙子。",
+    "angry": "我们那时候修得可快了。核桃也没这么硬。"
+   }
+  },
+  {
+   "id": "student",
+   "voice": 900621,
+   "deviceId": "phone",
+   "faultId": "stuck_button",
+   "name": "学生马克斯",
+   "device": "贴满贴纸的手机",
+   "fault": "闹钟按了一千次“再睡五分钟”，侧键卡住了",
+   "lines": {
+    "arrive": "你好……抱歉，我只睡了两个小时。学生的预算也能修手机吗？",
+    "story": "我按了太多次“再睡五分钟”，按键直接投降了。现在永远卡住了。",
+    "wait": "我就闭眼一秒钟。修好了叫我。或者永远别叫。",
+    "happy": "你们是英雄！这是 {money}。这是我一周的泡面钱。",
+    "angry": "这次修理我完全可以睡过去。差点就睡着了。"
+   }
+  },
+  {
+   "id": "courier",
+   "voice": 901656,
+   "deviceId": "phone",
+   "faultId": "cracked_screen",
+   "name": "快递员迪娜",
+   "device": "用胶带缠着的手机",
+   "fault": "扛着蛋糕爬九楼时摔了。蛋糕没事",
+   "lines": {
+    "arrive": "快快快！我只有四分钟，还有十一个包裹。",
+    "story": "我扛着蛋糕爬到九楼，在最后一级台阶上把手机摔了。蛋糕没事！",
+    "wait": "我的休息时间是四分钟。还剩三分钟。两分半……",
+    "happy": "跟新的一样！这是 {money}。五星好评，我给得飞快！",
+    "angry": "太慢了！我都能送完四十份披萨了。"
+   }
+  },
+  {
+   "id": "teacher",
+   "voice": 900906,
+   "deviceId": "phone",
+   "faultId": "broken_port",
+   "name": "佩尔老师",
+   "device": "套着一个非常稳重的手机壳的手机",
+   "fault": "充电口里塞满了三十年的粉笔灰",
+   "lines": {
+    "arrive": "晚上好。请不用着急。我第一课教的是耐心，第二课才是写字。",
+    "story": "充电口里全是粉笔灰。在黑板前站了三十年，粉笔终于赢了。",
+    "wait": "趁着等的时候提个问：谁能说出手机的三个零件？请举手。",
+    "happy": "干得非常好。这是 {money}。给你们满分，我几乎从不给满分。",
+    "angry": "这次修理我以后再打分。做好只得及格的准备吧。"
+   }
+  },
+  {
+   "id": "gamer",
+   "voice": 901217,
+   "deviceId": "phone",
+   "faultId": "broken_port",
+   "name": "玩家基特",
+   "device": "带 RGB 灯的游戏手机",
+   "fault": "“我没扔，是它自己飞的。”接口跟着线一起走了",
+   "lines": {
+    "arrive": "嘿。先说清楚：我没扔它。是它自己飞出去的。",
+    "story": "线还插在插座上，充电口就好像……跟着它一起走了。全怪网络卡顿。",
+    "wait": "这儿有无线网吗？帮我另一部手机问的。",
+    "happy": "GG！能充电了！这是 {money}。这可是我一周的午饭钱。",
+    "angry": "好卡啊。连我奶奶的路由器都比这快。"
+   }
+  },
+  {
+   "id": "barista",
+   "voice": 901011,
+   "deviceId": "watch",
+   "faultId": "water_damage",
+   "name": "咖啡师露",
+   "device": "一股浓缩咖啡味的智能手表",
+   "fault": "做拉花时把它泡进了奶缸",
+   "lines": {
+    "arrive": "你们好呀！我给你们带了咖啡。好吧，是给我自己带的，但你们可以闻闻。",
+    "story": "我在拿铁上拉一颗心，结果手腕直接泡进了牛奶里。现在它是一块奶昔手表。",
+    "wait": "这比三份浓缩还久。但比无咖啡因的快。我没事。",
+    "happy": "你们最棒了！这是 {money}。这周的卡布奇诺我请了。",
+    "angry": "我的咖啡凉了。我的心也凉了一点。"
+   }
+  },
+  {
+   "id": "taxi_driver",
+   "voice": 901313,
+   "deviceId": "phone",
+   "faultId": "dead_battery",
+   "name": "出租车司机山姆",
+   "device": "夹在车载支架上的手机",
+   "fault": "每天开 16 小时导航。电池见过整座城市",
+   "lines": {
+    "arrive": "晚上好，老板们！我是开出租的山姆。城里每条街、每个坑我都叫得出名字。",
+    "story": "导航一天开十六个小时。这块电池见过的城市比我还多。",
+    "wait": "我以前在这条街上拉过一位大明星。不能说是谁。只能告诉你他姓……算了，不说了。",
+    "happy": "服务一流！这是 {money}。想去哪儿说一声，给你们打对折。",
+    "angry": "计价器在跳啊，朋友们！好吧，要是在我车里的话。"
+   }
+  },
+  {
+   "id": "musician",
+   "voice": 900431,
+   "deviceId": "laptop",
+   "faultId": "cracked_screen",
+   "name": "鼓手乔",
+   "device": "贴满乐队贴纸的笔记本电脑",
+   "fault": "独奏时鼓棒飞了出去，正中屏幕",
+   "lines": {
+    "arrive": "哟！我是乔，鼓手。别怕，鼓我都留在家里了。大部分吧。",
+    "story": "史诗级鼓独奏，鼓棒一滑，直接飞进了笔记本屏幕。不过那是我这辈子最棒的独奏。",
+    "wait": "动次打次。不好意思，我一等人就到处敲。",
+    "happy": "听起来完美！这是 {money}。你们都上我们演出的嘉宾名单了。",
+    "angry": "这次修理比我们的贝斯手还慢。这可不是一般的慢。"
+   }
+  },
+  {
+   "id": "chef",
+   "voice": 901216,
+   "deviceId": "tablet",
+   "faultId": "broken_port",
+   "name": "阿诺主厨",
+   "device": "沾满面粉的菜谱平板",
+   "fault": "充电口里塞满了面粉",
+   "lines": {
+    "arrive": "晚上好，朋友们！我是阿诺主厨。我信任你们，就像信任我最好的那把刀。",
+    "story": "我的平板帮我包饺子来着。现在充电口里塞满了面粉。",
+    "wait": "耐心就像面团，朋友们。别去动它，它自己就发起来了。",
+    "happy": "绝了！这是 {money}。来我家吃饭吧。平板离面团远一点。",
+    "angry": "煮过头了！就像这次修理。太久了，朋友们。"
+   }
+  },
+  {
+   "id": "blogger",
+   "voice": 900873,
+   "deviceId": "phone",
+   "faultId": "cracked_screen",
+   "name": "博主米亚",
+   "device": "带三个环形补光灯的手机",
+   "fault": "自拍杆对决吊扇。吊扇赢了",
+   "lines": {
+    "arrive": "家人们好！我们来到了一家真正的修理铺！快跟我的粉丝打个招呼！",
+    "story": "我的自拍杆碰上了吊扇。吊扇赢了。我能拍你们修手机的过程吗？",
+    "wait": "等待也是内容！超真实。好吧，我无聊了。",
+    "happy": "爱了爱了！这是 {money}。我要在所有平台上艾特你们。",
+    "angry": "取关了。从心里取关。"
+   }
+  }
+ ],
+ "devices": {
+  "phone": "手机",
+  "tablet": "平板",
+  "laptop": "笔记本电脑",
+  "watch": "智能手表"
+ },
+ "faults": {
+  "cracked_screen": {
+   "name": "屏幕碎裂",
+   "part": "screen",
+   "story": "说来话长。我上了一节山羊健身课，一只山羊踩了上去。山羊没事。"
+  },
+  "dead_battery": {
+   "name": "电池没电",
+   "part": "battery",
+   "story": "它数了四万步就关机了。我觉得它只是累了。"
+  },
+  "broken_port": {
+   "name": "充电口损坏",
+   "part": "port",
+   "story": "聚会上有个小朋友想用香蕉给它充电。香蕉没事。"
+  },
+  "water_damage": {
+   "name": "进水",
+   "part": null,
+   "story": "盒子上写着防水。湖水不这么认为。"
+  },
+  "software_glitch": {
+   "name": "软件故障",
+   "part": null,
+   "story": "从星期二开始它只说德语。我可不会。不过它看起来挺开心。"
+  },
+  "stuck_button": {
+   "name": "按键卡住",
+   "part": null,
+   "story": "我的猫在上面睡了一整周。按键比猫先投降了。"
+  }
+ },
+ "parts": {
+  "screen": "替换屏幕",
+  "battery": "替换电池",
+  "port": "充电口"
+ },
+ "cutscenes": {
+  "intro": {
+   "captions": [
+    {
+     "id": "cut.intro.1",
+     "speaker": "radio",
+     "text": "夜班电台，凌晨两点。此刻，某个地方又有一部手机滑进了浴缸。"
+    },
+    {
+     "id": "cut.intro.2",
+     "speaker": "radio",
+     "text": "而在另一个地方，几个朋友正在车库里开一家修理铺。祝你们好运，夜猫子们。"
+    },
+    {
+     "id": "cut.intro.3",
+     "speaker": "narrator",
+     "text": "安静的街道。租来的车库。一块手写招牌：手机维修。"
+    },
+    {
+     "id": "cut.intro.4",
+     "speaker": "mira",
+     "text": "车库归你们了，孩子们。房租很便宜：每个月帮我修一次水壶就行。"
+    },
+    {
+     "id": "cut.intro.5",
+     "speaker": "narrator",
+     "text": "今晚，修理铺开张。明天呢？还没人知道。"
+    }
+   ]
+  },
+  "investor": {
+   "captions": [
+    {
+     "id": "cut.investor.1",
+     "speaker": "narrator",
+     "text": "一辆非常安静的车停在门外。电动的，闪闪发亮，一看就很贵。"
+    },
+    {
+     "id": "cut.investor.2",
+     "speaker": "felix",
+     "text": "晚上好！我是菲利克斯，米拉的弟弟。她说你们凌晨两点修手机，还对它们说话很温柔。"
+    },
+    {
+     "id": "cut.investor.3",
+     "speaker": "felix",
+     "text": "我靠扫地机器人发了财。它们老是卡在沙发底下，我就把这个问题解决了。"
+    },
+    {
+     "id": "cut.investor.4",
+     "speaker": "felix",
+     "text": "我不投资公司。我投资那些把东西拆开、只为弄明白它为什么坏的人。"
+    },
+    {
+     "id": "cut.investor.5",
+     "speaker": "felix",
+     "text": "这是 {money}。造一部我摔不坏的手机。我会非常、非常努力地摔。"
+    },
+    {
+     "id": "cut.investor.6",
+     "speaker": "mira",
+     "text": "他弄坏过我三个水壶。相信我，他会很努力的。"
+    },
+    {
+     "id": "cut.investor.7",
+     "speaker": "narrator",
+     "text": "日历开始走动了。从今天起，房租、对手和工资都是真的了。"
+    }
+   ]
+  },
+  "sign_swap": {
+   "captions": [
+    {
+     "id": "cut.sign_swap.1",
+     "speaker": "mira",
+     "text": "小心那块旧招牌。它比你们的电烙铁年纪还大。"
+    },
+    {
+     "id": "cut.sign_swap.2",
+     "speaker": "narrator",
+     "text": "“手机维修”被取下。“{company}”挂了上去。"
+    },
+    {
+     "id": "cut.sign_swap.3",
+     "speaker": "felix",
+     "text": "同一间车库，更大的计划。我在车里。稍微哭一会儿。"
+    },
+    {
+     "id": "cut.sign_swap.4",
+     "speaker": "mira",
+     "text": "不过柜台留着吧。老顾客还是会拿着碎屏手机来找你们。"
+    },
+    {
+     "id": "cut.sign_swap.5",
+     "speaker": "radio",
+     "text": "夜班电台：我们这条街上有了一家全新的手机公司。凌晨两点从没这么亮过。"
+    },
+    {
+     "id": "cut.sign_swap.6",
+     "speaker": "narrator",
+     "text": "故事结束了。车库是你们的了。现在，去造点了不起的东西吧。"
+    }
+   ]
+  }
+ },
+ "tips": [
+  "当前目标会微微发光。拿不准的时候，就跟着光走。",
+  "鼠标左键拿东西，右键转动。没错，还能扔。不过请别扔顾客的手机。",
+  "F 打开手电筒。车库里的暗角是故意的。",
+  "E 几乎对什么都管用：门、柜台、各种台子、电脑、白板和货车。",
+  "Tab 打开快捷菜单，里面有公司的所有界面。",
+  "T 打开聊天。你打的每一句话，角色都会大声说出来。",
+  "用顶栏的房间代码邀请朋友。一家公司最多可以有四位创始人。",
+  "一起玩？一个人在柜台接单，另一个人修。团队合作胜过单打独斗。",
+  "修得越细致收得越多：小游戏的得分决定顾客付多少钱。",
+  "屏幕或电池用完了？用车库里的电话联系供应商，在采购界面买零件。",
+  "箱子发货后才会进入商店。搬上货车可多得 5% 数量。",
+  "留在车库里的箱子一周后会自动发货，但没有轻拿轻放的奖励。",
+  "电脑、白板和工作台上的挑战能加快进度。每个挑战都有冷却时间。",
+  "设计工作室每做一个选择都会显示评测预测。发布前看一眼。",
+  "和供应商签合同，最多能比现价便宜 10%。",
+  "在有联合创始人的公司里，大额开支需要所有创始人同意。",
+  "研发中发现的虫子可以花研究点修掉，也可以交给测试员慢慢修。",
+  "在招聘板上招人。开心的员工干得更好；工资太低的员工……干得很有创意。",
+  "工作台只是开始：二楼有地方放真正的生产线。",
+  "对手也在发布手机。定价之前先看看他们的价格。",
+  "故事模式下，公司的时钟从第 4 章开始走。在那之前，慢慢来。",
+  "故事结束后，维修订单还会继续来。在公司搬出车库之前，算是点小外快。",
+  "事实：维修 90% 的时间在拧螺丝。剩下 10% 在找掉在地上的那颗。",
+  "如果顾客说“我什么都没做，它自己坏了”，那它肯定掉进过水里。",
+  "好手机是你自己也会买的手机。了不起的手机，是你奶奶也会用的手机。",
+  "咖啡不会让游戏时间变快。只是感觉变快了。",
+  "柜台上的服务铃从来没修过。它也不需要修。它很完美。"
+ ],
+ "credits": {
+  "title": "Silicon Overlord Online",
+  "sections": [
+   {
+    "id": "idea",
+    "heading": "创意与游戏设计",
+    "lines": [
+     "inkoffTTV"
+    ]
+   },
+   {
+    "id": "made",
+    "heading": "代码、美术、声音与文字",
+    "lines": [
+     "由 AI 智能体（Anthropic 的 Claude）在 inkoffTTV 的指导下制作"
+    ]
+   },
+   {
+    "id": "tech",
+    "heading": "使用技术",
+    "lines": [
+     "Godot Engine 4.5 (MIT)",
+     "Python · lupa (Lua) · websockets",
+     "Inter · Noto Sans CJK (SIL OFL 1.1)",
+     "所有音效和音乐都是为本游戏从零合成的"
+    ]
+   },
+   {
+    "id": "cast",
+    "heading": "出演",
+    "lines": [
+     "米拉阿姨 · 菲利克斯叔叔 · 小齐 · 维拉·跑分 · 夜班电台",
+     "修理铺的所有顾客，还有一只非常有耐心的山羊"
+    ]
+   },
+   {
+    "id": "thanks",
+    "heading": "鸣谢",
+    "lines": [
+     "献给每一个摔过手机、却仍然相信它能修好的人"
+    ]
+   }
+  ],
+  "closing": "感谢游玩。现在，去修点什么吧。"
+ },
+ "ui": {
+  "chapter": "第 {n} 章",
+  "optional": "可选",
+  "story_complete": "故事完成",
+  "final_title": "修理铺 → {company}",
+  "final_sub": "同一间车库，新的招牌。偶尔还会有维修订单上门。",
+  "customer_waiting": "有顾客在柜台等着",
+  "sign": "手机维修"
+ }
+}

@@ -856,6 +856,7 @@
   "story_complete": "Historia completada",
   "final_title": "Taller → {company}",
   "final_sub": "El mismo garaje, cartel nuevo. De vez en cuando aún llegan encargos de reparación.",
-  "customer_waiting": "Un cliente espera en el mostrador"
+  "customer_waiting": "Un cliente espera en el mostrador",
+  "sign": "REPARACIÓN DE MÓVILES"
  }
 }

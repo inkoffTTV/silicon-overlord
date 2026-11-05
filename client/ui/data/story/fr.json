@@ -856,6 +856,7 @@
   "story_complete": "Histoire terminée",
   "final_title": "Atelier → {company}",
   "final_sub": "Même garage, nouvelle enseigne. Des réparations arrivent encore de temps en temps.",
-  "customer_waiting": "Un client attend au comptoir"
+  "customer_waiting": "Un client attend au comptoir",
+  "sign": "RÉPARATION DE TÉLÉPHONES"
  }
 }

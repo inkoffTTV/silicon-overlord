@@ -1,5 +1,6 @@
 extends VBoxContainer
-## Settings form in three tabs: General (language, graphics), Sound (volumes, spoken chat), Server (address + test).
+## Settings form in four tabs: General (language, graphics), Sound (volumes, spoken chat), Controls (every key),
+## Server (address + test).
 ## Used by the main menu and the pause menu. Values go to user://settings.cfg (see ui/lib/prefs.gd, docs/AUDIO.md).
 
 const U := preload("res://ui/lib/uit.gd")
@@ -22,12 +23,13 @@ var _voice_box: VBoxContainer
 
 func _ready() -> void:
 	add_theme_constant_override("separation", 10)
-	add_child(U.segmented([["general", L.t("General")], ["audio", L.t("Sound")], ["server", L.t("Server")]], last_tab,
+	add_child(U.segmented([["general", L.t("General")], ["audio", L.t("Sound")], ["controls", L.t("Controls")], ["server", L.t("Server")]], last_tab,
 		func(id: String) -> void:
 			sfx("tab")
 			_show_tab(id), 34))
 	_tabs["general"] = _tab_general()
 	_tabs["audio"] = _tab_audio()
+	_tabs["controls"] = _tab_controls()
 	_tabs["server"] = _tab_server()
 	for k in _tabs:
 		add_child(_tabs[k])
@@ -201,6 +203,35 @@ func _notify_settings() -> void:
 	var bus: Node = get_node_or_null("/root/Bus")
 	if bus and bus.has_signal("settings_changed"):
 		bus.emit_signal("settings_changed")
+
+# ---------------------------------------------------------------- controls
+## Every key of the game (core/inputs.gd), including the time-speed hotkeys.
+const CONTROLS := [
+	[["W", "A", "S", "D"], "Move"], [["Shift"], "Sprint"], [["Ctrl"], "Crouch"], [["Space"], "Jump"],
+	[["E"], "Interact / pick up"], [["LMB"], "Grab and drag"], [["RMB"], "Rotate what you hold"], [["F"], "Flashlight"],
+	[["T"], "Chat"], [["Tab"], "Quick menu"], [["Esc"], "Pause menu"],
+	[["P", "0"], "Time: pause / resume"], [["1", "2", "3", "4"], "Time: 1× · 2× · 4× · 8×"], [["+", "−"], "Time: faster / slower"],
+]
+
+func _tab_controls() -> Control:
+	var v := U.vbox(6)
+	v.add_child(U.caps(L.t("KEYS")))
+	for row in CONTROLS:
+		var h := U.hbox(6)
+		var keys := U.hbox(4)
+		keys.custom_minimum_size.x = 130
+		for k in row[0]:
+			keys.add_child(U.keycap(L.t(k) if k in ["Space", "LMB", "RMB"] else k))
+		h.add_child(keys)
+		var l := U.lbl(L.t(row[1]), U.SM, U.TEXT)
+		l.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		l.clip_text = true
+		l.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+		l.custom_minimum_size.x = 60
+		h.add_child(l)
+		v.add_child(h)
+	v.add_child(U.para(L.t("Time keys work while you walk around. In the story the clock starts at chapter 4."), U.XS + 1, U.DIM))
+	return v
 
 # ---------------------------------------------------------------- server
 func _tab_server() -> Control:

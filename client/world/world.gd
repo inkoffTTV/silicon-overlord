@@ -12,6 +12,13 @@ extends Node3D
 ##   avatar_position(user_id) -> Vector3|null — mouth position of a player's avatar (for 3D voice)
 ## Iteration 2 (all state-driven, see world/live/*): prototype on the workbench, research on the whiteboard,
 ## production lines in the loft, crates + van (manual shipping), employees as NPCs, job board.
+## Iteration 3 (story start, see docs/STORY.md + world/live/repair_shop.gd):
+##   story_stage(chapter, step)  — highlight the current objective (glow outline + floating marker); driven
+##                                 automatically by Game.state.story, callable by the UI too
+##   play_cutscene(id)           — "intro" | "investor" | "sign_swap" (also via Bus.story_cutscene(id));
+##                                 signal cutscene_finished(id); is_cutscene_running()
+##   get_shop()                  — the repair shop node of the garage (null in offices)
+##   set_company_sign(text, color) — force the outside sign (preview); "" = back to the state
 
 const PostFX := preload("res://fx/post_fx.gd")
 const STAGE_SCENE := "res://world/stage.tscn"
@@ -25,6 +32,25 @@ const STAGE_OFFSET := Vector3(0, 0, -400)
 signal level_built(level: int)
 ## emitted when the launch show on the stage is over (camera is back on the player)
 signal launch_finished(product_name: String)
+## emitted when a story cutscene is over (camera back on the player)
+signal cutscene_finished(id: String)
+
+const Objective := preload("res://world/story/objective.gd")
+const Cutscenes := preload("res://world/story/cutscenes.gd")
+const Story := preload("res://world/live/story_state.gd")
+const STAGE_KINDS := [["supplier", "supplier_phone"], ["phone_call", "supplier_phone"], ["call", "supplier_phone"],
+	["part", "supplier_phone"], ["buy", "supplier_phone"], ["purchas", "supplier_phone"], ["material", "supplier_phone"],
+	["whiteboard", "whiteboard_research"], ["research", "whiteboard_research"], ["brainstorm", "whiteboard_challenge"],
+	["challenge", "whiteboard_challenge"], ["design", "pc_design"], ["blueprint", "pc_design"], ["publish", "pc_design"],
+	["pc", "pc_design"], ["develop", "pc_design"], ["production", "workbench_production"], ["produce", "workbench_production"],
+	["assembl", "workbench_production"], ["batch", "workbench_production"], ["queue", "workbench_production"],
+	["crate", "van"], ["ship", "van"], ["van", "van"], ["launch", "stage_launch"], ["stage", "stage_launch"],
+	["keynote", "stage_launch"], ["hire", "job_board"], ["job", "job_board"]]
+
+var objective: Node3D
+var cutscenes: Node3D
+var _stage: Array = []        # [chapter, step] set by story_stage() (UI) — else from Game.state.story
+var _stage_t := 0.0
 
 var env: Environment
 var world_env: WorldEnvironment
@@ -52,6 +78,16 @@ func _ready() -> void:
 	Bus.world_rebuild.connect(rebuild)
 	Bus.peers_changed.connect(_on_peers_changed)
 	Bus.launch_show.connect(_on_launch_show)
+	objective = Objective.new()
+	add_child(objective)
+	cutscenes = Cutscenes.new()
+	cutscenes.world = self
+	add_child(cutscenes)
+	cutscenes.finished.connect(func(id: String) -> void:
+		_show_running = false
+		_amb = ""
+		cutscene_finished.emit(id))
+	Bus.story_cutscene.connect(play_cutscene)
 	rebuild()
 
 # ------------------------------------------------------------------ environment
@@ -253,6 +289,10 @@ func _process(delta: float) -> void:
 	if _rescue_t <= 0.0:
 		_rescue_t = 0.5
 		_rescue_props()
+	_stage_t -= delta
+	if _stage_t <= 0.0:
+		_stage_t = 0.25
+		_update_stage()
 	_amb_t -= delta
 	if _amb_t > 0.0 or level_node == null or _show_running:
 		return
@@ -371,3 +411,72 @@ func play_launch(product_name: String, model: Node3D = null) -> void:
 			p.make_camera_current()
 	_show_running = false
 	launch_finished.emit(product_name)
+
+# ------------------------------------------------------------------ story (iteration 3)
+func get_shop() -> Node3D:
+	return level_node.get("shop") if level_node else null
+
+func set_company_sign(text: String, color: Color = Color(0.31, 0.55, 1.0)) -> void:
+	var shop := get_shop()
+	if shop == null:
+		return
+	if text == "":
+		shop.clear_sign_override()
+	else:
+		shop.set_sign_override(text, color, "company")
+
+## Highlight the objective of a story step (chapter, step id). Called automatically from Game.state.story.
+## story_stage(-1, "") clears a manual stage (back to the state).
+func story_stage(chapter: int, step: String) -> void:
+	_stage = [] if chapter < 0 else [chapter, step]
+	_update_stage()
+
+func stage_targets(chapter: int, step: String) -> Array:
+	var shop := get_shop()
+	if shop:
+		var t: Array = shop.objective_targets(chapter, step)
+		if not t.is_empty():
+			return t
+	var s := step.to_lower()
+	for pair in STAGE_KINDS:
+		if s.contains(pair[0]):
+			var n := _find_kind(pair[1])
+			if n:
+				return [n]
+	return []
+
+func _find_kind(kind: String) -> Node3D:
+	for n in get_tree().get_nodes_in_group("interactable"):
+		if n is Node3D and n.is_inside_tree() and str(n.get_meta("kind", "")) == kind and level_node and level_node.is_ancestor_of(n):
+			return n
+	# the van is not "interactable" for the lookup when hidden; fall back to any node with that meta
+	return null
+
+func _update_stage() -> void:
+	if objective == null:
+		return
+	if _show_running or (cutscenes and cutscenes.is_running()):
+		objective.set_targets([])
+		return
+	var ch := -1
+	var step := ""
+	if not _stage.is_empty():
+		ch = int(_stage[0])
+		step = str(_stage[1])
+	elif Story.active(Game.state):
+		ch = Story.chapter(Game.state)
+		step = Story.step(Game.state)
+	if ch < 0:
+		objective.set_targets([])
+		return
+	objective.set_targets(stage_targets(ch, step))
+
+func is_cutscene_running() -> bool:
+	return cutscenes != null and cutscenes.is_running()
+
+func play_cutscene(id: String) -> void:
+	if cutscenes == null or cutscenes.is_running() or _show_running:
+		return
+	_show_running = true
+	objective.set_targets([])
+	cutscenes.play(id)

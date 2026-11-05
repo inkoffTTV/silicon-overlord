@@ -36,6 +36,7 @@ const SCREENS := {
 	"negotiation": "res://ui/challenges/challenge_screen.gd",
 	"repair_bench": "res://ui/story/repair_game.gd",
 	"counter": "res://ui/story/counter_dialog.gd",
+	"goals": "res://ui/screens/goals.gd",
 }
 
 ## set before _ready to override the language (screenshot tool)
@@ -546,7 +547,7 @@ func _open_quick() -> void:
 	for it in [["pc_design", "palette", U.SUCCESS, "Design studio"], ["whiteboard_research", "flask", U.ACCENT_ALT, "Research board"],
 			["workbench_production", "factory", U.ORANGE, "Workbench"], ["phone_shelf", "shelf", U.CYAN, "Product shelf"],
 			["board_company", "chart", U.GOLD, "Company board"], ["job_board", "cv", U.PINK, "Employees"],
-			["purchasing", "box", U.ORANGE, "Purchasing"]]:
+			["purchasing", "box", U.ORANGE, "Purchasing"], ["goals", "trophy", U.GOLD, "Goals & gifts"]]:
 		var h := U.hbox(12)
 		h.add_child(U.icon_tile(it[1], it[2], 36, 9))
 		h.add_child(U.lbl(L.t(it[3]), U.MD, U.TEXT, "semibold"))

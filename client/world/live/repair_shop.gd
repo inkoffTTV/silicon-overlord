@@ -27,6 +27,7 @@ const HQ := preload("res://world/live/hq_state.gd")
 const Story := preload("res://world/live/story_state.gd")
 const Device := preload("res://world/live/broken_device.gd")
 const Customer := preload("res://world/actors/customer_npc.gd")
+const Kit := preload("res://world/lib/kit.gd")
 
 const D := 3.5          # garage half depth (front wall inner face at z = D)
 const W := 4.0
@@ -46,7 +47,7 @@ const NEON := Color(1.0, 0.28, 0.62)
 const NEON_2 := Color(0.25, 0.85, 1.0)
 
 var level: Node3D
-var kit                       # level kit (Kit)
+var kit: Kit                  # level kit
 var decor_only := false       # title screen: no state, no interactables, no Bus
 var look := ""                # "repair" | "company"
 

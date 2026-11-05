@@ -856,6 +856,7 @@
   "story_complete": "Story abgeschlossen",
   "final_title": "Werkstatt → {company}",
   "final_sub": "Dieselbe Garage, neues Schild. Ab und zu kommen noch Reparaturaufträge.",
-  "customer_waiting": "Am Tresen wartet ein Kunde"
+  "customer_waiting": "Am Tresen wartet ein Kunde",
+  "sign": "HANDY-REPARATUR"
  }
 }
