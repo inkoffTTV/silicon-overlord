@@ -32,7 +32,8 @@ cat > version.json <<JSON
   "pck_url": "https://github.com/inkoffTTV/silicon-overlord/raw/$SHA/SiliconOverlord.pck",
   "pck_sha256": "$SUM",
   "pck_size": $SIZE,
-  "zip_url": "https://github.com/inkoffTTV/silicon-overlord/raw/$SHA/SiliconOverlord.zip"
+  "zip_url": "https://github.com/inkoffTTV/silicon-overlord/raw/$SHA/SiliconOverlord.zip",
+  "date": "$(date -u +%Y-%m-%d)"
 }
 JSON
 git add version.json
@@ -42,3 +43,4 @@ Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
 Claude-Session: https://claude.ai/code/session_01GrSxc2FrBZgYuz6Arnf6Xs"
 git push -q origin builds
 echo "released $VERSION (engine $ENGINE) pack $SUM"
+echo "GitHub Actions on the builds branch now creates the release v$VERSION (notes: docs/releases/v$VERSION.md)"

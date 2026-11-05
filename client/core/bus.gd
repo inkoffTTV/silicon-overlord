@@ -12,6 +12,8 @@ signal peers_changed(list: Array)
 signal ship_feedback(crate_id: String, ok: bool)
 signal settings_changed()
 signal launch_finished(product_id: String)
+signal story_cutscene(id: String)
+signal story_dialogue(line_id: String)
 
 var modal_open := false
 
