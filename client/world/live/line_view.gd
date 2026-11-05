@@ -298,9 +298,14 @@ func _build() -> void:
 	sign.position = Vector3(-0.38, 1.85, length * 0.5)
 	sign.rotation_degrees.y = -90
 	sign.shaded = true
+	sign.double_sided = false
 	if ResourceLoader.exists("res://ui/fonts/Inter-Bold.ttf"):
 		sign.font = load("res://ui/fonts/Inter-Bold.ttf")
 	ia.add_child(sign)
+	var back := sign.duplicate() as Label3D
+	back.rotation_degrees.y = 90
+	back.position.x = 0.38
+	ia.add_child(back)
 
 ## Operator spot for staff placement (global): {pos, yaw, pose}
 func operator_slot() -> Dictionary:
@@ -465,6 +470,17 @@ static func _steam() -> CPUParticles3D:
 	m.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
 	m.vertex_color_use_as_albedo = true
 	m.billboard_mode = BaseMaterial3D.BILLBOARD_PARTICLES
+	var puff := GradientTexture2D.new()
+	puff.fill = GradientTexture2D.FILL_RADIAL
+	puff.fill_from = Vector2(0.5, 0.5)
+	puff.fill_to = Vector2(1.0, 0.5)
+	puff.width = 32
+	puff.height = 32
+	var pg := Gradient.new()
+	pg.set_color(0, Color(1, 1, 1, 1))
+	pg.set_color(1, Color(1, 1, 1, 0))
+	puff.gradient = pg
+	m.albedo_texture = puff
 	q.material = m
 	p.mesh = q
 	return p

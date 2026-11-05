@@ -312,7 +312,11 @@ func phone_shelf(parent: Node3D, pos: Vector3, rot_y: float, id: String = "shelf
 			ph.rotation_degrees.x = -12
 			kit.box(ph, Vector3(0.075 + si * 0.004, 0.15 + si * 0.006, 0.011), Vector3.ZERO, Mats.m("plastic_black", cols[(si + k) % 4] * Color(12, 12, 12)), Vector3.ZERO, false, 0.006)
 			kit.mesh(ph, Meshes.quad(Vector2(0.065 + si * 0.004, 0.135 + si * 0.006)), Vector3(0, 0, 0.0062), Mats.screen(3 if k % 2 == 0 else 0, Color(0.4, 0.75, 1.0) if k % 2 == 0 else Color(1.0, 0.6, 0.3), 1.0, si * 4.0 + k), Vector3.ZERO, false)
-			kit.label(ia, "v0.%d" % (si * 4 + k + 1), Vector3(x, y + 0.02, d * 0.5 + 0.002), 28, Color(0.1, 0.1, 0.1), Vector3.ZERO, 0.0012, true)
+			var tg := kit.label(ia, "v0.%d" % (si * 4 + k + 1), Vector3(x, y + 0.02, d * 0.5 + 0.002), 28, Color(0.1, 0.1, 0.1), Vector3.ZERO, 0.0012, true)
+			# anchor for a real finished prototype (proto_shelf.gd): the model's origin is its centre
+			var anchor := kit.node(ia, Vector3(x, y + 0.1, 0.04), 0.0, "Stand")
+			anchor.rotation_degrees.x = -12
+			stands.append({"anchor": anchor, "placeholder": ph, "tag": tg, "default_tag": tg.text, "order": absi(si - 1) * 10 + (si == 0 as int) * 5 + k})
 	# fill eye-level shelves first
 	stands.sort_custom(func(a: Dictionary, b: Dictionary) -> bool: return a.order < b.order)
 	proto_shelf.stands.append_array(stands)

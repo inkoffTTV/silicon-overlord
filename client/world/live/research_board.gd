@@ -70,7 +70,7 @@ func refresh(s: Dictionary) -> void:
 			var n := int(fw / 0.03)
 			for k in n:
 				var hx := x0 + 0.012 + k * 0.03
-				_line(rows_root, Vector3(hx, by - 0.018, z), Vector3(hx + 0.02, by + 0.018, z), col, 0.0035)
+				_line(rows_root, Vector3(hx, by - 0.018, z), Vector3(hx + 0.02, by + 0.018, z), col, 0.006)
 		_label(rows_root, "%d%%" % int(round(float(r.progress) * 100.0)), Vector3(x0 + bar_w + 0.04, by, z), 36, col, HORIZONTAL_ALIGNMENT_LEFT)
 	# sticky notes, 2 columns x 3 rows
 	for i in done.size():
@@ -123,7 +123,7 @@ func _label(parent: Node3D, text: String, pos: Vector3, px: int, col: Color, ali
 	parent.add_child(l)
 	return l
 
-func _line(parent: Node3D, a: Vector3, b: Vector3, col: Color, w: float = 0.005) -> MeshInstance3D:
+func _line(parent: Node3D, a: Vector3, b: Vector3, col: Color, w: float = 0.008) -> MeshInstance3D:
 	var mi := MeshInstance3D.new()
 	var d := b - a
 	mi.mesh = Meshes.cbox(Vector3(d.length() + w, w, 0.0008), 0.0)

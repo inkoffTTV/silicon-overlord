@@ -147,6 +147,7 @@ func _ship(cb: RigidBody3D) -> void:
 		cb.ship_state = "idle"
 		cb.set_meta("ship_cooldown", Time.get_ticks_msec() * 0.001 + 2.0)
 		var out: Vector3 = dock.global_transform * Vector3(0, 0.75, -1.9)
+		_kill_tween(cb)
 		var tw := cb.create_tween()
 		tw.tween_property(cb, "global_position", out, 0.35).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
 		tw.tween_callback(func() -> void:
@@ -168,10 +169,17 @@ func _slide(cb: RigidBody3D, to: Transform3D, t: float) -> void:
 	cb.collision_mask = 0
 	cb.linear_velocity = Vector3.ZERO
 	cb.angular_velocity = Vector3.ZERO
+	_kill_tween(cb)
 	var tw := cb.create_tween()
+	cb.set_meta("slide_tween", tw)
 	tw.set_parallel(true)
 	tw.tween_property(cb, "global_position", to.origin, t).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
 	tw.tween_property(cb, "global_basis", to.basis, t)
+
+func _kill_tween(cb: Node) -> void:
+	var old: Variant = cb.get_meta("slide_tween", null)
+	if old is Tween and (old as Tween).is_valid():
+		(old as Tween).kill()
 
 ## Crate stays inside the van as cargo (no longer interactable).
 func _load(cb: RigidBody3D) -> void:

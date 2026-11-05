@@ -1,0 +1,19 @@
+{
+"_about": "Prompts of world interactables ([E] ...), shown by the HUD through L.t. Columns: ru, uk, de, es, pt, fr, pl, tr, zh, ja.",
+"Design a phone": ["Спроектировать телефон", "Спроєктувати телефон", "Handy entwerfen", "Diseñar un teléfono", "Projetar um celular", "Concevoir un téléphone", "Zaprojektuj telefon", "Telefon tasarla", "设计手机", "スマホを設計"],
+"Research": ["", "Дослідження", "Forschung", "Investigación", "Pesquisa", "Recherche", "Badania", "Araştırma", "研究", "研究"],
+"Production": ["", "Виробництво", "Produktion", "Producción", "Produção", "Production", "Produkcja", "Üretim", "生产", "生産"],
+"Prototypes": ["Прототипы", "Прототипи", "Prototypen", "Prototipos", "Protótipos", "Prototypes", "Prototypy", "Prototipler", "原型机", "試作機"],
+"Company": ["", "Компанія", "Firma", "Empresa", "Empresa", "Entreprise", "Firma", "Şirket", "公司", "会社"],
+"Leave": ["Выйти", "Вийти", "Verlassen", "Salir", "Sair", "Partir", "Wyjdź", "Ayrıl", "离开", "離れる"],
+"Launch event": ["Презентация запуска", "Презентація запуску", "Launch-Event", "Evento de lanzamiento", "Evento de lançamento", "Événement de lancement", "Pokaz premierowy", "Lansman etkinliği", "发布会", "発表イベント"],
+"Brainstorm at the board (challenge)": ["Мозговой штурм у доски (испытание)", "Мозковий штурм біля дошки (випробування)", "Brainstorming an der Tafel (Challenge)", "Lluvia de ideas en la pizarra (desafío)", "Brainstorm no quadro (desafio)", "Brainstorming au tableau (défi)", "Burza mózgów przy tablicy (wyzwanie)", "Tahtada beyin fırtınası (görev)", "白板头脑风暴（挑战）", "ボードでブレスト（チャレンジ）"],
+"Sit at the PC (challenge)": ["Сесть за компьютер (испытание)", "Сісти за комп'ютер (випробування)", "Am PC sitzen (Challenge)", "Sentarse al PC (desafío)", "Sentar no PC (desafio)", "S'asseoir au PC (défi)", "Usiądź przy PC (wyzwanie)", "Bilgisayara otur (görev)", "坐到电脑前（挑战）", "PCの前に座る（チャレンジ）"],
+"QC inspection (challenge)": ["Проверка качества (испытание)", "Перевірка якості (випробування)", "Qualitätsprüfung (Challenge)", "Inspección de calidad (desafío)", "Inspeção de qualidade (desafio)", "Contrôle qualité (défi)", "Kontrola jakości (wyzwanie)", "Kalite denetimi (görev)", "质检（挑战）", "品質検査（チャレンジ）"],
+"Job board: hire staff": ["Доска вакансий: нанять людей", "Дошка вакансій: найняти людей", "Jobbörse: Personal einstellen", "Tablón de empleo: contratar", "Quadro de vagas: contratar", "Offres d'emploi : recruter", "Tablica ogłoszeń: zatrudnij", "İş panosu: personel al", "招聘板：雇人", "求人ボード：採用"],
+"Buy the second floor": ["Купить второй этаж", "Купити другий поверх", "Obergeschoss kaufen", "Comprar la segunda planta", "Comprar o segundo andar", "Acheter l'étage", "Kup piętro", "İkinci katı satın al", "购买二楼", "2階を購入"],
+"Carry to the van": ["Отнести в фургон", "Віднести до фургона", "Zum Lieferwagen tragen", "Llevar a la furgoneta", "Levar até a van", "Porter à la camionnette", "Zanieś do furgonetki", "Kamyonete taşı", "搬上货车", "バンへ運ぶ"],
+"Production line": ["Производственная линия", "Виробнича лінія", "Produktionslinie", "Línea de producción", "Linha de produção", "Ligne de production", "Linia produkcyjna", "Üretim hattı", "生产线", "生産ライン"],
+"Production lines": ["Производственные линии", "Виробничі лінії", "Produktionslinien", "Líneas de producción", "Linhas de produção", "Lignes de production", "Linie produkcyjne", "Üretim hatları", "生产线", "生産ライン"],
+"Open the design studio": ["Открыть студию дизайна", "Відкрити студію дизайну", "Designstudio öffnen", "Abrir el estudio de diseño", "Abrir o estúdio de design", "Ouvrir le studio de design", "Otwórz studio projektowe", "Tasarım stüdyosunu aç", "打开设计工作室", "デザインスタジオを開く"]
+}

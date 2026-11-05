@@ -189,7 +189,7 @@ func _build_board() -> void:
 		var head := U.hbox(7)
 		head.position = Vector2(LEFT + 2, y + 4)
 		head.add_child(U.icon(str(lane.icon), U.ACCENT_ALT.lightened(0.2), 15))
-		head.add_child(U.lbl(lane.nameRu if ru else lane.name, U.SM, U.TEXT, "bold"))
+		head.add_child(U.lbl(lane.nameRu if ru else L.t(lane.name), U.SM, U.TEXT, "bold"))
 		head.add_child(U.lbl("·  %d / %d" % [done, lane.ids.size()], U.SM, U.MUTED, "semibold"))
 		_board.add_child(head)
 		var top := y + LANE_HEAD
@@ -389,7 +389,7 @@ func _refresh_detail() -> void:
 	_detail.add_child(pills)
 	_detail.add_child(U.para(L.t(str(t.get("description", ""))), U.SM, U.MUTED, "medium", 300))
 	_detail.add_child(U.caps(L.t("WHAT IT GIVES")))
-	var effs := RL.effects(t, L.lang)
+	var effs := RL.effects_any(t, L.lang)
 	if effs.is_empty():
 		var nx := RL.dependents(selected)
 		var txt := L.t("A stepping stone towards the next techs.")

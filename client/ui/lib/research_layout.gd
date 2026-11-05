@@ -7,6 +7,7 @@ extends RefCounted
 ##  * effects() turns unlocks/modifiers into plain player language (EN/RU)
 
 const D := preload("res://ui/lib/gdata.gd")
+const L := preload("res://ui/lib/loc.gd")
 
 const LANES := {
 	"Silicon": [["nodes", "factory", "Process nodes", "Техпроцессы", ["^node_"]], ["litho", "sparkle", "Lithography", "Литография", ["^litho_"]],
@@ -294,8 +295,17 @@ static func effects(tech: Dictionary, lang: String = "en") -> Array:
 				out.append(_pct(delta) + " " + label)
 	return out
 
+## Other languages: the English effects through the phrase table ("Unlocks @", "New: @" ... templates).
+static func effects_any(tech: Dictionary, lang: String) -> Array:
+	if lang == "en" or lang == "ru":
+		return effects(tech, lang)
+	var out := []
+	for e in effects(tech, "en"):
+		out.append(L.t(str(e)))
+	return out
+
 static func effect_text(tech: Dictionary, lang: String = "en") -> String:
-	var list := effects(tech, lang)
+	var list := effects_any(tech, lang)
 	if list.is_empty():
 		return ""
 	if list.size() == 1:

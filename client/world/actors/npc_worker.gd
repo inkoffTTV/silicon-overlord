@@ -67,8 +67,9 @@ func setup(e: Dictionary, slot: Dictionary) -> void:
 	tag.name = "NameTag"
 	tag.billboard = BaseMaterial3D.BILLBOARD_ENABLED
 	tag.position = Vector3(0, 1.95 if not str(slot.get("pose", "")).begins_with("sit") else 1.55, 0)
-	tag.font_size = 36
-	tag.pixel_size = 0.0032
+	tag.font_size = 40
+	tag.pixel_size = 0.0006
+	tag.fixed_size = true
 	tag.outline_size = 12
 	tag.outline_modulate = Color(0, 0, 0, 0.85)
 	tag.text = "%s\n%s" % [str(e.get("name", "Employee")), HQ.role_label(role)]

@@ -3,9 +3,9 @@ extends Node3D
 ## Camera-facing, readable through the lo-fi filter (dark text on warm paper, black border).
 
 const SHADER := preload("res://world/actors/bubble.gdshader")
-const PX := 0.0042          # label pixel size (world units per font pixel)
+const PX := 0.0026          # label pixel size (world units per font pixel)
 const FONT_PX := 34
-const MAX_W := 560.0        # wrap width in font pixels
+const MAX_W := 520.0        # wrap width in font pixels
 
 var label: Label3D
 var bg: MeshInstance3D
@@ -48,9 +48,9 @@ func say(text: String, seconds: float) -> void:
 	label.text = text
 	var font: Font = label.font if label.font else ThemeDB.fallback_font
 	var sz := font.get_multiline_string_size(text, HORIZONTAL_ALIGNMENT_CENTER, MAX_W, FONT_PX, -1, TextServer.BREAK_MANDATORY | TextServer.BREAK_WORD_BOUND)
-	var w := minf(sz.x, MAX_W) * PX + 0.16
-	var h := sz.y * PX + 0.1
-	var tail := 0.09
+	var w := minf(sz.x, MAX_W) * PX + 0.1
+	var h := sz.y * PX + 0.06
+	var tail := 0.06
 	var q := QuadMesh.new()
 	q.size = Vector2(w, h + tail)
 	bg.mesh = q

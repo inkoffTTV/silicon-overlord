@@ -201,10 +201,13 @@ func _build_unlocked() -> void:
 		level.fluorescent(dyn, Vector3(1.4, FLOOR_Y + 2.6, 0.2), 90.0, 0.0)
 		for z in [-1.2, 1.4]:
 			level.kit.cable(dyn, Vector3(-1.0, FLOOR_Y + 3.3, z), Vector3(-1.0, FLOOR_Y + 2.78, z), 0.0, 1, 0.008)
+	# a bare warm bulb near the gable window: the attic's warm key against the cold tubes
+	if level and level.has_method("ceiling_bulb"):
+		level.ceiling_bulb(dyn, Vector3(1.6, FLOOR_Y + 3.0, 2.4), 0.7, Color(1.0, 0.66, 0.36), 1.8, 6.0, false)
 	var amb := OmniLight3D.new()
 	amb.position = Vector3(0, FLOOR_Y + 1.5, 0)
-	amb.light_color = Color(0.55, 0.65, 0.85)
-	amb.light_energy = 0.35
+	amb.light_color = Color(0.75, 0.7, 0.75)
+	amb.light_energy = 0.3
 	amb.omni_range = 7.0
 	amb.light_volumetric_fog_energy = 0.2
 	dyn.add_child(amb)

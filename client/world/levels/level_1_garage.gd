@@ -42,10 +42,25 @@ func _shell() -> void:
 	var g := kit.node(self, Vector3.ZERO, 0.0, "Shell")
 	# floor + ceiling
 	kit.box(g, Vector3(2 * W + 2 * T, 0.2, 2 * D + 2 * T), Vector3(0, -0.1, 0), Mats.m("concrete_floor"), Vector3.ZERO, true, 0.0)
-	kit.box(g, Vector3(2 * W + 2 * T, 0.12, 2 * D + 2 * T), Vector3(0, H + 0.06, 0), Mats.m("drywall"), Vector3.ZERO, true, 0.0)
-	# joists
+	# ceiling (= loft floor) with the hatch hole x[3,4] z[-2,-0.3]
+	var hole: Rect2 = Loft.HOLE
+	var hx0 := hole.position.x
+	var hz0 := hole.position.y
+	var hz1 := hole.position.y + hole.size.y
+	_ceiling_piece(g, -W - T, hx0, -D - T, D + T)
+	_ceiling_piece(g, hx0, W + T, -D - T, hz0)
+	_ceiling_piece(g, hx0, W + T, hz1, D + T)
+	# hatch frame trim
+	for z in [hz0, hz1]:
+		kit.box(g, Vector3(hole.size.x + 0.08, 0.06, 0.06), Vector3(hx0 + hole.size.x * 0.5, H - 0.03, z), Mats.m("wood", Color(1.2, 1.15, 1.1)), Vector3.ZERO, false, 0.008)
+	kit.box(g, Vector3(0.06, 0.06, hole.size.y), Vector3(hx0, H - 0.03, (hz0 + hz1) * 0.5), Mats.m("wood", Color(1.2, 1.15, 1.1)), Vector3.ZERO, false, 0.008)
+	# joists (the one over the hatch is cut)
 	for i in 6:
 		var x := -W + 0.6 + i * 1.36
+		if x > hx0 and x < hx0 + hole.size.x:
+			kit.box(g, Vector3(0.07, 0.2, hz0 + D), Vector3(x, H - 0.1, (-D + hz0) * 0.5), Mats.m("wood"), Vector3.ZERO, false, 0.006)
+			kit.box(g, Vector3(0.07, 0.2, D - hz1), Vector3(x, H - 0.1, (hz1 + D) * 0.5), Mats.m("wood"), Vector3.ZERO, false, 0.006)
+			continue
 		kit.box(g, Vector3(0.07, 0.2, 2 * D), Vector3(x, H - 0.1, 0), Mats.m("wood"), Vector3.ZERO, false, 0.006)
 	kit.box(g, Vector3(2 * W, 0.22, 0.12), Vector3(0, H - 0.11, 0.2), Mats.m("wood", Color(0.9, 0.85, 0.8)), Vector3.ZERO, false, 0.008)
 	# side walls
@@ -95,7 +110,7 @@ func _ceiling_piece(g: Node3D, x0: float, x1: float, z0: float, z1: float) -> vo
 	var ix1 := minf(x1, W)
 	var iz0 := maxf(z0, -D)
 	var iz1 := minf(z1, D)
-	kit.box(g, Vector3(ix1 - ix0, 0.04, iz1 - iz0), Vector3((ix0 + ix1) * 0.5, H + 0.14, (iz0 + iz1) * 0.5), Mats.m("wood_planks", Color(1.05, 1.0, 0.95), {"cell": Vector2(0.15, 2.4)}), Vector3.ZERO, true, 0.0)
+	kit.box(g, Vector3(ix1 - ix0, 0.04, iz1 - iz0), Vector3((ix0 + ix1) * 0.5, H + 0.14, (iz0 + iz1) * 0.5), Mats.m("wood_planks", Color(1.35, 1.15, 0.95), {"cell": Vector2(2.4, 0.15)}), Vector3.ZERO, true, 0.0)
 
 func _wall_piece(g: Node3D, x0: float, x1: float, y0: float, y1: float, z: float, mat: Material) -> void:
 	kit.box(g, Vector3(x1 - x0, y1 - y0, T), Vector3((x0 + x1) * 0.5, (y0 + y1) * 0.5, z), mat, Vector3.ZERO, true, 0.0)
@@ -302,6 +317,12 @@ func _furniture() -> void:
 	_spare_desk(g, Vector3(3.05, 0, D - 0.48))
 	# job board by the house door
 	job_board(g, Vector3(1.75, 1.45, -D + 0.01), 0.0, "garage_jobs")
+	# clip lamp over the job board
+	var cl := kit.node(g, Vector3(1.75, 2.05, -D + 0.12), 0.0, "ClipLamp")
+	kit.cyl(cl, 0.05, 0.09, Vector3(0, 0, 0.04), Mats.m("metal_red"), Vector3(-60, 0, 0), 12)
+	kit.mesh(cl, Meshes.sphere(0.022, 8), Vector3(0, -0.03, 0.07), Mats.glow(Color(1.0, 0.75, 0.45), 8.0), Vector3.ZERO, false)
+	var jl := kit.spot(cl, Vector3(0, -0.03, 0.08), Vector3(0, -0.6, -0.08), Color(1.0, 0.75, 0.45), 2.2, 1.6, 60.0, false, 0.4)
+	jl.position = Vector3(0, -0.03, 0.08)
 	# shipping corner: pallet + taped floor + stencil, inside the roll-up door on the left
 	_shipping_corner(g)
 	# rug
@@ -407,23 +428,6 @@ func _clutter() -> void:
 	# extension reel
 	kit.cyl(g, 0.16, 0.12, Vector3(-0.4, 0.06, -1.25), Mats.m("plastic_orange", Color(0.7, 0.7, 0.7)), Vector3(0, 0, 0), 14)
 	kit.cyl(g, 0.17, 0.02, Vector3(-0.4, 0.13, -1.25), Mats.m("plastic_black"), Vector3.ZERO, 14)
-	# old bicycle hanging on the left wall front (just a frame silhouette)
-	var bike := kit.node(g, Vector3(-W + 0.18, 1.7, 2.9), 90.0)
-	for s in [-0.45, 0.45]:
-		var wheel := MeshInstance3D.new()
-		var tm := TorusMesh.new()
-		tm.inner_radius = 0.28
-		tm.outer_radius = 0.31
-		tm.rings = 20
-		tm.ring_segments = 6
-		wheel.mesh = tm
-		wheel.material_override = Mats.m("rubber")
-		wheel.position = Vector3(s, 0, 0)
-		wheel.rotation_degrees.x = 90
-		bike.add_child(wheel)
-	kit.box(bike, Vector3(0.9, 0.03, 0.03), Vector3(0, 0.12, 0), Mats.m("metal_blue", Color(1.4, 1.4, 1.4)), Vector3(0, 0, -8), false, 0.008)
-	kit.box(bike, Vector3(0.03, 0.45, 0.03), Vector3(-0.05, 0.0, 0), Mats.m("metal_blue", Color(1.4, 1.4, 1.4)), Vector3(0, 0, 25), false, 0.008)
-	kit.box(bike, Vector3(0.6, 0.03, 0.03), Vector3(0.1, -0.12, 0), Mats.m("metal_blue", Color(1.4, 1.4, 1.4)), Vector3(0, 0, 30), false, 0.008)
 	# clock above the house door
 	var clock := kit.node(g, Vector3(1.6, 2.45, -D + 0.02), 0.0)
 	kit.cyl(clock, 0.16, 0.04, Vector3.ZERO, Mats.m("plastic_white"), Vector3(90, 0, 0), 20)
@@ -559,6 +563,23 @@ func _attic() -> void:
 	kit.box(g, Vector3(0.8, 0.55, 0.6), Vector3(W - 0.6, fy + 0.275, D - 0.5), Mats.m("cardboard", Color(0.9, 0.85, 0.8)), Vector3(0, 4, 0), true, 0.02)
 	kit.box(g, Vector3(0.7, 0.45, 0.55), Vector3(W - 0.55, fy + 0.78, D - 0.48), Mats.m("cardboard"), Vector3(0, -6, 0), true, 0.02)
 	kit.label(g, "XMAS", Vector3(W - 0.55, fy + 0.8, D - 0.765), 60, Color(0.1, 0.1, 0.1), Vector3(0, 174, 0), 0.0016, true)
+	# old bicycle leaning in the attic (just a frame silhouette)
+	var bike := kit.node(g, Vector3(-1.2, Loft.FLOOR_Y + 0.33, D - 0.35), 0.0)
+	for s in [-0.45, 0.45]:
+		var wheel := MeshInstance3D.new()
+		var tm := TorusMesh.new()
+		tm.inner_radius = 0.28
+		tm.outer_radius = 0.31
+		tm.rings = 20
+		tm.ring_segments = 6
+		wheel.mesh = tm
+		wheel.material_override = Mats.m("rubber")
+		wheel.position = Vector3(s, 0, 0)
+		wheel.rotation_degrees.x = 90
+		bike.add_child(wheel)
+	kit.box(bike, Vector3(0.9, 0.03, 0.03), Vector3(0, 0.12, 0), Mats.m("metal_blue", Color(1.4, 1.4, 1.4)), Vector3(0, 0, -8), false, 0.008)
+	kit.box(bike, Vector3(0.03, 0.45, 0.03), Vector3(-0.05, 0.0, 0), Mats.m("metal_blue", Color(1.4, 1.4, 1.4)), Vector3(0, 0, 25), false, 0.008)
+	kit.box(bike, Vector3(0.6, 0.03, 0.03), Vector3(0.1, -0.12, 0), Mats.m("metal_blue", Color(1.4, 1.4, 1.4)), Vector3(0, 0, 30), false, 0.008)
 	# old armchair under a dust sheet
 	kit.box(g, Vector3(0.9, 0.85, 0.85), Vector3(W - 0.7, fy + 0.42, 1.0), Mats.m("fabric", Color(2.2, 2.2, 2.1)), Vector3(0, -12, 0), true, 0.15)
 
@@ -619,8 +640,8 @@ func _staff_slots() -> void:
 	add_slot("design", Vector3(-2.15, 0, -2.42), 180.0, "stand_assemble")
 	add_slot("design", Vector3(-3.15, 0, -2.42), 180.0, "stand_assemble")
 	# research: at the whiteboard on the left wall
-	add_slot("research", Vector3(-3.3, 0, 1.35), -90.0, "stand_scribble")
-	add_slot("research", Vector3(-3.05, 0, 2.25), -110.0, "stand_think")
+	add_slot("research", Vector3(-3.5, 0, 1.4), -90.0, "stand_scribble")
+	add_slot("research", Vector3(-3.0, 0, 2.3), -115.0, "stand_think")
 	# assembly: hand-assembly bench (upstairs line operators are added by staff_slots())
 	add_slot("assembly", Vector3(0.6, 0, -0.88), 180.0, "stand_assemble")
 	add_slot("assembly", Vector3(1.4, 0, -0.88), 180.0, "stand_assemble")
@@ -662,10 +683,10 @@ func _viewpoints() -> void:
 	kit.viewpoint(self, "window", Vector3(0.9, 1.55, 0.2), Vector3(2.6, 1.45, 3.6), 70.0)
 	kit.viewpoint(self, "beam", Vector3(-0.8, 1.7, -0.5), Vector3(1.6, 0.4, 2.2), 75.0)
 	kit.viewpoint(self, "back", Vector3(-1.5, 1.6, -2.4), Vector3(1.5, 1.0, 3.0), 75.0)
-	kit.viewpoint(self, "build", Vector3(-2.45, 1.45, -2.2), Vector3(-2.65, 0.95, -3.15), 62.0)
-	kit.viewpoint(self, "whiteboard", Vector3(-2.2, 1.6, 1.75), Vector3(-4.0, 1.45, 1.7), 68.0)
+	kit.viewpoint(self, "build", Vector3(-1.3, 1.5, -1.75), Vector3(-2.6, 0.95, -3.2), 60.0)
+	kit.viewpoint(self, "whiteboard", Vector3(-1.75, 1.75, 1.0), Vector3(-4.0, 1.4, 1.75), 66.0)
 	kit.viewpoint(self, "loft", Vector3(3.3, H + 1.85, -2.6), Vector3(-1.5, H + 0.6, 1.2), 74.0)
 	kit.viewpoint(self, "van", Vector3(-0.4, 1.7, 1.2), Vector3(-1.6, 0.9, 5.4), 72.0)
-	kit.viewpoint(self, "staff", Vector3(3.2, 2.2, 3.1), Vector3(-1.6, 0.7, -1.4), 78.0)
-	kit.viewpoint(self, "hatch", Vector3(2.0, 1.55, 1.4), Vector3(3.5, 2.3, -1.1), 70.0)
+	kit.viewpoint(self, "staff", Vector3(2.6, 2.45, 3.25), Vector3(-1.2, 0.6, -1.2), 80.0)
+	kit.viewpoint(self, "hatch", Vector3(1.7, 1.6, 0.35), Vector3(3.5, 2.5, -1.15), 70.0)
 	kit.viewpoint(self, "jobs", Vector3(1.75, 1.5, -2.2), Vector3(1.75, 1.45, -3.5), 60.0)

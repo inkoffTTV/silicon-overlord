@@ -179,9 +179,9 @@ func _crt_head() -> void:
 	var hat_m := Mats.m("plastic_white", Color.WHITE, {"albedo": hc, "albedo2": hc.darkened(0.2), "roughness_base": 0.35, "grime": 0.25})
 	var hat := _pivot(head, Vector3(0, 0.44, 0.0))
 	hat.rotation_degrees = Vector3(-4, 0, 5)
-	_mesh(hat, Meshes.sphere(0.25, 16), Vector3(0, 0.0, 0), hat_m, Vector3(1.0, 0.62, 0.95))
-	_mesh(hat, Meshes.cyl(0.3, 0.025, 20), Vector3(0, -0.005, 0.02), hat_m, Vector3(1.0, 1.0, 1.05))
-	_box(hat, Vector3(0.05, 0.13, 0.35), Vector3(0, 0.13, 0), hat_m, 0.02)  # ridge
+	_mesh(hat, Meshes.sphere(0.235, 16), Vector3(0, 0.0, 0), hat_m, Vector3(1.0, 0.72, 0.95))
+	_mesh(hat, Meshes.cyl(0.255, 0.025, 20), Vector3(0, -0.005, 0.03), hat_m, Vector3(1.0, 1.0, 1.1))
+	_box(hat, Vector3(0.05, 0.14, 0.36), Vector3(0, 0.12, 0), hat_m, 0.02)  # ridge
 	_box(hat, Vector3(0.09, 0.06, 0.04), Vector3(0, 0.06, 0.235), Mats.m("plastic_black"), 0.012)
 	var lamp := _mesh(hat, Meshes.cyl(0.022, 0.012, 10), Vector3(0, 0.06, 0.258), Mats.glow(Color(1.0, 0.92, 0.7), 6.0))
 	lamp.rotation_degrees.x = 90
@@ -432,7 +432,7 @@ func _face(delta: float) -> void:
 			# syllable-ish rhythm with a little noise
 			open = clampf(0.5 + 0.5 * sin(_t * 17.0) * sin(_t * 5.3 + 1.0) + _rng.randf_range(-0.2, 0.2), 0.0, 1.0)
 		if head_style == "crt":
-			mouth.scale = Vector3(1.0 - open * 0.25, 1.0 + open * 3.5, 1.0)
+			mouth.scale = Vector3(1.0 - open * 0.45, 1.0 + open * 3.0, 1.0)
 			if face_mat:
 				face_mat.emission_energy_multiplier = 1.0 + open * 0.8
 		else:
