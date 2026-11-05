@@ -11,8 +11,9 @@ PHONE_SLOTS = {"SoC": "soc_arm_g1_plus", "RAM": "ram_lp4x_g1", "Storage": "ufs_g
 
 
 class Client:
-    def __init__(self, url, name="Tester"):
+    def __init__(self, url, name="Tester", local_ip=None):
         self.url = url
+        self.local_ip = local_ip  # e.g. "127.0.0.9": connect from another loopback address (per-IP limit tests)
         self.name = name
         self.ws = None
         self.state = None
@@ -34,7 +35,8 @@ class Client:
         self.closed = False
 
     async def connect(self):
-        self.ws = await connect(self.url, max_size=None)
+        kw = {"local_addr": (self.local_ip, 0)} if self.local_ip else {}
+        self.ws = await connect(self.url, max_size=None, **kw)
         self._reader = asyncio.ensure_future(self._read())
         return self
 

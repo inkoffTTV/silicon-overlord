@@ -111,7 +111,7 @@ func _check_menu(ui: Node, tag: String) -> void:
 	var keep: Dictionary = Game.state
 	Game.apply_snapshot({})
 	await frames(2)
-	for page in ["home", "play", "new", "create", "join", "settings"]:
+	for page in ["home", "play", "new", "create", "join", "settings", "account"]:
 		ui.menu.show_page(page)
 		await frames(3)
 		_check_all(ui, "%s menu %s" % [tag, page], false)

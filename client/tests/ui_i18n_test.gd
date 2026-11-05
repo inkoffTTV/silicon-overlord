@@ -221,7 +221,7 @@ func _story_all_langs(ui: Node) -> void:
 				if str(stp.get("objective", "")) == "":
 					missing.append(str(stp.get("id", "")))
 		check(missing.is_empty(), "%s story texts: %s" % [lang, str(missing.slice(0, 4))])
-		for page in ["home", "play", "new", "create", "join", "settings"]:
+		for page in ["home", "play", "new", "create", "join", "settings", "account"]:
 			ui.menu.show_page(page)
 			await frames(2)
 			_check_onscreen(ui, "%s menu %s" % [lang, page])

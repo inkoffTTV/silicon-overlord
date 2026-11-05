@@ -41,24 +41,30 @@ Passing a loop name to `play()` with a Node3D starts `loop()`; music/ambient nam
 - **Ducking**: while anyone speaks, Music ducks by 8 dB and Ambient by ~3 dB (smooth).
 
 ## Spoken chat details (client/audio/voice.gd)
-- Engine: `voice_mode = "tts"` → OS text-to-speech (`DisplayServer.tts_*`, Windows SAPI / macOS / speech-dispatcher)
+- **Default engine since 0.3.1: the character voice** (`voice_mode = "character"`): Piper TTS + robot-radio effect chain,
+  3D on the avatar, per-player pitch — see **docs/VOICE.md** (files, licences, fallbacks, updater, tests).
+  Fallback chain: character voice → OS TTS → robot blips. `Sfx.test_voice(text, lang)`, `Sfx.voice_status()`.
+- Engine `voice_mode = "tts"` → OS text-to-speech (`DisplayServer.tts_*`, Windows SAPI / macOS / speech-dispatcher)
   when available and a voice exists for the line's language; otherwise the **robot voice** (pitched syllable blips,
   Animal-Crossing style, `voice_blip_*` files). `"robot"` forces it, `"off"` mutes voices.
   OS TTS needs `audio/general/text_to_speech=true` in project.godot (requested from the lead in docs/REQUESTS.md);
   without it the robot voice is used.
 - Language: Cyrillic → `ru` (`uk` if it has і ї є ґ), kana → `ja`, Han → `zh`, Hangul → `ko`; Latin text → guessed
   from special letters (ş/ğ/ı → tr, ł/ś/ż → pl, ã/õ → pt, ñ/¿/¡ → es, ä/ö/ü/ß → de, è/ê/ç → fr), else the game
-  language if it is a Latin-script one, else `en`; no letters → game language. `Sfx.speak(..., lang)` forces a code.
+  language if it is a Latin-script one, else `en`; other scripts → `el` (Greek), `ar`, `he`, `th`, `hy`, `ka`, `hi`…
+  (OS voice or robot, never the character voice); no letters → game language. `Sfx.speak(..., lang)` forces a code.
 - OS voice: `[audio] voice_<lang>` (chosen in the settings panel) if set, else one picked per user among that
   language's voices; `uk` falls back to Russian voices and Latin-script languages to English ones; none → robot.
 - Per user (hash of userId, stable): TTS pitch 0.7–1.45, rate 0.9–1.3, which OS voice of the language, robot pitch.
-- Volume: full within 4 m of the camera, quadratic fade to silent at 30 m (computed when the line starts).
+- Volume: full within 4 m of the camera, quadratic fade to silent at 30 m (computed when the line starts; the 3D
+  character voice follows the same curve every frame via `voice.char_volume_db()`).
   OS TTS gets volume × voice × master (it bypasses Godot buses); the robot voice plays on the Voice bus.
 - Each speaker has a queue (max 4 waiting lines, 200 chars per line). Robot voices of different players can overlap;
   OS TTS says one line at a time, so TTS lines of different speakers wait for each other.
 
 ## Buses (created in code at startup)
 `Master` → `Music`, `SFX`, `UI`, `Voice`, `Ambient` (Ambient is a child of SFX so the SFX slider controls it too).
+Character voices add `VoiceFx0..7` (→ `Voice`) on first use, one per speaker (docs/VOICE.md).
 
 ## Settings — `user://settings.cfg` section `[audio]` (defaults are written on first start)
 | key | type | default | meaning |
@@ -68,7 +74,8 @@ Passing a loop name to `play()` with a Node3D starts `loop()`; music/ambient nam
 | sfx | float 0..1 | 0.8 | World sounds + ambience |
 | ui | float 0..1 | 0.7 | UI clicks |
 | voice | float 0..1 | 0.9 | Spoken chat |
-| voice_mode | String | "tts" | "tts" (OS text-to-speech, falls back to robot when unavailable) / "robot" (blah-blah voice) / "off" |
+| voice_mode | String | "character" | "character" (docs/VOICE.md) / "tts" (OS text-to-speech, falls back to robot when unavailable) / "robot" (blah-blah voice) / "off". 0.3.0's default "tts" is migrated once (voice_rev) |
+| voice_pitch | float 0.5..2 | 1.0 | your character voice pitch |
 | voice_<lang> | String | (none) | OS voice id for that language (`voice_ru`, `voice_en`…), "" = automatic per user |
 
 The UI settings panel writes these keys (e.g. with `Prefs.set_setting("audio", "music", 0.4)`); Sfx notices the file change
@@ -179,5 +186,7 @@ python3 client/audio/gen/make_audio.py              # all (≈2 min)
 python3 client/audio/gen/make_audio.py click menu   # re-encode only these names (bank_data.gd is always rewritten)
 <godot> --headless --path client --import            # create .import files for new files
 <godot> --headless --path client -s tests/audio_smoke.gd
+<godot> --headless --path client -s tests/audio_voice_test.gd   # character voice (docs/VOICE.md)
+python3 client/tests/audio_release_test.py                      # voice packaging / licences / download link
 ```
 Add a new sound by writing a generator snippet that calls `emit(kind, name, [variants], peak_db)`.

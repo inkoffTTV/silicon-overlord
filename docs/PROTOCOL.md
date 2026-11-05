@@ -73,6 +73,22 @@ Everything below the table keeps working as written; these are additions/clarifi
     - New `notify.key`s `story.*` (step done, chapter card, investor, complete, skipped, repair new/paid); `notify` may
       also carry `paramKeys` / `bodyParamKeys` set by the server.
 
+21. **Accounts** (docs/ACCOUNTS.md; fully backward compatible — a client that never sends these keeps using its
+    device token exactly as before):
+    - `welcome.account` = `{username}` or `null`. Device tokens are now stored hashed and a player may have several
+      (several PCs). `hello` is unchanged.
+    - New lobby `act` actions (allowed right after `hello`; login / logout / redeem only outside a company):
+      `accountStatus`, `accountRegister`, `accountLogin`, `accountLogout`, `accountChangePassword`, `accountDelete`,
+      `transferCreate`, `transferRedeem` — payloads in docs/ACTIONS.md "Accounts". Passwords are never sent: `key` =
+      PBKDF2-HMAC-SHA256(password, "silicon-overlord:" + lowercase(username), 100000) as 64 hex chars.
+    - Login / logout / transfer redeem switch the player of this socket: the server sends a fresh **`welcome`**
+      (new playerId, token, name, lastCompany, account) and then the `res`. If that player was online elsewhere the
+      other socket gets `left {reason:"replaced"}`.
+    - Errors: login always `"Wrong username or password"`; lockouts `"Too many attempts. Try again in {s} s"` with
+      `errorKey "err.account_locked"`, `errorParams {s}`. `accountRegister` attempts (also "That username is taken"),
+      `accountChangePassword` / `accountDelete` (also with the right key) and `transferRedeem` attempts are capped
+      too (table in docs/ACCOUNTS.md "Rate limits"); a username is never locked for everyone. Wire format unchanged.
+
 Endpoint: `ws://<host>:7350/ws` (later `wss://` behind a reverse proxy). One JSON object per frame,
 field `t` = message type. Numbers are JSON numbers; Lua maps with non-string keys are sent with string keys.
 
@@ -96,7 +112,7 @@ publishBlueprint, launchProduct, setPrice, hire, buildRoom, upgradeHQ, ...) with
 ## Server → client
 | t | fields |
 |---|---|
-| welcome | playerId:int, token:String, name |
+| welcome | playerId:int, token:String, name, lastCompany, account:{username}\|null |
 | joined | code, companyId, you:{userId, role}, members:[{userId,name,color,role,online}] |
 | snapshot | state: full CompanyState |
 | sections | data:{sectionKey: value} — top-level CompanyState keys that changed (replace whole key) |

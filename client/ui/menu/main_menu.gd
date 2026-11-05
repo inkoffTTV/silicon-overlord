@@ -16,6 +16,7 @@ const Settings := preload("res://ui/menu/settings_panel.gd")
 const LangPicker := preload("res://ui/lib/lang_picker.gd")
 const Backdrop := preload("res://ui/menu/title_backdrop.gd")
 const SD := preload("res://ui/story/story_data.gd")
+const AccountPanel := preload("res://ui/menu/account_panel.gd")
 
 signal language_changed(lang: String)
 signal enter_started(title: String, sub: String, color: Color)
@@ -65,6 +66,10 @@ var _upd_t := 0.0
 var _nick_label: Label
 var _nick_avatar_box: CenterContainer
 var _nick_pop: PanelContainer
+var _acct_label: Label
+var _acct_caption: Label
+var _acct_icon: Control
+var _account_panel: Node
 var _home_items: VBoxContainer
 var _slots_box: VBoxContainer
 var _companies: Array = []
@@ -92,6 +97,7 @@ func _ready() -> void:
 		_refresh_companies()
 		_rebuild_home_items())
 	Net.left_company.connect(func(_r: String) -> void: _refresh_companies())
+	Net.account_changed.connect(_update_account_chip)
 	_on_net_status(Net.status, Net.detail)
 	_update_updater()
 	show_page("home")
@@ -134,6 +140,7 @@ func _build() -> void:
 	_pages["create"] = _page_create()
 	_pages["join"] = _page_join()
 	_pages["settings"] = _page_settings()
+	_pages["account"] = _page_account()
 	for k in _pages:
 		var p: Control = _pages[k]
 		p.visible = false
@@ -220,6 +227,24 @@ func _build_top_right() -> void:
 	h.offset_right = -36
 	h.offset_top = 30
 	add_child(h)
+	# account chip (docs/ACCOUNTS.md): guest / username -> the Account page
+	var ah := U.hbox(10)
+	_acct_icon = U.icon("user", U.WARNING, 18)
+	ah.add_child(_acct_icon)
+	var av := U.vbox(-2)
+	_acct_caption = U.caps(L.t("ACCOUNT"), U.MUTED, 10)
+	av.add_child(_acct_caption)
+	_acct_label = U.clip("", U.MD, U.TEXT, "bold")
+	_acct_label.custom_minimum_size.x = 60
+	av.add_child(_acct_label)
+	ah.add_child(av)
+	var achip := U.content_btn(ah, "BtnGhost", Vector2(12, 6))
+	achip.add_theme_stylebox_override("normal", U.sbox(Color(0.04, 0.05, 0.09, 0.72), 12, Color(U.BORDER, 0.8), 1, 10, 6))
+	achip.tooltip_text = L.t("Account: play your companies on any PC")
+	achip.set_meta("account_chip", true)
+	achip.pressed.connect(func() -> void: show_page("account"))
+	h.add_child(achip)
+	_update_account_chip()
 	# nickname chip
 	var ch := U.hbox(10)
 	_nick_avatar_box = CenterContainer.new()
@@ -788,6 +813,29 @@ func _page_settings() -> Control:
 	v.add_child(save)
 	return v
 
+func _page_account() -> Control:
+	var v := U.vbox(12)
+	v.add_child(_page_header(L.t("Account"), "home"))
+	var p := AccountPanel.new()
+	_account_panel = p
+	var sc := U.scroll(U.margin(p, 0, 0, 10, 0))
+	v.add_child(sc)
+	return v
+
+func _update_account_chip() -> void:
+	if _acct_label == null:
+		return
+	var logged: bool = Net.is_logged_in()
+	_acct_label.text = Net.account_name if logged else L.t("Guest")
+	_acct_label.add_theme_color_override("font_color", U.TEXT if logged else U.WARNING)
+	_acct_caption.text = U.upper(L.t("ACCOUNT"))
+	_acct_icon.set("icon", "user" if logged else "warning")
+	_acct_icon.set("color", U.SUCCESS if logged else U.WARNING)
+
+## Tests / screenshots: the account panel of the title menu.
+func account_panel() -> Node:
+	return _account_panel
+
 func rebuild_settings() -> void:
 	if _settings:
 		_settings.call("show_tab", Settings.last_tab)
@@ -969,7 +1017,7 @@ func _set_logo_compact(on: bool) -> void:
 	U.fade_in(_logo, 0.25)
 
 static func _depth(p: String) -> int:
-	return {"home": 0, "play": 1, "settings": 1, "credits": 1, "new": 2, "join": 2, "create": 3}.get(p, 0)
+	return {"home": 0, "play": 1, "settings": 1, "account": 1, "credits": 1, "new": 2, "join": 2, "create": 3}.get(p, 0)
 
 func _focus_page(p: String) -> void:
 	if not is_inside_tree() or page != p or not is_visible_in_tree():
@@ -1000,6 +1048,9 @@ func _focus_page_now(p: String) -> void:
 				_code_edit.grab_focus()
 		"settings":
 			_focus_first(_pages["settings"])
+		"account":
+			if _account_panel:
+				_account_panel.call("focus_first")
 
 func _focus_first(root_c: Node) -> void:
 	if root_c == null or not root_c.is_inside_tree():
@@ -1027,6 +1078,9 @@ func _intro_anim() -> void:
 func go_back() -> bool:
 	if _nick_pop.visible:
 		_close_nick()
+		return true
+	if page == "account" and _account_panel and _account_panel.call("go_back"):
+		_sfx("back")
 		return true
 	match page:
 		"home":
@@ -1218,7 +1272,7 @@ func _on_net_status(status: String, _detail: String) -> void:
 			col = U.SUCCESS
 			txt = L.t("Online")
 	_conn_dot.set("color", col)
-	var server := L.t("Official server") if Net.url == Prefs.DEFAULT_URL else Net.url.trim_prefix("ws://").trim_prefix("wss://").trim_suffix("/ws")
+	var server := L.t("Server: Stockholm") if Net.url == Prefs.DEFAULT_URL else Net.url.trim_prefix("ws://").trim_prefix("wss://").trim_suffix("/ws")
 	_conn_label.text = "%s · %s" % [server, txt]
 	_retry_btn.visible = status == "offline"
 
@@ -1297,7 +1351,7 @@ func debug_page(p: String) -> void:
 			_preview_sign()
 		"join":
 			_code_edit.text = "KQ7-4XM"
-			_show_status(L.f("Can't reach the server at {url}. Is it running? Check the address in Settings.", {"url": Net.url}), true)
+			_show_status(L.t("Can't reach the server. Check your internet connection and try again."), true)
 
 ## The big item buttons of the home page (tests).
 func home_items() -> Array:

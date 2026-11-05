@@ -405,3 +405,19 @@ cash is at least the quick-start amount), credit line 1 000 000, the rest of the
 | daily gift | `claimDaily {}` → `{reward:{name, kind, amount}, dayIndex, streak, detail, streakBonus}`; kinds `cash` / `rp` / `mystery` / `influencer` / `gold`. Once per real (UTC) day per company; one missed day per week keeps the streak; error `"Already claimed today"` (`err.already_claimed_today`). Button state: claimable when `state.daily.lastClaimUnix` is 0 or on an earlier UTC day; next gift = `daily.dayIndex` (1..7, `shared-luau/Data/DailyRewards.luau`) | any member, any time (also during the story) |
 | goals / missions / challenges | as before (goal rewards, token-shop items, research challenge credit) | — |
 The `research` section is replicated on every day the points change.
+
+## Accounts — lobby actions (docs/ACCOUNTS.md)
+Sent as `act` like `listMyCompanies`; no company needed. `key` / `oldKey` / `newKey` = 64 lowercase hex chars,
+PBKDF2-HMAC-SHA256(password, "silicon-overlord:" + lowercase(username), 100000) — never the password itself.
+`kdf` is optional (`"pbkdf2-sha256-100000"`, the only value accepted).
+
+| action | args | data | notes |
+|---|---|---|---|
+| accountStatus | `{}` | `{account: {username, created} \| null, devices, companies}` | |
+| accountRegister | `{username, key, kdf?}` | `{username, token}` | links the current player (+ companies); rotates this device token (store `token`). Errors: `"You already have an account"`, `"That username is taken"`, `"Username: 3-20 letters, digits or _"`, `"Username: use Latin or Cyrillic letters, not both"`, `"Bad password key"`, lockout |
+| accountLogin | `{username, key, kdf?}` | `{username, guestKept}` | lobby only. Sends `welcome` (account's player, new token) before `res`. `guestKept`: this PC's previous guest (with companies) keeps its token — keep it for `accountLogout.guestToken`. Error always `"Wrong username or password"` (or lockout) |
+| accountLogout | `{guestToken?}` | `{guest: true, restored}` | lobby only; revokes this token; `welcome` of the saved guest (`restored: true`) or a new guest |
+| accountChangePassword | `{oldKey, newKey}` | `{signedOut}` | `"Wrong password"`; other devices are signed out |
+| accountDelete | `{key}` | `{signedOut}` | erases the credentials; player + companies stay on this PC as a guest |
+| transferCreate | `{}` | `{code: "ABCD-EFGH", expiresIn: 600}` | guests too; one live code per player; 5 per 10 min |
+| transferRedeem | `{code}` | `{username \| null, guestKept, same?}` | lobby only; single use, 10 min; `welcome` of that player before `res`. Error `"Wrong or expired code"` (5 per minute per IP, then lockout) |

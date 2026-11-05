@@ -6,6 +6,7 @@ drained and turned into frames (sections / notify / snapshot / profile / left / 
 state is never observed half-way. Each connection has an outgoing queue + writer task (ordering, back-pressure).
 """
 import asyncio
+import concurrent.futures
 import json
 import logging
 import math
@@ -21,6 +22,7 @@ from .lua_host import LuaHost, LuaError
 from .convert import lua_to_py
 from .store import Store
 from .locale import Locale
+from . import accounts as acc
 
 log = logging.getLogger("server")
 
@@ -29,7 +31,10 @@ MAX_MESSAGE_BYTES = 64 * 1024
 CODE_ALPHABET = "ABCDEFGHJKMNPQRSTUVWXYZ23456789"   # room codes (PROTOCOL.md)
 INVITE_ALPHABET = CODE_ALPHABET + "L"                  # GovernanceService.makeCode (personal invites) also uses L
 SPEEDS = (0, 1, 2, 4, 8)
-LOBBY_ACTIONS = ("listMyCompanies",)   # act names handled in Python without a company (iteration 3)
+# act names handled in Python without a company (iteration 3; accounts: docs/ACCOUNTS.md)
+ACCOUNT_ACTIONS = ("accountStatus", "accountRegister", "accountLogin", "accountLogout", "accountChangePassword",
+                   "accountDelete", "transferCreate", "transferRedeem")
+LOBBY_ACTIONS = ("listMyCompanies",) + ACCOUNT_ACTIONS
 MEMBER_COLORS = ["#4FC3F7", "#FFB74D", "#81C784", "#E57373", "#BA68C8", "#FFD54F", "#4DB6AC", "#F06292"]
 
 # limits
@@ -124,6 +129,13 @@ class Conn:
         self.closed = False
         self.last_create = -1e9
         self.addr = getattr(ws, "remote_address", None)
+        self.token_hash = None    # sha256 of the device token this connection said hello with
+        self.acct_busy = False    # an account action (scrypt) is running
+
+    @property
+    def ip(self):
+        a = self.addr
+        return str(a[0]) if isinstance(a, (tuple, list)) and a else str(a)
 
     def send(self, obj):
         if obj.get("t") in ("res", "error"):
@@ -174,6 +186,24 @@ class GameServer:
         self._server = None
         self.port = None
         self.stopping = False
+        # account rate limits (docs/ACCOUNTS.md "Rate limits"); tests may replace them.
+        # Nothing is locked per username alone: that would let anyone lock any account (password owner included).
+        self.login_ip = acc.Limiter(max_fail=5, window=60.0, base_lock=60.0)     # wrong logins per IP, never reset
+        self.login_pair = acc.Limiter(max_fail=5, window=60.0, base_lock=60.0)   # per (username, IP)
+        self.login_user_fails = acc.Counter(10, 600.0)       # per username, all IPs: only adds a delay (soft)
+        self.login_soft_delay = 1.0                          # seconds added to each login of a name under attack
+        self.login_ip_attempts = acc.Counter(30, 60.0)       # caps scrypt work per IP, failures or not
+        self.verify_pid = acc.Limiter(max_fail=5, window=60.0, base_lock=60.0)   # change password / delete
+        self.acct_ops = acc.Counter(5, 600.0)                # change password + delete per player, right or wrong
+        self.register_ip = acc.Counter(5, 600.0)             # accounts created per IP
+        self.register_probe_ip = acc.Counter(20, 600.0)      # register attempts per IP ("taken" answers count)
+        self.transfer_ip = acc.Limiter(max_fail=5, window=60.0, base_lock=60.0)  # wrong codes per IP, never reset
+        self.transfer_try_ip = acc.Counter(20, 600.0)        # redeem attempts per IP, right or wrong
+        self.transfer_new = acc.Counter(5, 600.0)            # codes created per player
+        # scrypt runs in small dedicated pools: logins / registrations, and the rare change-password / delete
+        # work, so neither can take all CPUs or starve the other
+        self._kdf_pool = concurrent.futures.ThreadPoolExecutor(max_workers=2, thread_name_prefix="kdf")
+        self._kdf_pool_slow = concurrent.futures.ThreadPoolExecutor(max_workers=1, thread_name_prefix="kdf-slow")
 
     # ------------------------------------------------------------------------------------------
     # Lua calls + outbox dispatch
@@ -483,7 +513,10 @@ class GameServer:
         else:
             name = name or player["name"]
             self.store.touch_player(player["id"], name)
-        pid = player["id"]
+        self._bind(conn, player["id"], name, player["token"])
+
+    def _bind(self, conn, pid, name, token):
+        """Makes conn the live connection of player pid (hello, or an account switch) and sends welcome."""
         old = self.players.get(pid)
         if old is not None and old is not conn:
             # same token connected again (reconnect / second window): the newest connection wins
@@ -498,9 +531,13 @@ class GameServer:
             asyncio.ensure_future(old.ws.close(1000, "replaced"))
         self.flush_profiles()
         conn.pid, conn.name = pid, name
+        conn.token_hash = acc.token_hash(token)
         self.players[pid] = conn
-        conn.send({"t": "welcome", "playerId": pid, "token": player["token"], "name": name,
-                   "lastCompany": player.get("last_company")})
+        account = self.store.account_of(pid)
+        # `account` is new (accounts): {username} or null; old clients ignore it
+        conn.send({"t": "welcome", "playerId": pid, "token": token, "name": name,
+                   "lastCompany": self.store.last_company(pid),
+                   "account": {"username": account["username"]} if account else None})
         self.lcall("connectPlayer", pid, name, self.lua.to_lua(self.store.load_profile(pid)))
         log.info("player %s (%s) connected from %s", pid, name, conn.addr)
 
@@ -674,6 +711,9 @@ class GameServer:
         if args is not None and not isinstance(args, dict):
             conn.send({"t": "res", "id": aid, "ok": False, "error": "args must be an object"})
             return
+        if action in ACCOUNT_ACTIONS:
+            asyncio.ensure_future(self._account_task(conn, aid, action, args or {}))
+            return
         try:
             data = self.list_my_companies(conn.pid)
         except Exception:
@@ -718,6 +758,281 @@ class GameServer:
             })
         out.sort(key=lambda r: (-(r["lastPlayed"] or 0), r["name"] or ""))
         return out
+
+    # ------------------------------------------------------------------------------------------
+    # accounts (docs/ACCOUNTS.md). Handlers are coroutines: scrypt runs in a worker thread.
+    # Never log args: they carry derived password keys and transfer codes.
+    # ------------------------------------------------------------------------------------------
+    async def _account_task(self, conn, aid, action, args):
+        if conn.acct_busy:
+            conn.send({"t": "res", "id": aid, "ok": False, "error": acc.ERR_BUSY})
+            return
+        conn.acct_busy = True
+        try:
+            fn = getattr(self, "_acct_" + action)
+            ok, data, switch = await fn(conn, args)
+        except Exception:
+            log.exception("account action %s failed (player %s)", action, conn.pid)
+            ok, data, switch = False, "Internal error", None
+        finally:
+            conn.acct_busy = False
+        if conn.closed:
+            return
+        if ok and switch is not None:
+            # identity switch (login, logout, transfer code): welcome with the new token first, then the answer
+            pid, token = switch
+            self._switch_player(conn, pid, token)
+        if ok:
+            frame = {"t": "res", "id": aid, "ok": True}
+            if data is not None:
+                frame["data"] = data
+        else:
+            frame = {"t": "res", "id": aid, "ok": False, "error": data}
+            if isinstance(data, str) and data.startswith("Too many attempts"):
+                frame["errorKey"] = "err.account_locked"
+                frame["errorParams"] = {"s": int(re.sub(r"\D", "", data) or 0)}
+        conn.send(frame)
+
+    def _switch_player(self, conn, pid, token):
+        old = conn.pid
+        if old is not None and self.players.get(old) is conn:
+            self.detach(conn, notify=False)
+            try:
+                self.lcall("disconnectPlayer", old)
+            except LuaError:
+                pass
+            self.players.pop(old, None)
+        player = self.store.player(pid)
+        self.store.touch_player(pid, player["name"])
+        self._bind(conn, pid, player["name"], token)
+
+    def _alive(self, conn, pid):
+        return not conn.closed and conn.pid == pid and self.players.get(pid) is conn
+
+    async def _scrypt(self, fn, *a, slow=False):
+        pool = self._kdf_pool_slow if slow else self._kdf_pool
+        return await asyncio.get_running_loop().run_in_executor(pool, fn, *a)
+
+    def _locked(self, *waits):
+        w = max(waits)
+        return acc.ERR_LOCKED.format(s=w) if w > 0 else None
+
+    @staticmethod
+    def _reserve(slots):
+        """acquire() on every (limiter, key) or on none. 0 when all reserved, else seconds to wait."""
+        got = []
+        for lim, key in slots:
+            w = lim.acquire(key)
+            if w:
+                for l2, k2 in got:
+                    l2.cancel(k2)
+                return w
+            got.append((lim, key))
+        return 0
+
+    def _guest_left_behind(self, conn):
+        """Before this PC switches to another player: what happens to the device token it used so far.
+        A guest with companies keeps its token (the client keeps it to come back on logout); anything else is
+        revoked (rotation: the old token on this PC stops working). Returns True when kept."""
+        pid = conn.pid
+        if self.store.account_of(pid) is None and self.list_my_companies(pid):
+            return True
+        if conn.token_hash:
+            self.store.revoke_device(conn.token_hash)
+        return False
+
+    async def _acct_accountStatus(self, conn, args):
+        a = self.store.account_of(conn.pid)
+        return True, {"account": {"username": a["username"], "created": int(a["created"])} if a else None,
+                      "devices": self.store.device_count(conn.pid),
+                      "companies": len(self.list_my_companies(conn.pid))}, None
+
+    async def _acct_accountRegister(self, conn, args):
+        pid = conn.pid
+        if self.store.account_of(pid):
+            return False, "You already have an account", None
+        username = args.get("username")
+        err = acc.username_error(username)
+        if err:
+            return False, err, None
+        key = args.get("key")
+        if not acc.valid_key(key) or args.get("kdf", acc.KDF_ID) != acc.KDF_ID:
+            return False, "Bad password key", None
+        # every attempt counts before the lookup: "taken" must not be a free username oracle
+        if not self.register_probe_ip.hit(conn.ip):
+            return False, acc.ERR_LOCKED.format(s=self.register_probe_ip.wait(conn.ip)), None
+        lc = acc.canonical(username)
+        if self.store.username_taken(lc, acc.skeleton(username)):
+            return False, "That username is taken", None
+        if not self.register_ip.hit(conn.ip):
+            return False, acc.ERR_LOCKED.format(s=self.register_ip.wait(conn.ip)), None
+        salt, h = await self._scrypt(acc.hash_key, key)
+        if not self._alive(conn, pid):
+            return False, "Connection changed", None
+        if not self.store.create_account(pid, username, lc, acc.KDF_ID, salt, h):
+            return False, "That username is taken", None
+        # rotate this device's token: the account is now the only way in, old copies of the guest token die
+        token = self.store.add_device(pid)
+        if conn.token_hash:
+            self.store.revoke_device(conn.token_hash)
+        conn.token_hash = acc.token_hash(token)
+        log.info("player %s registered account %s", pid, username)
+        return True, {"username": username, "token": token}, None
+
+    async def _acct_accountLogin(self, conn, args):
+        pid = conn.pid
+        if conn.room is not None:
+            return False, "Leave the company first", None
+        username, key = args.get("username"), args.get("key")
+        lc = acc.canonical(username)[:64]
+        ip = conn.ip
+        # the attempt is reserved (counted as a failure) before the await, so parallel requests cannot all pass
+        slots = [(self.login_ip, ip), (self.login_pair, (lc, ip))]
+        w = self._reserve(slots)
+        if w:
+            return False, acc.ERR_LOCKED.format(s=w), None
+        if not self.login_ip_attempts.hit(ip):
+            for lim, k in slots:
+                lim.cancel(k)
+            return False, acc.ERR_LOCKED.format(s=self.login_ip_attempts.wait(ip)), None
+        ok = False
+        try:
+            if self.login_user_fails.count(lc) >= self.login_user_fails.max_hits:
+                await asyncio.sleep(self.login_soft_delay)   # a name under attack: slower, never locked
+            a = self.store.account_by_username(lc) if lc else None
+            if a is not None and acc.valid_key(key) and a["kdf"] == args.get("kdf", acc.KDF_ID):
+                ok = await self._scrypt(acc.verify_key, key, a["salt"], a["hash"])
+            else:
+                await self._scrypt(acc.burn_time, key)
+        finally:
+            # the IP lock is never reset by a success (a login to your own account must not wipe the failures
+            # you made guessing other names); it only decays with time
+            self.login_ip.release(ip, ok)
+            self.login_pair.release((lc, ip), ok, reset=True)
+        if not ok:
+            self.login_user_fails.add(lc)
+            log.info("failed login from %s", ip)
+            return False, acc.ERR_LOGIN, None
+        if not self._alive(conn, pid) or conn.room is not None:
+            return False, "Connection changed", None
+        target = a["player_id"]
+        kept = False
+        if target == pid:
+            if conn.token_hash:
+                self.store.revoke_device(conn.token_hash)
+        else:
+            kept = self._guest_left_behind(conn)
+        token = self.store.add_device(target)
+        log.info("player %s logged in as %s (account player %s)", pid, a["username"], target)
+        return True, {"username": a["username"], "guestKept": kept}, (target, token)
+
+    async def _acct_accountLogout(self, conn, args):
+        pid = conn.pid
+        if conn.room is not None:
+            return False, "Leave the company first", None
+        if self.store.account_of(pid) is None:
+            return False, "You are not logged in", None
+        if conn.token_hash:
+            self.store.revoke_device(conn.token_hash)
+        conn.token_hash = None
+        # back to the guest profile this PC had before logging in (if the client kept it), else a fresh guest
+        gt = args.get("guestToken")
+        guest = self.store.player_by_token(gt) if isinstance(gt, str) and 0 < len(gt) <= 128 else None
+        if guest is not None and (guest["id"] == pid or self.store.account_of(guest["id"]) is not None):
+            guest = None
+        if guest is not None:
+            token, gid = gt, guest["id"]
+        else:
+            g = self.store.create_player(conn.name or "Player")
+            token, gid = g["token"], g["id"]
+        log.info("player %s logged out (now guest %s)", pid, gid)
+        return True, {"guest": True, "restored": guest is not None}, (gid, token)
+
+    async def _verify_current(self, conn, key):
+        """(account, None) when key is this account's current key, else (None, error)."""
+        a = self.store.account_of(conn.pid)
+        if a is None:
+            return None, "You are not logged in"
+        # Only someone holding a live token of this account gets here, so the limit is per player: failed logins
+        # from other IPs (an attack on the username) can never stop the owner from changing the password.
+        pid = conn.pid
+        if not self.acct_ops.hit(pid):
+            return None, acc.ERR_LOCKED.format(s=self.acct_ops.wait(pid))
+        w = self._reserve([(self.verify_pid, pid)])
+        if w:
+            return None, acc.ERR_LOCKED.format(s=w)
+        ok = False
+        try:
+            ok = acc.valid_key(key) and await self._scrypt(acc.verify_key, key, a["salt"], a["hash"], slow=True)
+        finally:
+            self.verify_pid.release(pid, ok, reset=True)
+        if not ok:
+            return None, "Wrong password"
+        return a, None
+
+    async def _acct_accountChangePassword(self, conn, args):
+        pid = conn.pid
+        new = args.get("newKey")
+        if not acc.valid_key(new):
+            return False, "Bad password key", None
+        a, err = await self._verify_current(conn, args.get("oldKey"))
+        if err:
+            return False, err, None
+        salt, h = await self._scrypt(acc.hash_key, new, slow=True)
+        if not self._alive(conn, pid):
+            return False, "Connection changed", None
+        self.store.set_password(pid, acc.KDF_ID, salt, h)
+        # every other device has to log in again with the new password
+        n = self.store.revoke_other_devices(pid, conn.token_hash)
+        self.store.drop_transfers(pid)
+        log.info("player %s changed the password (%d other devices signed out)", pid, n)
+        return True, {"signedOut": n}, None
+
+    async def _acct_accountDelete(self, conn, args):
+        pid = conn.pid
+        a, err = await self._verify_current(conn, args.get("key"))
+        if err:
+            return False, err, None
+        if not self._alive(conn, pid):
+            return False, "Connection changed", None
+        self.store.delete_account(pid)
+        n = self.store.revoke_other_devices(pid, conn.token_hash)
+        self.store.drop_transfers(pid)
+        log.info("player %s deleted account %s (%d other devices signed out)", pid, a["username"], n)
+        return True, {"signedOut": n}, None
+
+    async def _acct_transferCreate(self, conn, args):
+        pid = conn.pid
+        if not self.transfer_new.hit(pid):
+            return False, acc.ERR_LOCKED.format(s=self.transfer_new.wait(pid)), None
+        code = acc.new_transfer_code()
+        self.store.put_transfer(acc.token_hash(code), pid, time.time() + acc.TRANSFER_TTL)
+        log.info("player %s created a transfer code", pid)
+        return True, {"code": acc.format_transfer(code), "expiresIn": int(acc.TRANSFER_TTL)}, None
+
+    async def _acct_transferRedeem(self, conn, args):
+        pid = conn.pid
+        if conn.room is not None:
+            return False, "Leave the company first", None
+        ip = conn.ip
+        locked = self._locked(self.transfer_ip.check(ip))
+        if locked:
+            return False, locked, None
+        if not self.transfer_try_ip.hit(ip):
+            return False, acc.ERR_LOCKED.format(s=self.transfer_try_ip.wait(ip)), None
+        code = acc.normalize_transfer(args.get("code"))
+        target = self.store.take_transfer(acc.token_hash(code)) if code else None
+        if target is None or self.store.player(target) is None:
+            self.transfer_ip.fail(ip)
+            return False, acc.ERR_CODE, None
+        # no reset of transfer_ip on success: redeeming your own code must not wipe the wrong guesses
+        a = self.store.account_of(target)
+        if target == pid:
+            return True, {"username": a["username"] if a else None, "guestKept": False, "same": True}, None
+        kept = self._guest_left_behind(conn)
+        token = self.store.add_device(target)
+        log.info("player %s used a transfer code -> player %s", pid, target)
+        return True, {"username": a["username"] if a else None, "guestKept": kept}, (target, token)
 
     def on_speed(self, conn, msg):
         speed = msg.get("speed")
@@ -833,6 +1148,7 @@ class GameServer:
         last_minute = now()
         last_boards = now()
         last_stats = now()
+        last_legacy = now()
         while True:
             await asyncio.sleep(self.housekeeping_seconds)
             t = now()
@@ -850,6 +1166,11 @@ class GameServer:
                 if t - last_minute >= 60:
                     last_minute = t
                     self.lcall("minuteTick")
+                if t - last_legacy >= 3600:
+                    last_legacy = t
+                    n = self.store.scrub_legacy_tokens()
+                    if n:
+                        log.info("scrubbed %d legacy plaintext device tokens", n)
                 if t - last_stats >= self.stats_seconds:
                     last_stats = t
                     self.log_stats()
@@ -919,6 +1240,8 @@ class GameServer:
             except Exception:
                 pass
         self.store.close()
+        self._kdf_pool.shutdown(wait=False)
+        self._kdf_pool_slow.shutdown(wait=False)
         log.info("server stopped, all companies saved")
 
 

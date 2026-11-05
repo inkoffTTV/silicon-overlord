@@ -13,7 +13,11 @@ const Bank := preload("res://audio/bank_data.gd")
 const Voice := preload("res://audio/voice.gd")
 
 const SETTINGS := "user://settings.cfg"
-const DEFAULTS := {"master": 0.8, "music": 0.5, "sfx": 0.8, "ui": 0.7, "voice": 0.9, "voice_mode": "tts"}
+## Settings file actually read/written. Tests point it at a private file so parallel runs (other tests, a running
+## game) cannot change it under them; the game always uses SETTINGS.
+var settings_path := SETTINGS
+const DEFAULTS := {"master": 0.8, "music": 0.5, "sfx": 0.8, "ui": 0.7, "voice": 0.9, "voice_mode": "character", "voice_pitch": 1.0,
+	"voice_rev": 2}
 const BUSES := [["Music", "Master"], ["SFX", "Master"], ["UI", "Master"], ["Voice", "Master"], ["Ambient", "SFX"]]
 const KIND_BUS := {"ui": "UI", "sfx": "SFX", "loop": "SFX", "ambient": "Ambient", "music": "Music", "voice": "Voice"}
 const POOL_2D := 12
@@ -193,6 +197,19 @@ func speak(user_id: int, display_name: String, text: String, at: Variant = null,
 	if voice:
 		voice.speak(user_id, display_name, text, at, lang)
 
+## Settings "Test voice": your own voice (your pitch) saying a sample line in the given language.
+func test_voice(text: String, lang := "") -> void:
+	if voice:
+		var net := get_node_or_null("/root/Net")
+		var uid := int(net.get("player_id")) if net else 0
+		voice.speak(uid, "", text, null, lang)
+
+## {"character": bool (voice files found), "dir": String, "error": String} for the settings panel.
+func voice_status() -> Dictionary:
+	if voice == null or voice.tts == null:
+		return {"character": false, "dir": "", "error": ""}
+	return {"character": voice.tts.available, "dir": voice.tts.voice_dir, "error": voice.tts.last_error}
+
 ## Looping 3D emitter attached to `parent` (machine hum, conveyor, fluorescent tube...). Returns the player node
 ## (free it or call stop_loop to stop; freeing the parent stops it too). null for unknown names.
 func loop(sound: String, parent: Node3D, volume_db := 0.0) -> Node:
@@ -231,16 +248,22 @@ func _exit_tree() -> void:
 ## (Re)read user://settings.cfg [audio], writing defaults for missing keys, and apply bus volumes.
 func apply_settings() -> void:
 	var cfg := ConfigFile.new()
-	var err := cfg.load(SETTINGS)
+	var err := cfg.load(settings_path)
 	var dirty := false
+	# 0.3.0 wrote voice_mode "tts" as its default: move those players to the new character voice once
+	if err == OK and cfg.has_section("audio") and not cfg.has_section_key("audio", "voice_rev"):
+		if str(cfg.get_value("audio", "voice_mode", "")) == "tts":
+			cfg.set_value("audio", "voice_mode", "character")
+		cfg.set_value("audio", "voice_rev", 2)
+		dirty = true
 	for k in DEFAULTS:
 		if not cfg.has_section_key("audio", k):
 			cfg.set_value("audio", k, DEFAULTS[k])
 			dirty = true
 		settings[k] = cfg.get_value("audio", k, DEFAULTS[k])
 	if dirty or err != OK:
-		cfg.save(SETTINGS)
-	_settings_mtime = FileAccess.get_modified_time(SETTINGS)
+		cfg.save(settings_path)
+	_settings_mtime = FileAccess.get_modified_time(settings_path)
 	var lang := str(cfg.get_value("ui", "lang", ""))
 	if lang.length() < 2:
 		lang = OS.get_locale_language()
@@ -248,11 +271,12 @@ func apply_settings() -> void:
 		var pref := {}
 		if cfg.has_section("audio"):
 			for k in cfg.get_section_keys("audio"):
-				if k.begins_with("voice_") and k != "voice_mode":
+				if k.begins_with("voice_") and k not in ["voice_mode", "voice_pitch", "voice_rev"]:
 					pref[k.substr(6)] = str(cfg.get_value("audio", k, ""))
 		voice.preferred = pref
 		var vm := str(settings.voice_mode)
-		voice.mode = vm if vm in ["tts", "robot", "off"] else "tts"
+		voice.mode = vm if vm in voice.MODES else "character"
+		voice.own_pitch = clampf(float(settings.voice_pitch), 0.5, 2.0)
 		voice.volume = _vol("voice")
 		voice.master = _vol("master")
 		voice.game_lang = lang
@@ -326,7 +350,7 @@ func _process(dt: float) -> void:
 	_settings_check -= dt
 	if _settings_check <= 0.0:
 		_settings_check = 1.0
-		if FileAccess.file_exists(SETTINGS) and FileAccess.get_modified_time(SETTINGS) != _settings_mtime:
+		if FileAccess.file_exists(settings_path) and FileAccess.get_modified_time(settings_path) != _settings_mtime:
 			apply_settings()
 
 func _stream(path: String) -> AudioStream:
@@ -429,6 +453,8 @@ func _on_peers(list: Array) -> void:
 		voice.set_peer_positions(list)
 
 func _on_joined(_code: String) -> void:
+	if voice:
+		voice.prewarm()
 	music("game")
 	if ambient_name == "":
 		ambient("garage")

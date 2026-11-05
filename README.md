@@ -8,7 +8,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/inkoffTTV/silicon-overlord/raw/builds/SiliconOverlord.zip"><b>⬇ Скачать для Windows</b></a>
+  <a href="https://github.com/inkoffTTV/silicon-overlord/releases/latest/download/SiliconOverlord.zip"><b>⬇ Скачать для Windows</b></a>
   &nbsp;·&nbsp; <a href="#как-играть">Как играть</a>
   &nbsp;·&nbsp; <a href="#свой-сервер">Свой сервер</a>
   &nbsp;·&nbsp; <a href="#english">English</a>
@@ -39,7 +39,7 @@
 
 ## Как играть
 
-1. [Скачайте архив](https://github.com/inkoffTTV/silicon-overlord/raw/builds/SiliconOverlord.zip) и распакуйте его.
+1. [Скачайте архив](https://github.com/inkoffTTV/silicon-overlord/releases/latest/download/SiliconOverlord.zip) и распакуйте его.
 2. Запустите `SiliconOverlord.exe`. Файл `SiliconOverlord.pck` должен лежать рядом с ним.
    Если Windows покажет «Windows защитила компьютер», нажмите **Подробнее → Выполнить в любом случае**:
    у игры пока нет платной цифровой подписи.
@@ -87,5 +87,5 @@ garage, design phones in a 13-step studio with a live 3D model, launch them on s
 research 160 technologies and grow a company with your friends, who join with a room code.
 The Godot 4.5 client talks to an authoritative Python server that runs the game rules written in Luau.
 
-[Download for Windows](https://github.com/inkoffTTV/silicon-overlord/raw/builds/SiliconOverlord.zip) ·
+[Download for Windows](https://github.com/inkoffTTV/silicon-overlord/releases/latest/download/SiliconOverlord.zip) ·
 [Architecture](docs/ARCHITECTURE.md) · [Self-hosting](docs/DEPLOY.md)

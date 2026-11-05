@@ -10,6 +10,11 @@ extends Node
 ##      download its .pck, verify sha256 + size, record it in current.json and show a small "Restart now" banner.
 ##   3. If the remote build needs a different engine/runtime (manifest.engine != this engine), the banner offers the
 ##      full zip instead (opens the browser).
+##   4. Files that live NEXT TO the exe (the character voice: <exe dir>/voice/, docs/VOICE.md) never come with a .pck.
+##      version.json may carry "full_required_min" (oldest full-zip build that has everything the current pack
+##      expects) and "voice_version". The installed full build is read from voice/manifest.json ("build", "version");
+##      no manifest = a pre-voice zip (0.3.0) = "0.0.0". If it is older → the "full download needed" banner (zip).
+##      The .pck update still happens; the game works without the voice folder (OS voices / robot voice).
 ## Never runs in the editor, in headless runs, or when the feature tag "no_update" is present.
 
 signal update_ready(version: String)
@@ -18,7 +23,7 @@ const MANIFEST_URLS := [
 	"https://raw.githubusercontent.com/inkoffTTV/silicon-overlord/builds/version.json",
 	"https://github.com/inkoffTTV/silicon-overlord/raw/builds/version.json",
 ]
-const FULL_DOWNLOAD := "https://github.com/inkoffTTV/silicon-overlord/raw/builds/SiliconOverlord.zip"
+const FULL_DOWNLOAD := "https://github.com/inkoffTTV/silicon-overlord/releases/latest/download/SiliconOverlord.zip"
 const DIR := "user://updates"
 const CURRENT := "user://updates/current.json"
 
@@ -53,6 +58,27 @@ static func compare_versions(a: String, b: String) -> int:
 		if x != y:
 			return 1 if x > y else -1
 	return 0
+
+## What the installed full zip brought along (voice/manifest.json next to the exe): {"build": String, "version": int}.
+static func installed_full_info(voice_dir: String) -> Dictionary:
+	var path := voice_dir.path_join("manifest.json")
+	if voice_dir == "" or not FileAccess.file_exists(path):
+		return {"build": "0.0.0", "version": 0}
+	var m: Variant = JSON.parse_string(FileAccess.get_file_as_string(path))
+	if not (m is Dictionary):
+		return {"build": "0.0.0", "version": 0}
+	return {"build": str(m.get("build", "0.0.0")), "version": int(m.get("version", 0))}
+
+## True when the remote manifest says this install needs the full zip (see step 4 above).
+static func full_download_needed(remote_manifest: Dictionary, installed: Dictionary) -> bool:
+	var need := str(remote_manifest.get("full_required_min", ""))
+	if need != "" and compare_versions(str(installed.get("build", "0.0.0")), need) < 0:
+		return true
+	var vv := int(remote_manifest.get("voice_version", 0))
+	return vv > 0 and int(installed.get("version", 0)) < vv
+
+func _voice_dir() -> String:
+	return OS.get_executable_path().get_base_dir().path_join("voice")
 
 func _engine_tag() -> String:
 	var v := Engine.get_version_info()
@@ -110,24 +136,29 @@ func _check_remote() -> void:
 	if remote.is_empty():
 		return
 	var rv := str(remote.get("version", ""))
+	var full := full_download_needed(remote, installed_full_info(_voice_dir()))
 	if compare_versions(rv, current_version) <= 0:
+		if full:
+			_show_banner(rv, true)
 		return
 	if str(remote.get("engine", _engine_tag())) != _engine_tag():
 		_show_banner(rv, true)
 		return
 	var cur := _read_current()
 	if str(cur.get("version", "")) == rv and FileAccess.file_exists(str(cur.get("file", ""))):
-		_show_banner(rv, false)
+		_show_banner(rv, full)
 		return
 	var target := "%s/game_%s.pck" % [DIR, rv]
 	var ok := await _download_pack(str(remote.get("pck_url", "")), target, str(remote.get("pck_sha256", "")), int(remote.get("pck_size", 0)))
 	if not ok:
+		if full:
+			_show_banner(rv, true)
 		return
 	var f := FileAccess.open(CURRENT, FileAccess.WRITE)
 	f.store_string(JSON.stringify({"version": rv, "file": target, "engine": _engine_tag()}))
 	f.close()
 	update_ready.emit(rv)
-	_show_banner(rv, false)
+	_show_banner(rv, full)
 
 func _http_get(url: String, timeout: float) -> PackedByteArray:
 	var req := HTTPRequest.new()
@@ -209,7 +240,7 @@ func _show_banner(version: String, full_download: bool) -> void:
 	go.text = ("Скачать" if _ru() else "Download") if full_download else ("Перезапустить" if _ru() else "Restart now")
 	go.pressed.connect(func() -> void:
 		if full_download:
-			OS.shell_open(FULL_DOWNLOAD)
+			OS.shell_open(str(remote.get("zip_url", FULL_DOWNLOAD)) if str(remote.get("zip_url", "")).begins_with("https://") else FULL_DOWNLOAD)
 		else:
 			restart_now())
 	row.add_child(go)

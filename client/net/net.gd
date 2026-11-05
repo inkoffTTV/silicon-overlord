@@ -6,12 +6,17 @@ extends Node
 ##   var r := await Net.join("ABC-123")  /  await Net.resume()
 ##   var r := await Net.act("startResearch", {"techId": "arch_arm_2"})          # {ok, data?, error?}
 ##   Net.set_speed(2); Net.send_pos(pos, yaw, pitch, "walk"); Net.chat("hi"); Net.leave()
+##   Accounts (docs/ACCOUNTS.md), lobby only for login / logout / transfer redeem:
+##   await Net.account_register("Vasya", "password") / account_login(...) / account_logout() /
+##   account_change_password(old, new) / account_delete(password) / transfer_create() / transfer_redeem("ABCD-EFGH")
+##   Net.account_name ("" = guest), signal account_changed. The password is turned into a key here (net/kdf.gd).
 ##
 ## Feeds Game.apply_snapshot / apply_sections, Game.members / me / code, Bus.notify, Bus.peers_changed.
 ## Reconnects with backoff while in a company and resumes it with the saved token.
 
 const Prefs := preload("res://ui/lib/prefs.gd")
 const L := preload("res://ui/lib/loc.gd")
+const Kdf := preload("res://net/kdf.gd")
 
 signal status_changed(status: String, detail: String)
 signal joined_company(code: String)
@@ -22,6 +27,8 @@ signal latency_changed(ms: int)
 signal profile_changed(profile: Dictionary)
 signal boards_changed(boards: Dictionary)
 signal welcomed()
+## logged in / out / registered (account_name changed)
+signal account_changed()
 ## a production job stopped for lack of a material (English name), right after its notify toast
 signal production_blocked(material: String)
 ## a server notify with a "story.*" key (story.step.done, story.chapter, ...), emitted before Bus.notify
@@ -36,7 +43,12 @@ const PING_INTERVAL := 5.0
 const DEAD_AFTER := 20.0
 const BACKOFF := [1.0, 2.0, 4.0, 8.0, 15.0]
 ## actions the server accepts in the lobby (after hello, outside a company)
-const LOBBY_ACTIONS := ["listMyCompanies"]
+const LOBBY_ACTIONS := ["listMyCompanies", "accountStatus", "accountRegister", "accountLogin", "accountLogout",
+	"accountChangePassword", "accountDelete", "transferCreate", "transferRedeem"]
+## account rules (server/sos/accounts.py)
+const USERNAME_MIN := 3
+const USERNAME_MAX := 20
+const PASSWORD_MIN := 8
 
 class Waiter extends RefCounted:
 	signal done(result: Dictionary)
@@ -55,6 +67,8 @@ var url := Prefs.DEFAULT_URL
 var player_id := 0
 var token := ""
 var player_name := ""
+## account username ("" = guest: progress tied to this PC's token)
+var account_name := ""
 var latency_ms := -1
 var profile: Dictionary = {}
 ## company id the server would resume (welcome.lastCompany), "" when none
@@ -86,6 +100,7 @@ func _ready() -> void:
 	url = Prefs.url()
 	player_name = str(Prefs.get_profile("name", ""))
 	token = str(Prefs.get_profile("token", ""))
+	account_name = str(Prefs.get_profile("account", ""))
 	process_mode = Node.PROCESS_MODE_ALWAYS
 
 func _now() -> float:
@@ -233,6 +248,167 @@ static func is_valid_code(code: String) -> bool:
 			return false
 	return true
 
+# ================================================================ accounts (docs/ACCOUNTS.md)
+func is_logged_in() -> bool:
+	return account_name != ""
+
+## "" when fine, else a translated reason (same rules as the server).
+static func username_problem(u: String) -> String:
+	if u.length() < USERNAME_MIN or u.length() > USERNAME_MAX:
+		return L.t("Username: 3-20 letters, digits or _")
+	var latin := false
+	var cyr := false
+	for ch in u:
+		var c := ch.unicode_at(0)
+		if (c >= 65 and c <= 90) or (c >= 97 and c <= 122):
+			latin = true
+		elif (c >= 0x410 and c <= 0x44F) or c in [0x401, 0x451, 0x406, 0x456, 0x407, 0x457, 0x404, 0x454, 0x490, 0x491, 0x40E, 0x45E]:
+			# Russian alphabet + Ё ё І і Ї ї Є є Ґ ґ Ў ў only (server: accounts.CYRILLIC_LETTERS): no rare
+			# look-alikes (Ј Ѕ Һ), no combining marks
+			cyr = true
+		elif not (ch == "_" or (c >= 48 and c <= 57)):
+			return L.t("Username: 3-20 letters, digits or _")
+	if latin and cyr:
+		return L.t("Username: use Latin or Cyrillic letters, not both")
+	return ""
+
+static func password_problem(p: String) -> String:
+	if p.length() < PASSWORD_MIN:
+		return L.t("Password: at least 8 characters")
+	return ""
+
+## PBKDF2 on a worker thread (~0.2-0.4 s), the UI keeps animating.
+func derive_key(username: String, password: String) -> String:
+	if not is_inside_tree():
+		return Kdf.derive(username, password)
+	var th := Thread.new()
+	th.start(Kdf.derive.bind(username, password))
+	while th.is_alive():
+		await get_tree().process_frame
+	return str(th.wait_to_finish())
+
+func _set_account(n: String) -> void:
+	if n == account_name:
+		return
+	account_name = n
+	Prefs.set_profile("account", n)
+	account_changed.emit()
+
+func _account_ready(lobby: bool) -> Dictionary:
+	if mock_handler.is_valid():
+		return {"ok": true}
+	var c: Dictionary = await ensure_connected()
+	if not c.get("ok", false):
+		return c
+	if lobby and is_in_company():
+		return {"ok": false, "error": L.t("Leave the company first")}
+	return {"ok": true}
+
+func account_status() -> Dictionary:
+	var c: Dictionary = await _account_ready(false)
+	if not c.get("ok", false):
+		return c
+	return await act("accountStatus", {})
+
+func account_register(username: String, password: String) -> Dictionary:
+	username = username.strip_edges()
+	var bad := username_problem(username)
+	if bad == "":
+		bad = password_problem(password)
+	if bad != "":
+		return {"ok": false, "error": bad}
+	var c: Dictionary = await _account_ready(false)
+	if not c.get("ok", false):
+		return c
+	var key: String = await derive_key(username, password)
+	var r: Dictionary = await act("accountRegister", {"username": username, "key": key, "kdf": Kdf.KDF_ID})
+	if r.get("ok", false):
+		var d: Dictionary = r.get("data", {}) if r.get("data") is Dictionary else {}
+		if str(d.get("token", "")) != "":
+			token = str(d.token)
+			Prefs.set_profile("token", token)
+		_set_account(str(d.get("username", username)))
+	return r
+
+## Login on this PC. The server answers with a new welcome (new player id + token) before the result.
+## A guest with companies keeps its old token: it is saved as guest_token so Log out brings it back.
+func account_login(username: String, password: String) -> Dictionary:
+	username = username.strip_edges()
+	if username == "" or password == "":
+		return {"ok": false, "error": L.t("Wrong username or password")}
+	var c: Dictionary = await _account_ready(true)
+	if not c.get("ok", false):
+		return c
+	var prev := token
+	var key: String = await derive_key(username, password)
+	var r: Dictionary = await act("accountLogin", {"username": username, "key": key, "kdf": Kdf.KDF_ID})
+	_after_switch(r, prev)
+	return r
+
+func transfer_redeem(code: String) -> Dictionary:
+	var c: Dictionary = await _account_ready(true)
+	if not c.get("ok", false):
+		return c
+	var prev := token
+	var r: Dictionary = await act("transferRedeem", {"code": code.strip_edges()})
+	_after_switch(r, prev)
+	return r
+
+func _after_switch(r: Dictionary, prev_token: String) -> void:
+	if not r.get("ok", false):
+		return
+	var d: Dictionary = r.get("data", {}) if r.get("data") is Dictionary else {}
+	if d.get("guestKept", false) and prev_token != "":
+		Prefs.set_profile("guest_token", prev_token)
+	var u: Variant = d.get("username")
+	_set_account(str(u) if u != null else "")
+	Prefs.set_profile("name", player_name)
+
+func account_logout() -> Dictionary:
+	var c: Dictionary = await _account_ready(true)
+	if not c.get("ok", false):
+		return c
+	var args := {}
+	var gt := str(Prefs.get_profile("guest_token", ""))
+	if gt != "":
+		args["guestToken"] = gt
+	var r: Dictionary = await act("accountLogout", args)
+	if r.get("ok", false):
+		var d: Dictionary = r.get("data", {}) if r.get("data") is Dictionary else {}
+		if d.get("restored", false):
+			Prefs.set_profile("guest_token", "")
+		_set_account("")
+		Prefs.set_profile("name", player_name)
+	return r
+
+func account_change_password(old_password: String, new_password: String) -> Dictionary:
+	var bad := password_problem(new_password)
+	if bad != "":
+		return {"ok": false, "error": bad}
+	var c: Dictionary = await _account_ready(false)
+	if not c.get("ok", false):
+		return c
+	var old_key: String = await derive_key(account_name, old_password)
+	var new_key: String = await derive_key(account_name, new_password)
+	return await act("accountChangePassword", {"oldKey": old_key, "newKey": new_key, "kdf": Kdf.KDF_ID})
+
+func account_delete(password: String) -> Dictionary:
+	var c: Dictionary = await _account_ready(false)
+	if not c.get("ok", false):
+		return c
+	var key: String = await derive_key(account_name, password)
+	var r: Dictionary = await act("accountDelete", {"key": key})
+	if r.get("ok", false):
+		_set_account("")
+	return r
+
+## {ok, data: {code: "ABCD-EFGH", expiresIn: 600}}
+func transfer_create() -> Dictionary:
+	var c: Dictionary = await _account_ready(false)
+	if not c.get("ok", false):
+		return c
+	return await act("transferCreate", {})
+
 # ================================================================ internals
 func _enter(msg: Dictionary) -> Dictionary:
 	var c: Dictionary = await ensure_connected()
@@ -366,6 +542,10 @@ func _on_text(text: String) -> void:
 				player_name = str(msg.name)
 			Prefs.set_profile("token", token)
 			last_company = str(msg.get("lastCompany", "")) if msg.get("lastCompany") != null else ""
+			# servers before accounts send no "account" field: keep what we knew
+			if msg.has("account"):
+				var acc: Variant = msg.get("account")
+				_set_account(str((acc as Dictionary).get("username", "")) if acc is Dictionary else "")
 			_set_status("online", "")
 			welcomed.emit()
 			if _hello:
