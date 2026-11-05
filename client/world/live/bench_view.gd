@@ -3,6 +3,9 @@ extends Node3D
 ## Child of the assembly table interactable (local: top at y=TOP, +Z = front). While a batch runs: a phone in the
 ## product colour turns under the magnifier, finished phones pile up in the tray, the soldering iron sparks, and the
 ## little status screen shows product + produced/quantity. Adds the `line_qc` QC table at the right end.
+## The bench line has a production process too (hand / semi / robotic / smart, `line.process`): a small benchtop kit
+## shows it (`kit`, rebuilt when the process changes) — a pneumatic press for semi, a desktop robot arm for robotic,
+## arm + blue vision camera for smart — and the status screen names the process (RETOOLING while it is switched).
 
 const Mats := preload("res://world/lib/mats.gd")
 const Meshes := preload("res://world/lib/meshes.gd")
@@ -21,6 +24,14 @@ var sparks: CPUParticles3D
 var qc: StaticBody3D
 var _t := 0.0
 var _snd := 3.0
+var process := ""            # "" until the first refresh; "hand" | "semi" | "robotic" | "smart"
+var retooling := false
+var kit: Node3D              # process kit on the bench top (back middle, between the iron and the parts tray)
+var _press_head: Node3D
+var _arm: Node3D             # Base > Shoulder > Elbow
+var _cam_glow: OmniLight3D
+
+const PROCESS_TAG := {"hand": "HAND", "semi": "SEMI-AUTO", "robotic": "ROBOTIC", "smart": "SMART CELL"}
 
 func _ready() -> void:
 	phone_mat = StandardMaterial3D.new()
@@ -147,6 +158,13 @@ func refresh(s: Dictionary) -> void:
 	if not bl.is_empty():
 		line_id = str(bl.get("id", line_id))
 		qc.set_meta("id", line_id)
+	var pr := str(bl.get("process", "hand"))
+	if not pr in PROCESS_TAG:
+		pr = "hand"
+	if pr != process:
+		process = pr
+		_build_kit()
+	retooling = float(bl.get("processUntil", 0)) > float(HQ.elapsed_days(s)) and not bl.is_empty()
 	var job := HQ.line_job(s, line_id)
 	running = str(job.get("status", "")) == "Running"
 	var pid := str(job.get("productId", ""))
@@ -159,14 +177,118 @@ func refresh(s: Dictionary) -> void:
 		tray_phones[i].visible = i < shown
 	wip.visible = not job.is_empty()
 	sparks.emitting = running
-	if job.is_empty():
-		lcd.text = "%s  BENCH\nIDLE\nqueue a batch" % line_id.replace("line_", "LINE ").to_upper()
+	var head := "BENCH · %s" % PROCESS_TAG[process]
+	if retooling:
+		running = false
+		sparks.emitting = false
+		lcd.text = "RETOOLING\n→ %s\nUNTIL DAY %d" % [PROCESS_TAG[process], int(bl.get("processUntil", 0))]
+	elif job.is_empty():
+		lcd.text = "%s\nIDLE\nqueue a batch" % head
 	else:
-		lcd.text = "%s  %s\n%s\n%d / %d" % [line_id.replace("line_", "LINE ").to_upper(), str(job.get("status", "")).to_upper(),
-			HQ.product_name(s, pid).to_upper().substr(0, 16), int(job.get("produced", 0)), int(q)]
+		lcd.text = "%s\n%s %s\n%d / %d" % [head, str(job.get("status", "")).to_upper(),
+			HQ.product_name(s, pid).to_upper().substr(0, 12), int(job.get("produced", 0)), int(q)]
+
+## Benchtop kit for the bench line's process (hand = nothing extra: the iron + magnifier already are the tools).
+func _build_kit() -> void:
+	if kit:
+		kit.queue_free()
+	kit = Node3D.new()
+	kit.name = "ProcessKit_" + process
+	kit.position = Vector3(-0.16, TOP, -0.22)
+	add_child(kit)
+	_press_head = null
+	_arm = null
+	_cam_glow = null
+	var dark := Mats.m("steel_dark")
+	var orange := Mats.m("plastic_orange", Color(1.15, 1.0, 0.9), {"roughness_base": 0.35})
+	match process:
+		"semi":
+			# pneumatic benchtop press: base plate, back column, yellow head that stamps an orange jig
+			_box(kit, Vector3(0.22, 0.02, 0.17), Vector3(0, 0.01, 0), dark, 0.004)
+			var jig := _box(kit, Vector3(0.12, 0.016, 0.1), Vector3(0, 0.028, 0.02), Mats.m("plastic_white", Color(0.95, 0.55, 0.12)), 0.004)
+			_box(jig, Vector3(0.045, 0.005, 0.08), Vector3(0, 0.01, 0), Mats.m("plastic_black"), 0.0)
+			_box(kit, Vector3(0.035, 0.3, 0.035), Vector3(0, 0.16, -0.06), dark, 0.005)
+			_box(kit, Vector3(0.05, 0.04, 0.11), Vector3(0, 0.29, -0.025), Mats.m("metal_yellow"), 0.006)
+			_press_head = Node3D.new()
+			_press_head.position = Vector3(0, 0.2, 0.02)
+			kit.add_child(_press_head)
+			_box(_press_head, Vector3(0.05, 0.1, 0.05), Vector3(0, 0.02, 0), Mats.m("metal"), 0.006)
+			_box(_press_head, Vector3(0.08, 0.016, 0.07), Vector3(0, -0.035, 0), Mats.m("metal_yellow"), 0.004)
+			for sx in [-1.0, 1.0]:
+				var b := MeshInstance3D.new()
+				b.mesh = Meshes.cyl(0.013, 0.02, 8)
+				b.material_override = Mats.m("plastic_white", Color(0.9, 0.15, 0.1) if sx < 0 else Color(0.15, 0.7, 0.2))
+				b.position = Vector3(sx * 0.08, 0.03, 0.065)
+				kit.add_child(b)
+		"robotic", "smart":
+			# desktop robot arm on a dark plinth
+			_box(kit, Vector3(0.14, 0.04, 0.14), Vector3(0, 0.02, -0.01), dark, 0.008)
+			_arm = Node3D.new()
+			_arm.name = "Base"
+			_arm.position = Vector3(0, 0.04, -0.01)
+			kit.add_child(_arm)
+			var bc := MeshInstance3D.new()
+			bc.mesh = Meshes.cyl(0.045, 0.04, 14)
+			bc.material_override = orange
+			bc.position = Vector3(0, 0.02, 0)
+			_arm.add_child(bc)
+			var sh := Node3D.new()
+			sh.name = "Shoulder"
+			sh.position = Vector3(0, 0.045, 0)
+			_arm.add_child(sh)
+			_box(sh, Vector3(0.035, 0.16, 0.04), Vector3(0, 0.08, 0), orange, 0.01)
+			var el := Node3D.new()
+			el.name = "Elbow"
+			el.position = Vector3(0, 0.16, 0)
+			sh.add_child(el)
+			var ec := MeshInstance3D.new()
+			ec.mesh = Meshes.cyl(0.025, 0.05, 10)
+			ec.material_override = dark
+			ec.rotation_degrees.z = 90
+			el.add_child(ec)
+			_box(el, Vector3(0.03, 0.03, 0.14), Vector3(0, 0, 0.07), orange, 0.008)
+			var wr := _box(el, Vector3(0.026, 0.045, 0.026), Vector3(0, -0.02, 0.145), dark, 0.005)
+			var led := MeshInstance3D.new()
+			led.mesh = Meshes.sphere(0.006, 6)
+			led.material_override = Mats.glow(Color(0.3, 1.0, 0.4), 4.0)
+			led.position = Vector3(0, 0.026, 0)
+			wr.add_child(led)
+			sh.rotation.x = 0.35
+			el.rotation.x = 0.7
+			if process == "smart":
+				# vision camera on a gooseneck looking down at the work + blue glow
+				_box(kit, Vector3(0.015, 0.3, 0.015), Vector3(0.12, 0.15, -0.06), dark, 0.004)
+				_box(kit, Vector3(0.06, 0.015, 0.015), Vector3(0.095, 0.3, -0.06), dark, 0.004)
+				var cam := MeshInstance3D.new()
+				cam.mesh = Meshes.cyl(0.02, 0.05, 12)
+				cam.material_override = Mats.m("plastic_black")
+				cam.position = Vector3(0.065, 0.28, -0.06)
+				kit.add_child(cam)
+				var ring := MeshInstance3D.new()
+				ring.mesh = Meshes.cyl(0.024, 0.004, 14)
+				ring.material_override = Mats.glow(Color(0.25, 0.55, 1.0), 8.0)
+				ring.position = Vector3(0.065, 0.253, -0.06)
+				kit.add_child(ring)
+				_cam_glow = OmniLight3D.new()
+				_cam_glow.position = Vector3(0.065, 0.2, -0.02)
+				_cam_glow.light_color = Color(0.3, 0.55, 1.0)
+				_cam_glow.light_energy = 0.6
+				_cam_glow.omni_range = 0.7
+				_cam_glow.light_volumetric_fog_energy = 0.6
+				kit.add_child(_cam_glow)
 
 func _process(delta: float) -> void:
 	_t += delta
+	if _cam_glow:
+		_cam_glow.light_energy = 0.6 + (0.25 * sin(_t * 3.0) if running else 0.0)
+	if running and _press_head:
+		_press_head.position.y = 0.2 - maxf(0.0, sin(_t * 3.0)) * 0.1
+	if running and _arm:
+		var c := _t * 1.6
+		_arm.rotation.y = sin(c) * 0.8
+		var shd := _arm.get_node("Shoulder") as Node3D
+		shd.rotation.x = 0.35 + sin(c * 2.0) * 0.2
+		(shd.get_node("Elbow") as Node3D).rotation.x = 0.7 + cos(c * 2.0) * 0.25
 	if running and wip:
 		wip.rotation.y = sin(_t * 0.7) * 0.6
 		_snd -= delta

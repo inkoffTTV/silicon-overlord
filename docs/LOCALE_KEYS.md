@@ -31,9 +31,9 @@ the key is missing/unknown (or `null`), it shows the English text that is always
 - Server-side extraction is automatic; a few texts are assembled in ways the extractor cannot see and arrive with
   `key: null` — show the English text.
 
-## Keys (1309)
+## Keys (1450)
 
-### Errors (`res.errorKey`, `error.key`) — 292
+### Errors (`res.errorKey`, `error.key`) — 322
 
 | key | English template |
 |---|---|
@@ -55,8 +55,15 @@ the key is missing/unknown (or `null`), it shows the English text that is always
 | err.already_running | Already running |
 | err.already_started | Already started |
 | err.already_unlocked | Already unlocked |
+| err.already_using_that_process | Already using that process |
 | err.args_must_be_an_object | args must be an object |
+| err.bad_position | Bad position |
 | err.bezel_must_be_0_05_1_in | bezel must be 0.05..1 in |
+| err.blocked_doorway | Blocked: doorway |
+| err.blocked_something_built_in | Blocked: something built in |
+| err.blocked_stairs | Blocked: stairs |
+| err.blocked_van_ramp | Blocked: van ramp |
+| err.blocked_walkway | Blocked: walkway |
 | err.blueprint_is_locked_by_a_co_founder | Blueprint is locked by a co-founder |
 | err.blueprint_limit_reached_40 | Blueprint limit reached (40) |
 | err.build_the_factory_first | Build the factory first |
@@ -89,6 +96,8 @@ the key is missing/unknown (or `null`), it shows the English text that is always
 | err.enter_a_6_character_code_like_abc_123 | Enter a 6-character code like ABC-123 |
 | err.every_desk_already_has_one_place_another_desk | Every desk already has one. Place another desk first |
 | err.every_owner_needs_a_share | Every owner needs a share |
+| err.expansion_max_level | Expansion at max level |
+| err.expansions_garage_only | Expansions are for the garage. Build rooms in the office. |
 | err.fab_is_busy | Fab is busy |
 | err.factory_is_at_the_maximum_level | Factory is at the maximum level |
 | err.factory_setup_costs_setup | Factory setup costs ${setup} |
@@ -162,6 +171,7 @@ the key is missing/unknown (or `null`), it shows the English text that is always
 | err.needs_cost_legacy_point_s | Needs {cost} legacy point(s) |
 | err.needs_cost_research_points | Needs {cost} research points |
 | err.needs_cost_research_points_you_have_points | Needs {cost} research points (you have {points}) |
+| err.needs_hq_level_minhq | Needs HQ level {minHQ} |
 | err.needs_name | Needs {name} |
 | err.needs_price_tokens_you_have_tokens | Needs {price} tokens (you have {tokens}) |
 | err.needs_the_own_ai_model | Needs the Own AI Model |
@@ -199,16 +209,21 @@ the key is missing/unknown (or `null`), it shows the English text that is always
 | err.nothing_there | Nothing there |
 | err.offer_expired | Offer expired |
 | err.one_loan_at_a_time_pay_it_back_first | One loan at a time. Pay it back first. |
+| err.only_assembly_lines_have_a_process | Only assembly lines have a process |
+| err.only_max_of_these_per_room | Only {max} of these per room |
 | err.only_the_founder_can_sell_the_company | Only the founder can sell the company |
 | err.only_your_own_chip_designs_can_be_fabbed | Only your own chip designs can be fabbed |
 | err.open_a_company_first | Open a company first |
 | err.outside_the_office | Outside the office |
+| err.outside_the_room | Outside the room |
+| err.overlaps_another_item | Overlaps another item |
 | err.owner_missing | Owner missing |
 | err.patent_the_technology_first | Patent the technology first |
 | err.payload_must_be_a_table | Payload must be a table |
 | err.perk_is_at_max_rank | Perk is at max rank |
 | err.pick_a_colour | Pick a colour |
 | err.pick_a_cpu_or_gpu_fab | Pick a CPU or GPU fab |
+| err.pick_a_wall_or_the_floor | Pick a wall or the floor |
 | err.pick_an_assembly_line | Pick an assembly line |
 | err.place_it_on_a_desk | Place it on a desk |
 | err.player_name_rule | Name: 1-{max} letters, digits or spaces |
@@ -246,12 +261,15 @@ the key is missing/unknown (or `null`), it shows the English text that is always
 | err.research_custom_silicon_design_first | Research Custom Silicon Design first |
 | err.research_fab_operations_first | Research Fab Operations first |
 | err.research_kernel_architecture_1_first | Research Kernel Architecture 1 first |
+| err.research_name_first | Research {name} first |
 | err.research_patent_office_first | Research Patent Office first |
 | err.research_the_architecture_architecture_first | Research the {architecture} architecture first |
 | err.research_the_category_platform_first | Research the {category} platform first |
 | err.room_at_max_level | Room at max level |
 | err.room_is_full_upgrade_it_or_the_hq | Room is full; upgrade it or the HQ |
 | err.room_level_cannot_exceed_hq_level_1 | Room level cannot exceed HQ level + 1 |
+| err.room_not_built | That room is not built yet |
+| err.room_not_in_hq | That room is not part of this HQ |
 | err.salary_must_stay_within_50_300_of_market_rate | Salary must stay within 50%..300% of market rate |
 | err.send_hello_first | Send hello first |
 | err.share_must_be_50_40_or_30 | Share must be 50, 40 or 30 |
@@ -270,6 +288,8 @@ the key is missing/unknown (or `null`), it shows the English text that is always
 | err.term_must_be_6_12_or_24_months | Term must be 6, 12 or 24 months |
 | err.text_frames_only | Text frames only |
 | err.that_company_is_not_for_sale | That company is not for sale |
+| err.that_does_not_belong_in_this_room | That does not belong in this room |
+| err.that_material_does_not_go_on_this_surface | That material does not go on this surface |
 | err.that_region_cannot_be_bought_it_opens_through_a | That region cannot be bought; it opens through a megaproject |
 | err.that_spot_is_taken | That spot is taken |
 | err.the_bank_lends_up_to_limit_credit_limit | The bank lends up to ${limit} (credit limit) |
@@ -277,16 +297,19 @@ the key is missing/unknown (or `null`), it shows the English text that is always
 | err.the_company_has_no_active_owner | The company has no active owner |
 | err.the_founder_has_no_shares_left_to_offer | The founder has no shares left to offer |
 | err.the_office_is_full | The office is full |
+| err.the_room_is_full_maxitems_items | The room is full ({maxItems} items) |
 | err.this_invite_is_for_another_player | This invite is for another player |
 | err.this_is_a_solo_company_only_its_owner_can_enter | This is a solo company: only its owner can enter |
 | err.title_must_be_ceo_or_cto | Title must be CEO or CTO |
 | err.to_go_missing | To go: {missing} |
 | err.token_finish_unlock_research_points | Token finish: {unlock} research points |
+| err.too_many_build_actions_slow_down | Too many build actions, slow down |
 | err.too_many_contracts | Too many contracts |
 | err.too_many_features | Too many features |
 | err.too_many_open_invites | Too many open invites |
 | err.too_many_pending_approvals | Too many pending approvals |
 | err.too_many_requests | Too many requests |
+| err.too_tall_for_this_room | Too tall for this room |
 | err.unknown | Unknown |
 | err.unknown_action | Unknown action |
 | err.unknown_blueprint | Unknown blueprint |
@@ -297,11 +320,15 @@ the key is missing/unknown (or `null`), it shows the English text that is always
 | err.unknown_crate | Unknown crate |
 | err.unknown_device_type | Unknown device type |
 | err.unknown_employee | Unknown employee |
+| err.unknown_expansion | Unknown expansion |
 | err.unknown_factory | Unknown factory |
 | err.unknown_feature_id | Unknown feature {id} |
 | err.unknown_item | Unknown item |
+| err.unknown_item_id | Unknown item id |
+| err.unknown_lighting_preset | Unknown lighting preset |
 | err.unknown_line | Unknown line |
 | err.unknown_line_type | Unknown line type |
+| err.unknown_material | Unknown material |
 | err.unknown_megaproject | Unknown megaproject |
 | err.unknown_message_type | Unknown message type: {type} |
 | err.unknown_option | Unknown option |
@@ -309,16 +336,19 @@ the key is missing/unknown (or `null`), it shows the English text that is always
 | err.unknown_owner_in_share_map | Unknown owner in share map |
 | err.unknown_partner | Unknown partner |
 | err.unknown_perk | Unknown perk |
+| err.unknown_process | Unknown process |
 | err.unknown_product | Unknown product |
 | err.unknown_resource | Unknown resource |
 | err.unknown_room | Unknown room |
 | err.unknown_service | Unknown service |
 | err.unknown_supplier | Unknown supplier |
 | err.unknown_technology | Unknown technology |
+| err.unknown_theme | Unknown theme |
 | err.unsupported_protocol | Unsupported protocol version (server speaks v{version}) |
 | err.use_the_create_join_messages_for_lobby_actions | Use the create/join messages for lobby actions |
 | err.wafers_must_be_1_5000 | Wafers must be 1..5000 |
 | err.wait_a_few_seconds_before_creating_another | Wait a few seconds before creating another company |
+| err.wall_items_must_touch_a_wall | Wall items must touch a wall |
 | err.wallpaper_locked_why | Wallpaper locked: {why} |
 | err.you_already_own_this_finish | You already own this finish |
 | err.you_are_already_an_owner | You are already an owner |
@@ -560,7 +590,7 @@ the key is missing/unknown (or `null`), it shows the English text that is always
 | review.headline.Hardcore.great | {name}: the new benchmark king |
 | review.headline.Hardcore.mixed | {name} review: potential held back by thermals |
 
-### Data texts (sent whole as a title/body, or as a param — see `paramKeys`) — 807
+### Data texts (sent whole as a title/body, or as a param — see `paramKeys`) — 918
 
 | key | English template |
 |---|---|
@@ -716,6 +746,11 @@ the key is missing/unknown (or `null`), it shows the English text that is always
 | data.events.supply_collapse.text | Ports are jammed and freight rates triple. Logistics centers earn their keep. |
 | data.events.trade_restrictions.name | Trade Restrictions |
 | data.events.trade_restrictions.text | New tariffs between major blocs raise costs for cross-border supply chains. |
+| data.expansions.annex.name | Side annex lab |
+| data.expansions.basement.name | Basement |
+| data.expansions.loft.name | Loft |
+| data.expansions.shed.name | Backyard workshop |
+| data.expansions.showroom.name | Showroom |
 | data.features.always_on.desc | Time and notifications without waking the phone. |
 | data.features.always_on.name | Always-on display |
 | data.features.desktop_mode.desc | Plug into a monitor, get a desktop. |
@@ -882,6 +917,106 @@ the key is missing/unknown (or `null`), it shows the English text that is always
 | data.hqlevel.4 | Studio |
 | data.hqlevel.5 | Headquarters |
 | data.hqlevel.6 | Sky Campus |
+| data.interior.brick.name | Brick |
+| data.interior.carpet.name | Carpet |
+| data.interior.concrete.name | Concrete |
+| data.interior.daylight.name | Daylight |
+| data.interior.decor_aquarium.name | Aquarium |
+| data.interior.decor_arcade.name | Arcade Cabinet |
+| data.interior.decor_coffee_machine.name | Coffee Machine |
+| data.interior.decor_demo_table.name | Demo Table |
+| data.interior.decor_framed_print.name | Framed Print |
+| data.interior.decor_history_wall.name | Whiteboard History Wall |
+| data.interior.decor_neon_name.name | Company Neon Sign |
+| data.interior.decor_old_radio.name | Old Radio |
+| data.interior.decor_phone_case.name | Phone Display Case |
+| data.interior.decor_pinball.name | Pinball Machine |
+| data.interior.decor_ping_pong.name | Ping-Pong Table |
+| data.interior.decor_poster_launch.name | Launch Poster |
+| data.interior.decor_robot_mascot.name | Robot Mascot |
+| data.interior.decor_rug_braided.name | Braided Rug |
+| data.interior.decor_rug_grid.name | Grid Rug |
+| data.interior.decor_rug_wool.name | Wool Rug |
+| data.interior.decor_trophy_shelf.name | Trophy Shelf |
+| data.interior.decor_vinyl_player.name | Record Player |
+| data.interior.decor_wall_clock.name | Wall Clock |
+| data.interior.desk_bench4.name | Bench for Four |
+| data.interior.desk_corner.name | Corner Desk |
+| data.interior.desk_door_trestle.name | Door-on-Trestles Desk |
+| data.interior.desk_neon_rig.name | RGB Battlestation |
+| data.interior.desk_pine.name | Pine Desk |
+| data.interior.desk_pod6.name | Open-Plan Pod (6) |
+| data.interior.desk_standing.name | Standing Desk |
+| data.interior.desk_steel.name | Steel Shop Desk |
+| data.interior.desk_walnut_exec.name | Walnut Executive Desk |
+| data.interior.desk_white.name | White Lab Desk |
+| data.interior.desks.text | Desks & seating |
+| data.interior.grunge.name | Garage Grunge |
+| data.interior.lab.name | Clean Lab |
+| data.interior.lab.text | Lab & tools |
+| data.interior.lab_3d_printer.name | Desktop 3D Printer |
+| data.interior.lab_bench.name | Lab Bench |
+| data.interior.lab_clean_booth.name | Clean Booth |
+| data.interior.lab_drop_tester.name | Drop-Test Rig |
+| data.interior.lab_esd_bench.name | ESD Test Bench |
+| data.interior.lab_fume_hood.name | Fume Hood |
+| data.interior.lab_oscilloscope_cart.name | Oscilloscope Cart |
+| data.interior.lab_rf_chamber.name | RF Test Chamber |
+| data.interior.lab_server_rack.name | Server Rack |
+| data.interior.lab_solder_station.name | Soldering Station |
+| data.interior.lab_whiteboard_wall.name | Whiteboard Wall |
+| data.interior.light_bulb_string.name | Bulb String |
+| data.interior.light_chandelier.name | Chandelier |
+| data.interior.light_desk_banker.name | Banker's Lamp |
+| data.interior.light_floor_arc.name | Arc Floor Lamp |
+| data.interior.light_lava.name | Lava Lamp |
+| data.interior.light_led_panel.name | LED Daylight Panel |
+| data.interior.light_neon_tube.name | Neon Tube |
+| data.interior.light_paper_lantern.name | Paper Lantern |
+| data.interior.light_shop_tube.name | Shop Tube Light |
+| data.interior.light_work_lamp.name | Clamp Work Lamp |
+| data.interior.lighting.text | Lighting |
+| data.interior.metal.name | Metal sheet |
+| data.interior.neon.name | Neon |
+| data.interior.paint.name | Paint |
+| data.interior.plank.name | Wood planks |
+| data.interior.plant_cactus.name | Cactus |
+| data.interior.plant_fig.name | Fiddle-Leaf Fig |
+| data.interior.plant_herbs.name | Herb Shelf |
+| data.interior.plant_indoor_tree.name | Indoor Olive Tree |
+| data.interior.plant_monstera.name | Monstera |
+| data.interior.plant_moss_wall.name | Moss Wall |
+| data.interior.plant_palm.name | Potted Palm |
+| data.interior.plant_pothos.name | Pothos in a Bucket |
+| data.interior.prod_burn_in_rack.name | Burn-In Rack |
+| data.interior.prod_compressor.name | Air Compressor |
+| data.interior.prod_jig_rack.name | Assembly Jig Rack |
+| data.interior.prod_packing_table.name | Packing Table |
+| data.interior.prod_parts_bins.name | Parts Bin Wall |
+| data.interior.prod_qc_light_table.name | QC Light Table |
+| data.interior.prod_safety_station.name | Safety Station |
+| data.interior.prod_tool_wall.name | Pegboard Tool Wall |
+| data.interior.prod_xray_inspector.name | X-Ray Inspector |
+| data.interior.production.text | Production |
+| data.interior.scandi.name | Scandinavian |
+| data.interior.seat_armchair.name | Leather Armchair |
+| data.interior.seat_beanbag.name | Beanbag |
+| data.interior.seat_crate_stool.name | Crate Stool |
+| data.interior.seat_meeting_table.name | Meeting Table |
+| data.interior.seat_sofa_felt.name | Felt Sofa |
+| data.interior.seat_sofa_old.name | Thrift-Store Sofa |
+| data.interior.store_bookcase.name | Bookcase |
+| data.interior.store_cabinet.name | Steel Cabinet |
+| data.interior.store_cold_room.name | Climate Cabinet |
+| data.interior.store_crate_stack.name | Crate Stack |
+| data.interior.store_lockers.name | Staff Lockers |
+| data.interior.store_pallet_rack.name | Pallet Rack |
+| data.interior.store_wire_shelf.name | Wire Shelf |
+| data.interior.surfaces.text | Walls & floors |
+| data.interior.tile.name | Tiles |
+| data.interior.wallpaper.name | Wallpaper |
+| data.interior.warm.name | Warm |
+| data.interior.wood.name | Cozy Wood |
 | data.legacy.builder.desc | Factories, services and megaprojects cost 8% less per rank. |
 | data.legacy.builder.name | Builder |
 | data.legacy.consolePioneer.desc | Launch a game console rated 8.0 or more before 2022. |
@@ -961,6 +1096,10 @@ the key is missing/unknown (or `null`), it shows the English text that is always
 | data.missions.unlock_hover_chair.desc | Exclusive chair · Build mode |
 | data.missions.unlock_neural_rig.desc | Exclusive computer · Build mode |
 | data.missions.unlock_sky_tree.desc | Exclusive plant · Build mode |
+| data.productionprocesses.hand.name | Hand assembly |
+| data.productionprocesses.robotic.name | Robotic arms |
+| data.productionprocesses.semi.name | Semi-automatic (jigs + conveyor) |
+| data.productionprocesses.smart.name | Smart factory (lights-out, AI vision QC) |
 | data.regions.ASIA.name | Asia |
 | data.regions.EMERGING.name | Emerging Markets |
 | data.regions.EU.name | Europe |
@@ -995,6 +1134,8 @@ the key is missing/unknown (or `null`), it shows the English text that is always
 | data.resources.terra_mining.name | Terra Mining Group |
 | data.resources.vertex.name | Vertex Graphics |
 | data.resources.voltcell.name | VoltCell Energy |
+| data.roomgeometry.garage.name | Garage workshop |
+| data.roomgeometry.office.name | Open-plan office |
 | data.rooms.AssemblyLine.effect | Hosts assembly lines; +8% line efficiency per level. |
 | data.rooms.AssemblyLine.name | Assembly Line |
 | data.rooms.CPUDepartment.effect | +10% CPU fab capacity and binning quality per level. |

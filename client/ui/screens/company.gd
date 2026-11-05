@@ -5,6 +5,8 @@ extends "res://ui/screens/screen_base.gd"
 const D := preload("res://ui/lib/gdata.gd")
 const Chart := preload("res://ui/lib/ui_chart.gd")
 const HUD := preload("res://ui/hud/hud.gd")
+const IR := preload("res://ui/lib/interior_rules.gd")
+const Ring := preload("res://ui/lib/ui_ring.gd")
 
 var _cols: HBoxContainer
 
@@ -13,7 +15,7 @@ func _init() -> void:
 	subtitle = "Company board · money, reputation and the team"
 	icon_name = "chart"
 	accent = U.GOLD
-	watch_keys = ["finance", "reputation", "employees", "owners", "news", "loan", "world", "time"]
+	watch_keys = ["finance", "reputation", "employees", "owners", "news", "loan", "world", "time", "interior", "hq"]
 
 func build_body(b: Control) -> void:
 	_cols = U.hbox(14)
@@ -64,6 +66,7 @@ func refresh() -> void:
 		v.add_child(U.lbl(t[1], U.LG, t[2], "bold"))
 		h.add_child(v)
 		tiles.add_child(c)
+	_comfort_card(left)
 	# weekly revenue chart
 	var cv := _card(left, "REVENUE · LAST 12 WEEKS", "trend", U.SUCCESS)
 	var chart := Chart.new()
@@ -157,7 +160,7 @@ func refresh() -> void:
 		nv.add_child(U.lbl(str(o.get("displayName", "?")), U.SM, U.TEXT, "semibold"))
 		nv.add_child(U.lbl("%s · %s" % [L.t(str(o.get("role", ""))), L.t(str(o.get("title", "")))], U.XS, U.MUTED))
 		row.add_child(nv)
-		row.add_child(U.lbl(F.pct(U.num(o.get("sharePercent", 0))), U.SM, U.TEXT, "bold"))
+		row.add_child(U.lbl(share_text(o), U.SM, U.TEXT, "bold"))
 		tv.add_child(row)
 	# bank
 	var bv := _card(right, "Bank loan", "bank", U.ACCENT_ALT)
@@ -191,3 +194,95 @@ func refresh() -> void:
 		v.add_child(U.para(L.news(n)[0], U.SM, U.TEXT, "semibold", 260))
 		row.add_child(v)
 		nv2.add_child(row)
+
+# ---------------------------------------------------------------- 0.5.0 comfort per room and its effects
+func _comfort_card(parent: Control) -> void:
+	var cv := _card(parent, "Comfort & rooms", "heart", U.PINK)
+	cv.get_parent().set_meta("comfort_card", true)
+	var inter := U.dict(state().get("interior", {}))
+	var summ := U.dict(inter.get("summary", {}))
+	var eff := U.dict(summ.get("effects", {}))
+	var caps := U.dict(IR.balance().get("caps", {}))
+	var top := U.hbox(14)
+	cv.add_child(top)
+	var ring := Ring.new()
+	ring.value = U.num(summ.get("comfortAvg", 0))
+	ring.caption = U.upper(L.t("Average"))
+	ring.custom_minimum_size = Vector2(88, 102)
+	top.add_child(ring)
+	var eg := U.grid(2, 14, 4)
+	eg.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	top.add_child(eg)
+	for e in [["Morale", "morale", "+%.1f%%", 100.0], ["Research speed", "research", "+%.1f%%", 100.0], ["Defects", "defects", "−%.1f%%", 100.0],
+			["Design quality", "design", "+%.1f%%", 100.0], ["Brand", "brand", "+%.2f", 1.0]]:
+		var val := U.num(eff.get(e[1], 0))
+		var cap := U.num(caps.get(e[1], 0))
+		var row := U.vbox(2)
+		row.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		var h := U.hbox(6)
+		h.add_child(U.clip(L.t(e[0]), U.XS + 1, U.MUTED))
+		h.add_child(U.lbl(e[2] % (val * e[3]) if val > 0 else "—", U.XS + 1, U.SUCCESS if val > 0 else U.DIM, "bold"))
+		row.add_child(h)
+		var b := U.bar(val / cap if cap > 0 else 0.0, U.PINK, 4)
+		row.add_child(b)
+		eg.add_child(row)
+	var extras := []
+	if U.num(summ.get("staffBonus", 0)) > 0:
+		extras.append(L.f("+{n} staff places from desks", {"n": int(U.num(summ.staffBonus))}))
+	if U.num(summ.get("labSlots", 0)) > 0:
+		extras.append(L.f("+{n} research slot from lab benches", {"n": int(U.num(summ.labSlots))}))
+	if U.num(summ.get("storage", 0)) > 0:
+		extras.append(L.f("+{n} crate places from shelves", {"n": int(U.num(summ.storage))}))
+	if not extras.is_empty():
+		cv.add_child(U.para(" · ".join(extras), U.XS + 1, U.CYAN, "semibold"))
+	# rooms
+	var rooms := U.dict(inter.get("rooms", {}))
+	for id in IR.rooms_at(state()):
+		var r := U.dict(rooms.get(id, {}))
+		var c := U.num(r.get("comfort", 0))
+		var row := U.hbox(8)
+		row.set_meta("room", id)
+		var nl := U.clip(L.t(_room_name(id)), U.SM, U.TEXT, "semibold")
+		nl.custom_minimum_size.x = 200
+		nl.size_flags_horizontal = Control.SIZE_FILL
+		row.add_child(nl)
+		var bb := U.bar(c / 100.0, Ring.color_for(c), 6)
+		bb.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		row.add_child(bb)
+		var vl := U.lbl("%d" % int(round(c)), U.SM, U.TEXT, "bold")
+		vl.custom_minimum_size.x = 30
+		vl.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+		row.add_child(vl)
+		var n_items := U.arr(r.get("items", [])).size()
+		var il := U.lbl(L.f("{n} items", {"n": n_items}), U.XS, U.DIM)
+		il.custom_minimum_size.x = 64
+		il.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+		row.add_child(il)
+		cv.add_child(row)
+	var br := U.hbox(8)
+	cv.add_child(br)
+	var bm := U.btn(L.t("Furnish  ·  B"), "BtnGhost", "hammer", 0, 36)
+	bm.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	bm.set_meta("skip", true)
+	bm.pressed.connect(func() -> void:
+		if ui_root and ui_root.has_method("enter_build"):
+			ui_root.enter_build(true))
+	br.add_child(bm)
+	var gb := U.btn(L.t("Grow the base"), "BtnGhost", "house", 0, 36)
+	gb.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	gb.set_meta("grow_btn", true)
+	gb.pressed.connect(func() -> void:
+		if ui_root and ui_root.has_method("open_screen"):
+			ui_root.open_screen("expansions", ""))
+	br.add_child(gb)
+
+static func _room_name(id: String) -> String:
+	for r in IR.arr(IR.data().get("rooms", [])):
+		if str(r.get("id", "")) == id:
+			return str(r.get("name", id))
+	return id
+
+## Owner share: sharePercent is already in percent (0..100, ShareRules), F.pct would multiply by 100 again ("5000%").
+static func share_text(o: Dictionary) -> String:
+	var v := U.num(o.get("sharePercent", 0))
+	return ("%d%%" % int(round(v))) if is_equal_approx(v, round(v)) else ("%.1f%%" % v)

@@ -9,6 +9,11 @@ extends SceneTree
 ## Iteration 3: repair shop — chapter 0 dark garage (shop door + light switch -> storyEvent), objective highlight,
 ## customers + devices per repair order, device snaps into the bench holder, bench seat -> repair_bench, counter
 ## take / return prompts, a new customer walks in, a paid customer leaves, parts bins, sign swap + cutscene.
+## Iteration 5 (0.5.0): every interior catalogue item builds; the cozy layout passes the local rule mirror; interior
+## items render from state with pick bodies; build mode (ghost valid/blocked + reason, place / move / sell / copy /
+## paint / theme through Net.act with a local mock, room outline, UI contract: world.build_mode / build_select /
+## build_result + build_hover / build_request); expansions locked (FOR SALE interactables) / unlocked (doors open,
+## level-3 kit); production processes (robot arms, smart cell scanner, press heads, retooling); daylight windows.
 ## Exit code 0 = pass, 1 = fail.
 
 const REQUIRED_KINDS := ["pc_design", "whiteboard_research", "workbench_production", "phone_shelf", "board_company", "door_exit", "stage_launch",
@@ -37,6 +42,13 @@ func _initialize() -> void:
 func frames(n: int) -> void:
 	for i in n:
 		await physics_frame
+
+## process frames (build mode updates its aim in _process; slow software rendering can run several physics steps
+## per drawn frame)
+func pframes(n: int) -> void:
+	for i in n:
+		await process_frame
+	await physics_frame
 
 func _run() -> void:
 	print("[world_smoke] start")
@@ -99,7 +111,7 @@ func _run() -> void:
 		check(grabbed and player.held == box, "LMB grab picks up the box")
 		player.set_look(player.yaw, 0.15)  # look up: the box follows the hold point
 		await frames(45)
-		check(player.held == box, "box still held after 0.75 s")
+		check(player.held == box, "box still held after 0.75 s (player %s, box %s)" % [player.global_position, box.global_position])
 		# software rendering here is slow, so the spring lifts less within 45 frames than on a real PC
 		check(box.global_position.y > y0 + 0.08, "held box is lifted (%.2f -> %.2f)" % [y0, box.global_position.y])
 		player.release_held(true)
@@ -150,6 +162,7 @@ func _run() -> void:
 	check(world.peers.is_empty(), "peer avatars removed")
 
 	await _iteration2(world, player)
+	await _iteration5(world, player)
 	await _story(world, player)
 
 	# 6) HQ level 2 rebuild
@@ -202,7 +215,12 @@ func _iteration2(world: Node, player: CharacterBody3D) -> void:
 	k = _kinds()
 	check(not k.has("stairs_locked"), "AssemblyLine bought: stairs_locked gone")
 	check(get_nodes_in_group("ladder").size() == 1, "ladder to the loft exists")
-	check(int(k.get("production_line", 0)) == 2, "one production_line per upstairs line (%d)" % int(k.get("production_line", 0)))
+	var pl_ids := []
+	for n in get_nodes_in_group("interactable"):
+		if n.is_inside_tree() and not n.is_queued_for_deletion() and str(n.get_meta("kind", "")) == "production_line":
+			pl_ids.append(str(n.get_meta("id", "")))
+	pl_ids.sort()
+	check(pl_ids == ["", "line_2", "line_3"], "one production_line per upstairs line + the free-bay build spot (%s)" % [pl_ids])
 	check(int(k.get("line_qc", 0)) == 3, "QC tables: bench + 2 lines (%d)" % int(k.get("line_qc", 0)))
 	# whiteboard + workbench + shelf
 	var wb: String = lv.whiteboard_text()
@@ -325,6 +343,245 @@ func _iteration2(world: Node, player: CharacterBody3D) -> void:
 	game.state.production["crates"] = Shots.fake_state().production.crates
 
 const Story := preload("res://world/live/story_state.gd")
+const Shots5 := preload("res://tools/shot_iter5.gd")
+const IData := preload("res://world/build/interior_data.gd")
+const IItems := preload("res://world/build/interior_items.gd")
+
+func _iteration5(world: Node, player: CharacterBody3D) -> void:
+	bus.ui_modal_changed.emit(false)
+	var net: Node = root.get_node("/root/Net")
+	var calls: Array = []
+	var old_mock: Callable = net.mock_handler
+	net.mock_handler = func(action: String, a: Dictionary) -> Dictionary:
+		calls.append([action, a])
+		return Shots5.mock_act(game, action, a)
+	# --- catalogue meshes
+	var built := 0
+	var empty := []
+	for d in IData.items():
+		var n: Node3D = IItems.build(d, {"state": game.state, "item": {"id": "t"}, "ghost": true})
+		if n.get_child_count() > 0:
+			built += 1
+		else:
+			empty.append(d.id)
+		n.free()
+	check(built == IData.items().size() and built >= 80, "every catalogue item has a procedural mesh (%d/%d) %s" % [built, IData.items().size(), empty])
+	# --- the cozy layout is legal by the server's rules (local mirror)
+	var s := Shots.fake_state()
+	Shots5.decorate_company(s)
+	Shots5.with_interior(s, {"garage": {"items": [], "surfaces": {}}})
+	var bad := []
+	for it in Shots5.cozy_items():
+		var d := IData.def(str(it.def))
+		var spot := IData.snap_spot(IData.room("garage", 1), d, float(it.x), float(it.z), float(it.rot), it.get("y"))
+		var err := IData.validate(s, "garage", d, spot)
+		if err != "":
+			bad.append("%s: %s" % [it.def, err])
+		s.interior.rooms.garage.items.append(it)
+	check(bad.is_empty(), "cozy garage layout passes the placement rules %s" % [bad])
+	check(IData.validate(s, "garage", IData.def("decor_aquarium"), {"x": -1.0, "z": -1.0, "rot": 0.0, "y": null}) != "", "aquarium on the trapdoor is refused")
+	check(IData.validate(s, "annex", IData.def("lab_bench"), {"x": 0.0, "z": 0.0, "rot": 0.0, "y": null}) == "That room is not built yet", "annex not built: not available")
+	# --- render from state
+	game.apply_snapshot(s)
+	await frames(6)
+	var lv: Node3D = world.get_level()
+	var view: Node = lv.get("interior")
+	check(view != null, "garage has an interior view")
+	if view == null:
+		return
+	var shown := 0
+	for it in s.interior.rooms.garage.items:
+		var nd: Node3D = view.item_node("garage", str(it.id))
+		if nd and nd.find_child("Pick", true, false):
+			shown += 1
+	check(shown == s.interior.rooms.garage.items.size(), "every placed item is drawn with a pick body (%d)" % shown)
+	# --- build mode, driven like a player (no UI listening: the world sends Net.act itself) in an empty garage
+	var sb := Shots.fake_state()
+	Shots5.with_interior(sb, {"garage": {"items": [], "surfaces": {}}})
+	game.apply_snapshot(sb)
+	await pframes(4)
+	var bm: Node = world.get_build_mode()
+	check(bm != null and bm.is_in_group("build_mode"), "build mode node in group build_mode")
+	check(world.has_method("build_mode") and world.has_method("build_select") and world.has_method("build_result") and world.has_signal("build_hover") and world.has_signal("build_request"), "world implements the UI build contract")
+	check(InputMap.has_action("build"), "input action 'build' registered (B)")
+	await _aim_from(player, lv.to_global(Vector3(-2.5, 0.05, 2.1)), lv.to_global(Vector3(-2.45, 0.0, -0.4)))
+	bm.set_active(true)
+	bm.select_item("seat_beanbag")
+	await pframes(4)
+	check(player.build_mode and bm.room_id == "garage", "build mode on in the garage (player tools off)")
+	check(bm.ok and bm.spot_room == "garage" and bm._ghost != null and bm._ghost.visible, "ghost at a free spot is valid (%s)" % bm.reason)
+	check(absf(fmod(float(bm.spot.x), 0.25)) < 0.001 and absf(fmod(float(bm.spot.z), 0.25)) < 0.001, "ghost snaps to the 0.25 m grid %s" % [bm.spot])
+	var n0: int = game.state.interior.rooms.garage.items.size()
+	await bm.confirm()
+	await pframes(4)
+	check(game.state.interior.rooms.garage.items.size() == n0 + 1 and calls.size() > 0 and calls[calls.size() - 1][0] == "interiorPlace", "LMB places it (interiorPlace)")
+	var placed: Dictionary = game.state.interior.rooms.garage.items[n0]
+	check(view.item_node("garage", str(placed.id)) != null, "the new item appears in the world")
+	# blocked: the basement trapdoor
+	player.set_look(deg_to_rad(-30.0), -0.5)
+	await pframes(3)
+	check(not bm.ok and bm.reason == "Blocked: stairs", "ghost over the trapdoor is red: '%s'" % bm.reason)
+	check(bm._zones != null and bm._zones.get_child_count() > 4, "room outline + no-build zones drawn")
+	# hover the new beanbag: copy, move, sell
+	await _aim_from(player, lv.to_global(Vector3(-2.5, 0.05, 1.6)), view.item_node("garage", str(placed.id)).global_position + Vector3(0, 0.25, 0))
+	await pframes(3)
+	check(str(bm.hover.get("id", "")) == str(placed.id), "aiming at a placed item hovers it (%s)" % [bm.hover])
+	bm.select_item("plant_cactus")
+	bm.copy_hovered()
+	check(str(bm.sel.get("def", "")) == "seat_beanbag", "C copies the aimed item's type")
+	bm.pick_up()
+	check(not bm.carrying.is_empty(), "E picks it up to move")
+	player.set_look(deg_to_rad(-4.0), -0.75)
+	await pframes(3)
+	await bm.confirm()
+	await pframes(3)
+	var moved := calls.filter(func(c: Array) -> bool: return c[0] == "interiorMove")
+	check(moved.size() == 1 and bm.carrying.is_empty(), "LMB drops it at the new spot (interiorMove) %s" % [bm.reason])
+	await _aim_from(player, lv.to_global(Vector3(-2.5, 0.05, 1.6)), view.item_node("garage", str(placed.id)).global_position + Vector3(0, 0.25, 0))
+	await pframes(3)
+	await bm.sell_hovered()
+	await pframes(3)
+	check(calls.filter(func(c: Array) -> bool: return c[0] == "interiorRemove").size() == 1 and view.item_node("garage", str(placed.id)) == null, "X sells it (interiorRemove)")
+	# paint the wall we look at, then a theme
+	bm.select_paint("brick", "#7A4A3A")
+	player.set_look(deg_to_rad(60.0), -0.05)
+	await pframes(3)
+	check(bm.paint_surface == "wall" and bm.ok, "aiming at a wall picks the wall surface ('%s', room '%s', %s, ok %s, sel %s, carrying %s)" % [bm.paint_surface, bm.room_id, bm.reason, bm.ok, bm.sel, bm.carrying])
+	await bm.confirm()
+	await pframes(3)
+	check(view.skins("garage").get_child_count() > 4, "painted wall skins appear")
+	bm.select_theme("neon")
+	await bm.confirm()
+	await pframes(3)
+	var rig: Node3D = view._room_nodes["garage"].rig
+	check(str(game.state.interior.rooms.garage.get("theme", "")) == "neon" and rig.get_child_count() > 0, "theme applies + neon lighting rig")
+	# UI contract: with a UI listening, the world asks instead of sending
+	var reqs: Array = []
+	var cb := func(action: String, args: Dictionary) -> void: reqs.append([action, args])
+	world.build_request.connect(cb)
+	world.build_mode(true)
+	world.build_select({"tool": "place", "def": "plant_cactus", "color": "", "rot": 0, "room": "garage"})
+	await _aim_from(player, lv.to_global(Vector3(-2.5, 0.05, 2.1)), lv.to_global(Vector3(-2.45, 0.0, -0.9)))
+	await pframes(3)
+	var nc := calls.size()
+	await bm.confirm()
+	check(reqs.size() == 1 and reqs[0][0] == "interiorPlace" and calls.size() == nc, "with a UI: build_request(interiorPlace) instead of Net.act")
+	world.build_result("interiorPlace", false, {}, "Not enough cash ($30)")
+	check(bm.reason == "Not enough cash ($30)" and not bm.busy, "build_result error reaches the ghost")
+	world.build_request.disconnect(cb)
+	world.build_mode(false)
+	check(not bm.is_active() and not player.build_mode, "build mode off")
+	# --- expansions: locked look, unlocked rooms, level 3 kit
+	var k := _kinds()
+	check(int(k.get("expansion_locked", 0)) == 4, "four FOR SALE expansions (%d)" % int(k.get("expansion_locked", 0)))
+	var s3 := Shots.fake_state()
+	Shots5.with_interior(s3, {}, {"annex": {"level": 3}, "basement": {"level": 3}, "shed": {"level": 3}, "showroom": {"level": 3}})
+	game.apply_snapshot(s3)
+	await frames(6)
+	k = _kinds()
+	check(int(k.get("expansion_locked", 0)) == 0, "bought expansions: no FOR SALE doors")
+	var ex: Node = lv.get("expansions")
+	for nm in ["HEPA", "Totem", "AC", "Rack", "Extractor", "Awning", "Canopy"]:
+		check(ex.find_child(nm, true, false) != null, "level-3 expansion kit: %s" % nm)
+	# --- production processes on the loft lines
+	var s4 := Shots.fake_state()
+	s4.production.lines[1]["process"] = "robotic"
+	s4.production.lines[2]["process"] = "smart"
+	s4.production.jobs[2]["status"] = "Running"
+	game.apply_snapshot(s4)
+	await frames(6)
+	var lviews: Array = lv.loft.line_views
+	check(lviews.size() == 2 and lviews[0]._robots.size() >= 2 and lviews[1]._scanner != null, "robotic line has robot arms, smart line a scanner cell")
+	var z0: float = lviews[1]._scanner.position.z
+	await frames(20)
+	check(absf(lviews[1]._scanner.position.z - z0) > 0.005, "the scanner sweeps")
+	s4.production.lines[1]["process"] = "semi"
+	s4.production.lines[1]["processUntil"] = 9999
+	game.apply_snapshot(s4)
+	await frames(6)
+	lviews = lv.loft.line_views
+	check(lviews[0]._press.size() == 2 and lviews[0].retool != null and lviews[0].status == "retool", "switching to semi: press heads + RETOOLING look")
+	await _loft_bays_and_bench(lv)
+	# --- day-night through the windows
+	world.set_time_of_day(0.75)
+	await pframes(3)
+	var day_on := false
+	for l in lv.find_children("Daylight", "SpotLight3D", true, false):
+		day_on = day_on or (l.visible and l.light_energy > 0.5)
+	check(day_on, "noon: daylight through the windows")
+	world.set_time_of_day(0.25)
+	await pframes(3)
+	check(world.sky_mat.sky_top_color.v < 0.12, "midnight: dark sky")
+	world.set_time_of_day(-1.0)
+	net.mock_handler = old_mock
+	game.apply_snapshot(Shots.fake_state())
+	await pframes(4)
+
+## Regression: the loft bays are numbered by UPSTAIRS line (line_1 is the garage bench, so a fresh loft must not say
+## "LINE 1"), a free bay shows a localized "Build a production line" easel, and the bench shows its process.
+func _loft_bays_and_bench(lv: Node3D) -> void:
+	var loft: Node3D = lv.loft
+	var s: Dictionary = Shots.fake_state()
+	s.production.lines = [s.production.lines[0]]          # only the garage bench (line_1)
+	s.production.jobs = []
+	game.apply_snapshot(s)
+	await frames(4)
+	var nums := []
+	for b in loft.lines_root.find_children("Bay*", "Node3D", false, false):
+		var n: Label3D = b.get_node_or_null("BayNumber")
+		nums.append(n.text if n else "?")
+	nums.sort()
+	check(nums == ["1", "2", "3"], "empty loft: three taped bays numbered 1..3 (%s)" % [nums])
+	var line1_label := false
+	for l in loft.find_children("*", "Label3D", true, false):
+		line1_label = line1_label or (l as Label3D).text.contains("LINE 1")
+	check(not line1_label and loft.line_views.is_empty(), "empty loft: no 'LINE 1' marking while line_1 is the garage bench")
+	var free: Node = loft.lines_root.get_node_or_null("IA_production_line")
+	check(free != null and free.get_meta("id") == "" and free.get_meta("prompt") == "Build a production line" and int(free.get_meta("bay")) == 1,
+		"empty loft: bay 1 is the 'Build a production line' spot")
+	var L: Variant = load("res://ui/lib/loc.gd")
+	L.set_lang("ru")
+	bus.settings_changed.emit()
+	await frames(3)
+	free = loft.lines_root.get_node_or_null("IA_production_line")
+	var hint: Label3D = free.find_child("Hint", true, false) if free else null
+	check(hint != null and hint.text == "ПОСТРОИТЬ ПРОИЗВОДСТВЕННУЮ ЛИНИЮ", "free bay easel is localized (%s)" % (hint.text if hint else "none"))
+	L.set_lang("en")
+	bus.settings_changed.emit()
+	await frames(3)
+	# one upstairs line: it is bay 1 (sign "BAY 1", not "LINE 49_1"), the easel moves to bay 2
+	var s2: Dictionary = Shots.fake_state()
+	var up: Dictionary = s2.production.lines[1]
+	up["id"] = "line_49_1"
+	s2.production.lines = [s2.production.lines[0], up]
+	s2.production.jobs = []
+	game.apply_snapshot(s2)
+	await frames(4)
+	var lvs: Array = loft.line_views
+	check(lvs.size() == 1 and lvs[0].bay == 1 and lvs[0].sign_name() == "BAY 1" and lvs[0].ia.get_meta("prompt") == "Production line",
+		"upstairs line_49_1 is bay 1 with a clean sign/prompt")
+	free = loft.lines_root.get_node_or_null("IA_production_line")
+	check(free != null and int(free.get_meta("bay")) == 2, "the next free bay (2) gets the build spot")
+	# the garage bench shows its process: semi press, robot arm, retool on the status screen
+	var bv: Node3D = lv.bench_view
+	var s3: Dictionary = Shots.fake_state()
+	s3.production.lines[0]["process"] = "semi"
+	game.apply_snapshot(s3)
+	await frames(3)
+	check(bv.process == "semi" and bv._press_head != null and bv.kit.name == "ProcessKit_semi" and bv.lcd.text.contains("SEMI-AUTO"),
+		"bench line on semi: benchtop press + SEMI-AUTO on the screen")
+	s3.production.lines[0]["process"] = "robotic"
+	game.apply_snapshot(s3)
+	await frames(3)
+	check(bv._arm != null and bv._press_head == null, "bench line on robotic: desktop robot arm")
+	s3.production.lines[0]["process"] = "smart"
+	s3.production.lines[0]["processUntil"] = 99999
+	game.apply_snapshot(s3)
+	await frames(3)
+	check(bv._arm != null and bv._cam_glow != null and bv.lcd.text.begins_with("RETOOLING"), "bench switching to smart: arm + camera, RETOOLING screen")
+	game.apply_snapshot(Shots.fake_state())
+	await frames(3)
+	check(bv.process == "hand" and bv._arm == null and bv._press_head == null, "bench back on hand: no kit")
 
 func _story(world: Node, player: CharacterBody3D) -> void:
 	bus.ui_modal_changed.emit(false)
@@ -358,7 +615,7 @@ func _story(world: Node, player: CharacterBody3D) -> void:
 	await frames(3)
 	check(shop.door_is_open() and net_calls.has(["storyEvent", {"id": "door_open"}]), "door opens + storyEvent door_open %s" % [net_calls])
 	# light switch
-	await _aim_from(player, lv.to_global(shop.SWITCH_POS + Vector3(-0.2, 0, -1.0)), shop.switch_ia.global_position)
+	await _aim_from(player, lv.to_global(shop.SWITCH_POS + Vector3(0.5, 0, -1.1)), shop.switch_ia.global_position)
 	check(player.try_interact(), "E on the light switch")
 	await frames(3)
 	check(shop.lights_are_on() and net_calls.has(["storyEvent", {"id": "lights_on"}]), "lights on + storyEvent lights_on")

@@ -42,6 +42,10 @@ BUCKET_CAPACITY = 30          # same as Roblox RemoteGuard
 BUCKET_REFILL = 10.0          # tokens / s
 POS_CAPACITY = 20             # pos/ping frames: separate bucket, excess silently dropped
 POS_REFILL = 15.0
+BUILD_CAPACITY = 12           # 0.5.0: interior* / buildExpansion / setLineProcess have their own bucket on top
+BUILD_REFILL = 4.0            # (drag-placing in build mode must not drown the company in audit entries)
+BUILD_ACTIONS = ("interiorPlace", "interiorMove", "interiorRemove", "interiorPaint", "interiorTheme", "interiorLight",
+                 "buildExpansion", "setLineProcess")
 MAX_QUEUE = 2000              # outgoing frames buffered for a slow client before it is dropped
 CHAT_MAX = 200
 NAME_MAX = 20
@@ -125,6 +129,7 @@ class Conn:
         self.room = None          # Room or None
         self.bucket = Bucket(BUCKET_CAPACITY, BUCKET_REFILL)
         self.pos_bucket = Bucket(POS_CAPACITY, POS_REFILL)
+        self.build_bucket = Bucket(BUILD_CAPACITY, BUILD_REFILL)
         self.pos = None
         self.closed = False
         self.last_create = -1e9
@@ -686,6 +691,9 @@ class GameServer:
             return
         if conn.room is None:
             conn.send({"t": "res", "id": aid, "ok": False, "error": "You are not in a company"})
+            return
+        if action in BUILD_ACTIONS and not conn.build_bucket.take():
+            conn.send({"t": "res", "id": aid, "ok": False, "error": "Too many build actions, slow down"})
             return
         try:
             ok, data = self.lcall("act", conn.pid, action, self.lua.to_lua(args))

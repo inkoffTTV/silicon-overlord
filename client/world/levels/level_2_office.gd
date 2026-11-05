@@ -7,10 +7,13 @@ const H := 2.8
 const T := 0.2
 const ShipDock := preload("res://world/live/ship_dock.gd")
 const Shipping := preload("res://world/live/shipping.gd")
+const InteriorView := preload("res://world/build/interior_view.gd")
 
 var hw := 6.0
 var hd := 4.5
 var altitude := 4.0
+## 0.5.0: placed interior items (world/build/interior_view.gd)
+var interior: Node3D
 
 func _build() -> void:
 	var lv := clampi(level, 2, 7)
@@ -21,10 +24,21 @@ func _build() -> void:
 	_city()
 	_furniture(lv)
 	_lights(lv)
+	interior = InteriorView.new()
+	interior.level = self
+	live_root.add_child(interior)
 	set_spawn(Vector3(hw - 1.6, 0.05, hd - 1.4), 40.0)
 	kit.viewpoint(self, "overview", Vector3(hw - 0.6, 2.3, hd - 0.6), Vector3(-hw * 0.4, 0.6, -hd * 0.5), 76.0)
 	kit.viewpoint(self, "windows", Vector3(0.0, 1.6, 0.5), Vector3(-hw, 1.2, -hd * 0.2), 74.0)
 	kit.viewpoint(self, "dispatch", Vector3(hw - 4.2, 1.7, hd - 2.8), Vector3(hw - 0.5, 0.8, hd - 1.0), 72.0)
+
+func daylight_windows() -> Array:
+	var out := []
+	var n := maxi(1, int(hd / 3.0))
+	for i in n:
+		var z := -hd + (i + 0.5) * (2 * hd / n)
+		out.append({"pos": Vector3(-hw + 0.2, 2.3, z), "target": Vector3(-hw + 3.0, 0.0, z + 0.5)})
+	return out
 
 func _shell(lv: int) -> void:
 	var g := kit.node(self, Vector3.ZERO, 0.0, "Shell")

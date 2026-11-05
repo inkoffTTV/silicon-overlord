@@ -39,6 +39,19 @@ function Shipping.find(c: any, crateId: string): (any, number?)
 	return nil, nil
 end
 
+-- 0.5.0: open-crate limit = base x3 with the basement (garage only: HQ 1) + shelf storage in the interior
+-- (read from state, no require)
+function Shipping.maxOpen(c: any): number
+	local base = P.maxOpenCrates or 20
+	local inGarage = c.hq and (tonumber(c.hq.level) or 1) <= 1
+	local ex = inGarage and type(c.hq.expansions) == "table" and c.hq.expansions.basement or nil
+	if type(ex) == "table" and (tonumber(ex.level) or 0) > 0 then
+		base = base * ((Balance.Expansions and Balance.Expansions.basementCrateMult) or 3)
+	end
+	local sm = type(c.interior) == "table" and c.interior.summary or nil
+	return base + (type(sm) == "table" and (tonumber(sm.storage) or 0) or 0)
+end
+
 function Shipping.newestCrateOf(c: any, productId: string): any
 	local newest = nil
 	for _, cr in ipairs(crateList(c)) do
@@ -128,7 +141,7 @@ function Shipping.addOutput(c: any, productId: string, units: number): any
 		newest.units = newest.units + units
 		return newest
 	end
-	if #list >= (P.maxOpenCrates or 20) then
+	if #list >= Shipping.maxOpen(c) then
 		if newest then
 			newest.units = newest.units + units
 			return newest

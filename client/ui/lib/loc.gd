@@ -22,7 +22,7 @@ const LANGS := [["en", "English"], ["ru", "Русский"], ["uk", "Украї�
 const COLS := ["ru", "uk", "de", "es", "pt", "fr", "pl", "tr", "zh", "ja"]
 const I18N_FILES := ["res://ui/i18n/client_a.json", "res://ui/i18n/client_b.json", "res://ui/i18n/iter2.json",
 	"res://ui/i18n/game.json", "res://ui/i18n/world.json", "res://ui/i18n/purchasing.json", "res://ui/i18n/story_ui.json",
-	"res://ui/i18n/account.json"]
+	"res://ui/i18n/account.json", "res://ui/i18n/interior.json"]
 const SERVER_FILE := "res://ui/i18n/server.json"
 
 static var lang := "en"

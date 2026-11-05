@@ -67,6 +67,10 @@ async def play(url, i, days, results):
         r = await c.act("publishBlueprint", {"id": bp})
         pid, proj = r["data"]["productId"], r["data"].get("projectId")
         await c.act("claimDaily")
+        # 0.5.0: a bit of build mode (the interior section must stay in sync through the soak)
+        await c.act("interiorPlace", {"room": "garage", "def": "plant_pothos", "x": -2.5, "z": -1.5, "rot": 0})
+        await c.act("interiorTheme", {"room": "garage", "theme": ["grunge", "wood", "lab", "neon", "scandi"][i % 5]})
+        await c.act("buildExpansion", {"id": ["annex", "shed", "showroom", "basement"][i % 4]})
         cash0 = c.state["finance"]["cash"]
         await c.speed(8)
         t0 = time.time()

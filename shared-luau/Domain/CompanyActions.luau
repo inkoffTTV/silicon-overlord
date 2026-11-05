@@ -33,6 +33,8 @@ local Development = require(Shared.Domain.Development)
 local Shipping = require(Shared.Domain.Shipping)
 local Challenges = require(Shared.Domain.Challenges)
 local Story = require(Shared.Domain.Story)
+local Interior = require(Shared.Domain.Interior) -- 0.5.0
+local Processes = require(Shared.Data.ProductionProcesses) -- 0.5.0
 
 local CompanyActions = {}
 
@@ -69,7 +71,7 @@ function CompanyActions.startResearch(c: Types.CompanyState, userId: number, tec
 	end
 	local labLevel = CompanySim.roomLevel(c, "ResearchLab")
 	local researchers = EmployeeRules.count(c.employees.list, "Researcher")
-	local ok, why = ResearchRules.canStart(tech, c.research, labLevel, researchers)
+	local ok, why = ResearchRules.canStart(tech, c.research, labLevel, researchers, Interior.extraResearchSlots(c))
 	if not ok then
 		return fail(why or "Cannot start")
 	end
@@ -633,16 +635,35 @@ function CompanyActions.upgradeLine(c: Types.CompanyState, lineId: string): (boo
 		return fail("Max level")
 	end
 	local cost = ProductionRules.buildCost(line.kind, line.level + 1)
-	if not spend(c, cost, true) then
-		return fail(string.format("Not enough cash ($%.0f)", cost))
+	-- 0.5.0: the line keeps its process; a bigger line costs more to fit with it (setup scales with the level)
+	local lineAny: any = line
+	local processCost = CompanyActions.upgradeProcessCost(line)
+	if not spend(c, cost + processCost, true) then
+		return fail(string.format("Not enough cash ($%.0f)", cost + processCost))
 	end
 	local fresh = ProductionRules.newLine(line.id, line.kind, line.level + 1)
 	fresh.layoutScore = line.layoutScore
-	local lineAny: any = line
+	local keep = { process = lineAny.process, processFrom = lineAny.processFrom, processUntil = lineAny.processUntil }
 	for k, v in pairs(fresh) do
 		lineAny[k] = v
 	end
-	return true, { cost = cost }
+	if line.kind == "Assembly" then
+		lineAny.process = type(keep.process) == "string" and keep.process or lineAny.process
+		lineAny.processFrom = keep.processFrom
+		lineAny.processUntil = keep.processUntil
+		-- an upgrade fixes incident downtime (as before) but a running process switch still runs its course
+		lineAny.downUntilDay = math.max(lineAny.downUntilDay, ProductionRules.switchUntil(lineAny))
+	end
+	return true, { cost = cost + processCost, processCost = processCost }
+end
+
+-- 0.5.0: extra setup paid when an assembly line with a process above "hand" is upgraded (setup cost difference
+-- between the next level and this one; Data/ProductionProcesses setupCost)
+function CompanyActions.upgradeProcessCost(line: any): number
+	if line == nil or line.kind ~= "Assembly" or type(line.process) ~= "string" then
+		return 0
+	end
+	return math.max(0, Processes.setupCost("hand", line.process, line.level + 1) - Processes.setupCost("hand", line.process, line.level))
 end
 
 function CompanyActions.queueProduction(c: Types.CompanyState, productId: string, lineId: string, quantity: number): (boolean, any)
@@ -1176,7 +1197,7 @@ function CompanyActions.hire(c: Types.CompanyState, candidateId: string): (boole
 	if not cand then
 		return fail("Candidate no longer available")
 	end
-	local cap = EmployeeRules.staffCap(c.hq.level, CompanySim.roomLevel(c, "Headquarters"))
+	local cap = CompanySim.staffCap(c) -- 0.5.0: + seats in the interior
 	if #c.employees.list >= cap then
 		return fail(string.format("Staff cap reached (%.0f). Upgrade the HQ.", cap))
 	end
@@ -1941,6 +1962,92 @@ function CompanyActions.upgradeHQ(c: Types.CompanyState): (boolean, any)
 		Office.afterMove(c)
 	end
 	return ok, data
+end
+
+-- ---------------------------------------------------------------------------
+-- 0.5.0: interior editor, garage expansions, production processes (docs/ACTIONS.md)
+-- ---------------------------------------------------------------------------
+CompanyActions.interiorPlace = Interior.place
+CompanyActions.interiorMove = Interior.move
+CompanyActions.interiorRemove = Interior.remove
+CompanyActions.interiorPaint = Interior.paint
+CompanyActions.interiorTheme = Interior.theme
+CompanyActions.interiorLight = Interior.light
+CompanyActions.expansionCatalog = Interior.expansionCatalog
+
+function CompanyActions.buildExpansion(c: Types.CompanyState, id: any): (boolean, any)
+	if id == "loft" then
+		local ok, data = CompanyActions.buildRoom(c, "AssemblyLine")
+		if ok and type(data) == "table" then
+			data.id = "loft"
+		end
+		return ok, data
+	end
+	return Interior.buildExpansion(c, id)
+end
+
+-- At HQ 1 the QC / showroom / server rooms exist only as garage expansions (they were not buildable there before)
+local baseBuildRoom = CompanyActions.buildRoom
+function CompanyActions.buildRoom(c: Types.CompanyState, roomId: string): (boolean, any)
+	local alias = Interior.roomAlias[roomId]
+	if alias and c.hq.level <= 1 then
+		local ok, data = Interior.buildExpansion(c, alias)
+		if ok and type(data) == "table" then
+			data.expansion = alias
+		end
+		return ok, data
+	end
+	return baseBuildRoom(c, roomId)
+end
+
+function CompanyActions.setLineProcess(c: Types.CompanyState, lineId: any, processId: any): (boolean, any)
+	local line: any = TableUtil.find(c.production.lines, function(l: Types.ProductionLine)
+		return l.id == lineId
+	end)
+	if not line then
+		return fail("Unknown line")
+	end
+	if line.kind ~= "Assembly" then
+		return fail("Only assembly lines have a process")
+	end
+	local to = type(processId) == "string" and Processes.byId[processId] or nil
+	if to == nil then
+		return fail("Unknown process")
+	end
+	local from = line.process or Processes.default
+	if from == to.id then
+		return fail("Already using that process")
+	end
+	for _, techId in ipairs(to.tech) do
+		if not c.research.unlocked[techId] then
+			local t = TechTree.byId[techId]
+			return fail("Research " .. (t and t.name or techId) .. " first")
+		end
+	end
+	local cost = Processes.setupCost(from, to.id, line.level)
+	if not spend(c, cost, true) then
+		return fail(string.format("Not enough cash ($%.0f)", cost))
+	end
+	local day = c.time.elapsedDays
+	line.processFrom = from
+	line.process = to.id
+	line.processUntil = day + to.switchDays
+	line.downUntilDay = math.max(line.downUntilDay or 0, day + to.switchDays)
+	return true, { lineId = line.id, process = to.id, cost = cost, downtimeDays = to.switchDays, untilDay = line.processUntil }
+end
+
+-- Pieces bought / moved / sold through the old grid office (0.4.0 clients) are mirrored into the interior
+local CA: any = CompanyActions
+for _, name in ipairs({ "buyFurniture", "sellFurniture", "moveFurniture", "removeFurniture", "placeFromStorage", "autoPlace", "hire", "upgradeHQ" }) do
+	local base = CA[name]
+	CA[name] = function(c: Types.CompanyState, ...): (boolean, any)
+		local ok, data = base(c, ...)
+		if ok then
+			Interior.syncLegacy(c)
+			Interior.refresh(c)
+		end
+		return ok, data
+	end
 end
 
 return CompanyActions

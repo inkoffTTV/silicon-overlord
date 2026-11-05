@@ -17,6 +17,7 @@ extends Node
 const Prefs := preload("res://ui/lib/prefs.gd")
 const L := preload("res://ui/lib/loc.gd")
 const Kdf := preload("res://net/kdf.gd")
+const GD := preload("res://ui/lib/gdata.gd")
 
 signal status_changed(status: String, detail: String)
 signal joined_company(code: String)
@@ -609,8 +610,8 @@ func _on_text(text: String) -> void:
 			var nkey := str(msg.get("key", "")) if msg.get("key") != null else ""
 			if nkey.begins_with("story."):
 				story_notified.emit(nkey, msg.get("params") if msg.get("params") is Dictionary else {})
-			var nt := L.server(msg.get("key"), msg.get("params"), str(msg.get("title", "")))
-			var nb := L.server(msg.get("bodyKey"), msg.get("bodyParams"), str(msg.get("body", "")) if msg.get("body") != null else "")
+			var nt := notify_text(msg.get("key"), msg.get("params"), str(msg.get("title", "")))
+			var nb := notify_text(msg.get("bodyKey"), msg.get("bodyParams"), str(msg.get("body", "")) if msg.get("body") != null else "")
 			Bus.notify.emit(str(msg.get("kind", "info")), nt, nb)
 			var body_en := str(msg.get("body", "")) if msg.get("body") != null else ""
 			last_notify = {}
@@ -666,3 +667,21 @@ func _on_left(reason: String) -> void:
 		_set_status("online", "")
 	if had:
 		left_company.emit(reason)
+
+## A notify title / body in the current language. Line ids ("line_49_1") become the names players see in the
+## production screen ("Line 2", "Workbench") and incident kinds ("MaterialShortage") readable words; such a text is
+## then built from our template even in English (0.5.0 QA #4).
+static func notify_text(k: Variant, params: Variant, english: String) -> String:
+	var ks := str(k) if k != null else ""
+	if params is Dictionary and ks in LINE_KEYS:
+		var p: Dictionary = (params as Dictionary).duplicate()
+		var st: Dictionary = Game.state
+		if ks == "note.factory_incident_kind" and p.has("kind"):
+			p["kind"] = GD.incident_kind(str(p.kind))
+		elif p.has("id"):
+			p["id"] = GD.line_label_id(st, str(p.id))
+		if L.has_server_key(ks):
+			return L.server(ks, p, "")
+	return L.server(k, params, english)
+
+const LINE_KEYS := ["note.line_id_needs_a_decision_repair_replace_or", "note.factory_incident_kind"]

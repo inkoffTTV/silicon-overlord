@@ -18,7 +18,7 @@ function ResearchRules.days(tech: any): number
 	return math.floor(R.baseDaysTier[MathUtil.clamp(tech.tier, 1, 7)] * (tech.daysMult or 1))
 end
 
-function ResearchRules.canStart(tech: any, research: Types.ResearchState, labLevel: number, researcherCount: number): (boolean, string?)
+function ResearchRules.canStart(tech: any, research: Types.ResearchState, labLevel: number, researcherCount: number, extraSlots: number?): (boolean, string?)
 	if research.unlocked[tech.id] then
 		return false, "Already researched"
 	end
@@ -39,7 +39,7 @@ function ResearchRules.canStart(tech: any, research: Types.ResearchState, labLev
 	if researcherCount < tech.researcherRequirements then
 		return false, string.format("Requires %.0f researchers", tech.researcherRequirements)
 	end
-	local slots = R.parallelJobsPerLabLevel[MathUtil.clamp(labLevel, 1, 7)]
+	local slots = R.parallelJobsPerLabLevel[MathUtil.clamp(labLevel, 1, 7)] + (extraSlots or 0) -- 0.5.0: annex + lab benches
 	if #research.active >= slots then
 		return false, string.format("Lab can run %.0f projects at once", slots)
 	end

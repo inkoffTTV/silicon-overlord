@@ -52,6 +52,9 @@ RemoteRegistry.ActionPermission = {
 	-- NEXT-PASS-B
 	moveFurniture = "Construction", removeFurniture = "Construction", placeFromStorage = "Construction", paintFurniture = "Construction", autoPlace = "Construction",
 	teamParty = "Hiring", rerollCandidates = "Hiring", setAutoHire = "Hiring",
+	-- 0.5.0 interior editor, expansions, production processes
+	interiorPlace = "Construction", interiorMove = "Construction", interiorRemove = "Construction", interiorPaint = "Construction",
+	interiorTheme = "Construction", interiorLight = "Construction", buildExpansion = "Construction", setLineProcess = "Manufacturing",
 	finishProjectNow = "Design", cancelProject = "Design", addProjectQuality = "Design", fixProjectBug = "Design", buyTokenItem = nil, playInvite = "lobby",
 }
 

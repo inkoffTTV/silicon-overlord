@@ -17,7 +17,7 @@ REPLICATED = ["time", "finance", "hq", "employees", "research", "blueprints", "p
               "reputation", "ecosystem", "stock", "world", "milestones", "audit", "news", "owners", "approvals", "invites",
               "tutorialStep", "specialization", "liquidated", "customComponents", "name", "logo", "mode", "projects",
               "unlockedFinishes", "loan", "regionsUnlocked", "office", "goals", "achievements", "awards", "daily",
-              "empire", "legacyMods", "challenges", "story", "repairs", "stateVersion"]
+              "empire", "legacyMods", "challenges", "story", "repairs", "interior", "stateVersion"]
 
 
 def norm(v):

@@ -9,6 +9,8 @@ extends SceneTree
 ## and the real Design Studio flow (commit concept on step 1 -> save -> publishBlueprint) through the UI.
 ## Iteration 3: a Story start company: clock paused (speed refused), chapter 0 storyEvents, chapter 1 completed with
 ## two real repair orders (one through the UI counter + repair bench screens), listMyCompanies in the lobby.
+## 0.5.0: build mode through the UI (auto-place, move, paint, theme, light, undo, sell, a blocked spot's error), Grow the
+## base (buy the showroom, furnish it), production process (research Factory Automation 1, switch line_1 to semi).
 
 var port := 7391
 var pid := -1
@@ -20,7 +22,7 @@ func _initialize() -> void:
 		if a.begins_with("--port="):
 			port = int(a.substr(7))
 	_run.call_deferred()
-	create_timer(150).timeout.connect(func() -> void:
+	create_timer(260).timeout.connect(func() -> void:
 		print("ui_net_test: TIMEOUT")
 		_finish(2))
 
@@ -153,6 +155,108 @@ func _story(ui: Node) -> void:
 			found = c
 	check(not found.is_empty() and int(found.get("story", {}).get("chapter", -1)) >= 2, "listMyCompanies has the story company at chapter 2")
 	check(ui.menu.visible, "back in the title menu")
+
+func _items(room: String) -> Array:
+	var Game: Node = root.get_node("Game")
+	var r: Variant = Game.state.get("interior", {}).get("rooms", {}).get(room, {})
+	var it: Variant = r.get("items", []) if r is Dictionary else []
+	return it if it is Array else (it as Dictionary).values()
+
+func _interior(ui: Node) -> void:
+	var Game: Node = root.get_node("Game")
+	var Net: Node = root.get_node("Net")
+	var IR = load("res://ui/lib/interior_rules.gd")
+	print("ui_net_test: interior / expansions / processes")
+	if not (Game.state.get("interior") is Dictionary):
+		print("  (server without the 0.5.0 interior: skipped)")
+		return
+	ui.close_screen()
+	ui.enter_build(true)
+	var b: Control = ui.build
+	check(b.active and b.room_id == "garage", "build mode in the garage")
+	b.select_def("plant_cactus")
+	var r: Dictionary = await b.place_auto()
+	check(r.get("ok", false), "interiorPlace (auto spot) accepted: %s" % str(r.get("error", "ok")))
+	var ok: bool = await _wait(func() -> bool: return _items("garage").any(func(i: Dictionary) -> bool: return str(i.get("def", "")) == "plant_cactus"), 4.0)
+	check(ok, "the cactus arrives in the interior section")
+	var cid := ""
+	for i in _items("garage"):
+		if str(i.get("def", "")) == "plant_cactus":
+			cid = str(i.get("id", ""))
+	var spot: Array = IR.auto_spot(Game.state, "garage", "plant_cactus")
+	if not spot.is_empty():
+		var m: Dictionary = await b.move_item(cid, spot[0], spot[1], 90)
+		check(m.get("ok", false), "interiorMove: %s" % str(m.get("error", "ok")))
+		ok = await _wait(func() -> bool: return _items("garage").any(func(i: Dictionary) -> bool: return str(i.get("id", "")) == cid and is_equal_approx(float(i.get("x", 0)), float(spot[0])) and int(i.get("rot", 0)) == 90), 4.0)
+		check(ok, "moved item has the new position")
+		var u: Dictionary = await b.undo()
+		check(u.get("ok", false), "undo the move: %s" % str(u.get("error", "ok")))
+	var p: Dictionary = await b.paint("wall", "brick", "#6E5A4E")
+	check(p.get("ok", false), "interiorPaint: %s" % str(p.get("error", "ok")))
+	ok = await _wait(func() -> bool: return str(Game.state.get("interior", {}).get("rooms", {}).get("garage", {}).get("surfaces", {}).get("wall", {}).get("mat", "")) == "brick", 4.0)
+	check(ok, "the wall is brick in the state")
+	var t: Dictionary = await b.apply_theme("wood")
+	check(t.get("ok", false), "interiorTheme: %s" % str(t.get("error", "ok")))
+	var l: Dictionary = await b.set_light("neon")
+	check(l.get("ok", false), "interiorLight: %s" % str(l.get("error", "ok")))
+	ok = await _wait(func() -> bool: return float(Game.state.get("interior", {}).get("rooms", {}).get("garage", {}).get("comfort", 0)) > 0, 4.0)
+	check(ok, "the garage has comfort > 0")
+	# a blocked spot: the server's error is shown (and translated) by the HUD
+	b.select_def("plant_cactus")
+	var bad: Dictionary = await b.place_at(-3.75, 0.5, 0)   # the side annex doorway (garage left wall)
+	check(not bad.get("ok", true) and str(bad.get("errorKey", "")).begins_with("err.blocked"), "doorway refused (%s)" % str(bad.get("errorKey", "")))
+	check(b.last_error != "", "the HUD shows the error: %s" % b.last_error)
+	# place + undo (sells it back), then sell the cactus
+	b.select_def("decor_wall_clock")
+	var w: Dictionary = await b.place_auto()
+	check(w.get("ok", false), "wall clock placed: %s" % str(w.get("error", "ok")))
+	var uid := str(w.get("data", {}).get("item", {}).get("id", "")) if w.get("data") is Dictionary else ""
+	var un: Dictionary = await b.undo()
+	check(un.get("ok", false), "undo the placement: %s" % str(un.get("error", "ok")))
+	ok = await _wait(func() -> bool: return not _items("garage").any(func(i: Dictionary) -> bool: return str(i.get("id", "")) == uid), 4.0)
+	check(ok, "undone item is gone")
+	var sres: Dictionary = await b.sell(cid)
+	check(sres.get("ok", false) and float(sres.get("data", {}).get("refund", 0)) > 0, "interiorRemove refunds: %s" % str(sres.get("error", "ok")))
+	b.leave()
+	# Grow the base: the showroom
+	ui.open_screen("expansions", "showroom")
+	await create_timer(0.4).timeout
+	check(ui.current_kind == "expansions", "Grow the base opens")
+	var e: Dictionary = await ui.current.buy("showroom")
+	check(e.get("ok", false), "buildExpansion showroom: %s" % str(e.get("error", "ok")))
+	ok = await _wait(func() -> bool: return int(Game.state.get("hq", {}).get("expansions", {}).get("showroom", {}).get("level", 0)) == 1, 4.0)
+	check(ok, "hq.expansions.showroom level 1")
+	ui.close_screen()
+	ui.enter_build(true)
+	b.set_room("showroom")
+	b.select_def("decor_demo_table")
+	var dt: Dictionary = await b.place_auto()
+	check(dt.get("ok", false), "furnish the new showroom: %s" % str(dt.get("error", "ok")))
+	b.leave()
+	# production process: research Factory Automation 1, then switch line_1 to semi-automatic
+	var gate: Dictionary = await Net.act("setLineProcess", {"lineId": "line_1", "process": "semi"})
+	check(not gate.get("ok", true) and str(gate.get("errorKey", "")) != "", "semi needs research first (%s)" % str(gate.get("errorKey", "")))
+	await Net.act("cancelResearch", {"techId": "node_14_research"})
+	var sr: Dictionary = await Net.act("startResearch", {"techId": "mfg_auto_1"})
+	check(sr.get("ok", false), "startResearch Factory Automation 1: %s" % str(sr.get("error", "ok")))
+	Net.set_speed(8)
+	ok = await _wait(func() -> bool: return Game.state.get("research", {}).get("unlocked", {}).has("mfg_auto_1"), 45.0)
+	Net.set_speed(0)
+	check(ok, "Factory Automation 1 researched")
+	if ok:
+		ui.open_screen("production_line", "line_1")
+		await create_timer(0.3).timeout
+		ui.current.open_process("line_1")
+		await create_timer(0.2).timeout
+		var sw: Dictionary = await ui.current.switch_process("line_1", "semi")
+		check(sw.get("ok", false), "setLineProcess semi from the UI: %s" % str(sw.get("error", "ok")))
+		ok = await _wait(func() -> bool:
+			for ln in Game.state.get("production", {}).get("lines", []):
+				if str(ln.get("id", "")) == "line_1":
+					return str(ln.get("process", "")) == "semi" and int(ln.get("processUntil", 0)) > int(Game.state.get("time", {}).get("elapsedDays", 0))
+			return false, 4.0)
+		check(ok, "line_1 is semi and retooling")
+		ui.close_screen()
 
 func _run() -> void:
 	var Game: Node = root.get_node("Game")
@@ -290,6 +394,7 @@ func _run() -> void:
 	var published: bool = Game.state.get("blueprints", {}).get(bp_designed, {}).get("published", false) == true
 	check(published, "Begin development published the blueprint")
 	check(not Game.state.get("projects", {}).is_empty(), "a development project exists")
+	await _interior(ui)
 	# leave + resume
 	var code: String = Game.code
 	Net.leave()

@@ -87,6 +87,9 @@ var _seat_saw_modal := false
 var _seat_t := 0.0
 var _step_side := 0.0
 var _world: Node = null
+## 0.5.0: true while build mode is on (world/build/build_mode.gd sets it): no crouch on C, no interact prompts,
+## no prop grabbing — LMB / E / C / X belong to the build tools then.
+var build_mode := false
 
 func _enter_tree() -> void:
 	add_to_group("local_player")
@@ -300,9 +303,9 @@ func _unhandled_input(event: InputEvent) -> void:
 		_capture_mouse(false)
 	elif event.is_action_pressed("flashlight"):
 		flashlight.visible = not flashlight.visible
-	elif event.is_action_pressed("interact"):
+	elif event.is_action_pressed("interact") and not build_mode:
 		try_interact()
-	elif event.is_action_pressed("grab"):
+	elif event.is_action_pressed("grab") and not build_mode:
 		try_grab()
 	elif event.is_action_released("grab"):
 		release_held()
@@ -397,7 +400,7 @@ func _physics_process(dt: float) -> void:
 		velocity.y -= GRAVITY * dt
 		_fall_speed = maxf(_fall_speed, -velocity.y)
 	# crouch (stay crouched if something is overhead)
-	var want_crouch := ok and Input.is_action_pressed("crouch")
+	var want_crouch := ok and Input.is_action_pressed("crouch") and not build_mode
 	if crouching and not want_crouch and _blocked_above():
 		want_crouch = true
 	_set_crouch(want_crouch)
@@ -647,7 +650,7 @@ static func find_interactable(n: Node) -> Node:
 func _update_focus() -> void:
 	var f: Node = null
 	_aim_grabbable = false
-	if _input_allowed() and held == null and not seated:
+	if _input_allowed() and held == null and not seated and not build_mode:
 		var hit := _ray(GRAB_REACH)
 		if not hit.is_empty():
 			var c: Object = hit.collider

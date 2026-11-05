@@ -184,5 +184,21 @@
  {
   "key": "err.story_clock_paused",
   "en": "Story: time starts at chapter 4"
+ },
+ {
+  "key": "err.room_not_built",
+  "en": "That room is not built yet"
+ },
+ {
+  "key": "err.room_not_in_hq",
+  "en": "That room is not part of this HQ"
+ },
+ {
+  "key": "err.expansions_garage_only",
+  "en": "Expansions are for the garage. Build rooms in the office."
+ },
+ {
+  "key": "err.expansion_max_level",
+  "en": "Expansion at max level"
  }
 ]

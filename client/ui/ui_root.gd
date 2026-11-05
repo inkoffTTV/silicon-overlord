@@ -15,6 +15,7 @@ const LaunchOverlay := preload("res://ui/screens/launch_overlay.gd")
 const StoryUI := preload("res://ui/story/story_ui.gd")
 const Loading := preload("res://ui/menu/loading_screen.gd")
 const SD := preload("res://ui/story/story_data.gd")
+const BuildHUD := preload("res://ui/hud/build_hud.gd")
 
 const DESIGN := Vector2(1440, 810)
 const SCREENS := {
@@ -28,7 +29,9 @@ const SCREENS := {
 	"supplier_phone": "res://ui/screens/purchasing.gd",
 	"purchasing": "res://ui/screens/purchasing.gd",
 	"van": "res://ui/screens/dialog_van.gd",
-	"stairs_locked": "res://ui/screens/dialog_stairs.gd",
+	"stairs_locked": "res://ui/screens/expansions.gd",
+	"expansion_locked": "res://ui/screens/expansions.gd",
+	"expansions": "res://ui/screens/expansions.gd",
 	"production_line": "res://ui/screens/production.gd",
 	"pc_challenge": "res://ui/challenges/challenge_screen.gd",
 	"whiteboard_challenge": "res://ui/challenges/challenge_screen.gd",
@@ -56,6 +59,8 @@ var _launch: Control = null
 var story: Control = null
 var loading: Control = null
 var _modal := false
+## 0.5.0 build mode HUD (key B)
+var build: Control = null
 var _scale := 1.0
 
 func _ready() -> void:
@@ -151,6 +156,15 @@ func _build() -> void:
 	hud = HUD.new()
 	hud.ui_root = self
 	root.add_child(hud)
+	build = BuildHUD.new()
+	build.ui_root = self
+	build.changed_modal.connect(_update_modal)
+	build.closed.connect(func() -> void:
+		if hud and current == null:
+			hud.visible = Game.has_company()
+		if toasts:
+			toasts.set_compact(false))
+	root.add_child(build)
 	chat = Chat.new()
 	root.add_child(chat)
 	chat.open_changed.connect(func(_o: bool) -> void: _update_modal())
@@ -196,6 +210,7 @@ func set_language(lang: String) -> void:
 	_quick = null
 	_launch = null
 	loading = null
+	build = null
 	_build()
 	_refresh_mode()
 	SD.reload()
@@ -216,7 +231,7 @@ func _refresh_mode() -> void:
 	_update_modal()
 
 func _update_modal() -> void:
-	var open: bool = menu.visible or current != null or _pause != null or _quick != null or _launch != null or (chat and chat.is_open) \
+	var open: bool = menu.visible or current != null or (build != null and build.wants_modal()) or _pause != null or _quick != null or _launch != null or (chat and chat.is_open) \
 		or (loading != null and not loading.is_closing()) or (story != null and story.final_card != null)
 	if open != _modal:
 		_modal = open
@@ -239,6 +254,8 @@ func _on_state_changed(keys: Array) -> void:
 	if not Game.has_company():
 		return
 	hud.refresh()
+	if build and build.active:
+		build.on_state_changed(keys)
 	if keys.is_empty() or "products" in keys:
 		if not was_menu:
 			_watch_launches()
@@ -274,6 +291,9 @@ func _on_interact(kind: String, id: String) -> void:
 	if kind == "door_exit":
 		_open_pause()
 		return
+	if kind == "build_catalog":
+		enter_build(true)
+		return
 	if current_kind == kind:
 		return
 	if kind == "supplier_phone" and story:
@@ -287,6 +307,8 @@ func _open_screen(kind: String, id: String) -> void:
 	_close_quick()
 	if chat.is_open:
 		chat.close_input()
+	if build and build.active:
+		build.leave()
 	var scr: Control = load(SCREENS[kind]).new()
 	scr.setup(self, id)
 	if "source_kind" in scr:
@@ -547,16 +569,21 @@ func _open_quick() -> void:
 	for it in [["pc_design", "palette", U.SUCCESS, "Design studio"], ["whiteboard_research", "flask", U.ACCENT_ALT, "Research board"],
 			["workbench_production", "factory", U.ORANGE, "Workbench"], ["phone_shelf", "shelf", U.CYAN, "Product shelf"],
 			["board_company", "chart", U.GOLD, "Company board"], ["job_board", "cv", U.PINK, "Employees"],
-			["purchasing", "box", U.ORANGE, "Purchasing"], ["goals", "trophy", U.GOLD, "Goals & gifts"]]:
+			["purchasing", "box", U.ORANGE, "Purchasing"], ["goals", "trophy", U.GOLD, "Goals & gifts"],
+			["build", "hammer", U.ORANGE, "Build mode  ·  B"], ["expansions", "house", U.SUCCESS, "Grow the base"]]:
 		var h := U.hbox(12)
 		h.add_child(U.icon_tile(it[1], it[2], 36, 9))
 		h.add_child(U.lbl(L.t(it[3]), U.MD, U.TEXT, "semibold"))
 		var b := U.content_btn(h, "BtnRow", Vector2(12, 10))
 		b.custom_minimum_size.x = 230
 		var kind: String = it[0]
+		b.set_meta("quick", kind)
 		b.pressed.connect(func() -> void:
 			_close_quick()
-			_open_screen(kind, ""))
+			if kind == "build":
+				enter_build(true)
+			else:
+				_open_screen(kind, ""))
 		g.add_child(b)
 	_update_modal()
 
@@ -598,6 +625,8 @@ func _handle_escape() -> bool:
 			return true
 		close_screen()
 		return true
+	if build and build.active and build.on_escape():
+		return true
 	if menu.visible:
 		menu.go_back()
 		return true
@@ -611,6 +640,24 @@ func _unhandled_input(e: InputEvent) -> void:
 		return
 	if not Game.has_company() or menu.visible:
 		return
+	var ek := e as InputEventKey
+	var free: bool = current == null and _pause == null and not chat.is_open and _launch == null
+	if free and ek.physical_keycode == KEY_B and not ek.ctrl_pressed:
+		if build.active:
+			build.leave()
+		else:
+			enter_build(true)
+		get_viewport().set_input_as_handled()
+		return
+	if free and build.active:
+		if e.is_action("tab_menu"):
+			build.toggle_catalog()
+			get_viewport().set_input_as_handled()
+			return
+		if ek.physical_keycode == KEY_Z and ek.ctrl_pressed:
+			build.undo()
+			get_viewport().set_input_as_handled()
+			return
 	if e.is_action("chat") and current == null and _pause == null and not chat.is_open:
 		chat.open_input()
 		get_viewport().set_input_as_handled()
@@ -620,6 +667,27 @@ func _unhandled_input(e: InputEvent) -> void:
 		else:
 			_open_quick()
 		get_viewport().set_input_as_handled()
+
+# ---------------------------------------------------------------- build mode (0.5.0)
+func enter_build(open_catalog: bool = true) -> void:
+	if not Game.has_company():
+		return
+	close_screen()
+	_close_quick()
+	_close_pause()
+	if chat.is_open:
+		chat.close_input()
+	hud.visible = false
+	toasts.set_compact(true)
+	build.enter(open_catalog)
+	_update_modal()
+
+## Research board focused on a tech (links from the production processes table).
+func open_research(tech_id: String) -> void:
+	_open_screen("whiteboard_research", "")
+	if current and current.has_method("debug_select"):
+		var t: Dictionary = load("res://ui/lib/gdata.gd").tech(tech_id)
+		current.debug_select(str(t.get("branch", "")), tech_id)
 
 # ---------------------------------------------------------------- debug hooks (tools/ui_shot.gd, tests)
 func debug_chat(lines: Array) -> void:

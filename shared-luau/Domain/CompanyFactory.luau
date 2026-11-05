@@ -21,6 +21,8 @@ local Office = require(Shared.Domain.Office)
 local Shipping = require(Shared.Domain.Shipping)
 local Challenges = require(Shared.Domain.Challenges)
 local Story = require(Shared.Domain.Story)
+local Interior = require(Shared.Domain.Interior) -- 0.5.0
+local Processes = require(Shared.Data.ProductionProcesses) -- 0.5.0
 
 local CompanyFactory = {}
 
@@ -97,7 +99,7 @@ function CompanyFactory.new(args: NewCompanyArgs): Types.CompanyState
 			qRevenue = 0, qCogs = 0, qOpex = 0, qCapex = 0, qSubscription = 0, qAppStore = 0, qB2B = 0, qUnits = 0, history = {},
 			researchBudgetPct = 0.2, marketingBudgetPct = 0.1, bankruptMonths = 0, totalRevenue = 0, totalUnits = 0, weeklyRevenue = {},
 		},
-		hq = { level = 1, rooms = { Headquarters = { level = 1, builtDay = 0 }, ResearchLab = { level = 1, builtDay = 0 }, Warehouse = { level = 1, builtDay = 0 } }, theme = "default" },
+		hq = { level = 1, rooms = { Headquarters = { level = 1, builtDay = 0 }, ResearchLab = { level = 1, builtDay = 0 }, Warehouse = { level = 1, builtDay = 0 } }, theme = "default", expansions = {} },
 		employees = { list = employees, morale = 0.7, perksBudgetMonthly = 0, candidates = candidates, candidatesRefreshDay = 1 },
 		research = { unlocked = unlocked, active = {}, processMaturity = {}, patents = {}, licensesOut = {}, labBoost = 0, points = 0 },
 		blueprints = {}, products = {},
@@ -132,6 +134,7 @@ function CompanyFactory.new(args: NewCompanyArgs): Types.CompanyState
 	-- online iteration 3: story start (small cash, helpers only, paused clock) or quick start (story done)
 	Story.setupNew(state, args.storyMode == true)
 	Office.refresh(state) -- grid placement for the starter furniture (NEXT-PASS-A)
+	Interior.migrate(state, true) -- 0.5.0: empty interior; the starter pieces are the garage's built-in desk & sofa
 	return state
 end
 
@@ -195,6 +198,8 @@ function CompanyFactory.migrate(state: any): Types.CompanyState
 		templateAny.achievements = {}
 	end
 	template.research.unlocked = {}
+	templateAny.interior = nil -- 0.5.0: built from the save's own office below (never from the template's)
+	Office.sanitize(state) -- 0.5.0: drop malformed office records (a bad save must still load)
 	Office.normalize(state) -- convert count-only office saves before the template fills missing keys (NEXT-PASS-A)
 	local hadStory = type(state.story) == "table" -- online iteration 3: saves without a story are finished stories
 	TableUtil.reconcile(state, template :: any)
@@ -203,6 +208,24 @@ function CompanyFactory.migrate(state: any): Types.CompanyState
 	EmployeeRules.ensureStations(state)
 	Challenges.state(state)
 	Story.ensure(state, hadStory)
+	-- 0.5.0 (idempotent): interior (old grid office mirrored in once), expansions, line processes
+	Interior.migrate(state)
+	for _, line in ipairs(state.production.lines or {}) do
+		if line.kind == "Assembly" and (type(line.process) ~= "string" or Processes.byId[line.process] == nil) then
+			line.process = "hand"
+		end
+		if line.processUntil ~= nil and type(line.processUntil) ~= "number" then
+			line.processUntil = nil
+		end
+	end
+	-- audit notes are clipped (TransactionService.MaxNoteLength); older saves may hold oversized ones
+	if type(state.audit) == "table" then
+		for _, e in ipairs(state.audit) do
+			if type(e) == "table" and type(e.note) == "string" and #e.note > 120 then
+				e.note = string.sub(e.note, 1, 120)
+			end
+		end
+	end
 	return state
 end
 

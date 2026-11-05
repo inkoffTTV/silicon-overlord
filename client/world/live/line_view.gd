@@ -6,11 +6,18 @@ extends Node3D
 ## Idle: amber, "IDLE". Blocked: amber blink + reason. Down (downUntilDay): red beacon.
 ## Local frame: the line runs along +Z from z=0 to z=length; belt top at y=BELT_Y; operator side = -X.
 ## Interactables: production_line (id = line id), line_qc (id = line id) with a "seat" (stand) spot.
+## 0.5.0 production processes (line.process, docs/ACTIONS.md "Production processes") change the machine:
+##   hand     wooden roller bench, three hand-assembly stations (parts trays, lamps, screwdrivers), no machines
+##   semi     conveyor with orange jig plates under pneumatic press heads (the 0.4.0 boxy machines)
+##   robotic  conveyor + 2..3 animated robot arms behind a yellow safety fence, one end-of-line tester
+##   smart    the whole line in an enclosed glass cell, lights out inside, a blue AI-vision scanner gantry sweeping
+## After a switch (line.processUntil > today) the line shows RETOOLING: cones, tape, the new kit half-installed.
 
 const Mats := preload("res://world/lib/mats.gd")
 const Meshes := preload("res://world/lib/meshes.gd")
 const HQ := preload("res://world/live/hq_state.gd")
 const BELT_Y := 0.82
+const PROCESS_SIGN := {"hand": "Hand assembly", "semi": "Semi-auto", "robotic": "Robotic", "smart": "Smart cell"}
 const KIND_COL := {"Assembly": Color(0.2, 0.42, 0.45), "CPUFab": Color(0.18, 0.28, 0.55), "GPUFab": Color(0.42, 0.2, 0.5),
 	"DisplayFab": Color(0.5, 0.36, 0.14), "BatteryFab": Color(0.25, 0.45, 0.2)}
 
@@ -39,6 +46,14 @@ var _phone_t := 0.0
 var _beep_t := 0.0
 var _fill := 0.0
 var _progress := 0.0
+var process := ""
+var _press: Array[Node3D] = []
+var _robots: Array[Node3D] = []
+var _scanner: Node3D
+var _jigs: Array[MeshInstance3D] = []
+var retool: Node3D
+## Upstairs bay number (1..3, set by loft.gd) — shown on the sign instead of the raw line id ("line_49_1").
+var bay := 0
 
 func setup(l: Dictionary) -> void:
 	line = l
@@ -81,6 +96,9 @@ func _lamp_mat(c: Color) -> StandardMaterial3D:
 func _build() -> void:
 	var level := clampi(int(line.get("level", 1)), 1, 5)
 	var kind := str(line.get("kind", "Assembly"))
+	process = str(line.get("process", "hand")) if kind == "Assembly" else ""
+	if not process in ["hand", "semi", "robotic", "smart"] and kind == "Assembly":
+		process = "hand"
 	var mcol: Color = KIND_COL.get(kind, KIND_COL.Assembly)
 	var mm := Mats.m("metal_green", Color.WHITE, {"albedo": mcol, "albedo2": mcol.darkened(0.3), "metallic_base": 0.35, "roughness_base": 0.45, "grime": 0.45, "edge_wear": 0.6})
 	var frame := Mats.m("steel_dark")
@@ -90,12 +108,25 @@ func _build() -> void:
 	ia.add_to_group("interactable")
 	ia.set_meta("kind", "production_line")
 	ia.set_meta("id", line_id)
-	ia.set_meta("prompt", "Production line %s" % line_id.replace("line_", "#"))
+	ia.set_meta("prompt", "Production line")   # localized by the HUD; the bay number is on the floor and the sign
+	ia.set_meta("bay", bay)
 	add_child(ia)
 	# conveyor
-	_box(ia, Vector3(0.62, 0.06, length), Vector3(0, BELT_Y - 0.03, length * 0.5), Mats.m("rubber", Color(2.2, 2.2, 2.2)), 0.008)
-	for sx in [-1.0, 1.0]:
-		_box(ia, Vector3(0.05, 0.12, length + 0.1), Vector3(sx * 0.34, BELT_Y + 0.0, length * 0.5), yellow, 0.01)
+	if process == "hand":
+		_box(ia, Vector3(0.62, 0.05, length), Vector3(0, BELT_Y - 0.035, length * 0.5), Mats.m("wood_planks", Color(1.1, 1.0, 0.9), {"cell": Vector2(4.0, 0.12)}), 0.008)
+		for i in int(length / 0.12):
+			var rl := MeshInstance3D.new()
+			rl.mesh = Meshes.cyl(0.018, 0.56, 8)
+			rl.material_override = Mats.m("metal")
+			rl.position = Vector3(0, BELT_Y - 0.004, 0.06 + i * 0.12)
+			rl.rotation_degrees.z = 90
+			ia.add_child(rl)
+		for sx in [-1.0, 1.0]:
+			_box(ia, Vector3(0.05, 0.1, length + 0.1), Vector3(sx * 0.34, BELT_Y - 0.01, length * 0.5), Mats.m("wood"), 0.01)
+	else:
+		_box(ia, Vector3(0.62, 0.06, length), Vector3(0, BELT_Y - 0.03, length * 0.5), Mats.m("rubber", Color(2.2, 2.2, 2.2)), 0.008)
+		for sx in [-1.0, 1.0]:
+			_box(ia, Vector3(0.05, 0.12, length + 0.1), Vector3(sx * 0.34, BELT_Y + 0.0, length * 0.5), yellow, 0.01)
 	var nl := int(length / 1.1) + 1
 	for i in nl:
 		var z := 0.1 + i * (length - 0.2) / maxf(1.0, nl - 1)
@@ -119,8 +150,13 @@ func _build() -> void:
 	for i in 3:
 		_box(ia, Vector3(0.2, 0.14, 0.24), Vector3(-0.2 + i * 0.2, BELT_Y + 0.13, -0.18), Mats.m("plastic_white", bin_cols[i]), 0.015)
 	_box(ia, Vector3(0.66, 0.06, 0.3), Vector3(0, BELT_Y + 0.03, -0.18), frame, 0.008)
-	# machines
+	# machines (0.5.0: how many depends on the production process)
 	var n := clampi(level, 1, 3)
+	match process:
+		"hand", "smart":
+			n = 0
+		"robotic":
+			n = 1
 	var msize := Vector3(1.0 + level * 0.06, 0.95 + level * 0.1, 0.62 + level * 0.05)
 	for k in n:
 		var z := length * (k + 1) / (n + 1)
@@ -193,6 +229,12 @@ func _build() -> void:
 		m.add_child(sp)
 		sparks.append(sp)
 		_shape(ia, Vector3(msize.x, H, msize.z), Vector3(0, H * 0.5, z))
+	if screen_label == null:
+		_control_pedestal(frame)
+	_process_kit(level, frame)
+	if process == "hand" or process == "smart":
+		_build_tail()
+		return
 	# pick & place arm at the infeed
 	arm = Node3D.new()
 	arm.position = Vector3(0.42, BELT_Y + 0.05, 0.25)
@@ -210,6 +252,13 @@ func _build() -> void:
 	a1.add_child(a2)
 	_box(a2, Vector3(0.05, 0.05, 0.32), Vector3(0, 0, 0.0), amat, 0.015, Vector3(0, 90, 0))
 	_box(a2, Vector3(0.04, 0.12, 0.04), Vector3(-0.16, -0.06, 0), frame, 0.01)
+	_build_tail()
+
+## Outfeed crate, phones on the belt, QC table and the line signs (every process).
+func _build_tail() -> void:
+	var level := clampi(int(line.get("level", 1)), 1, 5)
+	var kind := str(line.get("kind", "Assembly"))
+	var frame := Mats.m("steel_dark")
 	# outfeed crate (open top) that fills up
 	var crate := Node3D.new()
 	crate.position = Vector3(0, 0, length + 0.38)
@@ -291,7 +340,7 @@ func _build() -> void:
 	qc.set_meta("seat", {"pos": Vector3(-0.62, 0.0, 0.0), "yaw": -90.0, "eye": 1.5, "pitch": -45.0, "pose": "stand"})
 	# sign above
 	var sign := Label3D.new()
-	sign.text = "%s · %s · LV%d" % [line_id.replace("line_", "LINE ").to_upper(), kind.to_upper(), level]
+	sign.text = "%s · %s · LV%d" % [sign_name(), (PROCESS_SIGN.get(process, kind)).to_upper(), level]
 	sign.font_size = 64
 	sign.pixel_size = 0.0022
 	sign.modulate = Color(0.95, 0.85, 0.3)
@@ -307,6 +356,238 @@ func _build() -> void:
 	back.position.x = 0.38
 	ia.add_child(back)
 
+## Screen + stack light + beacon on a pedestal at the infeed (processes without a boxy machine to carry them).
+func _control_pedestal(frame: Material) -> void:
+	var m := Node3D.new()
+	m.name = "Control"
+	m.position = Vector3(-0.75, 0, 0.35)
+	ia.add_child(m)
+	machines.append(m)
+	_box(m, Vector3(0.08, 1.15, 0.08), Vector3(0, 0.575, 0), frame, 0.01)
+	_box(m, Vector3(0.3, 0.06, 0.3), Vector3(0, 0.03, 0), frame, 0.01)
+	var head := Node3D.new()
+	head.position = Vector3(0, 1.25, 0)
+	head.rotation_degrees.y = -90
+	m.add_child(head)
+	_box(head, Vector3(0.42, 0.3, 0.06), Vector3.ZERO, Mats.m("plastic_black"), 0.01)
+	var scr := MeshInstance3D.new()
+	scr.mesh = Meshes.quad(Vector2(0.38, 0.26))
+	scr.material_override = Mats.screen(2, Color(0.4, 1.0, 0.6) if process != "smart" else Color(0.35, 0.65, 1.0), 0.55, float(hash(line_id) % 7))
+	scr.position = Vector3(0, 0, 0.032)
+	head.add_child(scr)
+	screen_label = Label3D.new()
+	screen_label.font_size = 30
+	screen_label.pixel_size = 0.00075
+	screen_label.position = Vector3(-0.17, 0.11, 0.035)
+	screen_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
+	screen_label.vertical_alignment = VERTICAL_ALIGNMENT_TOP
+	screen_label.modulate = Color(0.7, 1.0, 0.8) * 2.0
+	screen_label.font = _mono()
+	head.add_child(screen_label)
+	var cols := {"r": Color(1.0, 0.1, 0.05), "y": Color(1.0, 0.7, 0.05), "g": Color(0.2, 1.0, 0.3)}
+	var y := 1.45
+	for key in ["r", "y", "g"]:
+		var lm := _lamp_mat(cols[key])
+		var mi := MeshInstance3D.new()
+		mi.mesh = Meshes.cyl(0.04, 0.06, 10)
+		mi.material_override = lm
+		mi.position = Vector3(0, y, 0)
+		m.add_child(mi)
+		lamps[key] = lm
+		y += 0.065
+	beacon = OmniLight3D.new()
+	beacon.position = Vector3(0, 1.75, 0)
+	beacon.omni_range = 3.0
+	beacon.light_energy = 0.0
+	beacon.light_volumetric_fog_energy = 1.2
+	m.add_child(beacon)
+	_shape(ia, Vector3(0.3, 1.5, 0.3), Vector3(-0.75, 0.75, 0.35))
+
+## The process-specific kit along the line (see the header).
+func _process_kit(level: int, frame: Material) -> void:
+	var wood := Mats.m("wood", Color(1.1, 1.05, 1.0))
+	match process:
+		"hand":
+			# three hand stations on the operator side: tray of parts, a phone half-built, tools, a lamp each
+			for k in 3:
+				var z := length * (k + 0.5) / 3.0
+				var st := Node3D.new()
+				st.position = Vector3(-0.62, 0, z)
+				ia.add_child(st)
+				_box(st, Vector3(0.5, 0.05, 0.9), Vector3(0, 0.86, 0), Mats.m("plywood"), 0.01)
+				for sz in [-1.0, 1.0]:
+					_box(st, Vector3(0.05, 0.84, 0.05), Vector3(-0.2, 0.42, sz * 0.4), wood, 0.006)
+				_box(st, Vector3(0.44, 0.006, 0.6), Vector3(0, 0.888, 0), Mats.m("rubber", Color.WHITE, {"albedo": Color(0.08, 0.22, 0.24)}), 0.0)
+				var tray_cols := [Color(0.85, 0.25, 0.15), Color(0.15, 0.4, 0.8), Color(0.95, 0.75, 0.1)]
+				for i in 3:
+					_box(st, Vector3(0.1, 0.05, 0.13), Vector3(-0.14, 0.915, -0.3 + i * 0.15), Mats.m("plastic_white", tray_cols[i]), 0.01)
+				var ph := _box(st, Vector3(0.078, 0.012, 0.158), Vector3(0.06, 0.9, 0.05), phone_mat if phone_mat else Mats.m("plastic_grey"), 0.005, Vector3(0, 20 + k * 15, 0))
+				_box(ph, Vector3(0.06, 0.004, 0.12), Vector3(0, 0.008, 0), Mats.m("metal_green", Color(1.4, 1.4, 1.4)), 0.0)
+				_box(st, Vector3(0.012, 0.012, 0.16), Vector3(0.12, 0.9, -0.15), Mats.m("plastic_orange"), 0.0, Vector3(0, 35, 0))
+				_box(st, Vector3(0.025, 0.4, 0.025), Vector3(-0.22, 1.08, 0.35), frame, 0.004)
+				_box(st, Vector3(0.24, 0.025, 0.025), Vector3(-0.1, 1.28, 0.35), frame, 0.004, Vector3(0, 0, -15))
+				var lamp := MeshInstance3D.new()
+				lamp.mesh = Meshes.cyl(0.06, 0.08, 12, 0.03)
+				lamp.material_override = Mats.m("metal_red")
+				lamp.position = Vector3(0.02, 1.24, 0.35)
+				st.add_child(lamp)
+				var bulb := MeshInstance3D.new()
+				bulb.mesh = Meshes.sphere(0.025, 8)
+				bulb.material_override = Mats.glow(Color(1.0, 0.8, 0.5), 7.0)
+				bulb.position = Vector3(0.02, 1.2, 0.35)
+				st.add_child(bulb)
+				var sl := SpotLight3D.new()
+				st.add_child(sl)
+				sl.transform = Transform3D(Basis.looking_at(Vector3(0.05, -1, -0.3), Vector3.FORWARD), Vector3(0.02, 1.18, 0.35))
+				sl.light_color = Color(1.0, 0.78, 0.5)
+				sl.light_energy = 1.4
+				sl.spot_range = 1.4
+				sl.spot_angle = 42.0
+				_shape(ia, Vector3(0.5, 0.9, 0.9), Vector3(-0.62, 0.45, z))
+		"semi":
+			# orange jig plates riding the belt + pneumatic press heads over it
+			var jig_m := Mats.m("plastic_white", Color(0.95, 0.55, 0.12))
+			for i in 7:
+				var jg := _box(ia, Vector3(0.26, 0.03, 0.22), Vector3(0, BELT_Y + 0.015, 0.3 + i * (length - 0.6) / 6.0), jig_m, 0.006)
+				_box(jg, Vector3(0.09, 0.008, 0.17), Vector3(0, 0.017, 0), Mats.m("plastic_black"), 0.0)
+				_jigs.append(jg)
+			for k in 2:
+				var pz := length * (0.2 + 0.6 * k)
+				var gantry := Node3D.new()
+				gantry.position = Vector3(0, 0, pz)
+				ia.add_child(gantry)
+				for sx in [-1.0, 1.0]:
+					_box(gantry, Vector3(0.06, 1.45, 0.06), Vector3(sx * 0.42, 0.725, 0), frame, 0.008)
+				_box(gantry, Vector3(0.92, 0.1, 0.12), Vector3(0, 1.45, 0), Mats.m("metal_yellow"), 0.01)
+				var head := Node3D.new()
+				head.position = Vector3(0, 1.2, 0)
+				gantry.add_child(head)
+				_box(head, Vector3(0.12, 0.3, 0.12), Vector3.ZERO, Mats.m("metal"), 0.01)
+				_box(head, Vector3(0.2, 0.05, 0.16), Vector3(0, -0.18, 0), frame, 0.01)
+				_press.append(head)
+		"robotic":
+			# yellow safety fence on the far side, robot arms on pedestals
+			var nr := 2 if level < 3 else 3
+			for k in nr:
+				var z := length * (k + 0.6) / (nr + 0.4)
+				var rb := Node3D.new()
+				rb.name = "Robot%d" % k
+				rb.position = Vector3(0.62, 0, z)
+				ia.add_child(rb)
+				_robot(rb, k)
+				_robots.append(rb)
+				_shape(ia, Vector3(0.36, 0.6, 0.36), Vector3(0.62, 0.3, z))
+			var fence := Mats.m("metal_yellow", Color.WHITE, {"pattern": 8, "cell": Vector2(0.05, 0.05), "gap": 0.018, "albedo2": Color(0.05, 0.05, 0.05)})
+			_box(ia, Vector3(0.02, 1.3, length), Vector3(1.0, 0.75, length * 0.5), fence, 0.0)
+			for i in 5:
+				_box(ia, Vector3(0.05, 1.45, 0.05), Vector3(1.0, 0.725, i * length / 4.0), Mats.m("metal_yellow"), 0.006)
+			_shape(ia, Vector3(0.05, 1.45, length), Vector3(1.0, 0.725, length * 0.5))
+			_box(ia, Vector3(0.4, 0.004, length), Vector3(0.62, 0.003, length * 0.5), Mats.m("metal_yellow", Color.WHITE, {"pattern": 1, "cell": Vector2(0.1, 0.05), "albedo2": Color(0.05, 0.05, 0.05), "metallic_base": 0.0}), 0.0)
+		"smart":
+			# enclosed cell: metal frame, dark glass, blue strip lights, a scanner gantry that sweeps along
+			var cell_h := 1.5
+			var glass := Mats.glass(Color(0.45, 0.6, 0.85, 0.16))
+			for sx in [-1.0, 1.0]:
+				var pane := _box(ia, Vector3(0.012, cell_h - 0.1, length + 0.2), Vector3(sx * 0.5, 0.05 + cell_h * 0.5, length * 0.5), glass, 0.0)
+				pane.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+				_box(ia, Vector3(0.05, 0.05, length + 0.3), Vector3(sx * 0.5, cell_h, length * 0.5), Mats.m("plastic_white", Color(1.2, 1.2, 1.25)), 0.008)
+				_box(ia, Vector3(0.05, 0.05, length + 0.3), Vector3(sx * 0.5, 0.05, length * 0.5), Mats.m("plastic_white", Color(1.2, 1.2, 1.25)), 0.008)
+				var strip := _box(ia, Vector3(0.012, 0.012, length), Vector3(sx * 0.46, cell_h - 0.06, length * 0.5), Mats.glow(Color(0.3, 0.6, 1.0), 4.0), 0.0)
+				strip.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+			for i in 5:
+				for sx in [-1.0, 1.0]:
+					_box(ia, Vector3(0.05, cell_h, 0.05), Vector3(sx * 0.5, cell_h * 0.5, -0.1 + i * (length + 0.2) / 4.0), Mats.m("plastic_white", Color(1.2, 1.2, 1.25)), 0.008)
+			var roof := _box(ia, Vector3(1.0, 0.04, length + 0.3), Vector3(0, cell_h + 0.02, length * 0.5), Mats.m("plastic_white", Color(0.9, 0.92, 0.95)), 0.01)
+			roof.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON
+			_shape(ia, Vector3(1.05, cell_h + 0.05, length + 0.3), Vector3(0, (cell_h + 0.05) * 0.5, length * 0.5))
+			_scanner = Node3D.new()
+			_scanner.name = "Scanner"
+			_scanner.position = Vector3(0, 0, length * 0.5)
+			ia.add_child(_scanner)
+			_box(_scanner, Vector3(0.9, 0.08, 0.1), Vector3(0, cell_h - 0.15, 0), Mats.m("plastic_black"), 0.01)
+			var bar := _box(_scanner, Vector3(0.8, 0.01, 0.02), Vector3(0, cell_h - 0.195, 0), Mats.glow(Color(0.25, 0.55, 1.0), 9.0), 0.0)
+			bar.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+			for sx in [-1.0, 1.0]:
+				var cam := MeshInstance3D.new()
+				cam.mesh = Meshes.cyl(0.03, 0.06, 10)
+				cam.material_override = Mats.m("plastic_black")
+				cam.position = Vector3(sx * 0.25, cell_h - 0.22, 0)
+				_scanner.add_child(cam)
+			var sl := SpotLight3D.new()
+			_scanner.add_child(sl)
+			sl.transform = Transform3D(Basis.looking_at(Vector3(0, -1, 0.001), Vector3.FORWARD), Vector3(0, cell_h - 0.21, 0))
+			sl.light_color = Color(0.25, 0.55, 1.0)
+			sl.light_energy = 5.0
+			sl.spot_range = 1.6
+			sl.spot_angle = 18.0
+			sl.light_volumetric_fog_energy = 4.0
+			var glow := OmniLight3D.new()
+			glow.position = Vector3(0, 1.0, length * 0.5)
+			glow.light_color = Color(0.3, 0.55, 1.0)
+			glow.light_energy = 1.3
+			glow.omni_range = 2.8
+			glow.light_volumetric_fog_energy = 1.5
+			ia.add_child(glow)
+			var lbl := Label3D.new()
+			lbl.text = "LIGHTS-OUT · AI VISION QC"
+			lbl.font_size = 40
+			lbl.pixel_size = 0.0016
+			lbl.modulate = Color(0.45, 0.75, 1.0) * 2.0
+			lbl.position = Vector3(-0.52, cell_h - 0.25, length * 0.5)
+			lbl.rotation_degrees.y = -90
+			ia.add_child(lbl)
+
+func _robot(rb: Node3D, k: int) -> void:
+	var orange := Mats.m("plastic_orange", Color(1.15, 1.0, 0.9), {"roughness_base": 0.35})
+	var dark := Mats.m("steel_dark")
+	_box(rb, Vector3(0.34, 0.5, 0.34), Vector3(0, 0.25, 0), dark, 0.02)
+	var base := Node3D.new()
+	base.name = "Base"
+	base.position = Vector3(0, 0.5, 0)
+	rb.add_child(base)
+	var bc := MeshInstance3D.new()
+	bc.mesh = Meshes.cyl(0.13, 0.14, 16)
+	bc.material_override = orange
+	bc.position = Vector3(0, 0.07, 0)
+	base.add_child(bc)
+	var sh := Node3D.new()
+	sh.name = "Shoulder"
+	sh.position = Vector3(0, 0.16, 0)
+	base.add_child(sh)
+	_box(sh, Vector3(0.1, 0.5, 0.12), Vector3(0, 0.25, 0), orange, 0.03)
+	var el := Node3D.new()
+	el.name = "Elbow"
+	el.position = Vector3(0, 0.5, 0)
+	sh.add_child(el)
+	var ec := MeshInstance3D.new()
+	ec.mesh = Meshes.cyl(0.07, 0.14, 12)
+	ec.material_override = dark
+	ec.rotation_degrees.z = 90
+	el.add_child(ec)
+	_box(el, Vector3(0.08, 0.08, 0.42), Vector3(0, 0, -0.21), orange, 0.025)
+	var wr := Node3D.new()
+	wr.name = "Wrist"
+	wr.position = Vector3(0, 0, -0.44)
+	el.add_child(wr)
+	_box(wr, Vector3(0.07, 0.12, 0.07), Vector3(0, -0.06, 0), dark, 0.015)
+	for sx in [-1.0, 1.0]:
+		_box(wr, Vector3(0.015, 0.06, 0.03), Vector3(sx * 0.03, -0.14, 0), Mats.m("metal"), 0.004)
+	var led := MeshInstance3D.new()
+	led.mesh = Meshes.sphere(0.012, 6)
+	led.material_override = Mats.glow(Color(0.3, 1.0, 0.4), 4.0)
+	led.position = Vector3(0, 0.0, 0.04)
+	wr.add_child(led)
+	rb.set_meta("phase", k * 1.7)
+	base.rotation.y = PI * 0.5
+	sh.rotation.x = -0.35
+	el.rotation.x = 0.6
+
+## "BAY 2" for an upstairs bay, else "LINE <id>" (never the raw "LINE 49_1" when the loft numbered it).
+func sign_name() -> String:
+	if bay > 0:
+		return "BAY %d" % bay
+	return line_id.replace("line_", "LINE ").to_upper()
+
 ## Operator spot for staff placement (global): {pos, yaw, pose}
 func operator_slot() -> Dictionary:
 	var p := global_transform * Vector3(-0.9, 0, length * 0.3)
@@ -320,7 +601,11 @@ func refresh(s: Dictionary) -> void:
 	var job := HQ.line_job(s, line_id)
 	var down := HQ.line_down(s, line)
 	var st := "idle"
-	if down:
+	var retooling := float(line.get("processUntil", 0)) > float(HQ.elapsed_days(s)) and process != ""
+	_set_retool(retooling)
+	if retooling:
+		st = "retool"
+	elif down:
 		st = "down"
 	elif not job.is_empty():
 		st = "running" if str(job.get("status", "")) == "Running" else ("blocked" if str(job.get("status", "")) == "Blocked" else "queued")
@@ -345,6 +630,8 @@ func refresh(s: Dictionary) -> void:
 				screen_label.text = "QUEUED\n%s\nHEALTH %d%%" % [pname.to_upper().substr(0, 14), health]
 			"down":
 				screen_label.text = "!! DOWN !!\nREPAIR UNTIL\nDAY %d" % int(line.get("downUntilDay", 0))
+			"retool":
+				screen_label.text = "RETOOLING\n→ %s\nUNTIL DAY %d" % [str(PROCESS_SIGN.get(process, process)).to_upper().substr(0, 12), int(line.get("processUntil", 0))]
 			_:
 				screen_label.text = "IDLE\nqueue a batch\nHEALTH %d%%" % health
 	if running != was:
@@ -353,6 +640,37 @@ func refresh(s: Dictionary) -> void:
 		sp.emitting = running
 	for st2 in steam:
 		st2.emitting = running or st == "down"
+
+## RETOOLING look while a process switch is underway: cones, hazard tape, a crate of new parts.
+func _set_retool(on: bool) -> void:
+	if on == (retool != null):
+		return
+	if not on:
+		retool.queue_free()
+		retool = null
+		return
+	retool = Node3D.new()
+	retool.name = "Retool"
+	add_child(retool)
+	for z in [-0.4, length + 0.9]:
+		var cone := MeshInstance3D.new()
+		cone.mesh = Meshes.cyl(0.12, 0.42, 10, 0.02)
+		cone.material_override = Mats.m("plastic_orange")
+		cone.position = Vector3(-0.6, 0.21, z)
+		retool.add_child(cone)
+		for sx in [-1.0, 1.0]:
+			_box(retool, Vector3(0.006, 0.05, 1.3), Vector3(-0.6 + sx * 0.0, 0.45, z + (0.65 if z < 0 else -0.65) * 0.0), Mats.m("metal_yellow", Color.WHITE, {"pattern": 1, "cell": Vector2(0.1, 0.05), "albedo2": Color(0.05, 0.05, 0.05), "metallic_base": 0.0}), 0.0, Vector3(0, 90, 0))
+	var crate := _box(retool, Vector3(0.6, 0.45, 0.5), Vector3(-0.85, 0.225, length * 0.5), Mats.m("plywood"), 0.02)
+	_box(crate, Vector3(0.62, 0.06, 0.04), Vector3(0, 0.1, 0.26), Mats.m("metal_yellow"), 0.004)
+	var t := Label3D.new()
+	t.text = "RETOOLING"
+	t.font_size = 72
+	t.pixel_size = 0.0018
+	t.modulate = Color(1.0, 0.75, 0.15)
+	t.shaded = true
+	t.position = Vector3(-0.38, 1.6, length * 0.5)
+	t.rotation_degrees.y = -90
+	retool.add_child(t)
 
 func _set_loops(on: bool) -> void:
 	for l in _loops:
@@ -377,6 +695,9 @@ func _process(delta: float) -> void:
 				g = 5.0
 			"down":
 				r = 6.0 if blink else 0.3
+			"retool":
+				y = 5.0 if blink else 0.3
+				r = 2.0 if not blink else 0.0
 			"blocked":
 				y = 5.0 if blink else 0.3
 			_:
@@ -386,13 +707,30 @@ func _process(delta: float) -> void:
 		(lamps.g as StandardMaterial3D).emission_energy_multiplier = g
 	if beacon:
 		beacon.light_color = Color(1.0, 0.15, 0.08) if status == "down" else Color(1.0, 0.7, 0.1)
-		beacon.light_energy = (2.0 if blink else 0.0) if status in ["down", "blocked"] else 0.0
+		beacon.light_energy = (2.0 if blink else 0.0) if status in ["down", "blocked", "retool"] else 0.0
 	_fill = lerpf(_fill, _progress, 1.0 - exp(-2.0 * delta))
 	if crate_fill:
 		crate_fill.position.y = 0.14 + _fill * 0.3
 		crate_fill.visible = _fill > 0.02
+	if _scanner:
+		# the scanner keeps sweeping even when idle (slowly); fast while running
+		var sp := 1.6 if running else 0.35
+		_scanner.position.z = length * 0.5 + sin(_t * sp) * (length * 0.42)
 	if not running:
 		return
+	for i in _press.size():
+		_press[i].position.y = 1.2 - maxf(0.0, sin(_t * 3.0 + i * 1.6)) * 0.25
+	for rb in _robots:
+		var ph: float = rb.get_meta("phase", 0.0)
+		var b := rb.get_node("Base") as Node3D
+		var shd := b.get_node("Shoulder") as Node3D
+		var el := shd.get_node("Elbow") as Node3D
+		var c := _t * 1.8 + ph
+		b.rotation.y = PI * 0.5 + sin(c) * 0.9
+		shd.rotation.x = -0.35 + sin(c * 2.0) * 0.25
+		el.rotation.x = 0.6 + cos(c * 2.0) * 0.35
+	for i in _jigs.size():
+		_jigs[i].position.z = fmod(0.3 + i * (length - 0.6) / 6.0 + _t * 0.32, length - 0.1) + 0.05
 	for r in rollers:
 		r.rotation.x += delta * 6.0
 	for m in machines:
@@ -401,8 +739,8 @@ func _process(delta: float) -> void:
 		var a1: Node3D = arm.get_node("A1")
 		a1.rotation.y = sin(_t * 1.6) * 1.2
 		(a1.get_node("A2") as Node3D).rotation.z = 0.2 + sin(_t * 3.2) * 0.25
-	# phones ride the belt
-	var speed := 0.32
+	# phones ride the belt (a hand line is slow, a smart cell fast)
+	var speed: float = {"hand": 0.12, "semi": 0.32, "robotic": 0.45, "smart": 0.6}.get(process, 0.32)
 	var gap := length / phones.size()
 	for i in phones.size():
 		var z := fmod(_t * speed + i * gap, length + 0.45)

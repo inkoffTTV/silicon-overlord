@@ -5,6 +5,7 @@ extends Control
 const U := preload("res://ui/lib/uit.gd")
 const L := preload("res://ui/lib/loc.gd")
 const F := preload("res://ui/lib/fmt.gd")
+const GD := preload("res://ui/lib/gdata.gd")
 const Tracker := preload("res://ui/story/objective_tracker.gd")
 const Goals := preload("res://ui/screens/goals.gd")
 ## speed -> hotkey (core/inputs.gd: 1/2/3/4 = 1x/2x/4x/8x, P or 0 = pause)
@@ -391,10 +392,22 @@ func set_prompt(text: String) -> void:
 	if text == "":
 		_prompt.visible = false
 		return
-	_prompt_label.text = L.t(text)
+	_prompt_label.text = prompt_text(text)
 	if not _prompt.visible:
 		_prompt.visible = true
 		U.fade_in(_prompt, 0.12)
+
+## The world names a line by its id ("Production line #49_1"): show the player's numbering instead
+## ("Production line 2", or "Workbench" for the garage bench), like the production screen (0.5.0 QA #4).
+static func prompt_text(text: String) -> String:
+	if text.begins_with("Production line #"):
+		var id := "line_" + text.trim_prefix("Production line #")
+		var n := GD.line_number(Game.state, id)
+		if n == 0:
+			return L.t("Workbench")
+		if n > 0:
+			return L.f("Production line {n}", {"n": n})
+	return L.t(text)
 
 func set_connection(status: String, detail: String) -> void:
 	_banner.visible = status == "reconnecting"

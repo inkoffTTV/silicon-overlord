@@ -15,6 +15,9 @@ Writes client/ui/data/:
   locale.json         Locale phrase tables from the Roblox client (en keyed dict + ru phrase table)
   goals.json          Goals.list (id, title, desc, badge, reward) — the 28 sequential goals (checks stay on the server)
   daily.json          DailyRewards (7-day gift cycle, streak bonus)
+  (interior.json      0.5.0 catalogue + room geometry: client/tools/export_interior.py, read by the world and the UI)
+  sample_interior.json 0.5.0: interior + hq.expansions + line processes of a furnished demo garage (merged into
+                      sample_state by ui/lib/gdata.gd; tests and screenshots only)
   sample_state.json   a realistic CompanyState (created by CompanyFactory, a few weeks simulated,
                       one blueprint, one launched product) — used only by UI tests and screenshots.
 
@@ -187,6 +190,11 @@ def main():
     daily = req("Data.DailyRewards")
     dump("daily.json", {"days": to_py(daily.days), "streakBonus": to_py(daily.streakBonus), "secondsPerDay": to_py(daily.secondsPerDay)})
 
+    # ---- 0.5.0 interior: client/ui/data/interior.json is written by client/tools/export_interior.py (shared with the
+    # world); here only the furnished demo state for UI tests / screenshots
+    if not ONLY or "sample_interior" in ONLY:
+        dump("sample_interior.json", to_py(L.execute(SAMPLE_INTERIOR_LUA)))
+
     # ---- locale -------------------------------------------------------------------------
     try:
         Locale = L.eval("require(game.ClientLib.Locale)")
@@ -265,6 +273,45 @@ local ok2, r2 = Actions.createBlueprint(c, 1, "Nebula Two", "PremiumFlagship")
 c.finance.cash = 1846500
 c.audit = {}
 return c
+"""
+
+SAMPLE_INTERIOR_LUA = r"""
+local S = game.ReplicatedStorage.Shared
+local Factory = require(S.Domain.CompanyFactory)
+local Interior = require(S.Domain.Interior)
+local c = Factory.new({ id = "c_demo", name = "Nebula Labs", logo = { shape = "circle", colorA = "#4F8CFF", colorB = "#B15CFF" },
+  mode = "cofounder", founderUserId = 1, founderName = "Alex", founderShare = 1, seed = 42, now = 0 })
+c.finance.cash = 5000000
+c.time.elapsedDays = 93
+c.hq.rooms.AssemblyLine = { level = 1, builtDay = 0 }
+Interior.buildExpansion(c, "annex")
+local function put(room, def, x, z, rot, color)
+  local ok, r = Interior.place(c, { room = room, def = def, x = x, z = z, rot = rot or 0, color = color })
+  if not ok then print("sample_interior: " .. room .. " " .. def .. ": " .. tostring(r)) end
+end
+c.time.elapsedDays = 30
+put("garage", "plant_monstera", 2.25, -0.5)
+put("garage", "plant_cactus", -1.5, 2.0)
+c.time.elapsedDays = 93
+put("garage", "decor_rug_braided", 1.5, 0.25)
+put("garage", "seat_beanbag", -2.75, 1.75)
+put("garage", "light_bulb_string", 1.0, 1.0, 0)
+put("garage", "decor_poster_launch", -2.5, -3.45, 0)
+put("garage", "decor_wall_clock", 2.0, -3.45, 0)
+put("garage", "store_wire_shelf", -2.5, 0.25, 0)
+put("garage", "decor_coffee_machine", 2.0, -2.5)
+Interior.paint(c, { room = "garage", surface = "wall", mat = "brick", color = "#6E5A4E" })
+Interior.light(c, { room = "garage", preset = "warm" })
+Interior.theme(c, { room = "annex", theme = "lab" })
+put("annex", "lab_bench", -1.5, -2.0)
+put("annex", "desk_white", 1.5, -2.0)
+put("annex", "plant_fig", 2.5, 2.0)
+put("annex", "light_led_panel", 0.0, 0.0)
+Interior.refresh(c)
+for _, l in ipairs(c.production.lines) do
+  if l.kind == "Assembly" then l.process = l.process or "hand" end
+end
+return { interior = c.interior, expansions = c.hq.expansions }
 """
 
 if __name__ == "__main__":

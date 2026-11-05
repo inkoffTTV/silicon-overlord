@@ -64,6 +64,18 @@ func _run() -> void:
 			"listMyCompanies":
 				return {"ok": true, "data": [{"companyId": "a", "code": "KQ7-4XM", "name": "Nebula Labs", "date": {"year": 2016, "day": 40}, "cash": 6000, "role": "Founder", "lastPlayed": 1700000000, "story": {"done": false, "chapter": 1}},
 					{"companyId": "b", "code": "ZP3-9QA", "name": "Old Co", "date": {"year": 2018, "day": 10}, "cash": 900000, "role": "CoFounder", "lastPlayed": 1600000000}]}
+			"interiorPlace":
+				return {"ok": true, "data": {"item": {"id": "i_new_%d" % calls.size(), "def": args.get("def", "")}, "cost": 30, "comfort": 50}}
+			"interiorRemove":
+				return {"ok": true, "data": {"refund": 15}}
+			"interiorPaint":
+				return {"ok": true, "data": {"cost": 900, "surface": args.get("surface", "")}}
+			"getExpansionCatalog":
+				return {"ok": true, "data": {"hqLevel": 1, "expansions": {"basement": {"level": 0, "maxLevel": 3, "nextCost": 120000, "canBuild": true}}}}
+			"buildExpansion":
+				return {"ok": true, "data": {"id": args.get("id", ""), "level": 1, "cost": 120000}}
+			"setLineProcess":
+				return {"ok": true, "data": {"lineId": args.get("lineId", ""), "process": args.get("process", ""), "cost": 40000, "downtimeDays": 3, "untilDay": 99}}
 			"repairFinish":
 				return {"ok": true, "data": {"payout": 120, "quality": float(args.get("score", 0)), "partUsed": true, "rp": 2}}
 			"repairReturn":
@@ -299,11 +311,13 @@ func _run() -> void:
 	Game.apply_snapshot(st3)
 	Bus.interact.emit("stairs_locked", "stairs")
 	await frames(3)
-	check(ui.current_kind == "stairs_locked", "stairs dialog opened")
-	check(calls.has("getRoomCatalog"), "second floor price asked from the server")
-	await ui.current._buy()
-	check(calls.has("buildRoom") and last_args.buildRoom.roomId == "AssemblyLine", "buildRoom AssemblyLine sent")
+	check(ui.current_kind == "stairs_locked" and ui.current.focus_id == "loft", "locked stairs open Grow the base on the loft")
+	check(calls.has("getExpansionCatalog"), "expansion prices asked from the server")
+	await ui.current.buy("loft")
+	check(calls.has("buildExpansion") and last_args.buildExpansion.id == "loft", "buildExpansion loft sent")
 	await frames(3)
+	ui.close_screen()
+	await frames(2)
 	Game.apply_snapshot(st2)
 	Bus.interact.emit("production_line", "line_1")
 	await frames(3)
@@ -311,6 +325,7 @@ func _run() -> void:
 	check(ui.current._pick_line == "line_1", "focused line preselected for the batch")
 	ui.close_screen()
 	await frames(2)
+	await _build_section(ui, Game, Bus, calls, last_args, modal_events)
 	# ---------------------------------------------------------------- purchasing
 	print("ui_smoke: purchasing")
 	Bus.interact.emit("supplier_phone", "phone")
@@ -718,6 +733,259 @@ func _story_section(ui: Node, Game: Node, Bus: Node, Net: Node, calls: Array, la
 	await frames(2)
 	Game.apply_snapshot(base)
 	await frames(2)
+
+## 0.5.0: build mode (catalogue, auto-place, copy, sell, paint, theme, light, undo, B / Tab / Esc, the world contract),
+## Grow the base, the production process table, the company comfort card, the quick menu entries.
+class FakeWorld extends Node:
+	signal build_hover(info: Dictionary)
+	signal build_request(action: String, args: Dictionary)
+	var modes: Array = []
+	var selects: Array = []
+	var results: Array = []
+	func build_mode(on: bool) -> void:
+		modes.append(on)
+	func build_select(sel: Dictionary) -> void:
+		selects.append(sel)
+	func build_result(action: String, ok: bool, data: Dictionary, error: String) -> void:
+		results.append([action, ok, data, error])
+
+func _build_section(ui: Node, Game: Node, Bus: Node, calls: Array, last_args: Dictionary, modal_events: Array) -> void:
+	print("ui_smoke: build mode")
+	var keep_state: Dictionary = Game.state.duplicate(true)
+	var st: Dictionary = load("res://ui/lib/gdata.gd").sample_state()
+	Game.apply_snapshot(st)
+	await frames(2)
+	check(not U_arr(Game.state.get("interior", {}).get("rooms", {}).get("garage", {}).get("items", [])).is_empty(), "sample state has a furnished garage")
+	var ev := InputEventKey.new()
+	ev.physical_keycode = KEY_B
+	ev.pressed = true
+	ui._unhandled_input(ev)
+	await frames(3)
+	var b: Control = ui.build
+	check(b.active and b.catalog_open, "B opens build mode with the catalogue")
+	check(modal_events[-1] == true and ui.is_modal(), "catalogue is modal (mouse free)")
+	check(not ui.hud.visible, "normal HUD hidden in build mode")
+	check(b.room_id == "garage", "build mode starts in the garage (%s)" % b.room_id)
+	var cards: Array = b.find_children("*", "Button", true, false).filter(func(x: Node) -> bool: return x.has_meta("def"))
+	check(cards.size() >= 5, "desk cards in the catalogue (%d)" % cards.size())
+	var want := str(cards[1].get_meta("def"))
+	(cards[1] as Button).pressed.emit()
+	await frames(2)
+	check(str(b.sel.get("def", "")) == want, "clicking a card selects the item")
+	b.select_def("plant_cactus")
+	check(b.cat == "plants", "selecting a plant switches to the Plants tab")
+	await b.place_auto()
+	check(calls.has("interiorPlace") and last_args.interiorPlace.room == "garage" and last_args.interiorPlace.def == "plant_cactus", "auto-place sends interiorPlace")
+	var IR = load("res://ui/lib/interior_rules.gd")
+	var a: Dictionary = last_args.interiorPlace
+	check(IR.check(Game.state, "garage", "plant_cactus", float(a.x), float(a.z), float(a.rot))[0], "the auto spot passes the client rules")
+	check(b.undo_stack.size() == 1, "placement goes on the undo stack")
+	await b.undo()
+	check(calls[-1] == "interiorRemove" and str(last_args.interiorRemove.id).begins_with("i_new_"), "undo sells the placed item back")
+	b.copy_item("i1")
+	check(str(b.sel.get("def", "")) == "plant_monstera", "copy takes the item's def")
+	await b.sell("i3")
+	check(last_args.interiorRemove.id == "i3", "sell sends interiorRemove")
+	b.set_category("surfaces")
+	await frames(2)
+	check(b.sel.get("tool") == "paint", "Walls & floors = paint tool")
+	var mats: Array = b.find_children("*", "Button", true, false).filter(func(x: Node) -> bool: return x.has_meta("mat"))
+	check(mats.size() >= 5, "material cards for the walls (%d)" % mats.size())
+	# 0.5.0 QA #6: each material tile shows its own colour, not the colour picked for painting
+	b.select_paint("paint", "#F2F0EA")
+	await frames(2)
+	var tile_cols := {}
+	for th in b.find_children("*", "Control", true, false).filter(func(x: Node) -> bool: return x.has_meta("tile_color")):
+		tile_cols[str(th.get("swatch").get("color", ""))] = true
+	check(tile_cols.size() >= 4 and not tile_cols.has("#F2F0EA"), "material tiles keep their own colours (%s)" % str(tile_cols.keys()))
+	mats = b.find_children("*", "Button", true, false).filter(func(x: Node) -> bool: return x.has_meta("mat"))
+	(mats[0] as Button).pressed.emit()
+	await b.paint("wall", str(b.sel.mat), "#6E5A4E")
+	check(calls.has("interiorPaint") and last_args.interiorPaint.surface == "wall", "interiorPaint sent")
+	await b.apply_theme("wood")
+	check(last_args.get("interiorTheme", {}).get("theme", "") == "wood", "interiorTheme sent")
+	await b.set_light("neon")
+	check(last_args.get("interiorLight", {}).get("preset", "") == "neon", "interiorLight sent")
+	b.set_category("placed")
+	await frames(2)
+	check(b.find_children("*", "Button", true, false).any(func(x: Node) -> bool: return x.has_meta("sell")), "Placed here lists items with Sell")
+	# a server error is shown in the HUD
+	var keep_mock: Callable = Net_mock()
+	root.get_node("Net").set("mock_handler", func(act: String, _a: Dictionary) -> Dictionary:
+		if act == "interiorPlace":
+			return {"ok": false, "error": "Blocked: doorway"}
+		return {"ok": true})
+	b.select_def("desk_pine")
+	await b.place_at(-3.6, 0.4, 0)
+	check(b.last_error == "Blocked: doorway", "server error shown in build mode")
+	root.get_node("Net").set("mock_handler", keep_mock)
+	# Tab closes the catalogue (not modal any more), Esc leaves
+	var tab := InputEventKey.new()
+	tab.physical_keycode = KEY_TAB
+	tab.keycode = KEY_TAB
+	tab.pressed = true
+	ui._unhandled_input(tab)
+	await frames(2)
+	check(not b.catalog_open and not ui.is_modal(), "Tab collapses the catalogue (player can aim)")
+	check(ui._quick == null, "Tab in build mode does not open the quick menu")
+	ui._handle_escape()
+	await frames(2)
+	check(not b.active and ui.hud.visible, "Esc leaves build mode, HUD back")
+	# the world contract
+	var w := FakeWorld.new()
+	w.add_to_group("world")
+	root.add_child(w)
+	ui.enter_build(true)
+	b.select_def("seat_beanbag")
+	check(w.modes == [true], "world.build_mode(true) on enter")
+	check(not w.selects.is_empty() and str(w.selects[-1].get("def", "")) == "seat_beanbag" and str(w.selects[-1].get("room", "")) == "garage", "world.build_select gets the item + room")
+	w.build_hover.emit({"room": "annex", "valid": false, "reason": "Overlaps another item"})
+	await frames(2)
+	check(b.room_id == "annex", "world hover switches the room")
+	w.build_request.emit("interiorPlace", {"room": "annex", "def": "seat_beanbag", "x": 0.5, "z": 0.5, "rot": 0})
+	await frames(4)
+	check(not w.results.is_empty() and w.results[-1][0] == "interiorPlace" and w.results[-1][1] == true, "world build_request -> action -> build_result")
+	b.aim()
+	await frames(2)
+	check(not b.catalog_open and not ui.is_modal(), "Aim closes the catalogue")
+	b.set_catalog(true)
+	check(b.on_escape() and b.active and not b.catalog_open, "Esc with an item selected closes the catalogue first")
+	check(b.on_escape() and not b.active, "second Esc leaves build mode")
+	check(w.modes[-1] == false, "world.build_mode(false) on leave")
+	w.queue_free()
+	await frames(2)
+	# quick menu entries
+	ui._open_quick()
+	await frames(2)
+	var qb: Array = ui._quick.find_children("*", "Button", true, false).filter(func(x: Node) -> bool: return x.has_meta("quick") and x.get_meta("quick") in ["build", "expansions"])
+	check(qb.size() == 2, "quick menu: Build mode + Grow the base")
+	ui._close_quick()
+	# Grow the base
+	print("ui_smoke: expansions")
+	Bus.interact.emit("expansion_locked", "basement")
+	await frames(3)
+	check(ui.current_kind == "expansion_locked" and ui.current.focus_id == "basement", "for-sale door opens Grow the base on that expansion")
+	var ecards: Array = ui.current.find_children("*", "PanelContainer", true, false).filter(func(x: Node) -> bool: return x.has_meta("expansion"))
+	check(ecards.size() == 5, "five expansion cards (%d)" % ecards.size())
+	var buyb: Array = ui.current.find_children("*", "Button", true, false).filter(func(x: Node) -> bool: return x.get_meta("buy", "") == "basement")
+	check(buyb.size() == 1, "basement has a Buy button")
+	if buyb.size() == 1:
+		(buyb[0] as Button).pressed.emit()
+		await frames(2)
+		var yes: Array = ui.current.find_children("*", "Button", true, false).filter(func(x: Node) -> bool: return x.get_meta("confirm_buy", "") == "basement")
+		check(yes.size() == 1, "buying asks for a confirmation")
+		check(ui.current.on_escape(), "Esc cancels the confirmation first")
+	await ui.current.buy("basement")
+	check(last_args.get("buildExpansion", {}).get("id", "") == "basement", "buildExpansion basement sent")
+	ui.close_screen()
+	await frames(2)
+	# production processes
+	print("ui_smoke: processes")
+	Bus.interact.emit("production_line", "line_1")
+	await frames(3)
+	var pr: Control = ui.current
+	check(pr.find_children("*", "Button", true, false).any(func(x: Node) -> bool: return x.get_meta("process_btn", "") == "line_1"), "line card has a Production process button")
+	pr.open_process("line_1")
+	await frames(2)
+	check(pr.find_children("*", "GridContainer", true, false).any(func(x: Node) -> bool: return x.has_meta("process_table")), "process comparison table")
+	var sw: Array = pr.find_children("*", "Button", true, false).filter(func(x: Node) -> bool: return x.has_meta("switch"))
+	check(sw.size() == 3, "three other processes to switch to (%d)" % sw.size())
+	check(pr.find_children("*", "Button", true, false).any(func(x: Node) -> bool: return x.get_meta("research_link", "") == "mfg_auto_3"), "missing tech links to research")
+	pr.proc_confirm = "semi"
+	pr._build_process_overlay()
+	await frames(2)
+	check(pr.find_children("*", "PanelContainer", true, false).any(func(x: Node) -> bool: return x.has_meta("process_confirm")), "switch asks for a confirmation")
+	await pr.switch_process("line_1", "semi")
+	check(last_args.get("setLineProcess", {}).get("process", "") == "semi" and last_args.setLineProcess.lineId == "line_1", "setLineProcess sent")
+	pr.open_process("line_1")
+	check(pr.on_escape() and pr.proc_line == "", "Esc closes the process table first")
+	var st2: Dictionary = Game.state.duplicate(true)
+	st2.production.lines[0]["process"] = "semi"
+	st2.production.lines[0]["processUntil"] = int(st2.time.elapsedDays) + 2
+	Game.apply_snapshot(st2)
+	await frames(3)
+	check(ui.current.find_children("*", "Label", true, false).any(func(x: Node) -> bool: return (x as Label).text.contains("Retooling")), "retooling countdown on the line")
+	# 0.5.0 QA #5: the line card shows the capacity after the process (base × 1.3 for semi), not the base
+	var base_cap := float(st2.production.lines[0].get("capacityPerWeek", 0))
+	var want_cap: String = load("res://ui/lib/fmt.gd").number(round(base_cap * 1.3))
+	check(ui.current.find_children("*", "Label", true, false).any(func(x: Node) -> bool: return (x as Label).text.contains("Capacity " + want_cap + "/week")), "line card shows the capacity after the process (%s)" % want_cap)
+	ui.close_screen()
+	await frames(2)
+	ui.open_research("mfg_auto_3")
+	await frames(3)
+	check(ui.current_kind == "whiteboard_research" and ui.current.selected == "mfg_auto_3" and ui.current.branch == "Manufacturing", "research link opens the tech")
+	ui.close_screen()
+	await frames(2)
+	# company board comfort card
+	Bus.interact.emit("board_company", "board")
+	await frames(3)
+	check(ui.current.find_children("*", "PanelContainer", true, false).any(func(x: Node) -> bool: return x.has_meta("comfort_card")), "company board shows comfort per room")
+	var grow: Array = ui.current.find_children("*", "Button", true, false).filter(func(x: Node) -> bool: return x.has_meta("grow_btn"))
+	if not grow.is_empty():
+		(grow[0] as Button).pressed.emit()
+		await frames(3)
+		check(ui.current_kind == "expansions", "company board -> Grow the base")
+	ui.close_screen()
+	await frames(2)
+	await _qa_050(ui, Game, Bus)
+	Game.apply_snapshot(keep_state)
+	await frames(2)
+
+## 0.5.0 QA fixes: owner share, server texts in RU (payroll, quarterly report, incidents, line names), the line
+## prompt, slim toasts while a screen / build mode is open.
+func _qa_050(ui: Node, Game: Node, Bus: Node) -> void:
+	print("ui_smoke: 0.5.0 QA")
+	var L = load("res://ui/lib/loc.gd")
+	var Co = load("res://ui/screens/company.gd")
+	check(Co.share_text({"sharePercent": 50}) == "50%" and Co.share_text({"sharePercent": 100}) == "100%", "owner share is already a percentage (not 5000%)")
+	var st: Dictionary = Game.state.duplicate(true)
+	var lines: Array = st.production.lines
+	lines[0]["bench"] = true
+	lines.append({"id": "line_49_1", "kind": "Assembly", "level": 1, "capacityPerWeek": 2500, "health": 1, "location": "upstairs"})
+	Game.apply_snapshot(st)
+	await frames(2)
+	var Net: Node = root.get_node("Net")
+	var Hud = load("res://ui/hud/hud.gd")
+	var Pr = load("res://ui/screens/production.gd")
+	var keep_lang: String = L.lang
+	L.set_lang("ru")
+	var pay: String = Net.notify_text("note.payroll_payroll_rent_rent_maintenance", {"payroll": 62900, "rent": 2000, "maintenance": 12000}, "Payroll $62900, rent $2000, maintenance $12000")
+	check(pay.begins_with("Зарплаты $62,900"), "RU: monthly costs body translated (%s)" % pay)
+	var q: String = Net.notify_text("note.revenue_revenue_net_netprofit_market_share_share", {"revenue": 0, "netProfit": -230700, "share": 0.0, "valuation": 2}, "Revenue $0, net $-230700, market share 0.0%, valuation $2M")
+	check(q.begins_with("Выручка $0, чистая прибыль") and not q.contains("market share"), "RU: quarterly report body translated (%s)" % q)
+	var dec: String = Net.notify_text("note.line_id_needs_a_decision_repair_replace_or", {"id": "line_49_1"}, "Line line_49_1 needs a decision: repair, replace or reduce output.")
+	check(dec.begins_with("Линия 1") and not dec.contains("line_"), "RU: incident body names the line like the production screen (%s)" % dec)
+	var dec1: String = Net.notify_text("note.line_id_needs_a_decision_repair_replace_or", {"id": "line_1"}, "Line line_1 needs a decision: repair, replace or reduce output.")
+	check(dec1.begins_with("Верстак"), "RU: the workbench is called the workbench (%s)" % dec1)
+	var inc: String = Net.notify_text("note.factory_incident_kind", {"kind": "MaterialShortage"}, "Factory incident: MaterialShortage")
+	check(inc == "Инцидент на заводе: Нехватка материалов", "RU: incident title (%s)" % inc)
+	var it: String = Pr._incident_title({"kind": "QualityControlFailure", "lineId": "line_49_1"})
+	check(it == "Сбой контроля качества · Линия 1", "RU: production incident title (%s)" % it)
+	var pp: String = Hud.prompt_text("Production line #49_1")
+	check(pp == "Производственная линия 1", "RU: line prompt uses the line number (%s)" % pp)
+	L.set_lang("en")
+	var dec_en: String = Net.notify_text("note.line_id_needs_a_decision_repair_replace_or", {"id": "line_49_1"}, "Line line_49_1 needs a decision: repair, replace or reduce output.")
+	check(dec_en == "Line 1 needs a decision: repair, replace or reduce output.", "EN: incident body with the line name (%s)" % dec_en)
+	check(Net.notify_text("note.monthly_costs_paid", null, "Monthly costs paid") == "Monthly costs paid", "EN: other notifies unchanged")
+	L.set_lang(keep_lang)
+	# slim toasts while a screen is open: one line at the very top, above the screen header
+	Bus.interact.emit("board_company", "board")
+	await frames(3)
+	for i in 3:
+		Bus.notify.emit("warning", "Factory incident %d" % i, "A long body text that would wrap into two lines in the old card and cover the header")
+	await frames(3)
+	var tst: Control = ui.toasts
+	var kids: Array = tst._stack.get_children().filter(func(x: Node) -> bool: return not x.is_queued_for_deletion())
+	check(tst.is_compact() and kids.size() == 1, "one slim toast while a screen is open (%d)" % kids.size())
+	if kids.size() == 1:
+		var r: Rect2 = (kids[0] as Control).get_global_rect()
+		check(r.size.y <= 44 and r.end.y <= 56, "slim toast stays in the top strip %s" % str(r))
+	ui.close_screen()
+	await frames(3)
+	check(not tst.is_compact(), "toasts back to the right column after the screen closes")
+
+func Net_mock() -> Callable:
+	return root.get_node("Net").get("mock_handler")
 
 func _key(target: Control, code: int) -> void:
 	var ev := InputEventKey.new()

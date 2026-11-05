@@ -111,7 +111,19 @@ static func balance(section: String) -> Dictionary:
 
 static func sample_state() -> Dictionary:
 	var s: Variant = _json("sample_state")
-	return (s as Dictionary).duplicate(true) if s is Dictionary else {}
+	var st: Dictionary = (s as Dictionary).duplicate(true) if s is Dictionary else {}
+	# 0.5.0: a furnished garage + the side annex (ui/data/sample_interior.json), processes on the lines
+	var si: Variant = _json("sample_interior")
+	if not st.is_empty() and si is Dictionary and (si as Dictionary).has("interior"):
+		st["interior"] = (si.interior as Dictionary).duplicate(true)
+		if st.get("hq") is Dictionary:
+			st.hq["expansions"] = (si.get("expansions", {}) as Dictionary).duplicate(true)
+		var prod: Variant = st.get("production", {})
+		if prod is Dictionary and prod.get("lines") is Array:
+			for l in prod.lines:
+				if l is Dictionary and str(l.get("kind", "")) == "Assembly" and not l.has("process"):
+					l["process"] = "hand"
+	return st
 
 ## A realistic getMaterialQuotes answer for tests and screenshots (no server).
 static func sample_quotes() -> Dictionary:
@@ -141,3 +153,55 @@ static func sample_quotes() -> Dictionary:
 			"supplyMult": 1.3 if m[0] == "lithium" else 1.0, "dailyNeed": need, "daysLeft": snappedf(m[4] / need, 0.1) if need > 0 else -1, "usedBy": m[6], "offers": offers})
 	return {"materials": list, "contracts": [{"id": "ctr_80_1", "supplierId": "glassworks", "resourceId": "display_panels", "unitsPerWeek": 400, "pricePerUnit": 25.6, "weeksLeft": 9}],
 		"billPerUnit": {}, "supplierDiscount": 0, "cash": 1846500}
+
+# ---------------------------------------------------------------- production line names (0.5.0)
+## The garage workbench (same rule as the world's HqState.is_bench_line): bench flag, else location "garage",
+## else (old saves without a location) line_1.
+static func is_bench_line(l: Dictionary) -> bool:
+	if l.get("bench", false):
+		return true
+	var loc := str(l.get("location", "")) if l.get("location") != null else ""
+	if loc != "":
+		return loc == "garage"
+	return str(l.get("id", "")) == "line_1"
+
+## 1-based number of a line among the UPSTAIRS lines (= the loft's bay numbers); 0 = the garage workbench,
+## -1 = unknown id. Ids like "line_49_1" come from the server's id counter and mean nothing to players.
+static func line_number(st: Dictionary, id: String) -> int:
+	var lines: Variant = (st.get("production", {}) as Dictionary).get("lines", []) if st.get("production") is Dictionary else []
+	var n := 0
+	if lines is Array:
+		for x in lines:
+			if not (x is Dictionary):
+				continue
+			var bench := is_bench_line(x)
+			if not bench:
+				n += 1
+			if str((x as Dictionary).get("id", "")) == id:
+				return 0 if bench else n
+	return -1
+
+## A line's display name: "Workbench" for the garage bench, else "Line N" (N = its loft bay).
+static func line_label(st: Dictionary, l: Dictionary) -> String:
+	var Lc = load("res://ui/lib/loc.gd")
+	var n := line_number(st, str(l.get("id", "")))
+	if n == 0 or (n < 0 and is_bench_line(l)):
+		return Lc.t("Workbench")
+	if n > 0:
+		return "%s %d" % [Lc.t("Line"), n]
+	var tail := str(l.get("id", "")).trim_prefix("line_")
+	return "%s %s" % [Lc.t("Line"), tail if tail.is_valid_int() else "?"]
+
+static func line_label_id(st: Dictionary, id: String) -> String:
+	return line_label(st, {"id": id})
+
+## Incident kind ("MaterialShortage") -> "Material Shortage" in the current language.
+static func incident_kind(kind: String) -> String:
+	var Lc = load("res://ui/lib/loc.gd")
+	var out := ""
+	for i in kind.length():
+		var ch := kind[i]
+		if i > 0 and ch == ch.to_upper() and ch != ch.to_lower():
+			out += " "
+		out += ch
+	return Lc.t(out)

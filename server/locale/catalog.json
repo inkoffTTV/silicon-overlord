@@ -90,13 +90,48 @@
   "group": "err"
  },
  {
+  "key": "err.already_using_that_process",
+  "en": "Already using that process",
+  "group": "err"
+ },
+ {
   "key": "err.args_must_be_an_object",
   "en": "args must be an object",
   "group": "err"
  },
  {
+  "key": "err.bad_position",
+  "en": "Bad position",
+  "group": "err"
+ },
+ {
   "key": "err.bezel_must_be_0_05_1_in",
   "en": "bezel must be 0.05..1 in",
+  "group": "err"
+ },
+ {
+  "key": "err.blocked_doorway",
+  "en": "Blocked: doorway",
+  "group": "err"
+ },
+ {
+  "key": "err.blocked_something_built_in",
+  "en": "Blocked: something built in",
+  "group": "err"
+ },
+ {
+  "key": "err.blocked_stairs",
+  "en": "Blocked: stairs",
+  "group": "err"
+ },
+ {
+  "key": "err.blocked_van_ramp",
+  "en": "Blocked: van ramp",
+  "group": "err"
+ },
+ {
+  "key": "err.blocked_walkway",
+  "en": "Blocked: walkway",
   "group": "err"
  },
  {
@@ -257,6 +292,16 @@
  {
   "key": "err.every_owner_needs_a_share",
   "en": "Every owner needs a share",
+  "group": "err"
+ },
+ {
+  "key": "err.expansion_max_level",
+  "en": "Expansion at max level",
+  "group": "err"
+ },
+ {
+  "key": "err.expansions_garage_only",
+  "en": "Expansions are for the garage. Build rooms in the office.",
   "group": "err"
  },
  {
@@ -625,6 +670,11 @@
   "group": "err"
  },
  {
+  "key": "err.needs_hq_level_minhq",
+  "en": "Needs HQ level {minHQ}",
+  "group": "err"
+ },
+ {
   "key": "err.needs_name",
   "en": "Needs {name}",
   "group": "err"
@@ -810,6 +860,16 @@
   "group": "err"
  },
  {
+  "key": "err.only_assembly_lines_have_a_process",
+  "en": "Only assembly lines have a process",
+  "group": "err"
+ },
+ {
+  "key": "err.only_max_of_these_per_room",
+  "en": "Only {max} of these per room",
+  "group": "err"
+ },
+ {
   "key": "err.only_the_founder_can_sell_the_company",
   "en": "Only the founder can sell the company",
   "group": "err"
@@ -827,6 +887,16 @@
  {
   "key": "err.outside_the_office",
   "en": "Outside the office",
+  "group": "err"
+ },
+ {
+  "key": "err.outside_the_room",
+  "en": "Outside the room",
+  "group": "err"
+ },
+ {
+  "key": "err.overlaps_another_item",
+  "en": "Overlaps another item",
   "group": "err"
  },
  {
@@ -857,6 +927,11 @@
  {
   "key": "err.pick_a_cpu_or_gpu_fab",
   "en": "Pick a CPU or GPU fab",
+  "group": "err"
+ },
+ {
+  "key": "err.pick_a_wall_or_the_floor",
+  "en": "Pick a wall or the floor",
   "group": "err"
  },
  {
@@ -1045,6 +1120,11 @@
   "group": "err"
  },
  {
+  "key": "err.research_name_first",
+  "en": "Research {name} first",
+  "group": "err"
+ },
+ {
   "key": "err.research_patent_office_first",
   "en": "Research Patent Office first",
   "group": "err"
@@ -1072,6 +1152,16 @@
  {
   "key": "err.room_level_cannot_exceed_hq_level_1",
   "en": "Room level cannot exceed HQ level + 1",
+  "group": "err"
+ },
+ {
+  "key": "err.room_not_built",
+  "en": "That room is not built yet",
+  "group": "err"
+ },
+ {
+  "key": "err.room_not_in_hq",
+  "en": "That room is not part of this HQ",
   "group": "err"
  },
  {
@@ -1165,6 +1255,16 @@
   "group": "err"
  },
  {
+  "key": "err.that_does_not_belong_in_this_room",
+  "en": "That does not belong in this room",
+  "group": "err"
+ },
+ {
+  "key": "err.that_material_does_not_go_on_this_surface",
+  "en": "That material does not go on this surface",
+  "group": "err"
+ },
+ {
   "key": "err.that_region_cannot_be_bought_it_opens_through_a",
   "en": "That region cannot be bought; it opens through a megaproject",
   "group": "err"
@@ -1200,6 +1300,11 @@
   "group": "err"
  },
  {
+  "key": "err.the_room_is_full_maxitems_items",
+  "en": "The room is full ({maxItems} items)",
+  "group": "err"
+ },
+ {
   "key": "err.this_invite_is_for_another_player",
   "en": "This invite is for another player",
   "group": "err"
@@ -1225,6 +1330,11 @@
   "group": "err"
  },
  {
+  "key": "err.too_many_build_actions_slow_down",
+  "en": "Too many build actions, slow down",
+  "group": "err"
+ },
+ {
   "key": "err.too_many_contracts",
   "en": "Too many contracts",
   "group": "err"
@@ -1247,6 +1357,11 @@
  {
   "key": "err.too_many_requests",
   "en": "Too many requests",
+  "group": "err"
+ },
+ {
+  "key": "err.too_tall_for_this_room",
+  "en": "Too tall for this room",
   "group": "err"
  },
  {
@@ -1300,6 +1415,11 @@
   "group": "err"
  },
  {
+  "key": "err.unknown_expansion",
+  "en": "Unknown expansion",
+  "group": "err"
+ },
+ {
   "key": "err.unknown_factory",
   "en": "Unknown factory",
   "group": "err"
@@ -1315,6 +1435,16 @@
   "group": "err"
  },
  {
+  "key": "err.unknown_item_id",
+  "en": "Unknown item id",
+  "group": "err"
+ },
+ {
+  "key": "err.unknown_lighting_preset",
+  "en": "Unknown lighting preset",
+  "group": "err"
+ },
+ {
   "key": "err.unknown_line",
   "en": "Unknown line",
   "group": "err"
@@ -1322,6 +1452,11 @@
  {
   "key": "err.unknown_line_type",
   "en": "Unknown line type",
+  "group": "err"
+ },
+ {
+  "key": "err.unknown_material",
+  "en": "Unknown material",
   "group": "err"
  },
  {
@@ -1360,6 +1495,11 @@
   "group": "err"
  },
  {
+  "key": "err.unknown_process",
+  "en": "Unknown process",
+  "group": "err"
+ },
+ {
   "key": "err.unknown_product",
   "en": "Unknown product",
   "group": "err"
@@ -1390,6 +1530,11 @@
   "group": "err"
  },
  {
+  "key": "err.unknown_theme",
+  "en": "Unknown theme",
+  "group": "err"
+ },
+ {
   "key": "err.unsupported_protocol",
   "en": "Unsupported protocol version (server speaks v{version})",
   "group": "err"
@@ -1407,6 +1552,11 @@
  {
   "key": "err.wait_a_few_seconds_before_creating_another",
   "en": "Wait a few seconds before creating another company",
+  "group": "err"
+ },
+ {
+  "key": "err.wall_items_must_touch_a_wall",
+  "en": "Wall items must touch a wall",
   "group": "err"
  },
  {
@@ -3270,6 +3420,31 @@
   "group": "data"
  },
  {
+  "key": "data.expansions.annex.name",
+  "en": "Side annex lab",
+  "group": "data"
+ },
+ {
+  "key": "data.expansions.basement.name",
+  "en": "Basement",
+  "group": "data"
+ },
+ {
+  "key": "data.expansions.loft.name",
+  "en": "Loft",
+  "group": "data"
+ },
+ {
+  "key": "data.expansions.shed.name",
+  "en": "Backyard workshop",
+  "group": "data"
+ },
+ {
+  "key": "data.expansions.showroom.name",
+  "en": "Showroom",
+  "group": "data"
+ },
+ {
   "key": "data.features.always_on.desc",
   "en": "Time and notifications without waking the phone.",
   "group": "data"
@@ -4100,6 +4275,506 @@
   "group": "data"
  },
  {
+  "key": "data.interior.brick.name",
+  "en": "Brick",
+  "group": "data"
+ },
+ {
+  "key": "data.interior.carpet.name",
+  "en": "Carpet",
+  "group": "data"
+ },
+ {
+  "key": "data.interior.concrete.name",
+  "en": "Concrete",
+  "group": "data"
+ },
+ {
+  "key": "data.interior.daylight.name",
+  "en": "Daylight",
+  "group": "data"
+ },
+ {
+  "key": "data.interior.decor_aquarium.name",
+  "en": "Aquarium",
+  "group": "data"
+ },
+ {
+  "key": "data.interior.decor_arcade.name",
+  "en": "Arcade Cabinet",
+  "group": "data"
+ },
+ {
+  "key": "data.interior.decor_coffee_machine.name",
+  "en": "Coffee Machine",
+  "group": "data"
+ },
+ {
+  "key": "data.interior.decor_demo_table.name",
+  "en": "Demo Table",
+  "group": "data"
+ },
+ {
+  "key": "data.interior.decor_framed_print.name",
+  "en": "Framed Print",
+  "group": "data"
+ },
+ {
+  "key": "data.interior.decor_history_wall.name",
+  "en": "Whiteboard History Wall",
+  "group": "data"
+ },
+ {
+  "key": "data.interior.decor_neon_name.name",
+  "en": "Company Neon Sign",
+  "group": "data"
+ },
+ {
+  "key": "data.interior.decor_old_radio.name",
+  "en": "Old Radio",
+  "group": "data"
+ },
+ {
+  "key": "data.interior.decor_phone_case.name",
+  "en": "Phone Display Case",
+  "group": "data"
+ },
+ {
+  "key": "data.interior.decor_pinball.name",
+  "en": "Pinball Machine",
+  "group": "data"
+ },
+ {
+  "key": "data.interior.decor_ping_pong.name",
+  "en": "Ping-Pong Table",
+  "group": "data"
+ },
+ {
+  "key": "data.interior.decor_poster_launch.name",
+  "en": "Launch Poster",
+  "group": "data"
+ },
+ {
+  "key": "data.interior.decor_robot_mascot.name",
+  "en": "Robot Mascot",
+  "group": "data"
+ },
+ {
+  "key": "data.interior.decor_rug_braided.name",
+  "en": "Braided Rug",
+  "group": "data"
+ },
+ {
+  "key": "data.interior.decor_rug_grid.name",
+  "en": "Grid Rug",
+  "group": "data"
+ },
+ {
+  "key": "data.interior.decor_rug_wool.name",
+  "en": "Wool Rug",
+  "group": "data"
+ },
+ {
+  "key": "data.interior.decor_trophy_shelf.name",
+  "en": "Trophy Shelf",
+  "group": "data"
+ },
+ {
+  "key": "data.interior.decor_vinyl_player.name",
+  "en": "Record Player",
+  "group": "data"
+ },
+ {
+  "key": "data.interior.decor_wall_clock.name",
+  "en": "Wall Clock",
+  "group": "data"
+ },
+ {
+  "key": "data.interior.desk_bench4.name",
+  "en": "Bench for Four",
+  "group": "data"
+ },
+ {
+  "key": "data.interior.desk_corner.name",
+  "en": "Corner Desk",
+  "group": "data"
+ },
+ {
+  "key": "data.interior.desk_door_trestle.name",
+  "en": "Door-on-Trestles Desk",
+  "group": "data"
+ },
+ {
+  "key": "data.interior.desk_neon_rig.name",
+  "en": "RGB Battlestation",
+  "group": "data"
+ },
+ {
+  "key": "data.interior.desk_pine.name",
+  "en": "Pine Desk",
+  "group": "data"
+ },
+ {
+  "key": "data.interior.desk_pod6.name",
+  "en": "Open-Plan Pod (6)",
+  "group": "data"
+ },
+ {
+  "key": "data.interior.desk_standing.name",
+  "en": "Standing Desk",
+  "group": "data"
+ },
+ {
+  "key": "data.interior.desk_steel.name",
+  "en": "Steel Shop Desk",
+  "group": "data"
+ },
+ {
+  "key": "data.interior.desk_walnut_exec.name",
+  "en": "Walnut Executive Desk",
+  "group": "data"
+ },
+ {
+  "key": "data.interior.desk_white.name",
+  "en": "White Lab Desk",
+  "group": "data"
+ },
+ {
+  "key": "data.interior.desks.text",
+  "en": "Desks & seating",
+  "group": "data"
+ },
+ {
+  "key": "data.interior.grunge.name",
+  "en": "Garage Grunge",
+  "group": "data"
+ },
+ {
+  "key": "data.interior.lab.name",
+  "en": "Clean Lab",
+  "group": "data"
+ },
+ {
+  "key": "data.interior.lab.text",
+  "en": "Lab & tools",
+  "group": "data"
+ },
+ {
+  "key": "data.interior.lab_3d_printer.name",
+  "en": "Desktop 3D Printer",
+  "group": "data"
+ },
+ {
+  "key": "data.interior.lab_bench.name",
+  "en": "Lab Bench",
+  "group": "data"
+ },
+ {
+  "key": "data.interior.lab_clean_booth.name",
+  "en": "Clean Booth",
+  "group": "data"
+ },
+ {
+  "key": "data.interior.lab_drop_tester.name",
+  "en": "Drop-Test Rig",
+  "group": "data"
+ },
+ {
+  "key": "data.interior.lab_esd_bench.name",
+  "en": "ESD Test Bench",
+  "group": "data"
+ },
+ {
+  "key": "data.interior.lab_fume_hood.name",
+  "en": "Fume Hood",
+  "group": "data"
+ },
+ {
+  "key": "data.interior.lab_oscilloscope_cart.name",
+  "en": "Oscilloscope Cart",
+  "group": "data"
+ },
+ {
+  "key": "data.interior.lab_rf_chamber.name",
+  "en": "RF Test Chamber",
+  "group": "data"
+ },
+ {
+  "key": "data.interior.lab_server_rack.name",
+  "en": "Server Rack",
+  "group": "data"
+ },
+ {
+  "key": "data.interior.lab_solder_station.name",
+  "en": "Soldering Station",
+  "group": "data"
+ },
+ {
+  "key": "data.interior.lab_whiteboard_wall.name",
+  "en": "Whiteboard Wall",
+  "group": "data"
+ },
+ {
+  "key": "data.interior.light_bulb_string.name",
+  "en": "Bulb String",
+  "group": "data"
+ },
+ {
+  "key": "data.interior.light_chandelier.name",
+  "en": "Chandelier",
+  "group": "data"
+ },
+ {
+  "key": "data.interior.light_desk_banker.name",
+  "en": "Banker's Lamp",
+  "group": "data"
+ },
+ {
+  "key": "data.interior.light_floor_arc.name",
+  "en": "Arc Floor Lamp",
+  "group": "data"
+ },
+ {
+  "key": "data.interior.light_lava.name",
+  "en": "Lava Lamp",
+  "group": "data"
+ },
+ {
+  "key": "data.interior.light_led_panel.name",
+  "en": "LED Daylight Panel",
+  "group": "data"
+ },
+ {
+  "key": "data.interior.light_neon_tube.name",
+  "en": "Neon Tube",
+  "group": "data"
+ },
+ {
+  "key": "data.interior.light_paper_lantern.name",
+  "en": "Paper Lantern",
+  "group": "data"
+ },
+ {
+  "key": "data.interior.light_shop_tube.name",
+  "en": "Shop Tube Light",
+  "group": "data"
+ },
+ {
+  "key": "data.interior.light_work_lamp.name",
+  "en": "Clamp Work Lamp",
+  "group": "data"
+ },
+ {
+  "key": "data.interior.lighting.text",
+  "en": "Lighting",
+  "group": "data"
+ },
+ {
+  "key": "data.interior.metal.name",
+  "en": "Metal sheet",
+  "group": "data"
+ },
+ {
+  "key": "data.interior.neon.name",
+  "en": "Neon",
+  "group": "data"
+ },
+ {
+  "key": "data.interior.paint.name",
+  "en": "Paint",
+  "group": "data"
+ },
+ {
+  "key": "data.interior.plank.name",
+  "en": "Wood planks",
+  "group": "data"
+ },
+ {
+  "key": "data.interior.plant_cactus.name",
+  "en": "Cactus",
+  "group": "data"
+ },
+ {
+  "key": "data.interior.plant_fig.name",
+  "en": "Fiddle-Leaf Fig",
+  "group": "data"
+ },
+ {
+  "key": "data.interior.plant_herbs.name",
+  "en": "Herb Shelf",
+  "group": "data"
+ },
+ {
+  "key": "data.interior.plant_indoor_tree.name",
+  "en": "Indoor Olive Tree",
+  "group": "data"
+ },
+ {
+  "key": "data.interior.plant_monstera.name",
+  "en": "Monstera",
+  "group": "data"
+ },
+ {
+  "key": "data.interior.plant_moss_wall.name",
+  "en": "Moss Wall",
+  "group": "data"
+ },
+ {
+  "key": "data.interior.plant_palm.name",
+  "en": "Potted Palm",
+  "group": "data"
+ },
+ {
+  "key": "data.interior.plant_pothos.name",
+  "en": "Pothos in a Bucket",
+  "group": "data"
+ },
+ {
+  "key": "data.interior.prod_burn_in_rack.name",
+  "en": "Burn-In Rack",
+  "group": "data"
+ },
+ {
+  "key": "data.interior.prod_compressor.name",
+  "en": "Air Compressor",
+  "group": "data"
+ },
+ {
+  "key": "data.interior.prod_jig_rack.name",
+  "en": "Assembly Jig Rack",
+  "group": "data"
+ },
+ {
+  "key": "data.interior.prod_packing_table.name",
+  "en": "Packing Table",
+  "group": "data"
+ },
+ {
+  "key": "data.interior.prod_parts_bins.name",
+  "en": "Parts Bin Wall",
+  "group": "data"
+ },
+ {
+  "key": "data.interior.prod_qc_light_table.name",
+  "en": "QC Light Table",
+  "group": "data"
+ },
+ {
+  "key": "data.interior.prod_safety_station.name",
+  "en": "Safety Station",
+  "group": "data"
+ },
+ {
+  "key": "data.interior.prod_tool_wall.name",
+  "en": "Pegboard Tool Wall",
+  "group": "data"
+ },
+ {
+  "key": "data.interior.prod_xray_inspector.name",
+  "en": "X-Ray Inspector",
+  "group": "data"
+ },
+ {
+  "key": "data.interior.production.text",
+  "en": "Production",
+  "group": "data"
+ },
+ {
+  "key": "data.interior.scandi.name",
+  "en": "Scandinavian",
+  "group": "data"
+ },
+ {
+  "key": "data.interior.seat_armchair.name",
+  "en": "Leather Armchair",
+  "group": "data"
+ },
+ {
+  "key": "data.interior.seat_beanbag.name",
+  "en": "Beanbag",
+  "group": "data"
+ },
+ {
+  "key": "data.interior.seat_crate_stool.name",
+  "en": "Crate Stool",
+  "group": "data"
+ },
+ {
+  "key": "data.interior.seat_meeting_table.name",
+  "en": "Meeting Table",
+  "group": "data"
+ },
+ {
+  "key": "data.interior.seat_sofa_felt.name",
+  "en": "Felt Sofa",
+  "group": "data"
+ },
+ {
+  "key": "data.interior.seat_sofa_old.name",
+  "en": "Thrift-Store Sofa",
+  "group": "data"
+ },
+ {
+  "key": "data.interior.store_bookcase.name",
+  "en": "Bookcase",
+  "group": "data"
+ },
+ {
+  "key": "data.interior.store_cabinet.name",
+  "en": "Steel Cabinet",
+  "group": "data"
+ },
+ {
+  "key": "data.interior.store_cold_room.name",
+  "en": "Climate Cabinet",
+  "group": "data"
+ },
+ {
+  "key": "data.interior.store_crate_stack.name",
+  "en": "Crate Stack",
+  "group": "data"
+ },
+ {
+  "key": "data.interior.store_lockers.name",
+  "en": "Staff Lockers",
+  "group": "data"
+ },
+ {
+  "key": "data.interior.store_pallet_rack.name",
+  "en": "Pallet Rack",
+  "group": "data"
+ },
+ {
+  "key": "data.interior.store_wire_shelf.name",
+  "en": "Wire Shelf",
+  "group": "data"
+ },
+ {
+  "key": "data.interior.surfaces.text",
+  "en": "Walls & floors",
+  "group": "data"
+ },
+ {
+  "key": "data.interior.tile.name",
+  "en": "Tiles",
+  "group": "data"
+ },
+ {
+  "key": "data.interior.wallpaper.name",
+  "en": "Wallpaper",
+  "group": "data"
+ },
+ {
+  "key": "data.interior.warm.name",
+  "en": "Warm",
+  "group": "data"
+ },
+ {
+  "key": "data.interior.wood.name",
+  "en": "Cozy Wood",
+  "group": "data"
+ },
+ {
   "key": "data.legacy.builder.desc",
   "en": "Factories, services and megaprojects cost 8% less per rank.",
   "group": "data"
@@ -4495,6 +5170,26 @@
   "group": "data"
  },
  {
+  "key": "data.productionprocesses.hand.name",
+  "en": "Hand assembly",
+  "group": "data"
+ },
+ {
+  "key": "data.productionprocesses.robotic.name",
+  "en": "Robotic arms",
+  "group": "data"
+ },
+ {
+  "key": "data.productionprocesses.semi.name",
+  "en": "Semi-automatic (jigs + conveyor)",
+  "group": "data"
+ },
+ {
+  "key": "data.productionprocesses.smart.name",
+  "en": "Smart factory (lights-out, AI vision QC)",
+  "group": "data"
+ },
+ {
   "key": "data.regions.ASIA.name",
   "en": "Asia",
   "group": "data"
@@ -4662,6 +5357,16 @@
  {
   "key": "data.resources.voltcell.name",
   "en": "VoltCell Energy",
+  "group": "data"
+ },
+ {
+  "key": "data.roomgeometry.garage.name",
+  "en": "Garage workshop",
+  "group": "data"
+ },
+ {
+  "key": "data.roomgeometry.office.name",
+  "en": "Open-plan office",
   "group": "data"
  },
  {

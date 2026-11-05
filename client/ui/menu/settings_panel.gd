@@ -264,7 +264,7 @@ func _notify_settings() -> void:
 const CONTROLS := [
 	[["W", "A", "S", "D"], "Move"], [["Shift"], "Sprint"], [["Ctrl"], "Crouch"], [["Space"], "Jump"],
 	[["E"], "Interact / pick up"], [["LMB"], "Grab and drag"], [["RMB"], "Rotate what you hold"], [["F"], "Flashlight"],
-	[["T"], "Chat"], [["Tab"], "Quick menu"], [["Esc"], "Pause menu"],
+	[["T"], "Chat"], [["Tab"], "Quick menu"], [["Esc"], "Pause menu"], [["B"], "Build mode"],
 	[["P", "0"], "Time: pause / resume"], [["1", "2", "3", "4"], "Time: 1× · 2× · 4× · 8×"], [["+", "−"], "Time: faster / slower"],
 ]
 

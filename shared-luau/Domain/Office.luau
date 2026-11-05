@@ -41,7 +41,7 @@ Office.cellKey = key
 -- ---------------------------------------------------------------------------
 local function office(state: Types.CompanyState): any
 	local o: any = state.office
-	if o == nil then
+	if type(o) ~= "table" then
 		o = { comfort = 0, productivity = 0, furniture = {}, desksPlaced = 0 }
 		state.office = o
 	end
@@ -141,6 +141,56 @@ function Office.layoutFromCounts(counts: { [string]: number }, level: number): (
 		end
 	end
 	return placed, storage, floors, uid
+end
+
+-- Once per load (CompanyFactory.migrate): drops malformed placement records (no numeric uid / unknown shape) so
+-- the rules never index them; non-table storage / floors maps are reset.
+function Office.sanitize(state: Types.CompanyState)
+	local o = office(state)
+	if type(o.furniture) ~= "table" then
+		o.furniture = {}
+	end
+	for _, k in ipairs({ "storage", "floors", "unlocked" }) do
+		if o[k] ~= nil and type(o[k]) ~= "table" then
+			o[k] = nil
+		end
+	end
+	if o.placed ~= nil and type(o.placed) ~= "table" then
+		o.placed = nil
+	end
+	if type(o.placed) == "table" then
+		local kept = {}
+		for _, p in ipairs(o.placed) do
+			if type(p) == "table" and type(p.uid) == "number" and type(p.itemId) == "string" and type(p.x) == "number" and type(p.y) == "number" then
+				kept[#kept + 1] = p
+			end
+		end
+		o.placed = kept
+	end
+	if o.nextUid ~= nil and type(o.nextUid) ~= "number" then
+		o.nextUid = nil
+	end
+end
+
+-- 0.5.0: uids of old-office pieces mirrored into the interior editor and standing there (not stored). Their comfort
+-- and research now come from the interior (capped there); the old ratings skip them so nothing counts twice.
+function Office.mirrored(state: Types.CompanyState): { [number]: boolean }
+	local out: { [number]: boolean } = {}
+	local st: any = state
+	local rooms = type(st.interior) == "table" and type(st.interior.rooms) == "table" and st.interior.rooms or nil
+	if rooms == nil then
+		return out
+	end
+	for _, r in pairs(rooms) do
+		if type(r) == "table" and type(r.items) == "table" then
+			for _, it in ipairs(r.items) do
+				if type(it) == "table" and it.legacy and not it.stored and type(it.uid) == "number" then
+					out[it.uid] = true
+				end
+			end
+		end
+	end
+	return out
 end
 
 -- Makes sure the placement fields exist (idempotent). Converts old count-only saves.
@@ -255,9 +305,10 @@ end
 -- ---------------------------------------------------------------------------
 function Office.comfortPoints(state: Types.CompanyState): number
 	local pts = 0
+	local mirrored = Office.mirrored(state)
 	for _, p in ipairs(Office.placed(state)) do
 		local def = Furniture.byId[p.itemId]
-		if def and def.comfort then
+		if def and def.comfort and not mirrored[p.uid] then
 			pts = pts + def.comfort
 		end
 	end
@@ -325,9 +376,10 @@ function Office.researchBonus(state: Types.CompanyState): number
 		perDesk = perDesk / #desks
 	end
 	local extra = 0
+	local mirrored = Office.mirrored(state)
 	for _, p in ipairs(Office.placed(state)) do
 		local def = Furniture.byId[p.itemId]
-		if def and def.category ~= "computers" and def.research then
+		if def and def.category ~= "computers" and def.research and not mirrored[p.uid] then
 			extra = extra + def.research
 		end
 	end
@@ -374,7 +426,10 @@ function Office.staffFactor(state: Types.CompanyState): number
 	if staff == 0 then
 		return speed
 	end
-	local without = math.max(0, staff - Office.desksPlaced(state))
+	-- 0.5.0: seats placed in the interior editor count as desks too
+	local st: any = state
+	local extra = type(st.interior) == "table" and type(st.interior.summary) == "table" and (tonumber(st.interior.summary.extraSeats) or 0) or 0
+	local without = math.max(0, staff - Office.desksPlaced(state) - extra)
 	return speed * (1 - O.noDeskPenalty * (without / staff))
 end
 

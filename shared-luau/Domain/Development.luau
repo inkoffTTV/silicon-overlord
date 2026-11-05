@@ -194,6 +194,10 @@ function Development.tickDay(c: Types.CompanyState): { Note }
 	local researchBonus = safeOffice(Office.researchBonus, c)
 	local bugBonus = safeOffice(Office.bugFixBonus, c)
 	local productivity = EmployeeRules.productivity(c.employees.morale)
+	-- 0.5.0: a comfortable design room (interior comfort, capped) raises design quality gain
+	local cAny: any = c
+	local fx = type(cAny.interior) == "table" and type(cAny.interior.summary) == "table" and cAny.interior.summary.effects or nil
+	local designMult = 1 + (type(fx) == "table" and (tonumber(fx.design) or 0) or 0)
 	local ids = {}
 	for id in pairs(list) do
 		ids[#ids + 1] = id
@@ -205,7 +209,7 @@ function Development.tickDay(c: Types.CompanyState): { Note }
 		c.finance.cash = c.finance.cash - p.costPerDay
 		c.finance.qOpex = c.finance.qOpex + p.costPerDay
 		p.spent = p.spent + p.costPerDay
-		p.quality = math.min(D.qualityCap, p.quality + (D.qualityBase + D.qualityPerSkill * research) * researchBonus * productivity)
+		p.quality = math.min(D.qualityCap, p.quality + (D.qualityBase + D.qualityPerSkill * research) * researchBonus * productivity * designMult)
 		local chance = D.bugChancePerDay * math.max(0.2, 1 - D.bugChanceQcReduction * qcCount) / math.max(0.5, bugBonus)
 		if rng:chance(chance) then
 			if rng:chance(D.toughBugShare) then

@@ -3,6 +3,9 @@ extends "res://world/levels/level_base.gd"
 ## door (rolled up: the delivery van waits on the driveway) and a window onto an evening suburb street; back (-Z)
 ## has the door into the house. Above the ceiling: the attic = "second floor" (loft.gd), reached through a hatch
 ## + ladder in the right-front ceiling once `hq.rooms.AssemblyLine` is bought.
+## 0.5.0: the garage grows (world/live/expansions.gd): a doorway in the LEFT wall to the side annex lab, a trapdoor
+## + stairs in the floor to the basement, a back door to the backyard shed, a front door to the showroom. The static
+## openings live here; doors, rooms and the "for sale" looks are built by Expansions from hq.expansions.
 
 const W := 4.0   # half width
 const D := 3.5   # half depth
@@ -17,6 +20,15 @@ const DevBench := preload("res://world/live/dev_bench.gd")
 const BenchView := preload("res://world/live/bench_view.gd")
 const HQ := preload("res://world/live/hq_state.gd")
 const RepairShop := preload("res://world/live/repair_shop.gd")
+const Expansions := preload("res://world/live/expansions.gd")
+const InteriorView := preload("res://world/build/interior_view.gd")
+## 0.5.0 openings (level space, see shared-luau/Data/RoomGeometry.luau reserved zones)
+const ANNEX_DOOR := Vector2(0.0, 0.9)        # left wall, z range
+const YARD_DOOR := Vector2(0.3, 1.15)        # back wall, x range
+const SHOW_DOOR := Vector2(0.66, 1.46)       # front wall, x range
+const TRAP := Rect2(-1.6, -2.7, 1.2, 2.9)    # floor hole x, z, size x, size z
+const DOOR_H := 2.04
+const SLAB := 0.4                            # garage floor slab thickness (the basement ceiling under it)
 
 var loft: Node3D
 var dock: Node3D
@@ -25,6 +37,9 @@ var dev_bench: Node3D
 var bench_view: Node3D
 ## iteration 3: the repair shop (sign, shop door, light switch, counter, repair bench, customers, devices)
 var shop: Node3D
+## 0.5.0: garage expansions (annex, basement, yard + shed, showroom) and the interior renderer
+var expansions: Node3D
+var interior: Node3D
 ## title screen: build the garage as scenery only (no state-driven parts, no interactables)
 var decor_only := false
 
@@ -46,7 +61,7 @@ func _shell() -> void:
 	var wall := Mats.m("block_wall")
 	var g := kit.node(self, Vector3.ZERO, 0.0, "Shell")
 	# floor + ceiling
-	kit.box(g, Vector3(2 * W + 2 * T, 0.2, 2 * D + 2 * T), Vector3(0, -0.1, 0), Mats.m("concrete_floor"), Vector3.ZERO, true, 0.0)
+	_floor_slab(g)
 	# ceiling (= loft floor) with the hatch hole x[3,4] z[-2,-0.3]
 	var hole: Rect2 = Loft.HOLE
 	var hx0 := hole.position.x
@@ -69,17 +84,28 @@ func _shell() -> void:
 		kit.box(g, Vector3(0.07, 0.2, 2 * D), Vector3(x, H - 0.1, 0), Mats.m("wood"), Vector3.ZERO, false, 0.006)
 	kit.box(g, Vector3(2 * W, 0.22, 0.12), Vector3(0, H - 0.11, 0.2), Mats.m("wood", Color(0.9, 0.85, 0.8)), Vector3.ZERO, false, 0.008)
 	# side walls
-	kit.box(g, Vector3(T, H + 0.2, 2 * D + 2 * T), Vector3(-W - T * 0.5, H * 0.5, 0), wall, Vector3.ZERO, true, 0.0)
+	var lz0 := -D - T
+	var lz1 := D + T
+	kit.box(g, Vector3(T, H + 0.2, ANNEX_DOOR.x - lz0), Vector3(-W - T * 0.5, H * 0.5, (lz0 + ANNEX_DOOR.x) * 0.5), wall, Vector3.ZERO, true, 0.0)
+	kit.box(g, Vector3(T, H + 0.2, lz1 - ANNEX_DOOR.y), Vector3(-W - T * 0.5, H * 0.5, (ANNEX_DOOR.y + lz1) * 0.5), wall, Vector3.ZERO, true, 0.0)
+	kit.box(g, Vector3(T, H + 0.1 - DOOR_H, ANNEX_DOOR.y - ANNEX_DOOR.x), Vector3(-W - T * 0.5, (DOOR_H + H + 0.1) * 0.5, (ANNEX_DOOR.x + ANNEX_DOOR.y) * 0.5), wall, Vector3.ZERO, true, 0.0)
+	_door_frame(g, Vector3(-W, 0, (ANNEX_DOOR.x + ANNEX_DOOR.y) * 0.5), 90.0, ANNEX_DOOR.y - ANNEX_DOOR.x)
 	kit.box(g, Vector3(T, H + 0.2, 2 * D + 2 * T), Vector3(W + T * 0.5, H * 0.5, 0), wall, Vector3.ZERO, true, 0.0)
 	# back wall with house door opening x[2.4,3.3]
 	var bz := -D - T * 0.5
-	_wall_piece(g, -W, 2.4, 0.0, H, bz, wall)
+	_wall_piece(g, -W, YARD_DOOR.x, 0.0, H, bz, wall)
+	_wall_piece(g, YARD_DOOR.y, 2.4, 0.0, H, bz, wall)
+	_wall_piece(g, YARD_DOOR.x, YARD_DOOR.y, DOOR_H, H, bz, wall)
+	_door_frame(g, Vector3((YARD_DOOR.x + YARD_DOOR.y) * 0.5, 0, -D), 0.0, YARD_DOOR.y - YARD_DOOR.x)
 	_wall_piece(g, 3.3, W, 0.0, H, bz, wall)
 	_wall_piece(g, 2.4, 3.3, 2.08, H, bz, wall)
 	# front wall: roll-up opening x[-3.6,0.6] h 2.4, window x[1.6,3.2] y[1.0,2.1]
 	var fz := D + T * 0.5
 	_wall_piece(g, -W, -3.6, 0.0, H, fz, wall)
-	_wall_piece(g, 0.6, 1.5, 0.0, H, fz, wall)
+	_wall_piece(g, 0.6, SHOW_DOOR.x, 0.0, H, fz, wall)
+	_wall_piece(g, SHOW_DOOR.y, 1.5, 0.0, H, fz, wall)
+	_wall_piece(g, SHOW_DOOR.x, SHOW_DOOR.y, DOOR_H, H, fz, wall)
+	_door_frame(g, Vector3((SHOW_DOOR.x + SHOW_DOOR.y) * 0.5, 0, D), 180.0, SHOW_DOOR.y - SHOW_DOOR.x)
 	_wall_piece(g, 3.3, W, 0.0, H, fz, wall)
 	_wall_piece(g, -3.6, 0.6, 2.4, H, fz, wall)
 	_wall_piece(g, 1.5, 3.3, 0.0, 0.9, fz, wall)
@@ -88,7 +114,7 @@ func _shell() -> void:
 	for s in [-1.0, 1.0]:
 		kit.box(g, Vector3(0.012, 0.07, 2 * D), Vector3(s * (W - 0.006), 1.0, 0), Mats.m("metal_yellow", Color(0.6, 0.6, 0.6), {"metallic_base": 0.0, "roughness_base": 0.7}), Vector3.ZERO, false, 0.0, false)
 	# yellow guide line on the floor (taped)
-	kit.box(g, Vector3(0.08, 0.004, 4.4), Vector3(-1.0, 0.002, 0.8), Mats.m("metal_yellow", Color.WHITE, {"metallic_base": 0.0, "roughness_base": 0.6, "grime": 0.7, "grime_scale": 3.0}), Vector3.ZERO, false, 0.0, false)
+	kit.box(g, Vector3(0.08, 0.004, 2.7), Vector3(-1.0, 0.002, 1.65), Mats.m("metal_yellow", Color.WHITE, {"metallic_base": 0.0, "roughness_base": 0.6, "grime": 0.7, "grime_scale": 3.0}), Vector3.ZERO, false, 0.0, false)
 	# oil stain decal near the roll-up door
 	kit.mesh(g, Meshes.cyl(0.55, 0.003, 20), Vector3(-1.6, 0.0015, 2.3), Mats.m("concrete_floor", Color(0.62, 0.6, 0.58), {"roughness_base": 0.18, "pattern": 0, "grime": 0.9, "grime_scale": 3.0}), Vector3(0, 0, 0), false).scale = Vector3(1.4, 1, 0.8)
 	_rollup_door(g)
@@ -104,7 +130,7 @@ func _shell() -> void:
 	kit.box(g, Vector3(0.4, 0.55, 0.1), Vector3(W - 0.05, 1.55, -2.4), Mats.m("metal", Color(0.85, 0.85, 0.8), {"metallic_base": 0.4}), Vector3(0, 90, 0), true, 0.012)
 	kit.label(g, "!", Vector3(W - 0.11, 1.68, -2.4), 80, Color(0.8, 0.6, 0.0), Vector3(0, -90, 0), 0.0015, true)
 	kit.cyl(g, 0.016, 1.15, Vector3(W - 0.04, 2.4, -2.4), Mats.m("metal"), Vector3.ZERO, 8)
-	outlet(g, Vector3(-W, 0.35, -0.1), 90.0)
+	outlet(g, Vector3(-W, 0.35, -0.35), 90.0)
 	outlet(g, Vector3(W, 0.35, 1.0), -90.0)
 	outlet(g, Vector3(-1.5, 1.1, -D), 0.0)
 
@@ -119,6 +145,34 @@ func _ceiling_piece(g: Node3D, x0: float, x1: float, z0: float, z1: float) -> vo
 
 func _wall_piece(g: Node3D, x0: float, x1: float, y0: float, y1: float, z: float, mat: Material) -> void:
 	kit.box(g, Vector3(x1 - x0, y1 - y0, T), Vector3((x0 + x1) * 0.5, (y0 + y1) * 0.5, z), mat, Vector3.ZERO, true, 0.0)
+
+## Floor slab (= the basement ceiling) with the trapdoor hole; collision everywhere but the hole.
+func _floor_slab(g: Node3D) -> void:
+	var m := Mats.m("concrete_floor")
+	var x0 := -W - T
+	var x1 := W + T
+	var z0 := -D - T
+	var z1 := D + T
+	var hx0 := TRAP.position.x
+	var hx1 := TRAP.position.x + TRAP.size.x
+	var hz0 := TRAP.position.y
+	var hz1 := TRAP.position.y + TRAP.size.y
+	for r in [[x0, hx0, z0, z1], [hx1, x1, z0, z1], [hx0, hx1, z0, hz0], [hx0, hx1, hz1, z1]]:
+		kit.box(g, Vector3(r[1] - r[0], SLAB, r[3] - r[2]), Vector3((r[0] + r[1]) * 0.5, -SLAB * 0.5, (r[2] + r[3]) * 0.5), m, Vector3.ZERO, true, 0.0)
+	# steel angle trim round the hole
+	for z in [hz0, hz1]:
+		kit.box(g, Vector3(TRAP.size.x + 0.06, 0.012, 0.05), Vector3((hx0 + hx1) * 0.5, 0.004, z), Mats.m("steel_dark"), Vector3.ZERO, false, 0.003, false)
+	for x in [hx0, hx1]:
+		kit.box(g, Vector3(0.05, 0.012, TRAP.size.y), Vector3(x, 0.004, (hz0 + hz1) * 0.5), Mats.m("steel_dark"), Vector3.ZERO, false, 0.003, false)
+
+## Door trim on the garage side of an opening (pos = bottom centre on the wall face, rot_y: 0 = faces +Z).
+func _door_frame(g: Node3D, pos: Vector3, rot_y: float, w: float) -> void:
+	var f := kit.node(g, pos, rot_y)
+	var m := Mats.m("wood", Color(1.3, 1.25, 1.2))
+	for s in [-1.0, 1.0]:
+		kit.box(f, Vector3(0.06, DOOR_H + 0.06, 0.03), Vector3(s * (w * 0.5 + 0.03), (DOOR_H + 0.06) * 0.5, 0.015), m, Vector3.ZERO, false, 0.006)
+	kit.box(f, Vector3(w + 0.12, 0.06, 0.03), Vector3(0, DOOR_H + 0.03, 0.015), m, Vector3.ZERO, false, 0.006)
+	kit.box(f, Vector3(w, 0.012, 0.22), Vector3(0, 0.006, -0.1), Mats.m("steel_dark"), Vector3.ZERO, false, 0.003, false)
 
 func _rollup_door(g: Node3D) -> void:
 	var z := D + 0.02
@@ -169,7 +223,11 @@ func _outside() -> void:
 	kit.box(o, Vector3(60, 0.2, 2), Vector3(0, -0.08, 7.3), Mats.m("sidewalk"), Vector3.ZERO, true, 0.0)
 	kit.box(o, Vector3(60, 0.2, 8), Vector3(0, -0.22, 12.3), Mats.m("asphalt"), Vector3.ZERO, true, 0.0)
 	# thick safety slab under the whole lot (catches anything that slips past a seam)
-	kit.shape(Vector3(80, 1.0, 60), Transform3D(Basis(), Vector3(0, -1.2, 8.0)))
+	# (0.5.0: split around the basement under the garage x[-4.4,4.4] z[-3.9,3.9])
+	for r in [[-40.0, -4.4, -22.0, 38.0], [4.4, 40.0, -22.0, 38.0], [-4.4, 4.4, 3.9, 38.0], [-4.4, 4.4, -22.0, -3.9]]:
+		kit.shape(Vector3(r[1] - r[0], 1.0, r[3] - r[2]), Transform3D(Basis(), Vector3((r[0] + r[1]) * 0.5, -1.2, (r[2] + r[3]) * 0.5)))
+	kit.shape(Vector3(9.0, 1.0, 8.0), Transform3D(Basis(), Vector3(0, -3.6, 0)))   # under the basement floor
+	_backyard(o)
 	for i in 10:
 		kit.box(o, Vector3(1.5, 0.01, 0.12), Vector3(-14 + i * 3.4, -0.115, 12.3), Mats.m("paper", Color(1.0, 0.9, 0.5), {"grime": 0.6}), Vector3.ZERO, false, 0.0, false)
 	kit.box(o, Vector3(60, 0.2, 2), Vector3(0, -0.08, 17.3), Mats.m("sidewalk"), Vector3.ZERO, false, 0.0)
@@ -218,6 +276,54 @@ func _outside() -> void:
 	for dx in [-0.8, 0.0, 0.8]:
 		kit.cable(o, Vector3(-14.0 + dx, 7.45, 18.5), Vector3(10.0 + dx, 7.45, 18.5), 0.9, 12, 0.025)
 		kit.cable(o, Vector3(10.0 + dx, 7.45, 18.5), Vector3(34.0 + dx, 7.45, 18.5), 0.9, 12, 0.025)
+
+## 0.5.0 backyard behind the garage (reached through the back door once the shed is bought) + the side lot of the
+## annex: walkable ground, a board fence all round with tall invisible bounds, stepping stones, a few bits of life.
+func _backyard(o: Node3D) -> void:
+	var y := kit.node(o, Vector3.ZERO, 0.0, "Backyard")
+	var yz0 := -14.0
+	var yz1 := -D - T
+	kit.box(y, Vector3(12.4, 0.2, yz1 - yz0), Vector3(0, -0.12, (yz0 + yz1) * 0.5), Mats.m("grass", Color(0.9, 0.95, 0.9)), Vector3.ZERO, true, 0.0)
+	# side lot left of the garage (annex) + right strip, so nothing floats over the void
+	kit.box(y, Vector3(7.0, 0.2, 7.4), Vector3(-W - T - 3.5, -0.125, 0.0), Mats.m("grass"), Vector3.ZERO, true, 0.0)
+	kit.box(y, Vector3(2.0, 0.2, 7.4), Vector3(W + T + 1.0, -0.125, 0.0), Mats.m("grass"), Vector3.ZERO, true, 0.0)
+	# stepping stones from the back door to the shed door
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 23
+	for i in 4:
+		var p := Vector3(0.75 + rng.randf_range(-0.12, 0.12), 0.012, yz1 - 0.35 - i * 0.55)
+		kit.mesh(y, Meshes.cyl(0.2, 0.025, 10), p, Mats.m("sidewalk", Color(1.1, 1.1, 1.1)), Vector3(0, rng.randf() * 90.0, 0), false).scale = Vector3(1.2, 1, 0.9)
+	# board fence: back + sides + the short pieces beside the garage
+	var fm := Mats.m("wood_planks", Color(0.75, 0.68, 0.6), {"cell": Vector2(0.14, 1.8), "grime": 0.6})
+	var fences := [[Vector3(12.4, 1.8, 0.06), Vector3(0, 0.9, yz0)], [Vector3(0.06, 1.8, yz1 - yz0), Vector3(-6.2, 0.9, (yz0 + yz1) * 0.5)],
+		[Vector3(0.06, 1.8, yz1 - yz0), Vector3(6.2, 0.9, (yz0 + yz1) * 0.5)], [Vector3(2.0, 1.8, 0.06), Vector3(-5.2, 0.9, yz1)], [Vector3(2.0, 1.8, 0.06), Vector3(5.2, 0.9, yz1)]]
+	for f in fences:
+		kit.box(y, f[0], f[1], fm, Vector3.ZERO, true, 0.004)
+	for x in range(-6, 7, 2):
+		kit.box(y, Vector3(0.09, 1.95, 0.09), Vector3(float(x) + 0.0, 0.97, yz0 + 0.06), Mats.m("wood_dark"), Vector3.ZERO, false, 0.01)
+	for b in [[Vector3(12.8, 6.0, 0.3), Vector3(0, 3.0, yz0 - 0.2)], [Vector3(0.3, 6.0, yz1 - yz0 + 1.0), Vector3(-6.45, 3.0, (yz0 + yz1) * 0.5)],
+			[Vector3(0.3, 6.0, yz1 - yz0 + 1.0), Vector3(6.45, 3.0, (yz0 + yz1) * 0.5)], [Vector3(2.4, 6.0, 0.3), Vector3(-5.3, 3.0, yz1 + 0.1)], [Vector3(2.4, 6.0, 0.3), Vector3(5.3, 3.0, yz1 + 0.1)]]:
+		kit.shape(b[0], Transform3D(Basis(), b[1]))
+	# life: wheelie bins, an old grill, a tree in the corner, the neighbour's lit window over the fence
+	for i in 2:
+		var bn := kit.node(y, Vector3(4.6 + i * 0.75, 0, yz1 - 0.5), -10.0 + i * 15.0)
+		kit.box(bn, Vector3(0.6, 1.0, 0.7), Vector3(0, 0.5, 0), Mats.m("metal_green", [Color(1, 1, 1), Color(0.6, 0.8, 1.6)][i], {"metallic_base": 0.0}), Vector3.ZERO, true, 0.03)
+		kit.box(bn, Vector3(0.64, 0.06, 0.74), Vector3(0, 1.03, 0.0), Mats.m("plastic_black"), Vector3(-4, 0, 0), false, 0.02)
+	var gr := kit.node(y, Vector3(-4.8, 0, -6.2), 30.0)
+	kit.cyl(gr, 0.3, 0.3, Vector3(0, 0.85, 0), Mats.m("plastic_black"), Vector3.ZERO, 14)
+	for k in 3:
+		kit.box(gr, Vector3(0.03, 0.75, 0.03), Vector3(sin(k * 2.1) * 0.2, 0.37, cos(k * 2.1) * 0.2), Mats.m("steel_dark"), Vector3(cos(k * 2.1) * 10, 0, -sin(k * 2.1) * 10), false, 0.0)
+	_tree(y, Vector3(-4.9, 0, -12.6), rng)
+	_tree(y, Vector3(5.0, 0, -12.8), rng)
+	for i in 3:
+		kit.box(y, Vector3(1.0, 1.1, 0.05), Vector3(-3.5 + i * 3.5, 3.4, yz0 - 3.0), Mats.glow([Color(1.0, 0.68, 0.35), Color(0.35, 0.5, 1.0), Color(1.0, 0.6, 0.3)][i], 1.6), Vector3.ZERO, false, 0.0, false)
+	kit.box(y, Vector3(14.0, 5.0, 0.3), Vector3(0, 2.5, yz0 - 3.3), Mats.m("siding", Color(0.5, 0.5, 0.55)), Vector3.ZERO, false, 0.0)
+	# porch lamp over the back door (outside) + a dim moon-ish fill over the yard
+	var pl := kit.node(y, Vector3((YARD_DOOR.x + YARD_DOOR.y) * 0.5, 2.35, yz1 - 0.06), 0.0)
+	kit.box(pl, Vector3(0.14, 0.2, 0.1), Vector3(0, 0, -0.05), Mats.m("steel_dark"), Vector3.ZERO, false, 0.01)
+	kit.box(pl, Vector3(0.1, 0.14, 0.02), Vector3(0, 0, -0.105), Mats.glow(Color(1.0, 0.75, 0.45), 6.0), Vector3.ZERO, false, 0.0, false)
+	kit.omni(pl, Vector3(0, -0.1, -0.35), Color(1.0, 0.72, 0.42), 1.2, 6.0, false, 1.0)
+	kit.omni(y, Vector3(0, 6.0, -9.0), Color(0.45, 0.55, 0.9), 0.8, 14.0, false, 0.0)
 
 func _house(o: Node3D, p: Vector3, rng: RandomNumberGenerator) -> void:
 	var g := kit.node(o, p, 0.0)
@@ -303,7 +409,7 @@ func _furniture() -> void:
 	# desk + PC on the left wall, facing +X
 	var desk := desk_pc(g, Vector3(-W + 0.38, 0, -0.8), 90.0, "garage_pc")
 	desk_lamp(desk, Vector3(0.38, 0.76, -0.2), -50.0)
-	wall_calendar(g, Vector3(-W + 0.01, 1.62, 0.05), 90.0)
+	wall_calendar(g, Vector3(-W + 0.01, 2.55, 0.45), 90.0)
 	poster(g, Vector3(-W + 0.01, 1.75, -1.75), 90.0, "SHIP\nIT.", Color(0.15, 0.15, 0.18), Color(0.95, 0.85, 0.3), Vector2(0.42, 0.6))
 	# whiteboard on the left wall, nearer the front
 	whiteboard(g, Vector3(-W + 0.02, 0, 1.7), 90.0, "garage_whiteboard")
@@ -327,11 +433,11 @@ func _furniture() -> void:
 	# coffee table: a pallet with a crate
 	_pallet_table(g, Vector3(2.95, 0, 1.45))
 	fridge(g, Vector3(W - 0.36, 0, -D + 0.5), -90.0)
-	_podium(g, Vector3(1.62, 0, D - 0.6))
+	_podium(g, Vector3(1.78, 0, D - 0.62))
 	# spare desk under the window (a design hire works here on a laptop)
 	_spare_desk(g, Vector3(3.05, 0, D - 0.48))
 	# job board by the house door
-	job_board(g, Vector3(1.75, 1.45, -D + 0.01), 0.0, "garage_jobs")
+	job_board(g, Vector3(1.8, 1.45, -D + 0.01), 0.0, "garage_jobs")
 	# supply corner on the left wall between the desk and the workbench: phone to the suppliers + materials rack
 	supplier_phone(g, Vector3(-W + 0.01, 1.5, -2.2), 90.0, "garage_phone")
 	stock_rack = StockRack.new()
@@ -341,7 +447,7 @@ func _furniture() -> void:
 	g.add_child(stock_rack)
 	kit.shape(Vector3(0.4, 1.25, 0.8), Transform3D(Basis(), Vector3(-W + 0.22, 0.625, -2.2)))
 	# clip lamp over the job board
-	var cl := kit.node(g, Vector3(1.75, 2.05, -D + 0.12), 0.0, "ClipLamp")
+	var cl := kit.node(g, Vector3(1.8, 2.05, -D + 0.12), 0.0, "ClipLamp")
 	kit.cyl(cl, 0.05, 0.09, Vector3(0, 0, 0.04), Mats.m("metal_red"), Vector3(-60, 0, 0), 12)
 	kit.mesh(cl, Meshes.sphere(0.022, 8), Vector3(0, -0.03, 0.07), Mats.glow(Color(1.0, 0.75, 0.45), 8.0), Vector3.ZERO, false)
 	var jl := kit.spot(cl, Vector3(0, -0.03, 0.08), Vector3(0, -0.6, -0.08), Color(1.0, 0.75, 0.45), 2.2, 1.6, 60.0, false, 0.4)
@@ -441,16 +547,16 @@ func _clutter() -> void:
 	# broom + shop vac
 	kit.box(g, Vector3(0.025, 1.3, 0.025), Vector3(-1.05, 0.7, -3.42), Mats.m("wood"), Vector3(12, 0, 0), false, 0.006)
 	kit.box(g, Vector3(0.3, 0.08, 0.06), Vector3(-1.05, 0.05, -3.3), Mats.m("plastic_orange", Color(1.2, 0.8, 0.5)), Vector3.ZERO, false, 0.02)
-	kit.cyl(g, 0.2, 0.45, Vector3(-1.1, 0.25, -2.75), Mats.m("plastic_yellow" if false else "metal_yellow", Color.WHITE, {"metallic_base": 0.0}), Vector3.ZERO, 14, true)
-	kit.cyl(g, 0.21, 0.08, Vector3(-1.1, 0.5, -2.75), Mats.m("plastic_black"), Vector3.ZERO, 14)
-	kit.cable(g, Vector3(-1.0, 0.5, -2.65), Vector3(-0.6, 0.05, -2.4), 0.1, 6, 0.03, Mats.m("plastic_black"))
+	kit.cyl(g, 0.2, 0.45, Vector3(-3.72, 0.25, 2.75), Mats.m("metal_yellow", Color.WHITE, {"metallic_base": 0.0}), Vector3.ZERO, 14, true)
+	kit.cyl(g, 0.21, 0.08, Vector3(-3.72, 0.5, 2.75), Mats.m("plastic_black"), Vector3.ZERO, 14)
+	kit.cable(g, Vector3(-3.62, 0.5, 2.65), Vector3(-3.3, 0.05, 2.3), 0.1, 6, 0.03, Mats.m("plastic_black"))
 	# floor cables: desk -> outlet, extension cord across to the assembly table
 	kit.floor_cable(g, [Vector3(-3.5, 0, -0.5), Vector3(-3.8, 0, -0.3), Vector3(-3.95, 0, -0.1)])
-	kit.floor_cable(g, [Vector3(-3.3, 0, -0.95), Vector3(-2.2, 0, -1.0), Vector3(-0.6, 0, -1.2), Vector3(0.15, 0, -1.5)], 0.008, 0.018, Mats.m("plastic_orange"))
+	kit.floor_cable(g, [Vector3(-3.3, 0, -0.95), Vector3(-2.2, 0, -0.6), Vector3(-1.7, 0, 0.35), Vector3(-0.3, 0, 0.35), Vector3(0.15, 0, -1.5)], 0.008, 0.018, Mats.m("plastic_orange"))
 	kit.floor_cable(g, [Vector3(3.9, 0, 1.0), Vector3(3.7, 0, 1.25), Vector3(3.75, 0, 1.6)])
 	# extension reel
-	kit.cyl(g, 0.16, 0.12, Vector3(-0.4, 0.06, -1.25), Mats.m("plastic_orange", Color(0.7, 0.7, 0.7)), Vector3(0, 0, 0), 14)
-	kit.cyl(g, 0.17, 0.02, Vector3(-0.4, 0.13, -1.25), Mats.m("plastic_black"), Vector3.ZERO, 14)
+	kit.cyl(g, 0.16, 0.12, Vector3(-0.1, 0.06, -1.05), Mats.m("plastic_orange", Color(0.7, 0.7, 0.7)), Vector3(0, 0, 0), 14)
+	kit.cyl(g, 0.17, 0.02, Vector3(-0.1, 0.13, -1.05), Mats.m("plastic_black"), Vector3.ZERO, 14)
 	# clock above the house door
 	var clock := kit.node(g, Vector3(1.6, 2.45, -D + 0.02), 0.0)
 	kit.cyl(clock, 0.16, 0.04, Vector3.ZERO, Mats.m("plastic_white"), Vector3(90, 0, 0), 20)
@@ -480,7 +586,7 @@ func _props() -> void:
 	prop("phone_board", Vector3(-0.3, 0.95, -1.45), Vector3(0, 40, 0))
 	prop("battery_pack", Vector3(0.3, 0.95, -1.3))
 	prop("mug", Vector3(1.75, 0.96, -1.25), Vector3.ZERO, 2)
-	prop("stool", Vector3(-0.35, 0.68, -0.75))
+	prop("stool", Vector3(-0.05, 0.68, -0.6))
 	# prototype shelf: loose phones on the bottom shelves
 	prop("phone_proto", Vector3(0.0, 0.16, -3.15), Vector3(0, 80, 0), 2)
 	prop("box_s", Vector3(-0.8, 0.27, -3.25))
@@ -497,7 +603,7 @@ func _props() -> void:
 	prop("box_l", Vector3(2.3, 0.26, -2.75), Vector3(0, 12, 0))
 	prop("box_m", Vector3(2.35, 0.75, -2.75), Vector3(0, -8, 0))
 	prop("box_heavy", Vector3(-1.9, 0.25, -0.05), Vector3(0, 5, 0))
-	prop("crate", Vector3(-3.4, 0.22, 0.3), Vector3(0, -10, 0))
+	prop("crate", Vector3(-2.4, 0.22, -1.75), Vector3(0, -10, 0))
 	prop("trash_bin", Vector3(-1.95, 0.2, -0.75))
 	prop("bottle", Vector3(-1.9, 1.0, -2.9))
 	prop("book", Vector3(-3.6, 0.8, -1.25), Vector3(0, 80, 0), 1)
@@ -641,8 +747,16 @@ func _live() -> void:
 	shop.kit = kit
 	shop.decor_only = decor_only
 	live_root.add_child(shop)
+	expansions = Expansions.new()
+	expansions.name = "Expansions"
+	expansions.level = self
+	expansions.decor_only = decor_only
+	live_root.add_child(expansions)
 	if decor_only:
 		return
+	interior = InteriorView.new()
+	interior.level = self
+	live_root.add_child(interior)
 	loft = Loft.new()
 	loft.name = "Loft"
 	loft.level = self
@@ -681,7 +795,7 @@ func _staff_slots() -> void:
 	# overflow: sit on boxes
 	add_slot("overflow", Vector3(-2.45, 0, 0.75), -70.0, "sit_idle", 0.44)
 	add_slot("overflow", Vector3(-0.2, 0, 1.55), 160.0, "sit_idle", 0.44)
-	add_slot("overflow", Vector3(0.75, 0, -2.6), 200.0, "sit_idle", 0.44)
+	add_slot("overflow", Vector3(1.75, 0, -2.55), 200.0, "sit_idle", 0.44)
 	add_slot("overflow", Vector3(2.45, 0, 0.15), -110.0, "sit_idle", 0.44)
 
 func staff_slots() -> Dictionary:
@@ -690,9 +804,25 @@ func staff_slots() -> Dictionary:
 		out["assembly"] = loft.staff_slots() + out["assembly"]
 	return out
 
+## Day-night: daylight comes in through these windows (world/day_night.gd), level space.
+func daylight_windows() -> Array:
+	var out := [{"pos": Vector3(2.4, 2.0, D - 0.1), "target": Vector3(1.4, 0.0, 0.6)},
+		{"pos": Vector3(0.0, Loft.FLOOR_Y + 1.5, D - 0.1), "target": Vector3(-0.5, Loft.FLOOR_Y, 0.5)}]
+	if expansions and expansions.level_of("annex") > 0:
+		out.append({"pos": Vector3(-8.4, 1.9, 2.45), "target": Vector3(-7.6, 0.0, 0.0)})
+	if expansions and expansions.level_of("shed") > 0:
+		out.append({"pos": Vector3(-1.45, 1.6, -8.0), "target": Vector3(1.0, 0.0, -8.0)})
+	return out
+
 func surface_at(p: Vector3) -> String:
 	if p.y > H - 0.2:
 		return "wood"
+	if p.y < -0.3:
+		return "wood" if absf(p.x + 1.0) < 0.65 and p.z < 0.7 and p.y > -2.7 else "concrete"
+	if expansions and expansions.has_method("surface_at"):
+		var s: String = expansions.surface_at(p)
+		if s != "":
+			return s
 	if p.z > D + 0.2 and p.y > 0.25 and absf(p.x + 1.5) < 1.1:
 		return "metal"
 	return "concrete"
@@ -700,6 +830,12 @@ func surface_at(p: Vector3) -> String:
 func ambient_at(p: Vector3) -> String:
 	if p.y > H - 0.2:
 		return "loft"
+	if p.y < -0.6:
+		return "loft"      # the basement: low hum of the boiler (no own room tone yet)
+	if p.z < -D - 0.25:
+		return "outdoor"   # backyard / shed
+	if p.x < -W - 0.2:
+		return "garage"    # side annex lab
 	if p.z > D + 0.3:
 		return "outdoor"
 	return "garage"
@@ -720,4 +856,4 @@ func _viewpoints() -> void:
 	kit.viewpoint(self, "staff", Vector3(2.6, 2.45, 3.25), Vector3(-1.2, 0.6, -1.2), 80.0)
 	kit.viewpoint(self, "hatch", Vector3(1.7, 1.6, 0.35), Vector3(3.5, 2.5, -1.15), 70.0)
 	kit.viewpoint(self, "supplies", Vector3(-2.3, 1.55, -1.55), Vector3(-4.0, 1.05, -2.25), 64.0)
-	kit.viewpoint(self, "jobs", Vector3(1.75, 1.5, -2.2), Vector3(1.75, 1.45, -3.5), 60.0)
+	kit.viewpoint(self, "jobs", Vector3(1.8, 1.5, -2.2), Vector3(1.8, 1.45, -3.5), 60.0)

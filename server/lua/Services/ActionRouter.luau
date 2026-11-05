@@ -37,7 +37,7 @@ local function estimateCost(state: Types.CompanyState, action: string, p: any): 
 		local line = TableUtil.find(state.production.lines, function(l: Types.ProductionLine)
 			return l.id == p.lineId
 		end)
-		return line and ProductionRules.buildCost(line.kind, line.level + 1) or nil
+		return line and ProductionRules.buildCost(line.kind, line.level + 1) + CompanyActions.upgradeProcessCost(line) or nil
 	elseif action == "developOS" then
 		return Balance.Ecosystem.osDevelopmentCost[p.platform]
 	elseif action == "enableCloudService" then
@@ -52,6 +52,32 @@ local function estimateCost(state: Types.CompanyState, action: string, p: any): 
 		local Furniture = require(Shared.Data.Furniture)
 		local def = Furniture.byId[p.itemId]
 		return def and def.cost or nil
+	elseif action == "interiorPlace" then -- 0.5.0
+		local Catalog = require(Shared.Data.Interior)
+		local def = Catalog.byId[p.def]
+		return def and def.price or nil
+	elseif action == "interiorPaint" then
+		local Catalog = require(Shared.Data.Interior)
+		local m = Catalog.materialById[p.mat]
+		return m and m.price or nil
+	elseif action == "interiorTheme" then
+		local Catalog = require(Shared.Data.Interior)
+		local t = Catalog.themeById[p.theme]
+		return t and (Catalog.materialById[t.wall.mat].price + Catalog.materialById[t.floor.mat].price) or nil
+	elseif action == "buildExpansion" then
+		local Expansions = require(Shared.Data.Expansions)
+		if p.id == "loft" then
+			local room = state.hq.rooms.AssemblyLine
+			return Balance.HQ.roomBuildCostBase.AssemblyLine * (Balance.HQ.roomUpgradeMult ^ (room and room.level or 0))
+		end
+		local ex = state.hq.expansions and state.hq.expansions[p.id]
+		return Expansions.byId[p.id] and Expansions.cost(p.id, ex and ex.level or 0) or nil
+	elseif action == "setLineProcess" then
+		local Processes = require(Shared.Data.ProductionProcesses)
+		local line = TableUtil.find(state.production.lines, function(l: Types.ProductionLine)
+			return l.id == p.lineId
+		end)
+		return line and Processes.setupCost((line :: any).process, tostring(p.process), line.level) or nil
 	elseif action == "buyoutRival" then
 		local npc = TableUtil.find(state.world.npcs, function(n: Types.NPCState)
 			return n.id == p.npcId
@@ -222,8 +248,8 @@ handlers.signContract = act("signContract", { "inventory" }, function(s, u, p) r
 handlers.cancelContract = act("cancelContract", { "inventory" }, function(s, u, p) return CompanyActions.cancelContract(s, str(p.contractId)) end)
 
 -- ---------------- HQ ----------------
-handlers.upgradeHQ = act("upgradeHQ", { "hq", "news" }, function(s, u, p) return CompanyActions.upgradeHQ(s) end)
-handlers.buildRoom = act("buildRoom", { "hq" }, function(s, u, p) return CompanyActions.buildRoom(s, str(p.roomId)) end, function(p) return str(p.roomId) end)
+handlers.upgradeHQ = act("upgradeHQ", { "hq", "news", "interior", "office" }, function(s, u, p) return CompanyActions.upgradeHQ(s) end)
+handlers.buildRoom = act("buildRoom", { "hq", "interior" }, function(s, u, p) return CompanyActions.buildRoom(s, str(p.roomId)) end, function(p) return str(p.roomId) end)
 
 -- ---------------- staff ----------------
 handlers.hire = act("hire", { "employees" }, function(s, u, p) return CompanyActions.hire(s, str(p.candidateId)) end)
@@ -244,8 +270,8 @@ handlers.repayLoan = act("repayLoan", { "finance", "loan" }, function(s, u, p) r
 handlers.takeBankLoan = act("takeBankLoan", { "finance", "loan" }, function(s, u, p) return CompanyActions.takeBankLoan(s, tonumber(p.months) or 0, tonumber(p.amount) or 0) end, function(p) return str(p.amount) .. " / " .. str(p.months) .. "m" end)
 handlers.repayBankLoan = act("repayBankLoan", { "finance", "loan" }, function(s, u, p) return CompanyActions.repayBankLoan(s) end)
 handlers.unlockRegion = act("unlockRegion", { "regionsUnlocked", "products", "news" }, function(s, u, p) return CompanyActions.unlockRegion(s, str(p.region)) end, function(p) return str(p.region) end)
-handlers.buyFurniture = act("buyFurniture", { "office" }, function(s, u, p) return CompanyActions.buyFurniture(s, str(p.itemId)) end, function(p) return str(p.itemId) end)
-handlers.sellFurniture = act("sellFurniture", { "office" }, function(s, u, p) return CompanyActions.sellFurniture(s, str(p.itemId)) end, function(p) return str(p.itemId) end)
+handlers.buyFurniture = act("buyFurniture", { "office", "interior", "finance" }, function(s, u, p) return CompanyActions.buyFurniture(s, str(p.itemId)) end, function(p) return str(p.itemId) end)
+handlers.sellFurniture = act("sellFurniture", { "office", "interior", "finance" }, function(s, u, p) return CompanyActions.sellFurniture(s, str(p.itemId)) end, function(p) return str(p.itemId) end)
 handlers.buyoutRival = act("buyoutRival", { "world", "reputation", "news" }, function(s, u, p) return CompanyActions.buyoutRival(s, str(p.npcId)) end, function(p) return str(p.npcId) end)
 handlers.setSpecialization = act("setSpecialization", { "specialization" }, function(s, u, p) return CompanyActions.setSpecialization(s, str(p.title), str(p.path)) end)
 handlers.createInvite = function(session, player, payload) return GovernanceService.createInvite(session, player.UserId, payload) end
@@ -286,16 +312,16 @@ local function spotArg(p: any): any
 	end
 	return nil
 end
-handlers.buyFurniture = act("buyFurniture", { "office" }, function(s, u, p) return CompanyActions.buyFurniture(s, str(p.itemId), spotArg(p)) end, function(p) return str(p.itemId) end)
-handlers.moveFurniture = act("moveFurniture", { "office" }, function(s, u, p) return CompanyActions.moveFurniture(s, tonumber(p.uid), spotArg(p)) end)
-handlers.removeFurniture = act("removeFurniture", { "office" }, function(s, u, p) return CompanyActions.removeFurniture(s, tonumber(p.uid), spotArg(p), p.layer) end)
-handlers.placeFromStorage = act("placeFromStorage", { "office" }, function(s, u, p) return CompanyActions.placeFromStorage(s, str(p.itemId), spotArg(p)) end)
-handlers.paintFurniture = act("paintFurniture", { "office" }, function(s, u, p) return CompanyActions.paintFurniture(s, tonumber(p.uid), p.color) end)
-handlers.autoPlace = act("autoPlace", { "office" }, function(s, u, p) return CompanyActions.autoPlace(s) end)
+handlers.buyFurniture = act("buyFurniture", { "office", "interior", "finance" }, function(s, u, p) return CompanyActions.buyFurniture(s, str(p.itemId), spotArg(p)) end, function(p) return str(p.itemId) end)
+handlers.moveFurniture = act("moveFurniture", { "office", "interior", "finance" }, function(s, u, p) return CompanyActions.moveFurniture(s, tonumber(p.uid), spotArg(p)) end)
+handlers.removeFurniture = act("removeFurniture", { "office", "interior", "finance" }, function(s, u, p) return CompanyActions.removeFurniture(s, tonumber(p.uid), spotArg(p), p.layer) end)
+handlers.placeFromStorage = act("placeFromStorage", { "office", "interior", "finance" }, function(s, u, p) return CompanyActions.placeFromStorage(s, str(p.itemId), spotArg(p)) end)
+handlers.paintFurniture = act("paintFurniture", { "office", "interior", "finance" }, function(s, u, p) return CompanyActions.paintFurniture(s, tonumber(p.uid), p.color) end)
+handlers.autoPlace = act("autoPlace", { "office", "interior", "finance" }, function(s, u, p) return CompanyActions.autoPlace(s) end)
 handlers.teamParty = act("teamParty", { "employees" }, function(s, u, p) return CompanyActions.teamParty(s) end)
 handlers.rerollCandidates = act("rerollCandidates", { "employees", "research", "world" }, function(s, u, p) return CompanyActions.rerollCandidates(s) end)
-handlers.setAutoHire = act("setAutoHire", { "office" }, function(s, u, p) return CompanyActions.setAutoHire(s, p.on) end)
-handlers.hire = act("hire", { "employees", "office" }, function(s, u, p) return CompanyActions.hire(s, str(p.candidateId)) end)
+handlers.setAutoHire = act("setAutoHire", { "office", "interior", "finance" }, function(s, u, p) return CompanyActions.setAutoHire(s, p.on) end)
+handlers.hire = act("hire", { "employees", "office", "interior" }, function(s, u, p) return CompanyActions.hire(s, str(p.candidateId)) end)
 
 -- Online iteration 2: manual shipping, room catalog, challenge rewards (any member)
 handlers.shipCrate = act("shipCrate", { "production", "products", "finance" }, function(s, u, p) return CompanyActions.shipCrate(s, str(p.crateId)) end, function(p) return str(p.crateId) end)
@@ -311,6 +337,35 @@ handlers.repairFinish = act("repairFinish", { "repairs", "inventory" }, function
 handlers.repairReturn = act("repairReturn", { "repairs" }, function(s, u, p) return Story.repairReturn(s, u, str(p.orderId)) end, function(p) return str(p.orderId) end)
 handlers.storyEvent = act("storyEvent", { "story" }, function(s, u, p) return Story.event(s, p.id) end, function(p) return str(p.id) end)
 handlers.storySkip = act("storySkip", { "story", "repairs", "employees", "time", "news", "office" }, function(s, u, p) return Story.skip(s, u) end)
+
+-- 0.5.0: interior editor, garage expansions, production processes (docs/ACTIONS.md "Interior" / "Expansions" / "Production processes")
+local function interiorArgs(p: any): any
+	-- plain copy of the documented fields only (no nested tables reach the rules)
+	local out = {}
+	for _, k in ipairs({ "room", "def", "id", "x", "z", "y", "rot", "color", "ref", "toRoom", "surface", "mat", "theme", "preset" }) do
+		local v = p[k]
+		if type(v) == "string" or type(v) == "number" then
+			out[k] = v
+		end
+	end
+	return out
+end
+-- audit note: short, clipped parts only (the raw payload is not validated yet when the note is built)
+local function clip(v: any): string
+	return string.sub(type(v) == "string" and v or (type(v) == "number" and tostring(v) or ""), 1, 40)
+end
+local function noteRoom(p: any): string
+	return clip(p.room) .. " " .. clip(p.def or p.id or p.mat or p.theme or p.preset)
+end
+handlers.interiorPlace = act("interiorPlace", { "interior", "finance" }, function(s, u, p) return CompanyActions.interiorPlace(s, interiorArgs(p)) end, noteRoom)
+handlers.interiorMove = act("interiorMove", { "interior" }, function(s, u, p) return CompanyActions.interiorMove(s, interiorArgs(p)) end, noteRoom)
+handlers.interiorRemove = act("interiorRemove", { "interior", "finance", "office" }, function(s, u, p) return CompanyActions.interiorRemove(s, interiorArgs(p)) end, noteRoom)
+handlers.interiorPaint = act("interiorPaint", { "interior", "finance" }, function(s, u, p) return CompanyActions.interiorPaint(s, interiorArgs(p)) end, noteRoom)
+handlers.interiorTheme = act("interiorTheme", { "interior", "finance" }, function(s, u, p) return CompanyActions.interiorTheme(s, interiorArgs(p)) end, noteRoom)
+handlers.interiorLight = act("interiorLight", { "interior" }, function(s, u, p) return CompanyActions.interiorLight(s, interiorArgs(p)) end, noteRoom)
+handlers.buildExpansion = act("buildExpansion", { "hq", "interior", "finance" }, function(s, u, p) return CompanyActions.buildExpansion(s, str(p.id)) end, function(p) return str(p.id) end)
+handlers.getExpansionCatalog = function(session) return CompanyActions.expansionCatalog(session.state) end
+handlers.setLineProcess = act("setLineProcess", { "production", "finance" }, function(s, u, p) return CompanyActions.setLineProcess(s, str(p.lineId), str(p.process)) end, function(p) return str(p.lineId) .. " " .. str(p.process) end)
 
 function ActionRouter.has(action: string): boolean
 	return handlers[action] ~= nil

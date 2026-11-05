@@ -19,7 +19,7 @@ General rules
   Other owners answer with `respondApproval`. When everybody approved, the action runs and a `notify` is sent.
   Actions with a cost estimate (can need approval): upgradeHQ, buildRoom, buildLine, upgradeLine, developOS,
   enableCloudService, takeLoan, takeBankLoan, unlockRegion, teamParty, buyFurniture, buyoutRival,
-  queueProduction, buyResources.
+  queueProduction, buyResources, interiorPlace, interiorPaint, interiorTheme, buildExpansion, setLineProcess (0.5.0).
 - Rate limit: 30 requests burst, refill 10/s per connection (`error:"Too many requests"`).
 - An action that would need approval returns immediately with `{approvalId, pending:true}`; when the last owner
   approves, the `respondApproval` call returns the executed action's `data` (or its error), and everybody gets a
@@ -36,7 +36,7 @@ General rules
 | setSpeed | — | `{speed: 0\|1\|2\|4\|8}` | — (same as the `speed` frame) |
 | getSnapshot | — | `{}` | — (server sends a fresh `snapshot` frame) |
 | setTutorialStep | — | `{step: 1..20}` (only increases) | — |
-| getAudit | — | `{}` | array of audit entries `{transactionId, initiatorUserId, operationType, amount, timestamp, previousStateVersion, newStateVersion, note}` |
+| getAudit | — | `{}` | array of audit entries `{transactionId, initiatorUserId, operationType, amount, timestamp, previousStateVersion, newStateVersion, note}` (`note` ≤ 120 chars, clipped server-side; older oversized notes are clipped on load) |
 
 ## Research
 | action | perm | args | data |
@@ -85,11 +85,11 @@ Example phone slots (all available at start):
 | action | perm | args | data |
 |---|---|---|---|
 | buildLine | Construction | `{kind}`: Assembly / CPUFab / GPUFab / DisplayFab / BatteryFab (fabs need research; Assembly needs the second floor = room AssemblyLine) | `{id, cost}` |
-| upgradeLine | Construction | `{lineId}` | `{cost}` |
+| upgradeLine | Construction | `{lineId}` | `{cost, processCost}` — 0.5.0: the line keeps its `process` (and a running switch: `processFrom`/`processUntil`); `processCost` = setup difference of that process between the new and the old level (included in `cost`, 0 for `hand` and fab lines) |
 | queueProduction | Manufacturing | `{productId, lineId, quantity}` e.g. lineId `"line_1"`, quantity ≥ 100 | `{id, unitCost, estimatedCost}` |
 | cancelProduction | Manufacturing | `{jobId}` | — |
 | setQcLevel | Manufacturing | `{level}` 0..3 | — |
-| resolveIncident | Manufacturing | `{incidentId, option}` | `{cost}` |
+| resolveIncident | Manufacturing | `{incidentId, option}` | `{cost}` — 0.5.0: no option ends a process switch early (`downUntilDay` never drops below `processUntil`) |
 | setFactoryLayout | Manufacturing | `{cells:[{x,y,kind}]}` (≤ 64) | `{score}` |
 | queueFabJob | Manufacturing | `{lineId, componentId, wafers}` | `{id}` |
 | sellComponents | Finance | `{offerId, componentId}` | `{units, revenue}` |
@@ -421,3 +421,129 @@ PBKDF2-HMAC-SHA256(password, "silicon-overlord:" + lowercase(username), 100000) 
 | accountDelete | `{key}` | `{signedOut}` | erases the credentials; player + companies stay on this PC as a guest |
 | transferCreate | `{}` | `{code: "ABCD-EFGH", expiresIn: 600}` | guests too; one live code per player; 5 per 10 min |
 | transferRedeem | `{code}` | `{username \| null, guestKept, same?}` | lobby only; single use, 10 min; `welcome` of that player before `res`. Error `"Wrong or expired code"` (5 per minute per IP, then lockout) |
+
+## Interior — 0.5.0 (build mode: docs/INTERIOR.md §1, §4)
+Data for the client (export these Luau modules with the other Data tables; they are pure data + tiny helpers):
+`shared-luau/Data/Interior.luau` (catalogue `list`, `categories`, `themes`, `materials`, `lightPresets`, `legacyMap`),
+`shared-luau/Data/RoomGeometry.luau` (`list`, `officeHalf`, `grid` 0.25, `rotStep` 15, `wallSnap`; office rooms
+change size with the HQ level: use `officeHalf[hq.level]`), `shared-luau/Data/Expansions.luau`,
+`shared-luau/Data/ProductionProcesses.luau`. Numbers: `Balance.Interior` in `shared-luau/Config/Balance.luau`.
+
+### Rooms and coordinates
+Room ids (`RoomGeometry.list`): HQ 1 = `garage` (always), `loft` (needs `hq.rooms.AssemblyLine`), `annex`, `basement`,
+`shed`, `showroom` (need that expansion, see "Expansions"); HQ 2..7 = `office` (one open floor, x[-hw,hw] z[-hd,hd],
+`officeHalf`). A room is an axis-aligned box: `origin {x,y,z}` = where its local (0,0,0) is in the level scene
+(garage scene for HQ 1, office scene for HQ ≥ 2), `bounds {x0,x1,z0,z1}` = usable floor in local metres, `height`.
+Items store LOCAL `x`/`z` = centre of the footprint (sent as JSON numbers: numeric strings are `"Bad position"`), `rot` in degrees (multiple of 15, 0..345). At rot 0 the
+footprint is `w` along X and `d` along Z; for other angles the server uses the axis-aligned box of the rotated
+rectangle (`w' = |w·cos| + |d·sin|`, `d' = |w·sin| + |d·cos|`). x/z are snapped to 0.25 m by the server.
+`reserved` zones: `door`, `stairs`, `ramp`, `path` block every layer; `fixture` (built-in benches, counters, the
+loft's line bays...) blocks floor items only. World agent: build the expansions' doorways where the zones say.
+
+### State (`interior`, a replicated top-level section)
+```
+interior = {
+  version = 1, nextId = <n>,
+  rooms = { [roomId] = {
+      items = [ { id = "i12", def = "<Data/Interior id>", x, z, rot, y? (wall items: centre height), color? "#RRGGBB",
+                  day = <elapsedDays when placed>, ref? (living poster: productId), paid (USD, refund base),
+                  legacy? true, uid? (old office uid), stored? true (piece that arrived without a free spot / over a cap:
+                  not shown, no comfort, no seats; interiorMove it to a free spot to show it, or sell it) } ],
+      surfaces = { wall? = {mat, color}, floor? = {mat, color} },  -- {} = the level's default look
+      theme? = "grunge"|"wood"|"lab"|"neon"|"scandi", light? = "warm"|"daylight"|"neon",
+      comfort = 0..100, parts = { decor, light, plants, space, theme }, seats = n, coherence = 0..1 } },
+  summary = { seats, staffBonus, labSlots, storage, comfortAvg,
+              effects = { morale, research, defects, design, brand } },   -- already capped
+}
+```
+Rooms appear in `interior.rooms` once something was placed/painted there (treat a missing room as empty).
+`legacy:true` items mirror the old grid office (`state.office`, 0.4.0 `buyFurniture` & co.): old saves are migrated
+once into the main room (`garage` at HQ 1, `office` later); later buys from 0.4.0 clients appear there too.
+A mirrored piece lands on its old grid cell mapped to metres (cell centre, rot 0 or 90); when that spot is taken it gets
+a free-spot search (at most `Balance.Interior.legacySearchBudget` = 12 searches per pass), else `stored:true`. Room
+`maxItems`, the 400 total and `def.max` hold for mirrored pieces too (overflow → `stored`). A mirrored piece that stands
+in the interior gives its comfort / research through the interior only: the old office ratings
+(`office.comfort` → morale, non-computer research pieces) skip it (`Office.mirrored`), so nothing counts twice.
+Moving out of the garage (HQ 1 → 2): every piece of the garage rooms (garage, loft, annex, basement, shed, showroom)
+moves into `office` — same local x/z when free there, else a free spot, else `stored` — so it can still be placed or sold.
+Rooms that are not part of the current HQ do not count toward the 400 total.
+Malformed saved records are repaired on load (non-table rooms dropped, items without numeric x/z → `stored` at 0,0,
+office records without a numeric uid dropped, expansion levels clamped to 0..maxLevel).
+Plants: `growth = clamp((time.elapsedDays - item.day) / def.grow, 0, 1)` (client scales the model 0.5 → 1).
+
+### Actions (Construction permission; any co-owner with it; everybody sees the result via the `interior` section)
+| action | args | data |
+|---|---|---|
+| interiorPlace | `{room, def, x, z, rot, color?, y?, ref?}` | `{item, cost, comfort}` — buys and places one item. `y` only for wall items (default `def.y`). `ref` = productId for `living:"poster"` items |
+| interiorMove | `{room, id, x, z, rot, toRoom?, y?}` | `{item, room}` — free; `toRoom` moves it into another unlocked room |
+| interiorRemove | `{room, id}` | `{refund}` — sells it for `Balance.Interior.refundShare` (50 %) of its price |
+| interiorPaint | `{room, surface:"wall"\|"floor", mat, color}` | `{cost, surface}` — material price from `Interior.materials` (`color` = `#RRGGBB`) |
+| interiorTheme | `{room, theme}` (`theme:""` clears) | `{cost, theme}` — sets the theme AND repaints both surfaces + light preset to the theme's (cost = both materials) |
+| interiorLight | `{room, preset}` (`""` clears) | `{light}` — free (a preset or theme alone does not make an empty room comfortable) |
+
+Checks, in order: room exists / is part of this HQ / is built → def exists → `minHQ` → room role (`def.roles`) →
+room item cap (`maxItems`, 400 in total) → `def.max` per room → colour → position (snap, bounds, height, wall contact,
+reserved zones, overlap with items of the same layer; wall items also compare heights) → cash.
+Validation errors (all with `errorKey`): `"Pick a wall or the floor"`, `"Unknown room"`, `"That room is not built yet"`, `"That room is not part of this HQ"`,
+`"Unknown item"`, `"Needs HQ level 2"`, `"That does not belong in this room"`, `"Outside the room"`, `"Too tall for this room"`,
+`"Blocked: doorway"` / `"Blocked: stairs"` / `"Blocked: van ramp"` / `"Blocked: walkway"` / `"Blocked: something built in"`,
+`"Overlaps another item"`, `"Wall items must touch a wall"`, `"The room is full (40 items)"`, `"Only 1 of these per room"`,
+`"Not enough cash ($1800)"`, `"Unknown item id"`, `"Bad position"`, `"Unknown material"`, `"That material does not go on this surface"`,
+`"Pick a colour"`, `"Unknown theme"`, `"Unknown lighting preset"`, `"Unknown product"`, `"Too many build actions, slow down"`.
+Rate limit: besides the connection bucket, interior* actions + buildExpansion + setLineProcess have their own bucket (12 burst, 4/s per connection) →
+`ok:false, error:"Too many build actions, slow down"`. Approvals: interiorPlace / interiorPaint / interiorTheme have a cost
+estimate (co-founder large-spend rule applies, practically never).
+
+### Comfort (per room, 0..100) and effects (capped)
+`comfort = decor (≤45) + light (≤15) + plants (≤15) + space (≤15) + theme (≤10)`:
+decor = item comfort points of non-plant, non-lighting items with diminishing returns `45·(1−e^(−pts/18))`;
+light = lighting items' points + the light preset's points, `15·(1−e^(−pts/6))`; plants = plant points × growth,
+`15·(1−e^(−pts/6))`; space = free floor m² per seat (at least 1 person): 0 at ≤ 2 m², 15 at ≥ 8 m²;
+theme = 10 when a theme is set and ≥ 60 % of the themed-capable items match it (`coherence` = share), 0 below.
+Negative item comfort (a noisy compressor) subtracts from decor points. A room without a standing (non-stored) item has
+comfort 0 whatever its light preset / theme, and does not count in `comfortAvg`. No catalogue item with seats is free
+(`desk_door_trestle` costs 450).
+Effects (`interior.summary.effects`, all capped in `Balance.Interior.caps`):
+- morale (+ to the monthly morale drift; max +0.05): seat-weighted average comfort of rooms × 0.05 + item `fx.morale` (≤ 0.02).
+- research (lab speed, max +10 %): best comfort of `lab`/`mixed` rooms × 0.10 + item `fx.research` % (≤ +6 %).
+- defects (max −15 %): best comfort of `production`/`mixed` rooms × 0.15 + item `fx.defects` % (≤ 8 %).
+- design (design quality gain while developing, max +8 %): best comfort of `design`/`mixed` rooms × 0.08 + `fx.design` % (≤ 4 %).
+- brand (+ recognition per quarter, max +1): showroom comfort × 0.6 + `fx.brand` × 0.1 (≤ 0.4).
+- seats → `summary.staffBonus` = min(`Balance.Interior.staffBonusMax[hq.level]`, floor(seats / 2)) extra staff cap;
+  seats also count as desks for the "no desk" penalty. labSlots (lab benches) → `summary.labSlots` = min(1, Σ) extra
+  research slot. storage → crate space: `summary.storage` extra open crates (`maxOpenCrates` + storage, ≤ +20).
+
+## Expansions — 0.5.0 (docs/INTERIOR.md §2)
+State: `hq.expansions = { [id] = {level, builtDay} }` (missing = not built; `loft` is not stored here: it is `hq.rooms.AssemblyLine`).
+| id | room (interior) | counts as hq room | price L1 (then ×1.8 per level) | max level | effect |
+|---|---|---|---|---|---|
+| loft | loft | AssemblyLine | 150 000 | 2 (HQ 1 rule) | production lines upstairs (= `buildRoom AssemblyLine`) |
+| annex | annex | — (own effect) | 90 000 | 3 | +1 research slot (+2 at level 3), +4 % research speed per level, lab benches |
+| basement | basement | ServerRoom | 120 000 | 3 | open-crate limit ×3, warehouse capacity ×3, ServerRoom level = basement level (cloud services, eco users) |
+| shed | shed | QualityControl | 70 000 | 3 | QualityControl level = shed level (−12 % defects per level) |
+| showroom | showroom | Showroom | 60 000 | 3 | Showroom level = showroom level (+1.5 brand per level and quarter) |
+Rules: `CompanySim.roomLevel(room) = max(hq.rooms[room].level, expansion level)` for shed/showroom/basement while the
+company is in the garage (HQ 1). After the move to an office the garage rooms are gone: shed/showroom/basement still
+count as at most level `Balance.Expansions.keptRoomLevel` (= 1) of their room (higher levels: `buildRoom` under the
+normal HQ rules), and the annex research slots/speed and the basement ×3 crates/warehouse stop (garage only). Expansions can be bought/upgraded only at HQ 1 (`"Expansions are for the garage. Build rooms in the office."`).
+| action | perm | args | data |
+|---|---|---|---|
+| buildExpansion | Construction | `{id}` | `{id, level, cost}` — builds level 1 or upgrades +1. Errors `"Unknown expansion"`, `"Expansion at max level"`, `"Not enough cash ($90000)"` |
+| buildRoom | Construction | `{roomId: "QualityControl"\|"Showroom"\|"ServerRoom"}` at HQ 1 | routed to `buildExpansion shed/showroom/basement` (these rooms could not be built at HQ 1 before). `{level, cost, expansion}` |
+| getExpansionCatalog | — | `{}` (read-only) | `{expansions:{<id>:{name, room, hqRoom, level, maxLevel, nextCost, canBuild, reason?}}, hqLevel}` |
+
+## Production processes — 0.5.0 (docs/INTERIOR.md §3)
+State: every ASSEMBLY line in `production.lines[]` has `process` ∈ `"hand" | "semi" | "robotic" | "smart"`, plus after a
+switch `processFrom` (previous) and `processUntil` (game day the switch is done; the line is down until then:
+`downUntilDay`). Fab lines have no `process`. Old saves: every assembly line migrates to `"hand"` (multipliers 1.0 = the
+old behaviour). Table `Data/ProductionProcesses.luau`:
+| process | capacity × | defects × | energy × | worker need × | operators | setup $ (× (1 + 0.5·(level−1))) | switch days | tech (all required) |
+|---|---|---|---|---|---|---|---|---|
+| hand | 1.0 | 1.0 | 1.0 | 1.0 | 4 | 0 | 2 | — |
+| semi | 1.3 | 0.9 | 1.15 | 0.8 | 3 | 40 000 | 3 | `mfg_auto_1` Factory Automation 1 |
+| robotic | 1.75 | 0.7 | 1.5 | 0.45 | 2 | 250 000 | 7 | `mfg_auto_3` Factory Automation 3 |
+| smart | 2.4 | 0.45 | 1.9 | 0.2 | 1 | 900 000 | 10 | `mfg_auto_4` Factory Automation 4 + `mfg_qc_3` Quality Systems 3 |
+Switching down is free (still downtime). "worker need" divides the Worker staff a line needs (robots need fewer hands).
+| action | perm | args | data |
+|---|---|---|---|
+| setLineProcess | Manufacturing | `{lineId, process}` | `{lineId, process, cost, downtimeDays, untilDay}`. Errors `"Unknown line"`, `"Only assembly lines have a process"`, `"Unknown process"`, `"Already using that process"`, `"Research Factory Automation 3 first"`, `"Not enough cash ($250000)"` |

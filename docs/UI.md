@@ -22,8 +22,15 @@ client/tools/ui_shot_all.sh                                  # the whole set (sl
 client/tools/ui_shot_iter3.sh [ru] ["1920x1080 1366x768"]   # iteration 3: title menu, slots, story/quick, loading, credits, tracker +
                                                              # dialogue (with the 3D garage), chapter card, captions, repair game,
                                                              # ticket / receipt, skip story, final card, goals, controls -> tools/shots_ui/iter3/
+client/tools/ui_shot_iter5.sh [ru] ["1920x1080 1366x768"] [--world]  # 0.5.0: build mode (catalogue, annex lab, walls & floors,
+                                                             # placed, error, aiming bar), Grow the base (+ confirm), process table
+                                                             # (+ confirm), retooling line, company comfort, quick menu -> tools/shots_ui/iter5/
+<godot> --headless --path client -s tests/ui_net_test.gd -- --port=7503   # + 0.5.0: build mode against the live server (place / move /
+                                                             #   undo / paint / theme / light / blocked spot / sell), buy the showroom and
+                                                             #   furnish it, research Factory Automation 1 and switch line_1 to semi
 <godot> --headless --path client -s tools/ui_shot_check.gd   # compile check of every ui/net/phone/tests script
-python3 client/tools/export_data.py                          # shared-luau data + Roblox Locale -> client/ui/data/*.json
+python3 client/tools/export_data.py                          # shared-luau data + Roblox Locale -> client/ui/data/*.json (+ sample_interior.json)
+python3 client/tools/export_interior.py                      # (WORLD) 0.5.0 catalogue + room geometry -> client/ui/data/interior.json
 ```
 
 ## Structure
@@ -52,21 +59,26 @@ python3 client/tools/export_data.py                          # shared-luau data 
 | ui/hud/* | top bar (company, room code + copy, date, cash, RP chip (tooltip: RP sources + rate, click = Goals & gifts), team, reputation, speed with key labels P/1-4 (locked with a reason while the story clock is paused), members), left column (objective tracker, goal card, daily gift ready, dev chip, crates), [E] prompt, toasts (coalesced), chat |
 | ui/screens/designer.gd | Design Studio, 13 steps, live 3D model, cost card, critics preview (server evaluateBlueprint), undo/redo, concept shelf, publish |
 | ui/screens/research.gd | research board + details (startResearch / cancelResearch, "Boost +25% · 100 RP" = boostResearch) |
-| ui/screens/production.gd | dev projects (finish now / fix bug / add quality / cancel), batches (queueProduction), lines, incidents, launch |
+| ui/screens/production.gd | dev projects (finish now / fix bug / add quality / cancel), batches (queueProduction), lines, incidents, launch; 0.5.0: each assembly line shows its process + a retooling countdown, "Production process" opens the comparison table (capacity /week, defects, energy, operators, setup cost for this line, downtime, required techs with links to the research board) -> confirm -> `setLineProcess` |
 | ui/screens/shelf.gd | your devices: sales chart, reviews, price (setPrice), launch, discontinue, rivals |
-| ui/screens/company.gd | money, weekly revenue, market share, reputation, team, owners, bank loan, news |
+| ui/screens/company.gd | money, comfort & rooms (average ring, capped effects: morale / research / defects / design / brand, staff / lab / crate bonuses, comfort per room, Furnish + Grow the base), weekly revenue, market share, reputation, team, owners, bank loan, news |
 | ui/screens/employees.gd | "job_board": candidates (portrait, role, skill, salary, Hire), staff by station (salary -/+, Fire), new candidates for RP |
 | ui/screens/purchasing.gd | "supplier_phone" / quick menu / production / blocked toast: materials (stock, need/day, days left, spot price, used by, Buy 1/7/30 days or custom) and suppliers (offers, contract form with weeks slider + discount, active contracts) |
 | ui/screens/dialog_van.gd, dialog_stairs.gd | "van": ship all crates (+5%), haggle; "stairs_locked": buy the second floor (getRoomCatalog price) |
 | ui/challenges/* | mini-games: challenge_screen (pick -> intro -> 3-2-1 -> play -> result -> challengeReward; Esc = no reward), circuit + signal_match (PC research), bug_hunt (PC design), ideas (whiteboard), qc_line (line_qc), haggle (van / supplier negotiation) |
 | ui/screens/launch_overlay.gd | critics' score /10 + stars + verdict + quotes, after the world's stage show |
+| ui/hud/build_hud.gd | 0.5.0 build mode (key **B**, quick menu, company board, a `build_catalog` interactable): room tabs (locked expansions -> Grow the base), comfort gauge 0–100 with the 5 parts + preview of the selected item + the room's effect + "What to add"; budget, undo (Ctrl+Z: last placement sold back 50 % / last move reverted), room style (5 themes, light preset); catalogue (search, 8 categories + "Placed here" with Sell / Copy / Move, item cards: thumbnail, price, comfort, effects, HQ / room locks), Walls & floors (wall / floor, materials, swatches + any colour), the selected item's card (size, comfort, effects, themes, max, growth, living decor, colour, Place automatically / Aim). Tab = catalogue open (modal, mouse free) / closed (slim bar with the world's hover status, the player aims). Server errors in a banner. World contract (`build_mode`, `build_select`, `build_hover`, `build_request`, `build_result`) in docs/REQUESTS.md |
+| ui/lib/interior_rules.gd | client mirror of Domain/Interior (check, autoSpot, comfort + parts, suggestions, expansion / process costs) over `ui/data/interior.json` |
+| ui/lib/item_thumb.gd, ui_ring.gd, base_diagram.gd | code-drawn catalogue thumbnails / material swatches, the comfort ring, the "Grow the base" blueprint picture |
+| ui/screens/expansions.gd | "Grow the base" (`expansions`, `expansion_locked` id, `stairs_locked` = loft): 5 cards (picture, where, what it does now / next level, room size, price, level pips, lock reason), confirm -> `buildExpansion`, Furnish -> build mode in that room |
 | phone/phone_builder.gd | procedural device model (port of DeviceModelBuilder): bevelled body, accent frame, glass, live home screen, camera bump/lenses/OIS/flash, selfie hole, side buttons, port + speaker holes, logo styles, finishes (brushed, carbon, pearl...), foldable; simple laptop/box fallbacks |
 | phone/phone_preview.gd | SubViewport stage: lights, pedestal, orbit camera, view presets, auto-spin |
 
 ## Bus usage
 - listens: `interact(kind, id)` (pc_design, whiteboard_research, workbench_production, phone_shelf, stage_launch,
   board_company, job_board, van, stairs_locked, production_line, supplier_phone, pc_challenge, whiteboard_challenge,
-  line_qc, counter, repair_bench, door_exit -> pause menu), `focus_changed`, `notify`, `state_changed`,
+  line_qc, counter, repair_bench, door_exit -> pause menu; 0.5.0: build_catalog -> build mode, expansions / expansion_locked (id) /
+  stairs_locked -> Grow the base), `focus_changed`, `notify`, `state_changed`,
   `story_dialogue(line_id)` (step / cutscene / `cust.<id>.<kind>` lines, `customer:<id>:wait`), `story_cutscene(id)` (captions).
 - story events the UI sends (`storyEvent`): `intro_seen` / `investor_seen` / `sign_swapped` only when no world played the
   cutscene, `pattern_noticed` after the chapter-3 dialogue, `supplier_called` (supplier phone), `reviews_seen` (critics card closed).

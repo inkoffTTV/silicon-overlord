@@ -39,6 +39,7 @@ local ALL_KEYS = {
 	"goals", "achievements", "awards", "daily", "empire", "legacyMods",
 	"challenges", -- online iteration 2
 	"story", "repairs", -- online iteration 3 (story start, garage repair orders)
+	"interior", -- 0.5.0 interior editor
 }
 CompanyService.ALL_KEYS = ALL_KEYS
 
@@ -323,6 +324,7 @@ local function dirtyKeysForDay(session, state, notes)
 	end
 	if d % Balance.Time.daysPerMonth == 0 then
 		keys[#keys + 1] = "employees"
+		keys[#keys + 1] = "interior" -- 0.5.0: comfort refreshed monthly (plants grow)
 	end
 	if d % Balance.Time.daysPerQuarter == 0 then
 		for _, k in ipairs(ALL_KEYS) do

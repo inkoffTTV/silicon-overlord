@@ -35,6 +35,7 @@ local Bank = require(Shared.Domain.Bank)
 local Office = require(Shared.Domain.Office)
 local Development = require(Shared.Domain.Development)
 local Shipping = require(Shared.Domain.Shipping)
+local Interior = require(Shared.Domain.Interior) -- 0.5.0
 
 local T = Balance.Time
 local CompanySim = {}
@@ -64,7 +65,13 @@ end
 
 function CompanySim.roomLevel(c: Types.CompanyState, room: string): number
 	local r = c.hq.rooms[room]
-	return r and r.level or 0
+	-- 0.5.0: garage expansions count as levels of their room (shed = QualityControl, showroom, basement = ServerRoom)
+	return math.max(r and r.level or 0, Interior.roomFromExpansions(c, room))
+end
+
+-- 0.5.0: staff cap = HQ cap + seats placed in the interior (capped per HQ level)
+function CompanySim.staffCap(c: Types.CompanyState): number
+	return EmployeeRules.staffCap(c.hq.level, CompanySim.roomLevel(c, "Headquarters")) + Interior.summaryValue(c, "staffBonus")
 end
 
 -- extra (online, optional): localization fields { key, params, bodyKey, bodyParams, bodyParts } (docs/LOCALE_KEYS.md);
@@ -192,7 +199,7 @@ local function tickResearch(c: Types.CompanyState, notes: { Notification })
 	-- online iteration 3: passive research points from the research staff (fractional accumulation)
 	ResearchRules.addPoints(c.research, ResearchRules.dailyPoints(c.employees.list, labLevel))
 	local skill = EmployeeRules.sumSkill(c.employees.list, "Researcher") + 0.5 * EmployeeRules.sumSkill(c.employees.list, "SoftwareEngineer") * 0.3
-	local productivity = EmployeeRules.productivity(c.employees.morale) * Office.researchBonus(c) * Office.staffFactor(c)
+	local productivity = EmployeeRules.productivity(c.employees.morale) * Office.researchBonus(c) * Office.staffFactor(c) * Interior.researchMult(c)
 	for i = #c.research.active, 1, -1 do
 		local job = c.research.active[i]
 		local tech = TechTree.byId[job.techId]
@@ -271,6 +278,7 @@ local function tickProduction(c: Types.CompanyState, notes: { Notification })
 								c.inventory.resources[res] = c.inventory.resources[res] - bill[res] * n
 							end
 							local defectRate = math.max(0, 1 - product.ratings.reliability / 100) * 0.3 * (1 - 0.12 * CompanySim.roomLevel(c, "QualityControl")) * (mods.defect_mult or 1)
+							defectRate = defectRate * ProductionRules.processDefectMult(line) * (1 - Interior.effect(c, "defects")) -- 0.5.0
 							defectRate = MathUtil.clamp(defectRate * (1.2 - line.qualityLevel) * (1 - 0.1 * c.production.qcLevel), 0.003, 0.2)
 							local defective = math.floor(n * defectRate + 0.5)
 							job.defective = job.defective + defective
@@ -515,7 +523,7 @@ local function tickWeek(c: Types.CompanyState, notes: { Notification })
 	for _, p in ipairs(CompanySim.sortedProducts(c)) do
 		inv = inv + p.inventory
 	end
-	local carry = ProductionRules.carryCost(inv, ProductionRules.warehouseCapacity(CompanySim.roomLevel(c, "Warehouse")))
+	local carry = ProductionRules.carryCost(inv, ProductionRules.warehouseCapacity(CompanySim.roomLevel(c, "Warehouse")) * (Interior.garageExpansionLevel(c, "basement") > 0 and Balance.Expansions.basementCrateMult or 1))
 	if carry > 0 then
 		FinanceModel.spend(c.finance, carry)
 		c.finance.qOpex = c.finance.qOpex + carry
@@ -582,6 +590,7 @@ end
 -- Monthly: payroll, rent, morale, maintenance, bankruptcy
 -- ---------------------------------------------------------------------------
 local function tickMonth(c: Types.CompanyState, notes: { Notification })
+	Interior.refresh(c) -- 0.5.0: plants grew, comfort moves with them
 	local rng = rngFor(c)
 	local payroll = EmployeeRules.monthlyPayroll(c.employees.list)
 	local rent = Balance.HQ.rentMonthly[MathUtil.clamp(c.hq.level, 1, 7)]
@@ -620,7 +629,7 @@ local function tickMonth(c: Types.CompanyState, notes: { Notification })
 	end
 	local workload = MathUtil.clamp((running + #c.research.active) / math.max(1, #c.employees.list / 3), 0.3, 2)
 	local mods = ResearchRules.aggregateModifiers(c.research.unlocked)
-	EmployeeRules.monthlyMorale(c.employees, workload, (mods.morale_bonus or 0) + Office.moraleBonus(c), CompanySim.roomLevel(c, "ExecutiveOffice"))
+	EmployeeRules.monthlyMorale(c.employees, workload, (mods.morale_bonus or 0) + Office.moraleBonus(c) + Interior.effect(c, "morale"), CompanySim.roomLevel(c, "ExecutiveOffice"))
 	local gone = EmployeeRules.attrition(c.employees, rng)
 	if #gone > 0 then
 		notes[#notes + 1] = { kind = "HR", title = string.format("%.0f employee(s) resigned", #gone), body = "Low morale. Raise salaries, add perks or reduce workload.", sound = "Alert" }
@@ -786,7 +795,7 @@ local function tickQuarter(c: Types.CompanyState, notes: { Notification })
 		c.reputation.satisfaction = MathUtil.clamp(c.reputation.satisfaction + (avg * 10 - c.reputation.satisfaction) * 0.2, 0, 100)
 	end
 	local share = c.world.marketShare["player"] or 0
-	c.reputation.recognition = MathUtil.clamp(c.reputation.recognition * R.decayPerQuarter + share * R.recognitionPerShare + Balance.HQ.showroomBrandPerLevel * CompanySim.roomLevel(c, "Showroom"), 0, 100)
+	c.reputation.recognition = MathUtil.clamp(c.reputation.recognition * R.decayPerQuarter + share * R.recognitionPerShare + Balance.HQ.showroomBrandPerLevel * CompanySim.roomLevel(c, "Showroom") + Interior.effect(c, "brand"), 0, 100)
 	c.reputation.trust = MathUtil.clamp(c.reputation.trust * R.decayPerQuarter + (c.reputation.satisfaction - 50) * 0.05, 0, 100)
 	local avgDefect, m = 0, 0
 	for _, p in ipairs(CompanySim.sortedProducts(c)) do
@@ -991,7 +1000,7 @@ function CompanySim.tickDay(c: Types.CompanyState): { Notification }
 					best, bestIdx = cand, i
 				end
 			end
-			local cap = EmployeeRules.staffCap(c.hq.level, CompanySim.roomLevel(c, "Headquarters"))
+			local cap = CompanySim.staffCap(c)
 			if best and bestIdx and #c.employees.list < cap and c.finance.cash > best.salaryMonthly * 6 then
 				table.remove(c.employees.candidates, bestIdx)
 				c.finance.cash = c.finance.cash - best.salaryMonthly

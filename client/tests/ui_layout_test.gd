@@ -80,6 +80,7 @@ func _run() -> void:
 					ui.close_screen()
 					await frames(1)
 				await _check_story(ui, tag)
+				await _check_build(ui, tag)
 			if lang in ["en", "ru", "de", "zh"]:
 				await _check_menu(ui, tag)
 	# a live resize while the designer is open
@@ -104,6 +105,125 @@ func _run() -> void:
 	cfg.save(Prefs.SETTINGS)
 	print("ui_layout: %d checks, %d failures" % [checks, failures.size()])
 	quit(0 if failures.is_empty() else 1)
+
+## 0.5.0: Grow the base, the process table + confirm, build mode (catalogue, walls & floors, placed, aiming bar, error).
+## Build mode panels must also not overlap each other (left comfort panel / room style / catalogue / item card).
+func _check_build(ui: Node, tag: String) -> void:
+	ui.open_screen("expansions", "basement")
+	await frames(3)
+	_check_all(ui, tag + " expansions", false)
+	ui.close_screen()
+	# 0.5.0 QA #2: owned expansions show "Upgrade to level N" + "Furnish": the cards must still fit the screen
+	var Game: Node = root.get_node("Game")
+	var keep: Dictionary = Game.state
+	var st: Dictionary = keep.duplicate(true)
+	var hq: Dictionary = st.get("hq", {})
+	hq["level"] = 1
+	var ex := {}
+	for id in ["annex", "basement", "shed", "showroom"]:
+		ex[id] = {"level": 1 if id != "annex" else 2}
+	hq["expansions"] = ex
+	var rooms: Dictionary = hq.get("rooms", {})
+	rooms["AssemblyLine"] = {"level": 1}
+	hq["rooms"] = rooms
+	st["hq"] = hq
+	st["finance"]["cash"] = 9.0e6
+	Game.apply_snapshot(st)
+	ui.open_screen("expansions", "basement")
+	await frames(3)
+	_check_all(ui, tag + " expansions owned", false)
+	var canvas := _canvas(ui)
+	for c in ui.current.find_children("*", "PanelContainer", true, false):
+		if c.has_meta("expansion"):
+			# the grid scrolls vertically only: every card must fit across
+			var cr: Rect2 = (c as Control).get_global_rect()
+			check(cr.position.x >= canvas.position.x and cr.end.x <= canvas.end.x, "%s expansions owned: card %s fits across the window %s" % [tag, c.get_meta("expansion"), str(cr)])
+	var wmin := INF
+	var wmax := 0.0
+	for c in ui.current.find_children("*", "PanelContainer", true, false):
+		if c.has_meta("expansion"):
+			wmin = minf(wmin, (c as Control).size.x)
+			wmax = maxf(wmax, (c as Control).size.x)
+	check(wmax - wmin <= 2.0, "%s expansions owned: equal column widths (%.0f..%.0f)" % [tag, wmin, wmax])
+	ui.close_screen()
+	Game.apply_snapshot(keep)
+	await frames(1)
+	ui.open_screen("production_line", "line_1")
+	await frames(2)
+	ui.current.open_process("line_1")
+	await frames(3)
+	_check_all(ui, tag + " process table", false)
+	ui.current.set("proc_confirm", "semi")
+	ui.current._build_process_overlay()
+	await frames(2)
+	_check_all(ui, tag + " process confirm", false)
+	ui.close_screen()
+	await frames(1)
+	# a stand-in world, so the item card shows "Aim" too (0.5.0 QA #3: it ran past the screen edge)
+	var w := FakeWorld.new()
+	w.add_to_group("world")
+	root.add_child(w)
+	ui.enter_build(true)
+	# 0.5.0 QA #1: the right panel is anchored top-right when created, not a frame later (it flashed at (0, 0))
+	_check_right_panel(ui, tag + " build enter (same frame)")
+	ui.build.rebuild()
+	_check_right_panel(ui, tag + " build rebuild (same frame)")
+	for cat in ["desks", "lab", "surfaces", "placed"]:
+		ui.build.set_category(cat)
+		if cat == "desks":
+			ui.build.select_def("desk_neon_rig")
+		await frames(3)
+		_check_all(ui, "%s build %s" % [tag, cat], false)
+		_check_no_overlap(ui, "%s build %s" % [tag, cat])
+		if cat == "desks":
+			var aimb: Array = ui.build.find_children("*", "Button", true, false).filter(func(x: Node) -> bool: return x.has_meta("aim_btn"))
+			check(aimb.size() == 1, "%s build: Aim button on the item card" % tag)
+	ui.build.show_error("Blocked: something built in")
+	await frames(3)
+	_check_all(ui, tag + " build error", false)
+	ui.build.set_catalog(false)
+	_check_right_panel(ui, tag + " build slim (same frame)")
+	for c in (ui.build as Control).get_children():
+		if c.has_meta("slim"):
+			var r: Rect2 = (c as Control).get_global_rect()
+			check(r.position.y > (ui.root as Control).size.y * 0.5, "%s build slim bar at the bottom at once %s" % [tag, str(r)])
+	await frames(3)
+	_check_all(ui, tag + " build aiming", false)
+	_check_no_overlap(ui, tag + " build aiming")
+	ui.build.leave()
+	w.queue_free()
+	await frames(1)
+
+func _check_right_panel(ui: Node, what: String) -> void:
+	var found := false
+	for c in (ui.build as Control).get_children():
+		if c.has_meta("right_panel") and not c.is_queued_for_deletion():
+			found = true
+			var r: Rect2 = (c as Control).get_global_rect()
+			var vw := (ui.root as Control).size.x
+			check(r.position.x > vw * 0.4 and r.position.y >= 8, "%s: right panel in the top-right corner %s" % [what, str(r)])
+	check(found, what + ": right panel exists")
+
+class FakeWorld extends Node:
+	signal build_hover(info: Dictionary)
+	signal build_request(action: String, args: Dictionary)
+	func build_mode(_on: bool) -> void:
+		pass
+	func build_select(_sel: Dictionary) -> void:
+		pass
+	func build_result(_a: String, _ok: bool, _d: Dictionary, _e: String) -> void:
+		pass
+
+func _check_no_overlap(ui: Node, what: String) -> void:
+	var panels := []
+	for c in (ui.build as Control).get_children():
+		if c is PanelContainer and (c as Control).visible and (c as Control).mouse_filter == Control.MOUSE_FILTER_STOP:
+			panels.append(c)
+	for i in panels.size():
+		for j in range(i + 1, panels.size()):
+			var a: Rect2 = (panels[i] as Control).get_global_rect().grow(-1)
+			var b: Rect2 = (panels[j] as Control).get_global_rect().grow(-1)
+			check(not a.intersects(b), "%s: build panels overlap %s / %s" % [what, str(a), str(b)])
 
 ## Title menu pages (company slots, story / quick choice, the form, join, settings) without a company.
 func _check_menu(ui: Node, tag: String) -> void:

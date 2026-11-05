@@ -438,4 +438,36 @@ Balance.Office.partyMorale = 0.10
 Balance.Office.rerollRP = 20
 Balance.Office.maxRendered = 180
 
+-- 0.5.0: interior editor, comfort, expansions (docs/ACTIONS.md "Interior", "Expansions")
+Balance.Interior = {
+	refundShare = 0.5, -- interiorRemove sells for half the price
+	maxItemsTotal = 400, -- across all rooms
+	caps = {
+		morale = 0.05, -- + monthly morale drift
+		itemMorale = 0.02, -- part of morale from items' fx.morale
+		research = 0.10, -- lab speed
+		itemResearch = 6, -- % from items' fx.research
+		defects = 0.15, -- defect reduction
+		itemDefects = 8, -- % from items' fx.defects
+		design = 0.08, -- design quality gain
+		itemDesign = 4, -- % from items' fx.design
+		brand = 1.0, -- recognition per quarter
+		itemBrand = 0.4,
+		labSlots = 1, -- extra research slots from lab benches
+		storage = 20, -- extra open crates from shelves
+	},
+	staffBonusMax = { 4, 8, 12, 20, 30, 40, 60 }, -- extra staff cap from seats, by HQ level
+	seatsPerStaff = 2, -- every 2 seats = +1 staff cap
+	legacySearchBudget = 12, -- free-spot searches per mirror pass (old office -> interior); the rest goes to storage
+	spacePerPersonMin = 2, -- m² per seat: comfort space part 0 at this...
+	spacePerPersonMax = 8, -- ...and full at this
+	themeCoherence = 0.6, -- share of themed items needed for the theme bonus
+}
+Balance.Expansions = {
+	annexSlots = { 1, 1, 2 }, -- extra research slots by annex level
+	annexSpeedPerLevel = 0.04,
+	basementCrateMult = 3, -- open-crate limit and warehouse capacity (garage only, HQ 1)
+	keptRoomLevel = 1, -- after the move to an office a shed/showroom/basement still counts as this room level (max)
+}
+
 return Balance

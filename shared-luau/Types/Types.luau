@@ -609,6 +609,9 @@ export type ProductionLine = {
 	health: number, -- 0..1
 	downUntilDay: number,
 	layoutScore: number, -- 0..1 from factory layout puzzle
+	process: string?, -- 0.5.0: "hand" | "semi" | "robotic" | "smart" (assembly lines only; Data/ProductionProcesses)
+	processFrom: string?,
+	processUntil: number?,
 }
 
 export type ProductionJob = {

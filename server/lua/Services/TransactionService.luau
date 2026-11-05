@@ -11,6 +11,9 @@ local CompanyService = require(script.Parent.CompanyService)
 
 local TransactionService = {}
 
+-- Every audit note is clipped: notes are built from client payloads and the audit is replicated + saved.
+TransactionService.MaxNoteLength = 120
+
 local function append(state: Types.CompanyState, entry: Types.AuditEntry)
 	state.audit[#state.audit + 1] = entry
 	TableUtil.trimFront(state.audit, GameConfig.MaxAuditEntries)
@@ -29,7 +32,7 @@ function TransactionService.execute(session: CompanyService.Session, userId: num
 	local amount = state.finance.cash - cashBefore
 	append(state, {
 		transactionId = HttpService:GenerateGUID(false), companyId = state.id, initiatorUserId = userId, operationType = operationType, amount = amount,
-		timestamp = os.time(), previousStateVersion = versionBefore, newStateVersion = state.stateVersion, note = note or "",
+		timestamp = os.time(), previousStateVersion = versionBefore, newStateVersion = state.stateVersion, note = string.sub(type(note) == "string" and note or "", 1, TransactionService.MaxNoteLength),
 	})
 	local keys = TableUtil.shallowCopy(dirtyKeys)
 	keys[#keys + 1] = "audit"

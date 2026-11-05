@@ -198,6 +198,34 @@ func _run() -> void:
 			ui.call("debug_menu", "langpick")
 		"settings_audio", "settings_controls":
 			ui.call("debug_menu", screen)
+		# ---- 0.5.0 build mode / expansions / processes
+		"build":
+			ui.call("enter_build", not args.has("slim"))
+			var bh: Node = ui.get("build")
+			if args.has("room"):
+				bh.call("set_room", str(args.room))
+			if args.has("cat"):
+				bh.call("set_category", str(args.cat))
+			if args.has("def"):
+				bh.call("select_def", str(args.def))
+			if args.has("error"):
+				await create_timer(0.3).timeout
+				bh.call("show_error", load("res://ui/lib/loc.gd").t(str(args.error)))
+			if args.has("hover"):
+				bh.call("_on_hover", {"room": str(args.get("room", "garage")), "valid": str(args.hover) == "ok", "reason": "" if str(args.hover) == "ok" else str(args.hover)})
+		"expansions":
+			ui.call("open_screen", "expansions", str(args.get("id", "")))
+			await create_timer(0.3).timeout
+			if args.has("confirm"):
+				ui.get("current").set("_confirm", str(args.confirm))
+				ui.get("current").call("refresh")
+		"process":
+			Bus.interact.emit("production_line", str(args.get("line", "line_2")))
+			await process_frame
+			ui.get("current").call("open_process", str(args.get("line", "line_2")))
+			if args.has("confirm"):
+				ui.get("current").set("proc_confirm", str(args.confirm))
+				ui.get("current").call("_build_process_overlay")
 		"pause":
 			ui.call("debug_pause", args.has("settings"))
 		"quick":
@@ -298,6 +326,17 @@ func _iter2_state(st: Dictionary) -> void:
 		(prod.get("jobs", []) as Array).append({"id": "job_90_1", "lineId": "line_2", "productId": pids[0] if not pids.is_empty() else "p", "quantity": 1000, "produced": 380, "defective": 9, "status": "Running"})
 	if args.has("no_floor"):
 		(st.hq.rooms as Dictionary).erase("AssemblyLine")
+	# 0.5.0: research for the process table, a line that is retooling
+	var unl: Variant = st.get("research", {}).get("unlocked", {})
+	if unl is Dictionary:
+		unl["mfg_auto_1"] = true
+		if args.has("robotic"):
+			unl["mfg_auto_2"] = true
+			unl["mfg_auto_3"] = true
+	if args.has("retool") and lines.size() > 1:
+		lines[1]["process"] = "semi"
+		lines[1]["processFrom"] = "hand"
+		lines[1]["processUntil"] = int(st.time.elapsedDays) + 2
 	if not st.has("challenges"):
 		st["challenges"] = {"cooldowns": {"negotiation:retailer": 99}, "retailerPremium": 0, "supplierDiscount": 0, "history": []}
 
@@ -323,4 +362,6 @@ func _mock(action: String, a: Dictionary) -> Dictionary:
 				"ratings": {"overall": 64.2, "performance": 38.5, "design": 71.0, "software": 74.5, "batteryHours": 11.2, "value": 66.0, "buildQuality": 58.0, "innovation": 52.0, "ergonomics": 80.0, "reliability": 84.0, "thermalEfficiency": 92.0, "energyEfficiency": 60.0, "repairability": 60.0, "weightG": 188, "thicknessMm": 8.1}}}
 		"createBlueprint":
 			return {"ok": true, "data": {"id": "bp_new"}}
+		"getExpansionCatalog":
+			return {"ok": false, "error": "offline"}
 	return {"ok": true}

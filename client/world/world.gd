@@ -19,6 +19,11 @@ extends Node3D
 ##                                 signal cutscene_finished(id); is_cutscene_running()
 ##   get_shop()                  — the repair shop node of the garage (null in offices)
 ##   set_company_sign(text, color) — force the outside sign (preview); "" = back to the state
+## Iteration 5 (0.5.0, docs/INTERIOR.md): build mode (key B, world/build/build_mode.gd — the UI finds it in group
+##   "build_mode"), the interior renderer per level (level.interior, world/build/interior_view.gd), the garage
+##   expansions (world/live/expansions.gd), production processes on the loft lines, a day–night cycle through the
+##   windows (world/day_night.gd):
+##   get_build_mode() -> Node                   set_time_of_day(phase) (0 dusk, .25 night, .5 dawn, .75 noon; -1 clock)
 
 const PostFX := preload("res://fx/post_fx.gd")
 const STAGE_SCENE := "res://world/stage.tscn"
@@ -28,12 +33,20 @@ const LEVELS := {
 	2: "res://world/levels/level_2_office.gd",
 }
 const STAGE_OFFSET := Vector3(0, 0, -400)
+const BuildMode := preload("res://world/build/build_mode.gd")
+const DayNight := preload("res://world/day_night.gd")
 
 signal level_built(level: int)
 ## emitted when the launch show on the stage is over (camera is back on the player)
 signal launch_finished(product_name: String)
 ## emitted when a story cutscene is over (camera back on the player)
 signal cutscene_finished(id: String)
+## 0.5.0 build mode contract with the UI (docs/REQUESTS.md): aim info (≤ 10 Hz), "please send this action"
+## (interiorPlace / interiorMove / interiorRemove / interiorPaint / interiorTheme / interiorLight, pseudo "copy"),
+## and — when the world sent an action itself (no UI listening) — the result.
+signal build_hover(info: Dictionary)
+signal build_request(action: String, args: Dictionary)
+signal build_done(action: String, args: Dictionary, result: Dictionary)
 
 const Objective := preload("res://world/story/objective.gd")
 const Cutscenes := preload("res://world/story/cutscenes.gd")
@@ -48,6 +61,9 @@ const STAGE_KINDS := [["polish", "pc_challenge"], ["qc_", "line_qc"], ["supplier
 	["keynote", "stage_launch"], ["hire", "job_board"], ["job", "job_board"]]
 
 var objective: Node3D
+var builder: Node
+var day_night: Node
+var sky_mat: ProceduralSkyMaterial
 var cutscenes: Node3D
 var _stage: Array = []        # [chapter, step] set by story_stage() (UI) — else from Game.state.story
 var _stage_t := 0.0
@@ -85,6 +101,15 @@ func _ready() -> void:
 	add_child(cutscenes)
 	cutscenes.finished.connect(_on_cutscene_done)
 	Bus.story_cutscene.connect(play_cutscene)
+	day_night = DayNight.new()
+	day_night.name = "DayNight"
+	day_night.world = self
+	day_night.sky = sky_mat
+	day_night.env = env
+	add_child(day_night)
+	builder = BuildMode.new()
+	builder.world = self
+	add_child(builder)
 	rebuild()
 
 # ------------------------------------------------------------------ environment
@@ -101,6 +126,7 @@ func _make_environment() -> void:
 	psm.sky_energy_multiplier = 1.0
 	psm.sun_angle_max = 0.0
 	sky.sky_material = psm
+	sky_mat = psm
 	sky.radiance_size = Sky.RADIANCE_SIZE_64
 	env.sky = sky
 	env.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
@@ -139,6 +165,28 @@ func _make_environment() -> void:
 	world_env.environment = env
 	add_child(world_env)
 
+func get_build_mode() -> Node:
+	return builder
+
+## UI -> world (docs/REQUESTS.md "build mode contract")
+func build_mode(on: bool) -> void:
+	if builder:
+		builder.ui_attached = on
+		builder.set_active(on)
+		builder.ui_attached = on and builder.is_active()
+
+func build_select(sel: Dictionary) -> void:
+	if builder:
+		builder.apply_ui_selection(sel)
+
+func build_result(action: String, ok: bool, data: Dictionary, error: String) -> void:
+	if builder:
+		builder.on_result(action, ok, data, error)
+
+func set_time_of_day(phase: float) -> void:
+	if day_night:
+		day_night.force(phase)
+
 func apply_quality(q: String) -> void:
 	if post:
 		post.apply_quality(q)
@@ -154,6 +202,8 @@ func rebuild() -> void:
 	build_level(current_hq_level())
 
 func build_level(n: int) -> void:
+	if builder and builder.is_active():
+		builder.set_active(false)
 	if level_node:
 		level_node.queue_free()
 		level_node.name = "OldLevel"
@@ -377,7 +427,7 @@ func _product_model(product: Dictionary) -> Node3D:
 	var bp: Variant = bps.get(str(product.get("blueprintId", ""))) if bps is Dictionary else null
 	if not (bp is Dictionary):
 		bp = {"name": product.get("name", ""), "category": product.get("category", "Smartphone")}
-	var builder: Script = load(BUILDER)
+	var pb_script: Script = load(BUILDER)
 	var wizard: Script = load(WIZARD) if ResourceLoader.exists(WIZARD) else null
 	var resolve := func(id: String) -> Dictionary:
 		if wizard:
@@ -387,10 +437,10 @@ func _product_model(product: Dictionary) -> Node3D:
 	var logo: Dictionary = st.get("logo", {}) if st.get("logo") is Dictionary else {}
 	var brand := {"initial": str(st.get("name", "?")).substr(0, 1), "name": st.get("name", ""),
 		"colorA": logo.get("colorA", "#4F8CFF"), "colorB": logo.get("colorB", "#B15CFF")}
-	var params: Variant = builder.call("params_from_blueprint", bp, resolve, brand)
+	var params: Variant = pb_script.call("params_from_blueprint", bp, resolve, brand)
 	if not (params is Dictionary):
 		return null
-	var res: Variant = builder.call("build", params)
+	var res: Variant = pb_script.call("build", params)
 	return res if res is Node3D else null
 
 func play_launch(product_name: String, model: Node3D = null) -> void:

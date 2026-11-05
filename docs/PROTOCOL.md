@@ -88,6 +88,14 @@ Everything below the table keeps working as written; these are additions/clarifi
       `errorKey "err.account_locked"`, `errorParams {s}`. `accountRegister` attempts (also "That username is taken"),
       `accountChangePassword` / `accountDelete` (also with the right key) and `transferRedeem` attempts are capped
       too (table in docs/ACCOUNTS.md "Rate limits"); a username is never locked for everyone. Wire format unchanged.
+22. **0.5.0 (interior editor, expansions, production processes)** — fully backward compatible: a 0.4.0 client simply
+    ignores the new data and its old actions (`buyFurniture` & co., `buildRoom`) keep working.
+    - New replicated top-level section **`interior`** (in snapshots, in `sections` after interior actions, monthly, and
+      with the quarterly full refresh). New state fields: `hq.expansions {id: {level, builtDay}}`,
+      `production.lines[].process` (+ `processFrom`, `processUntil` after a switch). Old saves are migrated on load.
+    - New actions: `interiorPlace`, `interiorMove`, `interiorRemove`, `interiorPaint`, `interiorTheme`, `interiorLight`,
+      `buildExpansion`, `getExpansionCatalog`, `setLineProcess` — docs/ACTIONS.md "Interior", "Expansions",
+      "Production processes". They share an extra per-connection bucket (12 burst, 4/s): `"Too many build actions, slow down"`.
 
 Endpoint: `ws://<host>:7350/ws` (later `wss://` behind a reverse proxy). One JSON object per frame,
 field `t` = message type. Numbers are JSON numbers; Lua maps with non-string keys are sent with string keys.
