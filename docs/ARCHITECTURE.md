@@ -43,3 +43,31 @@ Rules: do not edit another owner's paths. If you need something there, add a TOD
 Authoritative. Each company = session with a Lua CompanyState, ticking days at speed 0/1/2/4/8
 (same Balance as Roblox). Clients send actions (same names/payloads as the Roblox ActionRouter) and
 receive snapshot + changed sections. See PROTOCOL.md.
+
+## Iteration 2 contracts (production you can see, employees, manual shipping)
+
+### State additions (server, Luau shared rules)
+- `production.crates`: array of `{id, productId, units, day}` — finished batches waiting in the garage/warehouse.
+  Production output goes HERE first (not straight into `products[id].inventory`). Units are sellable only after shipping.
+- Action `shipCrate {crateId}` → moves the crate's units into `products[productId].inventory`, removes the crate,
+  returns `{units, productId}`. Any member may ship. Fails if crate unknown.
+- Auto-shipping: crates older than `Balance.Production.autoShipDays` (default 7 game days) ship automatically
+  (so an AFK company still sells), and instantly once the company owns a LogisticsCenter room. Manual shipping is
+  the fast path and gives `Balance.Production.manualShipBonus` (default +5% units, "careful handling") — small but real.
+- "Second floor" of the garage = room `AssemblyLine` (bought with `buildRoom {roomId:"AssemblyLine"}`), allowed at
+  HQ level 1. Production lines (`buildLine`) require it. World shows the upper floor locked until `hq.rooms.AssemblyLine`.
+- Employees already exist: `employees.list` (hired) and `employees.candidates` (or whatever the state uses — see
+  docs/ACTIONS.md hire/fire). Each employee gets a stable `station` field the world uses to place them:
+  "design" (PC desks), "research" (whiteboard/lab), "assembly" (workbench / upstairs lines), "office" (generic desk).
+
+### World interactables (new kinds)
+- `crate` (id = crate id) — a grabbable crate RigidBody3D; carrying it into the van's cargo area ships it
+  (world calls `Net.act("shipCrate", {crateId})`, never decides itself). E on a crate shows "Carry to the van".
+- `van` — the delivery van at the garage door (prompt "Ship all crates" → UI confirm → shipCrate for each).
+- `stairs_locked` — stairs/trapdoor to the second floor while not bought → UI "Buy the second floor" dialog
+  (cost from server data) → `buildRoom AssemblyLine`.
+- `job_board` — cork board / laptop with CVs → UI Employees screen (hire/fire/salary).
+- `production_line` (id = line id), upstairs — UI production screen focused on that line.
+
+### Bus additions
+- `ship_feedback(crate_id: String, ok: bool)` — world plays a sound/flash when a shipment is accepted.
