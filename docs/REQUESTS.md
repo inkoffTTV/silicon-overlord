@@ -110,6 +110,7 @@ end
 | `van` | `garage_van` / `office_dispatch` | — | "Ship all crates" confirm → `shipAll` (crates then hop into the van by themselves) |
 | `stairs_locked` | `AssemblyLine` | boarded hatch + "2ND FLOOR — FOR SALE" sign | "Buy the second floor" dialog (price from `getRoomCatalog`) → `buildRoom {roomId:"AssemblyLine"}`; the world opens the hatch + ladder when `hq.rooms.AssemblyLine` appears |
 | `job_board` | `garage_jobs` / `office_jobs` | shows candidates' CVs + TEAM n | Employees screen |
+| `supplier_phone` | `garage_phone` / `office_phone` | red wall phone + "SUPPLIERS" card (prompt "Order materials"); next to it a MATERIALS rack showing `inventory.resources` (glass sheets, copper spools, aluminium bars + amounts) | Purchasing screen |
 | `production_line` | line id, or `""` (empty attic bay: "Production lines") | — | production screen focused on that line (`""` = build one) |
 | `pc_challenge` | `garage_pc` | player sits on the chair at the garage PC (camera to the seat) **before** emitting | open the mini-game overlay (modal); when you close it (`Bus.ui_modal_changed(false)`) the player stands up. targetId = a project in `state.projects` |
 | `whiteboard_challenge` | `garage_whiteboard` / `office_whiteboard` | player steps up to the board (marker tray "? BRAINSTORM") | research mini-game for a tech in `research.active` |

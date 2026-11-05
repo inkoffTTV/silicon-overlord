@@ -9,7 +9,7 @@ extends SceneTree
 ## Exit code 0 = pass, 1 = fail.
 
 const REQUIRED_KINDS := ["pc_design", "whiteboard_research", "workbench_production", "phone_shelf", "board_company", "door_exit", "stage_launch",
-	"pc_challenge", "whiteboard_challenge", "line_qc", "job_board", "van", "stairs_locked"]
+	"pc_challenge", "whiteboard_challenge", "line_qc", "job_board", "van", "stairs_locked", "supplier_phone"]
 const Shots := preload("res://tools/shot_iter2.gd")
 
 var fails: Array[String] = []
@@ -163,6 +163,7 @@ func _run() -> void:
 	var sh2: Node = lv2.get_node_or_null("Live/Shipping")
 	check(sh2 != null and sh2.crate_nodes().size() == game.state.production.crates.size(), "office: crates spawn by the door (%d)" % (sh2.crate_nodes().size() if sh2 else -1))
 	check(k2.has("van"), "office: DISPATCH chute is a 'van' interactable")
+	check(k2.has("supplier_phone") and k2.has("job_board"), "office: supplier phone + job board")
 	_finish()
 
 func _kinds() -> Dictionary:
@@ -219,6 +220,25 @@ func _iteration2(world: Node, player: CharacterBody3D) -> void:
 		if n.node.global_position.y > 3.0:
 			upstairs += 1
 	check(upstairs == 2, "assembly workers go to the upstairs lines first (%d)" % upstairs)
+	# --- supplier phone + materials rack (inventory.resources: glass 1060, copper 290, aluminum 194)
+	var phone: Node3D = null
+	for n in get_nodes_in_group("interactable"):
+		if str(n.get_meta("kind", "")) == "supplier_phone" and n.is_inside_tree():
+			phone = n
+	check(phone != null and phone.get_meta("id") == "garage_phone" and phone.get_meta("prompt") == "Order materials", "supplier_phone 'garage_phone' with prompt 'Order materials'")
+	if phone:
+		await _aim_from(player, phone.global_transform * Vector3(0, -0.3, 1.1), phone.global_position)
+		interacts.clear()
+		player.try_interact()
+		check(interacts.size() == 1 and interacts[0] == ["supplier_phone", "garage_phone"], "E on the phone emits Bus.interact('supplier_phone', 'garage_phone') %s" % [interacts])
+	var rack: Node = lv.stock_rack
+	check(rack.shown("glass") == 10 and rack.shown("copper") == 6 and rack.shown("aluminum") == 5, "materials rack shows stock (%d glass, %d copper, %d alu)" % [rack.shown("glass"), rack.shown("copper"), rack.shown("aluminum")])
+	var inv: Dictionary = game.state.inventory.duplicate(true)
+	inv.resources["copper"] = 0
+	inv.resources["glass"] = 150
+	game.apply_sections({"inventory": inv})
+	await frames(2)
+	check(rack.shown("copper") == 0 and rack.shown("glass") == 2, "rack follows inventory.resources")
 	# --- crates + van
 	var sh: Node = lv.shipping
 	check(sh.crate_nodes().size() == 5, "5 crates spawned near the door (%d)" % sh.crate_nodes().size())

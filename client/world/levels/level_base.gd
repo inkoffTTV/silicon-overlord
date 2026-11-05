@@ -12,6 +12,7 @@ const ResearchBoard := preload("res://world/live/research_board.gd")
 const ProtoShelf := preload("res://world/live/proto_shelf.gd")
 const JobBoard := preload("res://world/live/job_board.gd")
 const Staff := preload("res://world/live/staff.gd")
+const StockRack := preload("res://world/live/stock_rack.gd")
 
 const MONTHS := ["JANUARY", "FEBRUARY", "MARCH", "APRIL", "MAY", "JUNE", "JULY", "AUGUST", "SEPTEMBER", "OCTOBER", "NOVEMBER", "DECEMBER"]
 
@@ -26,6 +27,7 @@ var live_root: Node3D
 var research_boards: Array = []
 var proto_shelf: Node
 var staff: Node3D
+var stock_rack: Node3D
 ## station -> [{pos (level-local), yaw (radians, model faces +Z), pose, seat_h}]; see staff.gd
 var _slots := {"design": [], "research": [], "assembly": [], "office": [], "overflow": []}
 
@@ -326,6 +328,30 @@ func phone_shelf(parent: Node3D, pos: Vector3, rot_y: float, id: String = "shelf
 	for x in [-1.0, 1.0]:
 		kit.ia_shape(ia, Vector3(0.04, 2.0, d), Vector3(x * (w * 0.5 - 0.02), 1.0, 0))
 	kit.ia_shape(ia, Vector3(w, 2.0, 0.02), Vector3(0, 1.0, -d * 0.5 + 0.01))
+	return ia
+
+## Wall-mounted rotary phone with a "SUPPLIERS" card and a number list -> UI Purchasing screen.
+func supplier_phone(parent: Node3D, pos: Vector3, rot_y: float, id: String = "phone_1") -> StaticBody3D:
+	var ia := kit.interactable(parent, "supplier_phone", id, "Order materials", pos, rot_y)
+	var body := Mats.m("plastic_white", Color.WHITE, {"albedo": Color(0.55, 0.12, 0.1), "roughness_base": 0.3, "grime": 0.3})
+	kit.box(ia, Vector3(0.2, 0.26, 0.09), Vector3(0, 0, 0.045), body, Vector3.ZERO, false, 0.025)
+	# dial
+	kit.cyl(ia, 0.06, 0.012, Vector3(0, -0.03, 0.095), Mats.m("plastic_white", Color(1.2, 1.2, 1.15)), Vector3(90, 0, 0), 16)
+	for i in 10:
+		var a := TAU * i / 12.0 + 0.6
+		kit.cyl(ia, 0.008, 0.014, Vector3(cos(a) * 0.042, -0.03 + sin(a) * 0.042, 0.1), Mats.m("plastic_black"), Vector3(90, 0, 0), 6)
+	# handset on the cradle + curly cord
+	kit.box(ia, Vector3(0.05, 0.24, 0.05), Vector3(0.0, 0.1, 0.11), body, Vector3(0, 0, 0), false, 0.02)
+	for sy in [-1.0, 1.0]:
+		kit.box(ia, Vector3(0.07, 0.06, 0.07), Vector3(0.0, 0.1 + sy * 0.12, 0.12), body, Vector3.ZERO, false, 0.025)
+	for i in 8:
+		kit.cyl(ia, 0.012, 0.006, Vector3(0.09 + sin(i * 1.6) * 0.008, -0.12 - i * 0.03, 0.07), Mats.m("plastic_white", Color.WHITE, {"albedo": Color(0.5, 0.12, 0.1)}), Vector3(0, 0, 90), 8)
+	# SUPPLIERS card + number list pinned next to it
+	kit.box(ia, Vector3(0.24, 0.32, 0.003), Vector3(0.26, 0.0, 0.003), Mats.m("paper", Color(1.05, 1.0, 0.85)), Vector3(0, 0, -3), false, 0.0, false)
+	var t := kit.label(ia, "SUPPLIERS", Vector3(0.26, 0.12, 0.006), 34, Color(0.6, 0.1, 0.06), Vector3(0, 0, -3), 0.0011, true)
+	t.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	kit.label(ia, "glass .... 555-0142\ncopper ... 555-0177\nalu ...... 555-0193\nwafers ... 555-0101\n\nORDER EARLY!", Vector3(0.26, -0.03, 0.006), 22, Color(0.12, 0.12, 0.2), Vector3(0, 0, -3), 0.0011, true)
+	kit.ia_shape(ia, Vector3(0.5, 0.42, 0.16), Vector3(0.12, 0, 0.07))
 	return ia
 
 ## Cork job board with pinned CVs (employees.candidates) -> UI Employees screen.

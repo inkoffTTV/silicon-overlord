@@ -108,6 +108,12 @@ func _furniture(lv: int) -> void:
 	add_slot("assembly", Vector3(hw - 1.9, 0, 0.6), -90.0, "stand_assemble")
 	add_slot("assembly", Vector3(hw - 1.9, 0, 1.4), -90.0, "stand_assemble")
 	job_board(g, Vector3(2.2, 1.5, -hd + 0.01), 0.0, "office_jobs")
+	supplier_phone(g, Vector3(3.15, 1.45, -hd + 0.01), 0.0, "office_phone")
+	stock_rack = StockRack.new()
+	stock_rack.name = "StockRack"
+	stock_rack.position = Vector3(3.35, 0, -hd + 0.22)
+	g.add_child(stock_rack)
+	kit.shape(Vector3(0.8, 1.25, 0.4), Transform3D(Basis(), Vector3(3.35, 0.625, -hd + 0.22)))
 	poster(g, Vector3(0.6, 1.6, -hd + 0.01), 0.0, "THINK\nBIGGER", Color(0.1, 0.12, 0.2), Color(0.4, 0.8, 1.0), Vector2(0.5, 0.7))
 	# water cooler + plant + lounge
 	var wc := kit.node(g, Vector3(hw - 0.35, 0, hd - 2.6), 0.0)

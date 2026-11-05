@@ -556,7 +556,7 @@ static func segmented(items: Array, value: String, on_pick: Callable, min_h: flo
 		b.clip_text = true
 		b.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 		var tw := font("semibold").get_string_size(str(it[1]), HORIZONTAL_ALIGNMENT_LEFT, -1, SM).x + 30.0
-		b.custom_minimum_size.x = minf(tw, 112.0)
+		b.custom_minimum_size.x = minf(tw, 44.0)
 		b.tooltip_text = str(it[1])
 		b.toggle_mode = true
 		b.button_group = group
@@ -566,6 +566,14 @@ static func segmented(items: Array, value: String, on_pick: Callable, min_h: flo
 		b.pressed.connect(func() -> void: on_pick.call(id))
 		h.add_child(b)
 	return wrap
+
+## A segmented control that is not stretched by its container: every button keeps its full label width.
+static func segmented_natural(seg: PanelContainer) -> PanelContainer:
+	for b in seg.find_children("*", "Button", true, false):
+		var bt := b as Button
+		bt.clip_text = false
+		bt.custom_minimum_size.x = font("semibold").get_string_size(bt.text, HORIZONTAL_ALIGNMENT_LEFT, -1, SM).x + 30.0
+	return seg
 
 ## Key-cap hint: [E] style.
 static func keycap(key: String) -> PanelContainer:

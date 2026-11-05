@@ -2,7 +2,7 @@ extends SceneTree
 ## Iteration-2 screenshots (WORLD agent): loads main.tscn with a rich fake company state (sample_state.json +
 ## projects, crates, lines, staff), hides the UI and captures the new world features.
 ##   xvfb-run -a -s "-screen 0 1600x900x24" <godot> --path client -s res://tools/shot_iter2.gd -- --shots=all
-## --shots=all|build,whiteboard,loft,van,van_fp,staff,avatars,avatar_close,crate_fp,locked,seat,jobs,shelf,office
+## --shots=all|supplies,build,whiteboard,loft,van,van_fp,staff,avatars,avatar_close,crate_fp,locked,seat,jobs,shelf,office
 ## --frames=N (default 40) --out=tools/shots
 
 const HQ := preload("res://world/live/hq_state.gd")
@@ -119,7 +119,7 @@ func _run() -> void:
 	bus = root.get_node("/root/Bus")
 	var net := root.get_node("/root/Net")
 	var want: String = args.get("shots", "all")
-	var shots := ["build", "whiteboard", "loft", "van", "van_fp", "staff", "avatars", "avatar_close", "crate_fp", "seat", "jobs", "shelf", "locked", "office"] if want == "all" else Array(want.split(","))
+	var shots := ["supplies", "build", "whiteboard", "loft", "van", "van_fp", "staff", "avatars", "avatar_close", "crate_fp", "seat", "jobs", "shelf", "locked", "office"] if want == "all" else Array(want.split(","))
 	game.me = {"userId": 1, "name": "You"}
 	game.state = fake_state(shots == ["locked"])
 	# fake server for shipCrate: remove the crate, report units
@@ -162,6 +162,11 @@ func _peers(list: Array) -> void:
 func _shot(name: String, cam: Camera3D) -> void:
 	var lv: Node3D = world.get_level()
 	match name:
+		"supplies":
+			var vp := _vp("supplies")
+			_cam_at(cam, vp.global_transform, float(vp.get_meta("fov", 64.0)))
+			await _wait(frames)
+			await _save("supplier_phone")
 		"build", "whiteboard", "staff", "jobs":
 			var vp := _vp(name)
 			_cam_at(cam, vp.global_transform, float(vp.get_meta("fov", 70.0)))

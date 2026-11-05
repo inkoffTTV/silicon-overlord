@@ -317,6 +317,14 @@ func _furniture() -> void:
 	_spare_desk(g, Vector3(3.05, 0, D - 0.48))
 	# job board by the house door
 	job_board(g, Vector3(1.75, 1.45, -D + 0.01), 0.0, "garage_jobs")
+	# supply corner on the left wall between the desk and the workbench: phone to the suppliers + materials rack
+	supplier_phone(g, Vector3(-W + 0.01, 1.5, -2.2), 90.0, "garage_phone")
+	stock_rack = StockRack.new()
+	stock_rack.name = "StockRack"
+	stock_rack.position = Vector3(-W + 0.22, 0, -2.2)
+	stock_rack.rotation_degrees.y = 90.0
+	g.add_child(stock_rack)
+	kit.shape(Vector3(0.4, 1.25, 0.8), Transform3D(Basis(), Vector3(-W + 0.22, 0.625, -2.2)))
 	# clip lamp over the job board
 	var cl := kit.node(g, Vector3(1.75, 2.05, -D + 0.12), 0.0, "ClipLamp")
 	kit.cyl(cl, 0.05, 0.09, Vector3(0, 0, 0.04), Mats.m("metal_red"), Vector3(-60, 0, 0), 12)
@@ -416,8 +424,8 @@ func _water_heater(g: Node3D, p: Vector3) -> void:
 func _clutter() -> void:
 	var g := kit.node(self, Vector3.ZERO, 0.0, "Clutter")
 	# broom + shop vac
-	kit.box(g, Vector3(0.025, 1.3, 0.025), Vector3(-3.9, 0.7, -1.95), Mats.m("wood"), Vector3(0, 0, -12), false, 0.006)
-	kit.box(g, Vector3(0.3, 0.08, 0.06), Vector3(-3.78, 0.05, -1.95), Mats.m("plastic_orange", Color(1.2, 0.8, 0.5)), Vector3(0, 90, 0), false, 0.02)
+	kit.box(g, Vector3(0.025, 1.3, 0.025), Vector3(-1.05, 0.7, -3.42), Mats.m("wood"), Vector3(12, 0, 0), false, 0.006)
+	kit.box(g, Vector3(0.3, 0.08, 0.06), Vector3(-1.05, 0.05, -3.3), Mats.m("plastic_orange", Color(1.2, 0.8, 0.5)), Vector3.ZERO, false, 0.02)
 	kit.cyl(g, 0.2, 0.45, Vector3(-1.1, 0.25, -2.75), Mats.m("plastic_yellow" if false else "metal_yellow", Color.WHITE, {"metallic_base": 0.0}), Vector3.ZERO, 14, true)
 	kit.cyl(g, 0.21, 0.08, Vector3(-1.1, 0.5, -2.75), Mats.m("plastic_black"), Vector3.ZERO, 14)
 	kit.cable(g, Vector3(-1.0, 0.5, -2.65), Vector3(-0.6, 0.05, -2.4), 0.1, 6, 0.03, Mats.m("plastic_black"))
@@ -689,4 +697,5 @@ func _viewpoints() -> void:
 	kit.viewpoint(self, "van", Vector3(-0.4, 1.7, 1.2), Vector3(-1.6, 0.9, 5.4), 72.0)
 	kit.viewpoint(self, "staff", Vector3(2.6, 2.45, 3.25), Vector3(-1.2, 0.6, -1.2), 80.0)
 	kit.viewpoint(self, "hatch", Vector3(1.7, 1.6, 0.35), Vector3(3.5, 2.5, -1.15), 70.0)
+	kit.viewpoint(self, "supplies", Vector3(-2.3, 1.55, -1.55), Vector3(-4.0, 1.05, -2.25), 64.0)
 	kit.viewpoint(self, "jobs", Vector3(1.75, 1.5, -2.2), Vector3(1.75, 1.45, -3.5), 60.0)

@@ -126,6 +126,7 @@ climb), chamfered "toy" boxes, poses driven by `pose` + `move_speed`, mouth flap
 | Delivery van (original boxy van, company name + logo-colour stripe, rear doors open, ramp, cargo light, hazard blinkers, roof beacon). Ship OK: crate slides in and stays as cargo, green flash, "+N units", van bounces; fail: crate pushed back out, red flash | `ship_dock.gd` (style "van"; "chute" = DISPATCH hatch in offices) | driveway (the roll-up door is now open) |
 | Staff NPCs on station slots; overflow sits on cardboard boxes | `staff.gd` | desks, whiteboard, bench/lines, sofa |
 | Job board: cork board with pinned CVs (candidates) + TEAM n, clip lamp | `job_board.gd` | back wall by the house door |
+| Supplier phone (red rotary wall phone, "SUPPLIERS" card, `supplier_phone`) + MATERIALS rack: glass sheets (1 per 100), copper spools (1 per 50), aluminium bars (1 per 40) from `inventory.resources`, amounts on the shelf lips | `level_base.supplier_phone()`, `stock_rack.gd` | left wall between desk and workbench (office: back wall) |
 
 Seats (`player.sit_at`): interactables with meta `seat` {pos, yaw, eye, pitch, pose}. `pc_challenge` = the office chair
 at the garage PC (sit, eye 1.14 m), `whiteboard_challenge` = the marker tray ("? BRAINSTORM"), `line_qc` = QC tables

@@ -195,7 +195,7 @@ func _build() -> void:
 	bottom.add_child(vrow)
 	_view_seg = U.segmented([["auto", L.t("Auto")], ["front", L.t("Front")], ["back", L.t("Rear")], ["side", L.t("Side")], ["bottom", L.t("Bottom")]],
 		"auto", func(id: String) -> void: _preview.set_view(id), 30)
-	vrow.add_child(_view_seg)
+	vrow.add_child(U.segmented_natural(_view_seg))
 	var zm := U.icon_btn("minus", "", 34, "")
 	zm.pressed.connect(func() -> void: _preview.zoom(1.15))
 	vrow.add_child(zm)
