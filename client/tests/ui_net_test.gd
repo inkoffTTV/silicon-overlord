@@ -148,6 +148,11 @@ func _run() -> void:
 			L.set_lang("de")
 			check(L.server(ship.get("errorKey"), {}, str(ship.get("errorEn", ""))) == "Keine Kisten zum Versenden", "server error key translated (de)")
 			L.set_lang("en")
+		var mq: Dictionary = await Net.act("getMaterialQuotes", {})
+		check(mq.get("ok", false) and not (mq.get("data", {}).get("materials", []) as Array).is_empty(), "getMaterialQuotes lists materials")
+		if mq.get("ok", false):
+			var br: Dictionary = await Net.act("buyResources", {"resourceId": "glass", "units": 10})
+			check(br.get("ok", false), "buyResources glass x10 (%s)" % str(br.get("error", "ok")))
 		var cr: Dictionary = await Net.act("challengeReward", {"kind": "research", "targetId": "node_14_research", "score": 0.8})
 		check(cr.get("ok", false) or cr.has("error"), "challengeReward answered (%s)" % str(cr.get("error", "ok")))
 		if cr.get("ok", false):

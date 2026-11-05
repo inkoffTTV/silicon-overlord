@@ -130,3 +130,25 @@ by player position. `world.avatar_talk(uid, seconds, text)` and `world.avatar_po
 ### SERVER: nothing blocking
 The world reads `production.crates`, `production.lines[].location/bench`, `production.jobs[].status/produced/quantity`,
 `employees.list[].station` (falls back to role), `hq.rooms.AssemblyLine`, `projects`, `research.active/unlocked`.
+
+## From UI agent (iteration 2)
+
+### AUDIO: settings the UI writes
+- `[audio] voice_<lang>` (e.g. `voice_ru`, `voice_en`, `voice_de`) = DisplayServer TTS voice id the player picked for chat
+  lines in that language ("" = automatic). The Settings → Sound tab lists system voices per language and has a "test
+  voice" button that calls `Sfx.speak(player_id, name, sample_line)`.
+
+### lead: optional
+- `project.godot` window size 1600x900 is larger than common laptop screens (1366x768, 1536x864 at 125 %). ui_root now
+  maximizes such a window at start; consider `display/window/size/initial_position_type` centred or a smaller default.
+- `core/updater.gd` had a parse error during my runs (`_get` signature) — not used by UI tests, just FYI.
+
+### WORLD / lead: world_smoke needs one line (blocking for a green run)
+`tests/world_smoke.gd` presses E on the supplier phone; the UI now (correctly) opens the Purchasing screen, which is
+modal, so the player stays frozen and the later crate / PC-seat checks fail. Verified fix — after the
+`player.try_interact()` on the phone (around line 232) add:
+```gdscript
+		await frames(2)
+		bus.ui_modal_changed.emit(false)
+```
+With it world_smoke passes (checked locally on a temporary copy; the file itself is not mine, so I did not edit it).

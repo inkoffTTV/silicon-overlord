@@ -110,6 +110,21 @@ func show_toast(kind: String, title: String, body: String = "") -> void:
 	timer.timeout.connect(_dismiss.bind(card))
 	timer.start()
 
+## Adds a button to the visible toast with this (translated) title, e.g. "Buy materials" on "Production blocked".
+func add_action(title: String, label: String, cb: Callable) -> void:
+	for c in _stack.get_children():
+		if str(c.get_meta("title", "")) == title and not c.has_meta("closing") and not c.has_meta("action"):
+			c.set_meta("action", true)
+			var v: VBoxContainer = (c.get_meta("title_label") as Control).get_parent()
+			var b := U.btn(label, "BtnOrange", "box", 0, 30)
+			b.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+			b.pressed.connect(func() -> void:
+				cb.call()
+				_dismiss(c))
+			v.add_child(b)
+			(c.get_meta("timer") as Timer).start(LIFETIME * 2.0)
+			return
+
 func _dismiss(card: Control) -> void:
 	if not is_instance_valid(card) or card.has_meta("closing"):
 		return

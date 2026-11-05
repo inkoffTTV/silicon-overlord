@@ -231,6 +231,9 @@ func _iteration2(world: Node, player: CharacterBody3D) -> void:
 		interacts.clear()
 		player.try_interact()
 		check(interacts.size() == 1 and interacts[0] == ["supplier_phone", "garage_phone"], "E on the phone emits Bus.interact('supplier_phone', 'garage_phone') %s" % [interacts])
+		# the UI opens the (modal) Purchasing screen; release the player so the later checks can move
+		await frames(2)
+		bus.ui_modal_changed.emit(false)
 	var rack: Node = lv.stock_rack
 	check(rack.shown("glass") == 10 and rack.shown("copper") == 6 and rack.shown("aluminum") == 5, "materials rack shows stock (%d glass, %d copper, %d alu)" % [rack.shown("glass"), rack.shown("copper"), rack.shown("aluminum")])
 	var inv: Dictionary = game.state.inventory.duplicate(true)

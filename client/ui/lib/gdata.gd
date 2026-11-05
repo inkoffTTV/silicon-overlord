@@ -112,3 +112,32 @@ static func balance(section: String) -> Dictionary:
 static func sample_state() -> Dictionary:
 	var s: Variant = _json("sample_state")
 	return (s as Dictionary).duplicate(true) if s is Dictionary else {}
+
+## A realistic getMaterialQuotes answer for tests and screenshots (no server).
+static func sample_quotes() -> Dictionary:
+	var mats := [
+		["silicon_wafers", "Silicon Wafers", "wafer", 3500, 0, 0.0, []],
+		["rare_earth", "Rare Earth Materials", "kg", 90, 40, 6.2, ["Nebula One"]],
+		["lithium", "Lithium", "kg", 25, 18, 9.0, ["Nebula One"]],
+		["copper", "Copper", "kg", 9, 900, 14.0, ["Nebula One", "Nebula Mini"]],
+		["aluminum", "Aluminum", "kg", 3, 300, 20.0, ["Nebula One", "Nebula Mini"]],
+		["glass", "Glass", "sheet", 12, 0, 60.0, ["Nebula One", "Nebula Mini"]],
+		["battery_materials", "Battery Materials", "kg", 40, 260, 45.0, ["Nebula One"]],
+		["memory_chips", "Memory Chips", "chip", 14, 700, 120.0, ["Nebula One", "Nebula Mini"]],
+		["advanced_packaging", "Advanced Packaging Materials", "kit", 22, 0, 0.0, []],
+		["display_panels", "Display Panel Glass", "sheet", 30, 1500, 60.0, ["Nebula One"]],
+	]
+	var sups := [["spot_market", "Spot Market", 1.0, 1, 1.15], ["terra_mining", "Terra Mining Group", 0.9, 12, 0.92],
+		["glassworks", "Meridian Glassworks", 0.95, 6, 0.88], ["memstock", "MemStock Trading", 0.96, 4, 0.95]]
+	var list := []
+	for m in mats:
+		var offers := []
+		for s in sups:
+			if s[0] == "spot_market" or (s[0] == "terra_mining" and m[0] in ["lithium", "rare_earth", "copper", "aluminum"]) \
+					or (s[0] == "glassworks" and m[0] in ["glass", "display_panels"]) or (s[0] == "memstock" and m[0] == "memory_chips"):
+				offers.append({"supplierId": s[0], "name": s[1], "reliability": s[2], "minWeeks": s[3], "pricePerUnit": snappedf(m[3] * s[4], 0.01), "pricePerUnitLong": snappedf(m[3] * s[4] * 0.9, 0.01)})
+		var need: float = m[5]
+		list.append({"id": m[0], "name": m[1], "unit": m[2], "stock": m[4], "basePrice": m[3], "spotPrice": snappedf(m[3] * 1.15 * (1.3 if m[0] == "lithium" else 1.0), 0.01),
+			"supplyMult": 1.3 if m[0] == "lithium" else 1.0, "dailyNeed": need, "daysLeft": snappedf(m[4] / need, 0.1) if need > 0 else -1, "usedBy": m[6], "offers": offers})
+	return {"materials": list, "contracts": [{"id": "ctr_80_1", "supplierId": "glassworks", "resourceId": "display_panels", "unitsPerWeek": 400, "pricePerUnit": 25.6, "weeksLeft": 9}],
+		"billPerUnit": {}, "supplierDiscount": 0, "cash": 1846500}

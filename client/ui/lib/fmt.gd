@@ -102,6 +102,8 @@ const UNITS := {
 }
 
 static func unit(name: String) -> String:
+	if name == "d":
+		return str(DAYS_UNIT.get(L.lang, "d"))
 	return str(UNITS.get(L.lang, {}).get(name, name))
 
 ## Device size: inches in English, millimetres everywhere else.

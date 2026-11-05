@@ -54,6 +54,8 @@ func _run() -> void:
 				return {"ok": true, "data": {"applied": {"added": 0.05}, "cooldownDays": 5}}
 			"shipAll":
 				return {"ok": true, "data": {"units": 550, "bonusUnits": 27, "premium": 0}}
+			"getMaterialQuotes":
+				return {"ok": true, "data": D.sample_quotes()}
 			"createBlueprint":
 				return {"ok": true, "data": {"id": "bp_test"}}
 			"updateBlueprint", "evaluateBlueprint":
@@ -250,6 +252,46 @@ func _run() -> void:
 	check(ui.current._pick_line == "line_1", "focused line preselected for the batch")
 	ui.close_screen()
 	await frames(2)
+	# ---------------------------------------------------------------- purchasing
+	print("ui_smoke: purchasing")
+	Bus.interact.emit("supplier_phone", "phone")
+	await frames(4)
+	var pur: Control = ui.current
+	check(pur != null and ui.current_kind == "supplier_phone", "purchasing opened from the supplier phone")
+	check(calls.has("getMaterialQuotes"), "purchasing asks getMaterialQuotes")
+	check(pur.materials().size() == 10, "one row per material")
+	var glass: Dictionary = {}
+	for m in pur.materials():
+		if m.id == "glass":
+			glass = m
+	check(pur.materials()[0].id == "glass", "the material that runs out first is on top")
+	check(pur._units_for(glass, "7") == 420, "7 days of need = 420 sheets")
+	await pur._buy(glass, 420)
+	check(calls.has("buyResources") and last_args.buyResources.resourceId == "glass" and int(last_args.buyResources.units) == 420, "buyResources sent")
+	pur.debug_tab("suppliers")
+	await frames(2)
+	var offer: Dictionary = glass.offers[1]
+	check(is_equal_approx(pur.contract_price(offer, int(offer.minWeeks) + 52), offer.pricePerUnit * 0.9), "long contract is 10% cheaper")
+	await pur._sign(glass, offer, 400, 26)
+	check(calls.has("signContract") and int(last_args.signContract.weeks) == 26 and last_args.signContract.supplierId == offer.supplierId, "signContract sent")
+	await pur._cancel("ctr_80_1")
+	check(calls.has("cancelContract"), "cancelContract sent")
+	ui.close_screen()
+	await frames(2)
+	# "Production blocked: Out of Glass" toast gets a Buy materials button that opens purchasing on that material
+	Bus.notify.emit("warning", L.t("Production blocked"), "Nebula One: Out of Glass")
+	Net.production_blocked.emit("Glass")
+	await frames(2)
+	var act_btn: Button = null
+	for b in ui.toasts.find_children("*", "Button", true, false):
+		act_btn = b
+	check(act_btn != null, "blocked toast has a Buy materials button")
+	if act_btn:
+		act_btn.pressed.emit()
+		await frames(4)
+		check(ui.current_kind == "purchasing" and ui.current._sel_material == "glass", "toast opens purchasing on the missing material")
+		ui.close_screen()
+		await frames(2)
 	# ---------------------------------------------------------------- challenges
 	print("ui_smoke: challenges")
 	for spec in [["pc_challenge", "", "circuit"], ["pc_challenge", "", "signal"], ["pc_challenge", "", "bughunt"],

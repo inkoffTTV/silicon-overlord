@@ -117,6 +117,8 @@ func _build() -> void:
 	add_child(_preview)
 	_preview.anchor_right = 1.0
 	_preview.anchor_bottom = 1.0
+	# the stage starts right of the cost / critics cards, so the phone never hides behind them
+	_preview.offset_left = 336
 	_preview.offset_right = -PANEL_W - 24
 	_preview.offset_top = 40
 	_preview.offset_bottom = -70
@@ -158,10 +160,17 @@ func _build() -> void:
 	cost.add_child(ch)
 	var cv := U.vbox(0)
 	ch.add_child(cv)
-	cv.add_child(U.caps(L.t("COST TO MAKE")))
+	var cc := U.caps(L.t("COST TO MAKE"))
+	cc.clip_text = true
+	cc.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	cc.custom_minimum_size.x = 150
+	cv.add_child(cc)
 	_cost_value = U.lbl("$0", 30, U.TEXT, "display")
 	cv.add_child(_cost_value)
 	_cost_status = U.lbl("", U.XS, U.SUCCESS, "semibold")
+	_cost_status.clip_text = true
+	_cost_status.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	_cost_status.custom_minimum_size.x = 150
 	cv.add_child(_cost_status)
 	var cr := U.vbox(2)
 	cr.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -171,6 +180,8 @@ func _build() -> void:
 	cr.add_child(_cost_name)
 	_cost_detail = U.lbl("", U.XS, U.MUTED)
 	_cost_detail.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	_cost_detail.clip_text = true
+	_cost_detail.custom_minimum_size.x = 60
 	cr.add_child(_cost_detail)
 	# critics preview card (left, under the cost)
 	var rc := U.card("Glass")
@@ -187,8 +198,9 @@ func _build() -> void:
 	bottom.anchor_bottom = 1.0
 	bottom.anchor_right = 1.0
 	bottom.offset_right = -PANEL_W - 24
-	bottom.offset_top = -118
-	bottom.offset_bottom = -16
+	bottom.offset_top = -136
+	bottom.offset_bottom = -14
+	bottom.grow_vertical = Control.GROW_DIRECTION_BEGIN
 	bottom.alignment = BoxContainer.ALIGNMENT_END
 	var vrow := U.hbox(8)
 	vrow.alignment = BoxContainer.ALIGNMENT_CENTER
@@ -241,6 +253,8 @@ func _build() -> void:
 	_panel_body = U.vbox(8)
 	var pm := U.margin(_panel_body, 18, 6, 14, 12)
 	_panel_scroll = U.scroll(pm)
+	# a too-wide row never widens the panel past the window edge (rows wrap or shrink; see uit.segmented)
+	_panel_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_SHOW_NEVER
 	pv.add_child(_panel_scroll)
 	pv.add_child(U.hsep())
 	var nav := U.hbox(10)
@@ -530,6 +544,10 @@ func refresh_chrome() -> void:
 		if cur:
 			txt = "%d · %s" % [i + 1, L.t(str(list[i].title))]
 		var b := U.btn(txt, "BtnSpeed", "", 32 if not cur else 0, 32)
+		if cur:
+			b.clip_text = true
+			b.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+			b.custom_minimum_size.x = minf(U.font("semibold").get_string_size(txt, HORIZONTAL_ALIGNMENT_LEFT, -1, U.SM).x + 30.0, 200.0)
 		b.toggle_mode = true
 		b.button_pressed = cur
 		b.tooltip_text = L.t(str(list[i].title))
@@ -589,20 +607,28 @@ func _refresh_ratings() -> void:
 	U.clear(_ratings_box)
 	var h := U.hbox(8)
 	_ratings_box.add_child(h)
-	h.add_child(U.caps(L.t("CRITICS PREVIEW")))
+	var ct := U.caps(L.t("CRITICS PREVIEW"))
+	ct.clip_text = true
+	ct.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	ct.custom_minimum_size.x = 60
+	ct.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	h.add_child(ct)
 	var r := U.dict(server_eval.get("ratings", {}))
 	if r.is_empty():
 		_ratings_box.add_child(U.para(L.t("Start a concept to see the critics' preview.") if selected_id == "" else L.t("Ratings update when the server answers."), U.XS + 1, U.DIM, "medium", 260))
 		return
 	var overall := U.num(r.get("overall", 0))
-	h.add_child(U.spacer())
 	h.add_child(U.lbl("%.1f" % (overall / 10.0), U.LG, _rating_color(overall), "display"))
 	h.add_child(U.lbl("/10", U.XS, U.MUTED))
 	for pair in [["performance", "Performance"], ["design", "Design"], ["software", "Software"], ["buildQuality", "Build quality"], ["value", "Value"]]:
 		var v := U.num(r.get(pair[0], 0))
 		var row := U.hbox(8)
 		var lab := U.lbl(L.t(pair[1]), U.XS + 1, U.MUTED)
-		lab.custom_minimum_size.x = 112
+		lab.custom_minimum_size.x = 134
+		lab.clip_text = true
+		lab.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+		lab.tooltip_text = L.t(pair[1])
+		lab.mouse_filter = Control.MOUSE_FILTER_PASS
 		row.add_child(lab)
 		var b := U.bar(v / 100.0, _rating_color(v), 6)
 		b.size_flags_vertical = Control.SIZE_SHRINK_CENTER
@@ -1258,7 +1284,13 @@ func _render_review() -> void:
 		c.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		var v := U.vbox(2)
 		c.add_child(v)
-		v.add_child(U.caps(L.t(t[0]), U.MUTED, 10))
+		var cap := U.caps(L.t(t[0]), U.MUTED, 10)
+		cap.clip_text = true
+		cap.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+		cap.custom_minimum_size.x = 40
+		cap.tooltip_text = L.t(t[0])
+		cap.mouse_filter = Control.MOUSE_FILTER_PASS
+		v.add_child(cap)
 		v.add_child(U.lbl(t[1], U.MD, t[2], "bold"))
 		tiles.add_child(c)
 	_caps("NAME")

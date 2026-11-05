@@ -147,7 +147,7 @@ func _render_summary() -> void:
 		per_day += U.num(m.get("dailyNeed", 0)) * U.num(m.get("spotPrice", 0))
 	_chip("CASH", F.money(_cash()), U.SUCCESS)
 	_chip("RUNNING LOW", str(low), U.DANGER if low > 0 else U.TEXT)
-	_chip("MATERIALS / DAY", F.money(per_day))
+	_chip("MATERIALS / DAY", money(per_day))
 	var disc := U.num(quotes.get("supplierDiscount", 0))
 	if disc > 0:
 		_chip("NEXT ORDER", "−" + F.pct(disc, 1), U.GOLD)
@@ -160,7 +160,10 @@ func _render_summary() -> void:
 	_summary.add_child(hag)
 
 # ---------------------------------------------------------------- materials tab
-const COLS := [["MATERIAL", 220], ["IN STOCK", 96], ["NEED / DAY", 92], ["DAYS LEFT", 92], ["SPOT PRICE", 104], ["USED BY", 150]]
+const COLS := [["MATERIAL", 210], ["IN STOCK", 88], ["NEED / DAY", 104], ["DAYS LEFT", 88], ["SPOT PRICE", 96], ["USED BY", 118]]
+
+static func money(v: float) -> String:
+	return F.money_full(v) if absf(v) < 1e5 else F.money(v)
 
 func _render_materials() -> void:
 	var head := U.hbox(10)
@@ -185,7 +188,7 @@ func _render_materials() -> void:
 			focus = row
 	if U.arr(quotes.get("materials", [])).is_empty():
 		list.add_child(U.para(L.t("No materials known yet."), U.SM, U.MUTED))
-	list.add_child(U.para(L.t("Production takes materials from stock every day. A batch stops with \"Out of …\" when one runs out. Contracts deliver every week at a lower price."), U.XS + 1, U.DIM))
+	list.add_child(U.para(L.t("Production takes materials from stock every day. A batch stops with “Out of …” when one runs out. Contracts deliver every week at a lower price."), U.XS + 1, U.DIM))
 	if focus:
 		_scroll_to.call_deferred(sc, focus)
 
@@ -200,7 +203,7 @@ func _units_for(m: Dictionary, preset: String) -> int:
 	var need := U.num(m.get("dailyNeed", 0))
 	if need <= 0:
 		return int(FALLBACK_UNITS.get(preset, 100))
-	return maxi(1, ceili(need * float(preset) - maxf(0.0, U.num(m.get("stock", 0))) * (0.0 if preset == "1" else 0.0)))
+	return maxi(1, ceili(need * float(preset)))
 
 func _material_row(m: Dictionary) -> Control:
 	var rid := str(m.get("id", ""))
@@ -227,6 +230,7 @@ func _material_row(m: Dictionary) -> Control:
 	dc.add_child(pill)
 	h.add_child(dc)
 	var pv := U.vbox(0)
+	pv.alignment = BoxContainer.ALIGNMENT_CENTER
 	pv.custom_minimum_size.x = COLS[4][1]
 	pv.add_child(U.lbl(F.money(U.num(m.get("spotPrice", 0)), 2 if U.num(m.get("spotPrice", 0)) < 100 else 0), U.SM, U.TEXT, "bold"))
 	var mult := U.num(m.get("supplyMult", 1), 1)
@@ -249,13 +253,13 @@ func _material_row(m: Dictionary) -> Control:
 	var preset: String = _preset.get(rid, "7")
 	var items := []
 	for p in PRESETS:
-		items.append([p[0], L.t(p[1]) if need > 0 else F.number(FALLBACK_UNITS[p[0]])])
-	items.append(["custom", L.t("Custom")])
+		items.append([p[0], (p[0] + " " + F.unit("d")) if need > 0 else F.number(FALLBACK_UNITS[p[0]])])
+	items.append(["custom", "…"])
 	var total_l := U.lbl("", U.SM, U.TEXT, "bold")
 	total_l.custom_minimum_size.x = 84
 	total_l.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	var edit := LineEdit.new()
-	edit.custom_minimum_size = Vector2(76, 32)
+	edit.custom_minimum_size = Vector2(70, 32)
 	edit.placeholder_text = L.t("units")
 	edit.alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	edit.text = str(_units_for(m, preset))
@@ -263,7 +267,7 @@ func _material_row(m: Dictionary) -> Control:
 	var update := func() -> void:
 		var units := int(edit.text) if edit.text.is_valid_int() else 0
 		var cost := units * U.num(m.get("spotPrice", 0))
-		total_l.text = F.money(cost)
+		total_l.text = money(cost)
 		total_l.add_theme_color_override("font_color", U.DANGER if cost > _cash() else U.TEXT)
 		go.disabled = units <= 0 or cost > _cash()
 		go.tooltip_text = L.t("Not enough cash") if cost > _cash() else L.f("{n} {unit} now", {"n": F.number(units), "unit": L.t(str(m.get("unit", "")))})
@@ -411,7 +415,7 @@ func _offer_card(m: Dictionary, o: Dictionary) -> Control:
 	sl.max_value = 104
 	sl.step = 1
 	sl.value = form.weeks
-	sl.custom_minimum_size = Vector2(220, 24)
+	sl.custom_minimum_size = Vector2(360, 24)
 	sl.focus_mode = Control.FOCUS_NONE
 	sl.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	g.add_child(sl)
@@ -433,7 +437,7 @@ func _offer_card(m: Dictionary, o: Dictionary) -> Control:
 		wl.text = L.f("{w} weeks", {"w": weeks}) + ("  −" + F.pct(disc, 1) if disc > 0.0005 else "")
 		wl.add_theme_color_override("font_color", U.SUCCESS if disc > 0.0005 else U.TEXT)
 		sum.text = L.f("{price} per {unit} · {week} a week · {total} in total", {"price": F.money(price, 2), "unit": L.t(str(m.get("unit", ""))),
-			"week": F.money(price * units), "total": F.money(price * units * weeks)})
+			"week": money(price * units), "total": money(price * units * weeks)})
 		sign.disabled = units <= 0
 	uw.text_changed.connect(func(_t: String) -> void: upd.call())
 	sl.value_changed.connect(func(_x: float) -> void: upd.call())

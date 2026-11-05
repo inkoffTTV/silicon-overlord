@@ -21,6 +21,8 @@ signal latency_changed(ms: int)
 signal profile_changed(profile: Dictionary)
 signal boards_changed(boards: Dictionary)
 signal welcomed()
+## a production job stopped for lack of a material (English name), right after its notify toast
+signal production_blocked(material: String)
 
 const PROTOCOL_VERSION := 1
 const ACT_TIMEOUT := 10.0
@@ -386,6 +388,9 @@ func _on_text(text: String) -> void:
 			var nt := L.server(msg.get("key"), msg.get("params"), str(msg.get("title", "")))
 			var nb := L.server(msg.get("bodyKey"), msg.get("bodyParams"), str(msg.get("body", "")) if msg.get("body") != null else "")
 			Bus.notify.emit(str(msg.get("kind", "info")), nt, nb)
+			var body_en := str(msg.get("body", "")) if msg.get("body") != null else ""
+			if (str(msg.get("key", "")) == "note.production_blocked" or str(msg.get("title", "")) == "Production blocked") and body_en.contains("Out of "):
+				production_blocked.emit(body_en.substr(body_en.find("Out of ") + 7).strip_edges())
 		"members":
 			Game.members = msg.get("list", []) if msg.get("list") is Array else []
 			members_changed.emit(Game.members)

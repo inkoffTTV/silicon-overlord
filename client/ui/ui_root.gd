@@ -22,6 +22,8 @@ const SCREENS := {
 	"stage_launch": "res://ui/screens/shelf.gd",
 	"board_company": "res://ui/screens/company.gd",
 	"job_board": "res://ui/screens/employees.gd",
+	"supplier_phone": "res://ui/screens/purchasing.gd",
+	"purchasing": "res://ui/screens/purchasing.gd",
 	"van": "res://ui/screens/dialog_van.gd",
 	"stairs_locked": "res://ui/screens/dialog_stairs.gd",
 	"production_line": "res://ui/screens/production.gd",
@@ -50,6 +52,7 @@ var _scale := 1.0
 
 func _ready() -> void:
 	layer = 10
+	_fit_window_to_screen()
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	L.set_lang(force_lang if force_lang != "" else Prefs.lang())
 	U.set_font_lang(L.lang)
@@ -74,6 +77,9 @@ func _ready() -> void:
 		if hud:
 			hud.set_connection(s, d))
 	Net.members_changed.connect(_on_members_changed)
+	Net.production_blocked.connect(func(material: String) -> void:
+		if toasts:
+			toasts.add_action(L.t("Production blocked"), L.t("Buy materials"), func() -> void: open_screen("purchasing", material)))
 	Net.left_company.connect(func(_r: String) -> void:
 		close_screen()
 		_close_pause()
@@ -96,6 +102,21 @@ func sfx(name: String) -> void:
 	var s: Node = get_node_or_null("/root/Sfx")
 	if s and s.has_method("ui"):
 		s.call("ui", name)
+
+## The default 1600x900 window is bigger than a 1366x768 (or 1536x864 at 125 %) screen: Windows then cuts the
+## bottom/right of the game off. Shrink such a window to the usable screen area (maximized).
+func _fit_window_to_screen() -> void:
+	if DisplayServer.get_name() == "headless" or Engine.is_editor_hint() or OS.has_feature("web"):
+		return
+	if DisplayServer.window_get_mode() != DisplayServer.WINDOW_MODE_WINDOWED:
+		return
+	var screen := DisplayServer.window_get_current_screen()
+	var usable := DisplayServer.screen_get_usable_rect(screen)
+	var ws := DisplayServer.window_get_size()
+	if usable.size.x <= 0 or usable.size.y <= 0:
+		return
+	if ws.x > usable.size.x or ws.y + 32 > usable.size.y:
+		DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_MAXIMIZED)
 
 func _layout() -> void:
 	var vs := get_viewport().get_visible_rect().size
@@ -394,7 +415,8 @@ func _open_quick() -> void:
 	v.add_child(g)
 	for it in [["pc_design", "palette", U.SUCCESS, "Design studio"], ["whiteboard_research", "flask", U.ACCENT_ALT, "Research board"],
 			["workbench_production", "factory", U.ORANGE, "Workbench"], ["phone_shelf", "shelf", U.CYAN, "Product shelf"],
-			["board_company", "chart", U.GOLD, "Company board"], ["job_board", "cv", U.PINK, "Employees"]]:
+			["board_company", "chart", U.GOLD, "Company board"], ["job_board", "cv", U.PINK, "Employees"],
+			["purchasing", "box", U.ORANGE, "Purchasing"]]:
 		var h := U.hbox(12)
 		h.add_child(U.icon_tile(it[1], it[2], 36, 9))
 		h.add_child(U.lbl(L.t(it[3]), U.MD, U.TEXT, "semibold"))

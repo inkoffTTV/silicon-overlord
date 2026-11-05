@@ -18,6 +18,9 @@ func _init() -> void:
 	watch_keys = ["projects", "products", "production", "research", "finance", "inventory", "time"]
 
 func build_body(b: Control) -> void:
+	var buy := U.btn(L.t("Buy materials"), "BtnOrange", "box", 0, 38)
+	buy.pressed.connect(func() -> void: _open_purchasing(""))
+	header_actions.add_child(buy)
 	var h := U.hbox(16)
 	b.add_child(h)
 	_left = U.vbox(12)
@@ -237,6 +240,16 @@ func _build_jobs() -> void:
 		h.add_child(U.pill(L.t(str(j.get("status", ""))), stc))
 		row.add_child(U.bar(done / q, stc, 5))
 		row.add_child(U.lbl(L.f("{done} / {total} built · {bad} defective", {"done": F.number(done), "total": F.number(q), "bad": int(U.num(j.get("defective", 0)))}), U.XS, U.MUTED))
+		var reason := str(j.get("blockedReason", "")) if j.get("blockedReason") != null else ""
+		if str(j.get("status", "")) == "Blocked" or reason != "":
+			var bh := U.hbox(8)
+			var rl := U.para(L.t(reason) if reason != "" else L.t("Blocked"), U.XS + 1, U.DANGER, "semibold")
+			bh.add_child(rl)
+			var material := reason.substr(7).strip_edges() if reason.begins_with("Out of ") else ""
+			var bb := U.btn(L.t("Buy materials"), "BtnOrange", "box", 0, 30)
+			bb.pressed.connect(func() -> void: _open_purchasing(material))
+			bh.add_child(bb)
+			row.add_child(bh)
 		var c := U.card("CardFlat")
 		c.add_child(row)
 		v.add_child(c)
@@ -339,6 +352,10 @@ func _build_lines() -> void:
 				row.add_child(b)
 			v.add_child(c)
 	_right.add_child(card)
+
+func _open_purchasing(material: String) -> void:
+	if ui_root and ui_root.has_method("open_screen"):
+		ui_root.open_screen("purchasing", material)
 
 static func line_name(l: Dictionary) -> String:
 	if l.get("bench", false):

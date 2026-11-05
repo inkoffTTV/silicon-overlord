@@ -116,6 +116,11 @@ func _run() -> void:
 			ui.call("show_launch", str(args.get("product", "")))
 		"employees":
 			Bus.interact.emit("job_board", "board")
+		"purchasing":
+			Bus.interact.emit("supplier_phone", str(args.get("material", "")))
+			await create_timer(0.3).timeout
+			if args.has("tab"):
+				ui.get("current").call("debug_tab", str(args.tab))
 		"van":
 			Bus.interact.emit("van", "van")
 		"stairs":
@@ -194,6 +199,8 @@ func _iter2_state(st: Dictionary) -> void:
 
 func _mock(action: String, a: Dictionary) -> Dictionary:
 	match action:
+		"getMaterialQuotes":
+			return {"ok": true, "data": D.sample_quotes()}
 		"getRoomCatalog":
 			return {"ok": true, "data": {"hqLevel": 1, "rooms": {"AssemblyLine": {"name": "Assembly Line", "level": 0, "maxLevel": 5, "nextCost": 150000, "canBuild": true}}}}
 		"challengeReward":
