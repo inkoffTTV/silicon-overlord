@@ -72,7 +72,7 @@ const RU := {
 	"Clean": "Чистая",
 	"Grainy, low-res, cosy. The intended look.": "Зерно, низкое разрешение, уют. Так задумано.",
 	"Sharp and smooth. Easier on old eyes.": "Чётко и гладко. Проще для глаз.",
-	"Default: ws://127.0.0.1:7350/ws (a server on this computer).": "По умолчанию: ws://127.0.0.1:7350/ws (сервер на этом компьютере).",
+	"Default: the official server. For a server on this computer: ws://127.0.0.1:7350/ws": "По умолчанию: официальный сервер. Для сервера на этом компьютере: ws://127.0.0.1:7350/ws",
 	"Save": "Сохранить",
 	"Saved": "Сохранено",
 	"Test connection": "Проверить связь",

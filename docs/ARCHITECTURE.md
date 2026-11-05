@@ -71,3 +71,21 @@ receive snapshot + changed sections. See PROTOCOL.md.
 
 ### Bus additions
 - `ship_feedback(crate_id: String, ok: bool)` — world plays a sound/flash when a shipment is accepted.
+
+## Iteration 2b: challenges (mini-games), audio, spoken chat
+- Ownership: AUDIO agent owns client/audio/** (autoload `Sfx`, API in client/audio/sfx.gd) and the chat→voice feature.
+- Challenges are short skill mini-games that speed things up; the server caps rewards (anti-cheat).
+  Server action `challengeReward {kind, targetId, score}` (score 0..1 computed by the client mini-game) →
+  applies a capped bonus and returns `{applied, cooldownDays}`. kinds:
+  - "research" (sit at the PC/whiteboard while a tech is researching) → research progress boost on targetId (techId)
+  - "design" (bug hunt / polish while a product is in development) → project quality or bug fix on targetId (projectId)
+  - "assembly" (QC inspection at the bench/line) → fewer defects / small output bonus for targetId (lineId or productId)
+  - "negotiation" (shipping van / supplier phone call) → small price/cost bonus
+  Caps: per kind per company a cooldown in game days and max bonus — defined in Balance.Challenges.
+- World: interactable kinds `pc_challenge` (sit at the PC: camera moves to the chair, player seated, Esc stands up),
+  `whiteboard_challenge`, `line_qc`. On sit, world emits Bus.interact(kind, id); UI opens the mini-game overlay and
+  on finish calls Net.act("challengeReward", ...), then Bus.ui_modal_changed(false) → world stands the player up.
+- Spoken chat (like R.E.P.O): every chat line is spoken aloud by the speaker's character: OS text-to-speech
+  (DisplayServer.tts_*; Windows SAPI has Russian/English voices), per-player pitch/rate from userId, volume by distance
+  to the speaker's avatar, speech bubble + mouth/jaw anim on the avatar (world exposes `world.avatar_talk(user_id, seconds)`).
+  Setting to mute/adjust voice volume. Own messages are spoken from the local player.

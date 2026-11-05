@@ -18,6 +18,7 @@ Inputs="*res://core/inputs.gd"
 Bus="*res://core/bus.gd"
 Game="*res://core/game.gd"
 Net="*res://net/net.gd"
+Sfx="*res://audio/sfx.gd"
 
 [display]
 window/size/viewport_width=1600

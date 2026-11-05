@@ -7,7 +7,8 @@ extends RefCounted
 
 const SETTINGS := "user://settings.cfg"
 const PROFILE := "user://profile.cfg"
-const DEFAULT_URL := "ws://127.0.0.1:7350/ws"
+const DEFAULT_URL := "ws://13.143.162.211:7350/ws"  # the official server
+const LOCAL_URL := "ws://127.0.0.1:7350/ws"
 
 static func _cfg(path: String) -> ConfigFile:
 	var c := ConfigFile.new()
@@ -40,7 +41,11 @@ static func url() -> String:
 	var env := OS.get_environment("SOO_SERVER")
 	if env != "":
 		return env
-	return str(get_setting("net", "url", DEFAULT_URL))
+	var saved := str(get_setting("net", "url", ""))
+	# an empty or old local default means "use the official server"
+	if saved == "" or saved == LOCAL_URL:
+		return DEFAULT_URL
+	return saved
 
 static func lang() -> String:
 	var l := str(get_setting("ui", "lang", ""))

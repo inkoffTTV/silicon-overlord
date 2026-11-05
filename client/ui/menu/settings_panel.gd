@@ -28,7 +28,7 @@ func _ready() -> void:
 	var test := U.btn(L.t("Test connection"), "", "signal", 0, 42)
 	test.pressed.connect(_test)
 	row.add_child(test)
-	add_child(U.para(L.t("Default: ws://127.0.0.1:7350/ws (a server on this computer)."), U.XS + 1, U.DIM))
+	add_child(U.para(L.t("Default: the official server. For a server on this computer: ws://127.0.0.1:7350/ws"), U.XS + 1, U.DIM))
 	_status = U.para("", U.SM, U.MUTED, "semibold")
 	_status.visible = false
 	add_child(_status)
