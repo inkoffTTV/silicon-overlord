@@ -1,9 +1,12 @@
 {
-  "version": "0.3.0",
+  "version": "0.4.0",
   "engine": "4.5.1",
-  "pck_url": "https://github.com/inkoffTTV/silicon-overlord/raw/12cea8da42cf22aeedb10fea178809fc4b0aa677/SiliconOverlord.pck",
-  "pck_sha256": "48f2c6efe353859c7211a8e5116f9a8abd425559f78967bba8ccdba1cc1a7742",
-  "pck_size": 11408292,
-  "zip_url": "https://github.com/inkoffTTV/silicon-overlord/raw/12cea8da42cf22aeedb10fea178809fc4b0aa677/SiliconOverlord.zip",
+  "pck_url": "https://github.com/inkoffTTV/silicon-overlord/raw/734463399884f1509d22195f1e0e56578bfae936/SiliconOverlord.pck",
+  "pck_sha256": "a2384d0abbae670915b4bf62d0bdd61a79807737113a2ff4dc406822dcb509e6",
+  "pck_size": 11510804,
+  "zip_url": "https://github.com/inkoffTTV/silicon-overlord/releases/download/v0.4.0/SiliconOverlord.zip",
+  "zip_size": 106986091,
+  "full_required_min": "0.3.1",
+  "voice_version": 1,
   "date": "2026-11-05"
 }
