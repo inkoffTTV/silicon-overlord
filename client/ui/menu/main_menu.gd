@@ -393,6 +393,10 @@ func _page_settings() -> Control:
 	row.add_child(back)
 	return v
 
+func rebuild_settings() -> void:
+	if _settings:
+		_settings.call("show_tab", Settings.last_tab)
+
 func show_page(p: String) -> void:
 	page = p
 	for k in _pages:

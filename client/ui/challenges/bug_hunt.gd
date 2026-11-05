@@ -155,7 +155,7 @@ func _draw() -> void:
 		if b.dead >= 0:
 			if b.get("escaped", false):
 				continue
-			var a2 := 1.0 - b.dead * 2.0
+			var a2: float = 1.0 - b.dead * 2.0
 			draw_circle(p, 13, Color(U.SUCCESS, 0.5 * a2))
 			for k in 6:
 				draw_line(p, p + Vector2.from_angle(k * TAU / 6.0 + 0.3) * 16, Color(U.SUCCESS, 0.6 * a2), 3)
@@ -164,11 +164,14 @@ func _draw() -> void:
 		var leg := sin(b.t * 18.0) * 3.0
 		for side in [-1, 1]:
 			for k in 3:
-				var base := p + Vector2(-4 + k * 4, 0).rotated(ang)
-				draw_line(base, base + Vector2(leg * (1 if k % 2 == 0 else -1), side * 9).rotated(ang), Color("#2A0F12"), 2)
-		draw_set_transform(p, ang, Vector2(1.0, 0.72))
+				var base := p + Vector2(-6 + k * 6, 0).rotated(ang)
+				draw_line(base, base + Vector2(leg * (1 if k % 2 == 0 else -1), side * 14).rotated(ang), Color("#2A0F12"), 2.5)
+		draw_set_transform(p, ang, Vector2(1.45, 1.05))
 		draw_circle(Vector2.ZERO, 9, Color("#C8324B"))
-		draw_circle(Vector2(7, 0), 5, Color("#2A0F12"))
+		draw_line(Vector2(-8, 0), Vector2(6, 0), Color("#2A0F12"), 1.5)
+		draw_circle(Vector2(-3, -4), 1.8, Color("#2A0F12"))
+		draw_circle(Vector2(-3, 4), 1.8, Color("#2A0F12"))
+		draw_circle(Vector2(8, 0), 5, Color("#2A0F12"))
 		draw_set_transform(Vector2.ZERO)
 		draw_line(p, p + Vector2(0, -6).rotated(ang), Color("#2A0F12"), 1.5)
 		var warn: float = 1.0 - b.life / b.max

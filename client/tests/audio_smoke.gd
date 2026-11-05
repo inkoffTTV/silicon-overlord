@@ -154,6 +154,14 @@ func _run() -> void:
 	check(V.detect_lang("hello there", "en") == "en", "latin -> en")
 	check(V.detect_lang("hello there", "ru") == "en", "latin text in a ru game -> en voice")
 	check(V.detect_lang("123 !!", "ru") == "ru", "no letters -> game language")
+	check(V.detect_lang("Привіт! Зберемо телефон?", "en") == "uk", "ukrainian letters -> uk")
+	check(V.detect_lang("Die Größe passt", "en") == "de", "umlaut -> de")
+	check(V.detect_lang("¡Hola amigo!", "en") == "es", "¡ -> es")
+	check(V.detect_lang("Cześć wszystkim", "en") == "pl", "ś/ć -> pl")
+	check(V.detect_lang("Merhaba, nasılsın?", "en") == "tr", "ı -> tr")
+	check(V.detect_lang("hello", "de") == "de", "plain latin in a German game -> de")
+	check(str(Sfx.voice.speak(3, "T", "Hallo", null, "de").get("lang", "")) == "de", "forced language")
+	Sfx.voice.stop_all()
 	check(V.distance_volume(Vector3.ZERO, Vector3(0, 0, 2)) == 1.0, "close = full volume")
 	check(V.distance_volume(Vector3.ZERO, Vector3(0, 0, 50)) == 0.0, "far = silent")
 	var mid: float = V.distance_volume(Vector3.ZERO, Vector3(0, 0, 15))
@@ -232,6 +240,10 @@ func _run() -> void:
 	await frames(2)
 	check(not Sfx._last_play.has("click"), "no default click when the handler plays its own UI sound")
 
+	for n in [holder, cam, world, btn, quiet, own]:
+		n.queue_free()
+	Sfx.stop_all()
+	check(Sfx.music_name == "" and Sfx.voice.speaking_count() == 0, "stop_all silences everything")
 	# restore the settings file
 	if backup != "":
 		var f := FileAccess.open(SETTINGS, FileAccess.WRITE)

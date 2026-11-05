@@ -270,7 +270,9 @@ func _build_lines() -> void:
 		tv.add_child(hb)
 		h.add_child(tv)
 		if running.has(lid):
-			h.add_child(U.pill(L.t("Running"), U.ACCENT))
+			var rpill := U.pill(L.t("Running"), U.ACCENT)
+			rpill.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+			h.add_child(rpill)
 		var acts := HFlowContainer.new()
 		acts.add_theme_constant_override("h_separation", 6)
 		acts.add_theme_constant_override("v_separation", 6)

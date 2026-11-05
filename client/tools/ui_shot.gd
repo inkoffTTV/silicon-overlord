@@ -5,7 +5,9 @@ extends SceneTree
 ##       --screen=designer --lang=ru --size=1920x1080 --out=tools/shots_ui/designer_ru.png [--step=6] [--wait=1.0]
 ##
 ## Screens: menu, menu_create, menu_join, settings, hud, designer, research, production, shelf, company, launch,
-##          pause, quick, phone (3D preview only). --world loads main.tscn behind the UI (default: dark backdrop).
+##          pause, quick, phone (3D preview only), employees, van, stairs, line (production focused on --line),
+##          challenge (--source=pc_challenge|whiteboard_challenge|line_qc|negotiation [--game=circuit --play=3.5 | --result=0.82]),
+##          langpick, settings_audio. Iteration-2 state (crates, challenges, no second floor) is faked: --no_floor. --world loads main.tscn behind the UI (default: dark backdrop).
 
 const D := preload("res://ui/lib/gdata.gd")
 
@@ -82,6 +84,7 @@ func _run() -> void:
 	ui.set("force_lang", lang)
 	root.add_child(ui)
 	if not st.is_empty():
+		_iter2_state(st)
 		Game.apply_snapshot(st)
 	await process_frame
 	var step := int(args.get("step", "0"))
@@ -111,6 +114,25 @@ func _run() -> void:
 			Bus.interact.emit("board_company", "board")
 		"launch":
 			ui.call("show_launch", str(args.get("product", "")))
+		"employees":
+			Bus.interact.emit("job_board", "board")
+		"van":
+			Bus.interact.emit("van", "van")
+		"stairs":
+			Bus.interact.emit("stairs_locked", "stairs")
+		"line":
+			Bus.interact.emit("production_line", str(args.get("line", "line_2")))
+		"challenge":
+			Bus.interact.emit(str(args.get("source", "pc_challenge")), str(args.get("id", "")))
+			await process_frame
+			await process_frame
+			var ch: Node = ui.get("current")
+			if ch and args.has("game"):
+				ch.call("debug_play", str(args.game), float(args.get("play", "0")), float(args.get("result", "-1")))
+		"langpick":
+			ui.call("debug_menu", "langpick")
+		"settings_audio":
+			ui.call("debug_menu", "settings_audio")
 		"pause":
 			ui.call("debug_pause")
 		"quick":
@@ -150,8 +172,39 @@ func _run() -> void:
 	print("saved ", out)
 	quit(0)
 
+## Iteration-2 parts of the state that the exported sample may not have yet.
+func _iter2_state(st: Dictionary) -> void:
+	var prod: Dictionary = st.get("production", {})
+	var pids: Array = (st.get("products", {}) as Dictionary).keys()
+	if not prod.has("crates") or (prod.crates is Dictionary and (prod.crates as Dictionary).is_empty()):
+		var crates := []
+		for i in 4:
+			crates.append({"id": "crate_%d" % i, "productId": pids[i % pids.size()] if not pids.is_empty() else "p", "units": [120, 200, 80, 150][i], "day": 88 + i})
+		prod["crates"] = crates
+	var lines: Array = prod.get("lines", [])
+	if lines.size() < 2 and not args.has("no_floor"):
+		lines[0]["bench"] = true
+		lines[0]["location"] = "garage"
+		lines.append({"id": "line_2", "kind": "Assembly", "level": 2, "health": 0.92, "capacityPerWeek": 4250, "location": "upstairs"})
+		(prod.get("jobs", []) as Array).append({"id": "job_90_1", "lineId": "line_2", "productId": pids[0] if not pids.is_empty() else "p", "quantity": 1000, "produced": 380, "defective": 9, "status": "Running"})
+	if args.has("no_floor"):
+		(st.hq.rooms as Dictionary).erase("AssemblyLine")
+	if not st.has("challenges"):
+		st["challenges"] = {"cooldowns": {"negotiation:retailer": 99}, "retailerPremium": 0, "supplierDiscount": 0, "history": []}
+
 func _mock(action: String, a: Dictionary) -> Dictionary:
 	match action:
+		"getRoomCatalog":
+			return {"ok": true, "data": {"hqLevel": 1, "rooms": {"AssemblyLine": {"name": "Assembly Line", "level": 0, "maxLevel": 5, "nextCost": 150000, "canBuild": true}}}}
+		"challengeReward":
+			match str(a.get("kind", "")):
+				"research":
+					return {"ok": true, "data": {"applied": {"techId": a.targetId, "progress": 0.6, "added": 0.064}, "cooldownDays": 5}}
+				"design":
+					return {"ok": true, "data": {"applied": {"fixed": "bug", "bugs": 0, "toughBugs": 0}, "cooldownDays": 5}}
+				"assembly":
+					return {"ok": true, "data": {"applied": {"productId": "p", "bonusPct": 0.08}, "cooldownDays": 5}}
+			return {"ok": false, "error": "Already done: try again in 3 days"}
 		"evaluateBlueprint", "updateBlueprint":
 			return {"ok": true, "data": {"valid": true, "issues": [], "cost": {"total": 171.4, "bom": 141.2, "manufacturing": 12.0, "labor": 8.0, "logistics": 4.2, "amortization": 3.0, "defects": 3.0, "yieldRate": 0.97},
 				"ratings": {"overall": 64.2, "performance": 38.5, "design": 71.0, "software": 74.5, "batteryHours": 11.2, "value": 66.0, "buildQuality": 58.0, "innovation": 52.0, "ergonomics": 80.0, "reliability": 84.0, "thermalEfficiency": 92.0, "energyEfficiency": 60.0, "repairability": 60.0, "weightG": 188, "thicknessMm": 8.1}}}

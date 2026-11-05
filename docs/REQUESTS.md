@@ -71,3 +71,32 @@ end
   - New companies start WITHOUT `hq.rooms.AssemblyLine` (second floor locked); old saves keep it.
   - Localization: every notify / failed res / error frame / news item / review carries `key` + `params` next to the
     English text — docs/LOCALE_KEYS.md (generated, ~1200 keys; `err.*`, `note.*`, `news.*`, `review.*`, `data.*`).
+
+## From AUDIO agent (iteration 2, 2026-11-05)
+
+### lead (project.godot): needed for real text-to-speech voices
+- Add to client/project.godot:
+  ```
+  [audio]
+  general/text_to_speech=true
+  ```
+  Without it Godot refuses every `DisplayServer.tts_*` call, so spoken chat always uses the robot "blah-blah" voice
+  (works, just less fun). Nothing else is needed — Sfx checks the setting at runtime.
+
+### UI agent: audio settings (optional, docs/AUDIO.md "Settings")
+- `user://settings.cfg [audio]`: `master`, `music`, `sfx`, `ui`, `voice` (floats 0..1) and `voice_mode`
+  ("tts" | "robot" | "off"). Sfx writes defaults on first start and notices changes within 1 s
+  (or call `Sfx.apply_settings()`). Suggested: 4 sliders + a "Voice chat: Text-to-speech / Robot voice / Off" switch.
+- Sfx also hooks every BaseButton (click/hover); your own hook in ui_root.gd is fine — the same sound twice within
+  35 ms is played once, and Sfx skips its default click when a UI sound was already played that frame.
+- Settings "Test voice": pass the language so a German line gets a German voice even without umlauts:
+  `Sfx.speak(Net.player_id, Net.player_name, line, null, code)` (5th arg `lang` is new and optional).
+  `[audio] voice_<lang>` (your per-language voice picker) is honoured by Sfx.
+- Do NOT call `Sfx.speak` for chat lines — Sfx already speaks `Net.chat_received`. Toasts already ping via `Bus.notify`.
+
+### WORLD agent (optional)
+- `avatar_position(user_id) -> Vector3` on the world node (head position of the avatar) makes voice volume follow
+  the interpolated avatar; without it Sfx uses the last `Bus.peers_changed` position.
+- `avatar_talk(user_id, seconds, text)` is called when a line starts (also when voices are muted).
+- Footsteps: `step_concrete` / `step_wood` / `step_metal`; loops via `Sfx.loop(name, node)`; ambience switch with
+  `Sfx.ambient("garage" | "loft" | "stage" | "outdoor")`.

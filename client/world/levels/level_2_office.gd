@@ -5,6 +5,8 @@ extends "res://world/levels/level_base.gd"
 
 const H := 2.8
 const T := 0.2
+const ShipDock := preload("res://world/live/ship_dock.gd")
+const Shipping := preload("res://world/live/shipping.gd")
 
 var hw := 6.0
 var hd := 4.5
@@ -22,6 +24,7 @@ func _build() -> void:
 	set_spawn(Vector3(hw - 1.6, 0.05, hd - 1.4), 40.0)
 	kit.viewpoint(self, "overview", Vector3(hw - 0.6, 2.3, hd - 0.6), Vector3(-hw * 0.4, 0.6, -hd * 0.5), 76.0)
 	kit.viewpoint(self, "windows", Vector3(0.0, 1.6, 0.5), Vector3(-hw, 1.2, -hd * 0.2), 74.0)
+	kit.viewpoint(self, "dispatch", Vector3(hw - 4.2, 1.7, hd - 2.8), Vector3(hw - 0.5, 0.8, hd - 1.0), 72.0)
 
 func _shell(lv: int) -> void:
 	var g := kit.node(self, Vector3.ZERO, 0.0, "Shell")
@@ -90,15 +93,21 @@ func _furniture(lv: int) -> void:
 				desk_pc(g, Vector3(x, 0, z), -90.0, "office_pc", false)
 			else:
 				_plain_desk(g, Vector3(x, 0, z), -90.0, placed)
-			prop("chair", Vector3(x - 0.75, 0.5, z), Vector3(0, 90, 0))
+				office_chair(g, Vector3(x - 0.68, 0, z), 90.0)
+				add_slot("design" if placed % 3 != 0 else "office", Vector3(x - 0.7, 0, z), 90.0, "sit_type", 0.5)
 			placed += 1
 		row += 1
 	# back wall: whiteboard, shelf, board
 	whiteboard(g, Vector3(-hw + 2.6, 0, -hd + 0.02), 0.0, "office_whiteboard")
+	add_slot("research", Vector3(-hw + 2.2, 0, -hd + 0.8), 180.0, "stand_scribble")
+	add_slot("research", Vector3(-hw + 3.3, 0, -hd + 1.05), 200.0, "stand_think")
 	phone_shelf(g, Vector3(hw - 1.2, 0, -hd + 0.24), 0.0, "office_shelf")
 	company_board(g, Vector3(hw - 0.01, 1.6, -0.6), -90.0, "office_board", Vector2(1.6, 0.9))
 	wall_calendar(g, Vector3(hw - 0.01, 1.55, 1.2), -90.0)
 	assembly_table(g, Vector3(hw - 2.6, 0, 1.0), 90.0, "office_line")
+	add_slot("assembly", Vector3(hw - 1.9, 0, 0.6), -90.0, "stand_assemble")
+	add_slot("assembly", Vector3(hw - 1.9, 0, 1.4), -90.0, "stand_assemble")
+	job_board(g, Vector3(2.2, 1.5, -hd + 0.01), 0.0, "office_jobs")
 	poster(g, Vector3(0.6, 1.6, -hd + 0.01), 0.0, "THINK\nBIGGER", Color(0.1, 0.12, 0.2), Color(0.4, 0.8, 1.0), Vector2(0.5, 0.7))
 	# water cooler + plant + lounge
 	var wc := kit.node(g, Vector3(hw - 0.35, 0, hd - 2.6), 0.0)
@@ -109,9 +118,26 @@ func _furniture(lv: int) -> void:
 	for i in 5:
 		kit.mesh(plant, Meshes.sphere(0.25, 8), Vector3(sin(i * 1.3) * 0.15, 0.6 + i * 0.12, cos(i * 1.3) * 0.15), Mats.m("grass", Color(1.4, 2.0, 1.2), {"pattern": 0}), Vector3.ZERO)
 	sofa(g, Vector3(1.0, 0, hd - 0.6), 180.0, Mats.m("fabric_blue"))
+	add_slot("office", Vector3(1.4, 0, hd - 0.7), 180.0, "sit_idle", 0.5)
+	add_slot("office", Vector3(0.6, 0, hd - 0.7), 180.0, "sit_idle", 0.5)
+	for i in 4:
+		add_slot("overflow", Vector3(-1.0 + i * 1.1, 0, hd - 2.2 + (i % 2) * 0.4), 150.0 + i * 25.0, "sit_idle", 0.44)
+	# shipping: crates wait by the door, the DISPATCH chute in the right wall takes them
+	var dock := ShipDock.new()
+	dock.name = "Dispatch"
+	dock.style = "chute"
+	dock.dock_id = "office_dispatch"
+	dock.position = Vector3(hw - 0.02, 0, hd - 1.25)
+	dock.rotation_degrees.y = 90.0
+	live_root.add_child(dock)
+	var sh := Shipping.new()
+	sh.name = "Shipping"
+	sh.dock = dock
+	sh.zone = Transform3D(Basis(), Vector3(hw - 3.6, 0.0, hd - 1.15))
+	live_root.add_child(sh)
 	# props
-	for i in 6:
-		prop(["box_m", "box_s", "box_l"][i % 3], Vector3(hw - 0.6 - (i % 2) * 0.6, 0.3 + (i / 2) * 0.0, hd - 0.8 - (i / 2) * 0.7), Vector3(0, i * 17, 0))
+	for i in 3:
+		prop(["box_m", "box_s", "box_l"][i % 3], Vector3(-hw + 0.8 + i * 0.6, 0.3, hd - 0.6), Vector3(0, i * 17, 0))
 	prop("mug", Vector3(-hw + 2.0, 0.82, -hd + 1.0), Vector3.ZERO, 1)
 	prop("phone_proto", Vector3(hw - 2.6, 0.96, 1.2), Vector3.ZERO, 1)
 	prop("trash_bin", Vector3(-hw + 1.2, 0.2, hd - 1.0))

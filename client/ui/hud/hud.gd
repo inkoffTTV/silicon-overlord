@@ -27,6 +27,8 @@ var _dev_chip: PanelContainer
 var _dev_label: Label
 var _dev_bar: Control
 var _last_cash := -1.0
+var _crate_chip: PanelContainer
+var _crate_label: Label
 
 func _ready() -> void:
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
@@ -36,6 +38,7 @@ func _ready() -> void:
 	_build_banner()
 	_build_hints()
 	_build_dev_chip()
+	_build_crate_chip()
 	refresh()
 	set_prompt("")
 
@@ -185,6 +188,38 @@ func _build_dev_chip() -> void:
 	v.add_child(_dev_bar)
 	_dev_chip.visible = false
 
+func _build_crate_chip() -> void:
+	_crate_chip = PanelContainer.new()
+	_crate_chip.add_theme_stylebox_override("panel", U.card_box(U.GLASS, Color(U.GOLD, 0.5), 10, 12))
+	_crate_chip.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(_crate_chip)
+	_crate_chip.set_anchors_and_offsets_preset(Control.PRESET_TOP_LEFT)
+	_crate_chip.offset_left = 18
+	_crate_chip.offset_top = 92
+	_crate_chip.custom_minimum_size = Vector2(240, 0)
+	var v := U.vbox(3)
+	_crate_chip.add_child(v)
+	var h := U.hbox(8)
+	v.add_child(h)
+	h.add_child(U.icon("truck", U.GOLD, 14))
+	h.add_child(U.caps(L.t("WAITING TO SHIP"), U.GOLD, 10))
+	_crate_label = U.clip("", U.SM, U.TEXT, "semibold")
+	v.add_child(_crate_label)
+	var hint := U.clip(L.t("Carry crates to the van"), U.XS, U.MUTED)
+	v.add_child(hint)
+	_crate_chip.visible = false
+
+func _refresh_crates(s: Dictionary) -> void:
+	var crates := U.arr(U.dict(s.get("production", {})).get("crates", []))
+	_crate_chip.visible = not crates.is_empty()
+	if crates.is_empty():
+		return
+	var units := 0.0
+	for c in crates:
+		units += U.num(c.get("units", 0))
+	_crate_label.text = L.f("{n} crates · {u} units", {"n": crates.size(), "u": F.number(units)})
+	_crate_chip.offset_top = 160 if _dev_chip.visible else 92
+
 # ---------------------------------------------------------------- updates
 func refresh() -> void:
 	var s: Dictionary = Game.state
@@ -217,6 +252,7 @@ func refresh() -> void:
 	_logo_holder.add_child(U.avatar(_initial(str(s.get("name", "?"))), ca, 36, cb))
 	_refresh_members()
 	_refresh_dev(s)
+	_refresh_crates(s)
 
 func _refresh_dev(s: Dictionary) -> void:
 	var projects := U.arr(s.get("projects", {}))

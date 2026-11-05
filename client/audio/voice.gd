@@ -16,6 +16,7 @@ var mode := "tts"          # "tts" | "robot" | "off"
 var volume := 0.9          # 0..1 (settings [audio] voice)
 var master := 0.8          # 0..1, OS TTS bypasses Godot buses so master is applied by hand
 var game_lang := "en"
+var preferred := {}        # lang -> OS voice id chosen in settings ([audio] voice_<lang>), "" = automatic
 
 var _queues := {}          # user_id -> Array of line dicts
 var _busy_until := {}      # user_id -> msec when the current line ends
@@ -34,14 +35,15 @@ func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 
 ## Queue a line. Returns the line dictionary (also used by tests).
-func speak(user_id: int, display_name: String, text: String, at: Variant = null) -> Dictionary:
+## lang: "" = detect from the text (see detect_lang), or a language code to force ("de", "ru"...).
+func speak(user_id: int, display_name: String, text: String, at: Variant = null, lang := "") -> Dictionary:
 	text = clean_text(text)
 	if text == "":
 		return {}
 	var q: Array = _queues.get(user_id, [])
 	if q.size() >= QUEUE_LIMIT:
 		q.pop_front()
-	var line := {"user_id": user_id, "name": display_name, "text": text, "at": at, "lang": detect_lang(text, game_lang)}
+	var line := {"user_id": user_id, "name": display_name, "text": text, "at": at, "lang": lang if lang != "" else detect_lang(text, game_lang)}
 	q.append(line)
 	_queues[user_id] = q
 	return line
@@ -91,10 +93,16 @@ static func clean_text(text: String) -> String:
 		t = t.substr(0, MAX_CHARS)
 	return t
 
-## "ru" for Cyrillic, "ja" for kana, "zh" for Han ideographs, "ko" for Hangul, else the game language
-## (or "en" when the game language does not use the Latin script, so Latin text gets a Latin voice).
+const LATIN_LANGS := ["en", "de", "fr", "es", "it", "pt", "pl", "nl", "tr", "id", "vi"]
+## Letters that give a Latin-script language away (checked in this order).
+const LATIN_HINTS := [["tr", "şğıİŞĞ"], ["pl", "ąęłśżźćńĄĘŁŚŻŹĆŃ"], ["pt", "ãõÃÕ"], ["es", "ñÑ¿¡"],
+	["de", "äöüßÄÖÜ"], ["fr", "èêàçœâîûùëïÈÊÀÇ"]]
+
+## "ru" for Cyrillic ("uk" with і ї є ґ), "ja" for kana, "zh" for Han, "ko" for Hangul; Latin text → a language
+## guessed from its special letters (ß, ñ, ł, ş...), else the game language when it is a Latin-script one, else "en".
 static func detect_lang(text: String, fallback: String = "en") -> String:
 	var cyr := 0
+	var uk := 0
 	var lat := 0
 	var kana := 0
 	var han := 0
@@ -103,6 +111,8 @@ static func detect_lang(text: String, fallback: String = "en") -> String:
 		var c := text.unicode_at(i)
 		if c >= 0x0400 and c <= 0x04FF:
 			cyr += 1
+			if c in [0x0456, 0x0457, 0x0454, 0x0491, 0x0406, 0x0407, 0x0404, 0x0490]:
+				uk += 1
 		elif (c >= 0x41 and c <= 0x5A) or (c >= 0x61 and c <= 0x7A) or (c >= 0xC0 and c <= 0x24F):
 			lat += 1
 		elif c >= 0x3040 and c <= 0x30FF:
@@ -118,10 +128,14 @@ static func detect_lang(text: String, fallback: String = "en") -> String:
 	if han > 0:
 		return "zh"
 	if cyr > 0 and cyr >= lat:
-		return "ru"
+		return "uk" if uk > 0 else ("uk" if fallback == "uk" else "ru")
 	if lat == 0:
 		return fallback
-	return fallback if fallback in ["en", "de", "fr", "es", "it", "pt", "pl", "nl", "tr"] else "en"
+	for hint in LATIN_HINTS:
+		for ch in str(hint[1]):
+			if text.contains(ch):
+				return hint[0]
+	return fallback if fallback in LATIN_LANGS else "en"
 
 ## Deterministic per-user voice traits: {pitch, rate, robot_pitch, pick} (pick chooses among OS voices).
 static func traits(user_id: int) -> Dictionary:
@@ -215,11 +229,20 @@ func _engine_for(line: Dictionary) -> String:
 		return "tts"
 	return "robot"
 
+## OS voice for a line: the one chosen in settings for that language, else one picked per user.
+## Ukrainian falls back to Russian voices, Latin-script languages to English ones; "" = none (robot voice).
 func _voice_for(lang: String, user_id: int) -> String:
-	var ids := DisplayServer.tts_get_voices_for_language(lang)
-	if ids.is_empty():
-		return ""
-	return ids[int(traits(user_id).pick) % ids.size()]
+	for l in [lang, "ru" if lang == "uk" else ("en" if lang in LATIN_LANGS else "")]:
+		if l == "":
+			continue
+		var ids := DisplayServer.tts_get_voices_for_language(l)
+		if ids.is_empty():
+			continue
+		var want := str(preferred.get(l, ""))
+		if want != "" and want in ids:
+			return want
+		return ids[int(traits(user_id).pick) % ids.size()]
+	return ""
 
 func _start(line: Dictionary, engine: String) -> void:
 	var uid := int(line.user_id)
@@ -250,7 +273,7 @@ func _start(line: Dictionary, engine: String) -> void:
 		var v := _voice_for(str(line.lang), uid)
 		DisplayServer.tts_speak(text, v, clampi(int(round(loud * master * 100.0)), 1, 100), float(vt.pitch), float(vt.rate), _utt_id, false)
 	else:
-		_robot_say(uid, text, float(vt.robot_pitch), float(vt.rate), loud, seconds)
+		_robot_say(uid, text, float(vt.robot_pitch), float(vt.rate), vol, seconds)  # the Voice bus applies the volume setting
 
 # ---- robot voice ----------------------------------------------------------------------------
 func set_syllables(streams: Array) -> void:
@@ -278,7 +301,8 @@ func _robot_say(uid: int, text: String, base_pitch: float, rate: float, loud: fl
 	var words := text.split(" ", false)
 	for wi in words.size():
 		var w: String = words[wi]
-		var n := clampi(int(ceil(w.length() / 2.5)), 1, 5)
+		# CJK has no spaces: one syllable per character there
+		var n := clampi(w.length(), 1, 40) if w.unicode_at(0) >= 0x3000 else clampi(int(ceil(w.length() / 2.5)), 1, 5)
 		for k in n:
 			var p := base_pitch * rng.randf_range(0.9, 1.12)
 			var last := wi == words.size() - 1 and k == n - 1

@@ -79,7 +79,6 @@ static func _bit(d: Vector2i) -> int:
 
 ## Self-avoiding random path (randomised DFS) between two edge cells.
 func _find_path(a: Vector2i, b: Vector2i) -> Array:
-	var stack := [[a]]
 	var seen := {a: true}
 	var path := [a]
 	var guard := 0

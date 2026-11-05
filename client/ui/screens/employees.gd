@@ -72,8 +72,14 @@ func _cap() -> int:
 	var caps: Array = D.balance("Employees").get("hqStaffCap", [10, 25, 60, 140, 280, 500, 1000])
 	return int(caps[clampi(lvl - 1, 0, caps.size() - 1)]) if not caps.is_empty() else 10
 
+const ROLE_NAMES := {"HardwareEngineer": "Hardware engineer", "SoftwareEngineer": "Software engineer", "Researcher": "Researcher",
+	"Worker": "Worker", "QCEngineer": "QC engineer", "Marketer": "Marketer", "FinancialAnalyst": "Financial analyst",
+	"LogisticsManager": "Logistics manager"}
+
 static func role_name(role: String) -> String:
-	return L.t(role)
+	if L.lang == "ru":
+		return L.t(role)
+	return L.t(str(ROLE_NAMES.get(role, role)))
 
 static func station_of(e: Dictionary) -> String:
 	var st := str(e.get("station", ""))
@@ -283,7 +289,7 @@ func _staff_row(e: Dictionary) -> Control:
 	sh.add_child(val)
 	sh.add_child(plus)
 	sv.add_child(sh)
-	var ml := U.lbl(L.f("market {amount}", {"amount": F.money(market)}), U.XS, U.WARNING if sal < market * 0.95 else U.DIM)
+	var ml := U.lbl(L.f("market {amount}", {"amount": F.money_full(market) if market < 1e5 else F.money(market)}), U.XS, U.WARNING if sal < market * 0.95 else U.DIM)
 	ml.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	sv.add_child(ml)
 	h.add_child(sv)

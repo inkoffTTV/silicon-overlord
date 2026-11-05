@@ -4,7 +4,7 @@ extends Node
 ##   Sfx.ui(name: String)                                           # UI click/hover/confirm/error/toast
 ##   Sfx.music(name: String)                                        # "" stops; crossfades
 ##   Sfx.ambient(name: String)                                      # room tone loop ("garage", "loft", "stage", "outdoor", "")
-##   Sfx.speak(user_id: int, display_name: String, text: String, at: Variant = null)  # chat → character voice
+##   Sfx.speak(user_id: int, display_name: String, text: String, at: Variant = null, lang := "")  # chat → character voice
 ## Extras: Sfx.loop(name, parent) -> Node, Sfx.stop_loop(node), Sfx.apply_settings(), Sfx.has_sound(name).
 ## Sound names, buses, settings and licences: docs/AUDIO.md. All sounds are synthesized by client/audio/gen/make_audio.py.
 ## Every call is safe headless / without an audio device; unknown names print one debug line and are ignored.
@@ -188,9 +188,10 @@ func ambient(room: String) -> void:
 	_amb_idx = _crossfade(_amb, _amb_idx, room, AMBIENT_DB)
 
 ## Chat line → character voice (OS TTS or robot blah-blah). Sfx already speaks Net.chat_received by itself.
-func speak(user_id: int, display_name: String, text: String, at: Variant = null) -> void:
+## lang (optional): force a language code instead of detecting it from the text (settings "test voice").
+func speak(user_id: int, display_name: String, text: String, at: Variant = null, lang := "") -> void:
 	if voice:
-		voice.speak(user_id, display_name, text, at)
+		voice.speak(user_id, display_name, text, at, lang)
 
 ## Looping 3D emitter attached to `parent` (machine hum, conveyor, fluorescent tube...). Returns the player node
 ## (free it or call stop_loop to stop; freeing the parent stops it too). null for unknown names.
@@ -215,6 +216,18 @@ func stop_loop(player: Node) -> void:
 	if player and is_instance_valid(player):
 		player.queue_free()
 
+## Silence everything at once (one-shots, music, ambience, voices). Also done on exit.
+func stop_all() -> void:
+	for p in _pool2d + _pool3d + _music + _amb:
+		p.stop()
+	music_name = ""
+	ambient_name = ""
+	if voice:
+		voice.stop_all()
+
+func _exit_tree() -> void:
+	stop_all()
+
 ## (Re)read user://settings.cfg [audio], writing defaults for missing keys, and apply bus volumes.
 func apply_settings() -> void:
 	var cfg := ConfigFile.new()
@@ -229,9 +242,15 @@ func apply_settings() -> void:
 		cfg.save(SETTINGS)
 	_settings_mtime = FileAccess.get_modified_time(SETTINGS)
 	var lang := str(cfg.get_value("ui", "lang", ""))
-	if lang != "en" and lang != "ru":
-		lang = "ru" if OS.get_locale_language() == "ru" else "en"
+	if lang.length() < 2:
+		lang = OS.get_locale_language()
 	if voice:
+		var pref := {}
+		if cfg.has_section("audio"):
+			for k in cfg.get_section_keys("audio"):
+				if k.begins_with("voice_") and k != "voice_mode":
+					pref[k.substr(6)] = str(cfg.get_value("audio", k, ""))
+		voice.preferred = pref
 		var vm := str(settings.voice_mode)
 		voice.mode = vm if vm in ["tts", "robot", "off"] else "tts"
 		voice.volume = _vol("voice")

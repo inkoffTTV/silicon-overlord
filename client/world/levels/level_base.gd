@@ -8,6 +8,10 @@ const Meshes := preload("res://world/lib/meshes.gd")
 const Kit := preload("res://world/lib/kit.gd")
 const Props := preload("res://world/props/props.gd")
 const Flicker := preload("res://fx/flicker.gd")
+const ResearchBoard := preload("res://world/live/research_board.gd")
+const ProtoShelf := preload("res://world/live/proto_shelf.gd")
+const JobBoard := preload("res://world/live/job_board.gd")
+const Staff := preload("res://world/live/staff.gd")
 
 const MONTHS := ["JANUARY", "FEBRUARY", "MARCH", "APRIL", "MAY", "JUNE", "JULY", "AUGUST", "SEPTEMBER", "OCTOBER", "NOVEMBER", "DECEMBER"]
 
@@ -18,15 +22,49 @@ var props_root: Node3D
 var board_labels: Array[Label3D] = []
 var calendars: Array = [] # [{header, big, marks:Array[MeshInstance3D], ring}]
 var monitor_lights: Array = []
+var live_root: Node3D
+var research_boards: Array = []
+var proto_shelf: Node
+var staff: Node3D
+## station -> [{pos (level-local), yaw (radians, model faces +Z), pose, seat_h}]; see staff.gd
+var _slots := {"design": [], "research": [], "assembly": [], "office": [], "overflow": []}
 
 func build_level() -> void:
 	kit = Kit.new(self)
 	props_root = kit.node(self, Vector3.ZERO, 0.0, "Props")
+	live_root = kit.node(self, Vector3.ZERO, 0.0, "Live")
 	_build()
+	staff = Staff.new()
+	staff.name = "Staff"
+	staff.level = self
+	live_root.add_child(staff)
 
 ## Override in level scripts.
 func _build() -> void:
 	pass
+
+## Staff slot (pos in level space; yaw_deg = direction the person faces, 0 = +Z).
+func add_slot(station: String, pos: Vector3, yaw_deg: float, pose: String, seat_h: float = 0.47) -> void:
+	_slots[station].append({"pos": pos, "yaw": deg_to_rad(yaw_deg), "pose": pose, "seat_h": seat_h})
+
+## For staff.gd: global slots per station.
+func staff_slots() -> Dictionary:
+	var out := {}
+	for k in _slots:
+		out[k] = _slots[k].map(func(sl: Dictionary) -> Dictionary:
+			var d := sl.duplicate()
+			d.pos = global_transform * sl.pos
+			d.yaw = float(sl.yaw) + global_rotation.y
+			return d)
+	return out
+
+## Footstep surface under a level-space point: "concrete" | "wood" | "metal".
+func surface_at(_p: Vector3) -> String:
+	return "concrete"
+
+## Ambient room tone for a level-space point (Sfx.ambient names).
+func ambient_at(_p: Vector3) -> String:
+	return "garage"
 
 func set_spawn(pos: Vector3, yaw_deg: float) -> void:
 	spawn_xform = Transform3D(Basis(Vector3.UP, deg_to_rad(yaw_deg)), pos)
@@ -57,8 +95,10 @@ func set_date(year: int, day: int) -> void:
 		c["ring"].position = cell + Vector3(0, 0, 0.002)
 
 # ---------------------------------------------------------------- furniture
-func desk_pc(parent: Node3D, pos: Vector3, rot_y: float, id: String = "pc_1", crt: bool = true) -> StaticBody3D:
+func desk_pc(parent: Node3D, pos: Vector3, rot_y: float, id: String = "pc_1", crt: bool = true, chair: bool = true) -> StaticBody3D:
 	var ia := kit.interactable(parent, "pc_design", id, "Design a phone", pos, rot_y)
+	if chair:
+		office_chair(ia, Vector3(-0.05, 0, 0.62), 180.0, "pc_challenge", id, "Sit at the PC (challenge)")
 	var top_mat := Mats.m("wood_dark") if crt else Mats.m("plastic_white")
 	kit.box(ia, Vector3(1.5, 0.05, 0.75), Vector3(0, 0.735, 0), top_mat, Vector3.ZERO, false, 0.012)
 	for x in [-0.7, 0.7]:
@@ -110,6 +150,30 @@ func desk_pc(parent: Node3D, pos: Vector3, rot_y: float, id: String = "pc_1", cr
 	kit.ia_shape(ia, Vector3(0.48, 0.42, 0.45), Vector3(-0.05, 0.97, -0.17))
 	return ia
 
+## Static office chair. With a kind it is an interactable "seat": the player sits down (camera to the seat).
+func office_chair(parent: Node3D, pos: Vector3, rot_y: float, kind: String = "", id: String = "", prompt: String = "") -> Node3D:
+	var g: Node3D
+	if kind != "":
+		g = kit.interactable(parent, kind, id, prompt, pos, rot_y)
+		# seat meta in the chair's frame: feet a bit in front of the backrest, looking over the chair's front (+Z)
+		g.set_meta("seat", {"pos": Vector3(0, 0, 0.0), "yaw": 180.0, "eye": 1.14, "pitch": -6.0, "pose": "sit"})
+	else:
+		g = kit.node(parent, pos, rot_y, "Chair")
+	var fab := Mats.m("fabric_blue", Color(1.3, 0.75, 0.7))
+	kit.box(g, Vector3(0.48, 0.09, 0.46), Vector3(0, 0.47, 0), fab, Vector3.ZERO, false, 0.035)
+	kit.box(g, Vector3(0.44, 0.5, 0.08), Vector3(0, 0.78, -0.21), fab, Vector3(-8, 0, 0), false, 0.035)
+	kit.cyl(g, 0.025, 0.36, Vector3(0, 0.26, 0), Mats.m("steel_dark"))
+	for i in 5:
+		var a := TAU * i / 5.0
+		kit.box(g, Vector3(0.05, 0.03, 0.28), Vector3(sin(a) * 0.14, 0.06, cos(a) * 0.14), Mats.m("plastic_black"), Vector3(0, rad_to_deg(a), 0), false, 0.01)
+		kit.cyl(g, 0.03, 0.03, Vector3(sin(a) * 0.27, 0.03, cos(a) * 0.27), Mats.m("rubber"), Vector3(90, rad_to_deg(a), 0), 8)
+	for sx in [-1.0, 1.0]:
+		kit.box(g, Vector3(0.05, 0.2, 0.3), Vector3(sx * 0.24, 0.6, 0.0), Mats.m("plastic_black"), Vector3.ZERO, false, 0.015)
+	if g is StaticBody3D:
+		kit.ia_shape(g, Vector3(0.55, 0.55, 0.5), Vector3(0, 0.28, 0))
+		kit.ia_shape(g, Vector3(0.46, 0.5, 0.1), Vector3(0, 0.78, -0.21))
+	return g
+
 func desk_lamp(parent: Node3D, pos: Vector3, rot_y: float, color: Color = Color(1.0, 0.72, 0.42)) -> SpotLight3D:
 	var g := kit.node(parent, pos, rot_y, "DeskLamp")
 	kit.cyl(g, 0.08, 0.025, Vector3(0, 0.012, 0), Mats.m("metal_green"))
@@ -132,29 +196,34 @@ func whiteboard(parent: Node3D, pos: Vector3, rot_y: float, id: String = "wb_1")
 	for s in [-1.0, 1.0]:
 		kit.box(ia, Vector3(w + 0.04, 0.03, 0.04), Vector3(0, cy + s * (h * 0.5 + 0.01), 0.02), Mats.m("metal"), Vector3.ZERO, false, 0.008)
 		kit.box(ia, Vector3(0.03, h + 0.04, 0.04), Vector3(s * (w * 0.5 + 0.01), cy, 0.02), Mats.m("metal"), Vector3.ZERO, false, 0.008)
-	kit.box(ia, Vector3(w * 0.6, 0.02, 0.07), Vector3(0, cy - h * 0.5 - 0.02, 0.05), Mats.m("metal"), Vector3.ZERO, false, 0.006)
+	# live content: active research with progress bars + sticky notes for finished techs
+	var rb := ResearchBoard.new()
+	rb.name = "ResearchBoard"
+	rb.size = Vector2(w, h)
+	rb.position = Vector3(0, cy, 0.0255)
+	ia.add_child(rb)
+	research_boards.append(rb)
+	kit.ia_shape(ia, Vector3(w + 0.06, h * 0.78, 0.12), Vector3(0, cy + h * 0.11, 0.05))
+	# marker tray = the brainstorm challenge (stand at the board)
+	var ch := kit.interactable(ia, "whiteboard_challenge", id, "Brainstorm at the board (challenge)", Vector3(0, 0, 0), 0.0)
+	kit.box(ch, Vector3(w * 0.6, 0.02, 0.07), Vector3(0, cy - h * 0.5 - 0.02, 0.05), Mats.m("metal"), Vector3.ZERO, false, 0.006)
 	for i in 3:
 		var c: Color = [Color(0.1, 0.2, 0.7), Color(0.75, 0.1, 0.1), Color(0.05, 0.05, 0.05)][i]
-		kit.cyl(ia, 0.009, 0.12, Vector3(-0.2 + i * 0.14, cy - h * 0.5 - 0.005, 0.06), Mats.m("plastic_white", c * Color(1.4, 1.4, 1.4)), Vector3(0, 0, 90), 8)
-	# scribbles
-	var blue := Color(0.12, 0.22, 0.65)
-	var red := Color(0.7, 0.1, 0.08)
-	var z := 0.0265
-	kit.label(ia, "R&D ROADMAP", Vector3(-0.42, cy + 0.38, z), 64, blue, Vector3.ZERO, 0.0016, true)
-	kit.label(ia, "battery 3000mAh??\nbigger screen = $$$\nsoftware > hardware\nCHEAPER CHIPS!!", Vector3(-0.42, cy + 0.05, z), 40, blue, Vector3.ZERO, 0.0016, true).horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
-	kit.label(ia, "v1 -> v2 -> ???", Vector3(0.42, cy - 0.32, z), 48, red, Vector3.ZERO, 0.0016, true)
-	# a phone sketch
-	var sk := kit.node(ia, Vector3(0.45, cy + 0.12, z), 0.0)
-	for s in [-1.0, 1.0]:
-		kit.box(sk, Vector3(0.006, 0.34, 0.001), Vector3(s * 0.09, 0, 0), Mats.unlit(blue), Vector3(0, 0, s * 1.5), false, 0.0, false)
-		kit.box(sk, Vector3(0.18, 0.006, 0.001), Vector3(0, s * 0.17, 0), Mats.unlit(blue), Vector3(0, 0, s * 1.0), false, 0.0, false)
-	kit.box(sk, Vector3(0.04, 0.005, 0.001), Vector3(0, 0.145, 0), Mats.unlit(blue), Vector3.ZERO, false, 0.0, false)
-	kit.box(sk, Vector3(0.3, 0.005, 0.001), Vector3(0.2, 0.05, 0), Mats.unlit(red), Vector3(0, 0, 25), false, 0.0, false)
-	for i in 4:
-		var c: Color = [Color(1.0, 0.9, 0.3), Color(1.0, 0.55, 0.7), Color(0.6, 0.95, 0.6), Color(0.5, 0.8, 1.0)][i]
-		kit.box(ia, Vector3(0.075, 0.075, 0.002), Vector3(0.66 - (i % 2) * 0.09, cy + 0.38 - (i / 2) * 0.09, 0.027), Mats.m("paper", c), Vector3(0, 0, -5 + i * 4), false, 0.0, false)
-	kit.ia_shape(ia, Vector3(w + 0.06, h + 0.1, 0.12), Vector3(0, cy, 0.05))
+		kit.cyl(ch, 0.009, 0.12, Vector3(-0.2 + i * 0.14, cy - h * 0.5 - 0.005, 0.06), Mats.m("plastic_white", c * Color(1.4, 1.4, 1.4)), Vector3(0, 0, 90), 8)
+	kit.box(ch, Vector3(0.09, 0.05, 0.03), Vector3(0.32, cy - h * 0.5 - 0.0, 0.06), Mats.m("plastic_white", Color(0.5, 0.5, 0.55)), Vector3(0, 0, 0), false, 0.008)
+	var tag := kit.label(ch, "? BRAINSTORM", Vector3(-0.42, cy - h * 0.5 + 0.06, 0.027), 30, Color(0.7, 0.1, 0.08), Vector3.ZERO, 0.0016, true)
+	tag.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
+	kit.ia_shape(ch, Vector3(w + 0.06, h * 0.22 + 0.1, 0.14), Vector3(0, cy - h * 0.5 + h * 0.11 - 0.05, 0.05))
+	ch.set_meta("seat", {"pos": Vector3(0, 0, 0.8), "yaw": 0.0, "eye": 1.58, "pitch": -2.0, "pose": "stand"})
 	return ia
+
+## Researcher text on every whiteboard of this level (tests).
+func whiteboard_text() -> String:
+	var out := []
+	for rb in research_boards:
+		if is_instance_valid(rb):
+			out.append(rb.written_text())
+	return "\n".join(out)
 
 func assembly_table(parent: Node3D, pos: Vector3, rot_y: float, id: String = "line_1") -> StaticBody3D:
 	var ia := kit.interactable(parent, "workbench_production", id, "Production", pos, rot_y)
@@ -227,6 +296,11 @@ func phone_shelf(parent: Node3D, pos: Vector3, rot_y: float, id: String = "shelf
 			kit.box(ia, Vector3(w - 0.1, 0.008, 0.015), Vector3(0, y + 0.43, 0.1), Mats.glow(Color(0.55, 0.8, 1.0), 2.2), Vector3.ZERO, false, 0.0, false)
 	# displayed prototypes on little stands (static); loose ones are props spawned by the level
 	var cols := [Color(0.08, 0.08, 0.09), Color(0.6, 0.6, 0.63), Color(0.55, 0.42, 0.3), Color(0.15, 0.25, 0.45)]
+	if proto_shelf == null:
+		proto_shelf = ProtoShelf.new()
+		proto_shelf.name = "ProtoShelf"
+		live_root.add_child(proto_shelf)
+	var stands := []
 	for si in 3:
 		var y: float = ys[si + 1]
 		for k in 4:
@@ -239,12 +313,29 @@ func phone_shelf(parent: Node3D, pos: Vector3, rot_y: float, id: String = "shelf
 			kit.box(ph, Vector3(0.075 + si * 0.004, 0.15 + si * 0.006, 0.011), Vector3.ZERO, Mats.m("plastic_black", cols[(si + k) % 4] * Color(12, 12, 12)), Vector3.ZERO, false, 0.006)
 			kit.mesh(ph, Meshes.quad(Vector2(0.065 + si * 0.004, 0.135 + si * 0.006)), Vector3(0, 0, 0.0062), Mats.screen(3 if k % 2 == 0 else 0, Color(0.4, 0.75, 1.0) if k % 2 == 0 else Color(1.0, 0.6, 0.3), 1.0, si * 4.0 + k), Vector3.ZERO, false)
 			kit.label(ia, "v0.%d" % (si * 4 + k + 1), Vector3(x, y + 0.02, d * 0.5 + 0.002), 28, Color(0.1, 0.1, 0.1), Vector3.ZERO, 0.0012, true)
+	# fill eye-level shelves first
+	stands.sort_custom(func(a: Dictionary, b: Dictionary) -> bool: return a.order < b.order)
+	proto_shelf.stands.append_array(stands)
 	kit.label(ia, "PROTOTYPES", Vector3(0, 1.94, d * 0.5 + 0.003), 40, Color(0.12, 0.12, 0.14), Vector3.ZERO, 0.0015, true)
 	kit.box(ia, Vector3(0.3, 0.035, 0.002), Vector3(0, 1.94, d * 0.5 + 0.001), Mats.m("paper", Color(1, 0.95, 0.75)), Vector3.ZERO, false, 0.0, false)
 	kit.omni(ia, Vector3(0, 1.3, 0.45), Color(0.5, 0.75, 1.0), 0.35, 1.8, false, 0.3)
 	for x in [-1.0, 1.0]:
 		kit.ia_shape(ia, Vector3(0.04, 2.0, d), Vector3(x * (w * 0.5 - 0.02), 1.0, 0))
 	kit.ia_shape(ia, Vector3(w, 2.0, 0.02), Vector3(0, 1.0, -d * 0.5 + 0.01))
+	return ia
+
+## Cork job board with pinned CVs (employees.candidates) -> UI Employees screen.
+func job_board(parent: Node3D, pos: Vector3, rot_y: float, id: String = "jobs_1") -> StaticBody3D:
+	var ia := kit.interactable(parent, "job_board", id, "Job board: hire staff", pos, rot_y)
+	var sz := Vector2(0.95, 0.68)
+	kit.box(ia, Vector3(sz.x + 0.06, sz.y + 0.06, 0.03), Vector3(0, 0, 0.015), Mats.m("wood", Color(1.2, 1.1, 1.0)), Vector3.ZERO, false, 0.008)
+	kit.box(ia, Vector3(sz.x, sz.y, 0.02), Vector3(0, 0, 0.022), Mats.m("cork"), Vector3.ZERO, false, 0.0)
+	var jb := JobBoard.new()
+	jb.name = "JobBoard"
+	jb.size = sz
+	jb.position = Vector3(0, 0, 0.033)
+	ia.add_child(jb)
+	kit.ia_shape(ia, Vector3(sz.x + 0.06, sz.y + 0.06, 0.1), Vector3(0, 0, 0.04))
 	return ia
 
 func company_board(parent: Node3D, pos: Vector3, rot_y: float, id: String = "board_1", size: Vector2 = Vector2(1.25, 0.72)) -> StaticBody3D:

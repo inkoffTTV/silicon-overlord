@@ -7,6 +7,11 @@ extends Node3D
 ##   play_launch(product_name, model=null) — run the launch show on the stage (also via Bus.launch_show)
 ##   apply_quality(q: String)              — "lo-fi" | "clean"
 ##   rebuild()                             — rebuild the HQ for Game.state.hq.level (also via Bus.world_rebuild)
+##   avatar_talk(user_id, seconds, text="") — spoken chat: mouth anim + speech bubble on that player's avatar
+##                                            (the local player has no visible avatar: no bubble for yourself)
+##   avatar_position(user_id) -> Vector3|null — mouth position of a player's avatar (for 3D voice)
+## Iteration 2 (all state-driven, see world/live/*): prototype on the workbench, research on the whiteboard,
+## production lines in the loft, crates + van (manual shipping), employees as NPCs, job board.
 
 const PostFX := preload("res://fx/post_fx.gd")
 const STAGE_SCENE := "res://world/stage.tscn"
@@ -31,6 +36,8 @@ var peers := {}
 var stage: Node3D
 var _board_override: Array = []
 var _show_running := false
+var _amb := ""
+var _amb_t := 0.0
 
 func _ready() -> void:
 	add_to_group("world")
@@ -134,6 +141,7 @@ func build_level(n: int) -> void:
 	_refresh_calendar()
 	_refresh_board()
 	place_local_player()
+	_amb = ""
 	level_built.emit(n)
 
 func place_local_player() -> void:
@@ -214,6 +222,41 @@ func _on_state_changed(keys: Array) -> void:
 		_refresh_calendar()
 	if _board_override.is_empty() and (keys.has("finance") or keys.has("time") or keys.has("name") or keys.has("products")):
 		_refresh_board()
+
+# ------------------------------------------------------------------ ambience
+func _process(delta: float) -> void:
+	_amb_t -= delta
+	if _amb_t > 0.0 or level_node == null or _show_running:
+		return
+	_amb_t = 0.5
+	var p := get_tree().get_first_node_in_group("local_player") as Node3D
+	if p == null:
+		return
+	var a := "garage"
+	if level_node.has_method("ambient_at"):
+		a = str(level_node.ambient_at(level_node.to_local(p.global_position)))
+	if a != _amb:
+		_amb = a
+		Sfx.ambient(a)
+
+# ------------------------------------------------------------------ voice / speech bubbles
+func avatar_talk(user_id: Variant, seconds: float, text: String = "") -> void:
+	var uid := str(user_id)
+	if uid == str(Game.me.get("userId", "__none__")):
+		return
+	var av: Node = peers.get(uid)
+	if av and is_instance_valid(av) and av.has_method("talk"):
+		av.talk(seconds, text)
+
+func avatar_position(user_id: Variant) -> Variant:
+	var uid := str(user_id)
+	if uid == str(Game.me.get("userId", "__none__")):
+		var p := get_tree().get_first_node_in_group("local_player") as Node3D
+		return p.global_position + Vector3(0, 1.5, 0) if p else null
+	var av: Node3D = peers.get(uid)
+	if av and is_instance_valid(av):
+		return av.global_position + Vector3(0, 1.35, 0)
+	return null
 
 # ------------------------------------------------------------------ peers
 func _on_peers_changed(list: Array) -> void:

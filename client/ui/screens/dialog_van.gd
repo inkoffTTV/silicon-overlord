@@ -60,14 +60,18 @@ func refresh() -> void:
 		var k := U.lbl(row[0], U.SM, U.MUTED)
 		k.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		sg.add_child(k)
-		sg.add_child(U.lbl(row[1], U.SM, row[2], "bold"))
+		var val := U.lbl(row[1], U.SM, row[2], "bold")
+		val.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+		sg.add_child(val)
 	var ch := U.dict(state().get("challenges", {}))
 	var prem := U.num(ch.get("retailerPremium", 0))
 	if prem > 0:
 		var k2 := U.lbl(L.t("Negotiated premium"), U.SM, U.MUTED)
 		k2.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		sg.add_child(k2)
-		sg.add_child(U.lbl("+" + F.pct(prem, 1), U.SM, U.GOLD, "bold"))
+		var pv := U.lbl("+" + F.pct(prem, 1), U.SM, U.GOLD, "bold")
+		pv.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+		sg.add_child(pv)
 	_v.add_child(sum)
 	var ship := U.btn(L.t("Ship all crates"), "BtnSuccess", "truck", 0, 46)
 	ship.pressed.connect(_ship_all.bind(ship))

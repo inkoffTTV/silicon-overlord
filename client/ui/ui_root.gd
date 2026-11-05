@@ -21,6 +21,14 @@ const SCREENS := {
 	"phone_shelf": "res://ui/screens/shelf.gd",
 	"stage_launch": "res://ui/screens/shelf.gd",
 	"board_company": "res://ui/screens/company.gd",
+	"job_board": "res://ui/screens/employees.gd",
+	"van": "res://ui/screens/dialog_van.gd",
+	"stairs_locked": "res://ui/screens/dialog_stairs.gd",
+	"production_line": "res://ui/screens/production.gd",
+	"pc_challenge": "res://ui/challenges/challenge_screen.gd",
+	"whiteboard_challenge": "res://ui/challenges/challenge_screen.gd",
+	"line_qc": "res://ui/challenges/challenge_screen.gd",
+	"negotiation": "res://ui/challenges/challenge_screen.gd",
 }
 
 ## set before _ready to override the language (screenshot tool)
@@ -71,6 +79,23 @@ func _ready() -> void:
 		_close_pause()
 		_refresh_mode())
 	_refresh_mode()
+	get_tree().node_added.connect(_on_node_added)
+
+## Every button of the UI clicks (docs/AUDIO.md): one hook instead of a call in every screen.
+func _on_node_added(n: Node) -> void:
+	if n is BaseButton and root and root.is_ancestor_of(n):
+		var b := n as BaseButton
+		if not b.has_meta("sfx_hooked"):
+			b.set_meta("sfx_hooked", true)
+			b.pressed.connect(func() -> void: sfx("tab" if b.toggle_mode else "click"))
+			b.mouse_entered.connect(func() -> void:
+				if not b.disabled:
+					sfx("hover"))
+
+func sfx(name: String) -> void:
+	var s: Node = get_node_or_null("/root/Sfx")
+	if s and s.has_method("ui"):
+		s.call("ui", name)
 
 func _layout() -> void:
 	var vs := get_viewport().get_visible_rect().size
@@ -186,11 +211,15 @@ func _open_screen(kind: String, id: String) -> void:
 		chat.close_input()
 	var scr: Control = load(SCREENS[kind]).new()
 	scr.setup(self, id)
+	if "source_kind" in scr:
+		scr.set("source_kind", kind)
 	scr.close_requested.connect(close_screen)
 	current = scr
 	current_kind = kind
 	screen_host.add_child(scr)
 	hud.visible = false
+	toasts.set_compact(true)
+	sfx("open")
 	_update_modal()
 
 func open_screen(kind: String, id: String = "") -> void:
@@ -206,6 +235,9 @@ func close_screen() -> void:
 		var tw := c.create_tween()
 		tw.tween_property(c, "modulate:a", 0.0, 0.12)
 		tw.tween_callback(c.queue_free)
+		sfx("close")
+	if toasts:
+		toasts.set_compact(false)
 	if hud:
 		hud.visible = Game.has_company()
 	_update_modal()
@@ -359,7 +391,7 @@ func _open_quick() -> void:
 	v.add_child(g)
 	for it in [["pc_design", "palette", U.SUCCESS, "Design studio"], ["whiteboard_research", "flask", U.ACCENT_ALT, "Research board"],
 			["workbench_production", "factory", U.ORANGE, "Workbench"], ["phone_shelf", "shelf", U.CYAN, "Product shelf"],
-			["board_company", "chart", U.GOLD, "Company board"]]:
+			["board_company", "chart", U.GOLD, "Company board"], ["job_board", "cv", U.PINK, "Employees"]]:
 		var h := U.hbox(12)
 		h.add_child(U.icon_tile(it[1], it[2], 36, 9))
 		h.add_child(U.lbl(L.t(it[3]), U.MD, U.TEXT, "semibold"))
@@ -441,6 +473,12 @@ func debug_menu(which: String) -> void:
 			menu.debug_page("join")
 		"settings":
 			menu.show_page("settings")
+		"settings_audio":
+			Settings.last_tab = "audio"
+			menu.show_page("settings")
+			menu.call("rebuild_settings")
+		"langpick":
+			load("res://ui/lib/lang_picker.gd").open(menu, func(c: String) -> void: set_language(c))
 
 func debug_designer(step: int, bp: String) -> void:
 	if current and current.has_method("debug_step"):

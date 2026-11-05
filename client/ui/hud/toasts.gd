@@ -25,7 +25,33 @@ func _ready() -> void:
 	_stack.offset_top = 92
 	_stack.custom_minimum_size = Vector2(340, 0)
 
+## While a full screen is open the stack moves to the top centre (over the empty middle of the screen header),
+## so it never covers buttons or the screen's content columns.
+var _compact := false
+
+func set_compact(on: bool) -> void:
+	if on == _compact or _stack == null:
+		return
+	_compact = on
+	if on:
+		_stack.set_anchors_and_offsets_preset(Control.PRESET_CENTER_TOP)
+		_stack.grow_horizontal = Control.GROW_DIRECTION_BOTH
+		_stack.offset_top = 10
+		_stack.custom_minimum_size = Vector2(380, 0)
+	else:
+		_stack.set_anchors_and_offsets_preset(Control.PRESET_TOP_RIGHT)
+		_stack.grow_horizontal = Control.GROW_DIRECTION_BEGIN
+		_stack.offset_right = -18
+		_stack.offset_top = 92
+		_stack.custom_minimum_size = Vector2(340, 0)
+	while _compact and _stack.get_child_count() > 2:
+		var old := _stack.get_child(0)
+		_stack.remove_child(old)
+		old.queue_free()
+
 func show_toast(kind: String, title: String, body: String = "") -> void:
+	title = L.t(title)
+	body = L.t(body)
 	# at 8x the same report can arrive every second: bump a counter on the visible card instead of stacking
 	for c in _stack.get_children():
 		if c.get_meta("title", "") == title and not c.has_meta("closing"):
@@ -68,7 +94,7 @@ func show_toast(kind: String, title: String, body: String = "") -> void:
 		if e is InputEventMouseButton and e.pressed:
 			_dismiss(card))
 	_stack.add_child(card)
-	while _stack.get_child_count() > MAX:
+	while _stack.get_child_count() > (2 if _compact else MAX):
 		var old := _stack.get_child(0)
 		_stack.remove_child(old)
 		old.queue_free()
