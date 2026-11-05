@@ -555,7 +555,8 @@ static func segmented(items: Array, value: String, on_pick: Callable, min_h: flo
 		# long labels (German, Russian) shrink with an ellipsis instead of pushing the row off the screen
 		b.clip_text = true
 		b.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
-		b.custom_minimum_size.x = 36
+		var tw := font("semibold").get_string_size(str(it[1]), HORIZONTAL_ALIGNMENT_LEFT, -1, SM).x + 30.0
+		b.custom_minimum_size.x = minf(tw, 112.0)
 		b.tooltip_text = str(it[1])
 		b.toggle_mode = true
 		b.button_group = group

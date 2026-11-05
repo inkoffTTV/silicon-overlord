@@ -1043,7 +1043,10 @@ func _render_specs(st: Dictionary) -> void:
 	var names := []
 	for sl in slots:
 		names.append(sl.slot)
-	var row := U.hbox(8)
+	# wraps onto two lines when the labels are long (German, Russian)
+	var row := HFlowContainer.new()
+	row.add_theme_constant_override("h_separation", 8)
+	row.add_theme_constant_override("v_separation", 8)
 	var cheap := U.btn(L.t("Quick pick: cheapest"), "", "cash", 0, 34)
 	cheap.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	cheap.pressed.connect(func() -> void: mutate("quick", func() -> void: draft["slots"] = W.quick_pick(state(), draft, names, "cheap")))
