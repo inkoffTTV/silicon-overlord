@@ -20,6 +20,7 @@ from websockets.asyncio.server import serve
 from .lua_host import LuaHost, LuaError
 from .convert import lua_to_py
 from .store import Store
+from .locale import Locale
 
 log = logging.getLogger("server")
 
@@ -39,6 +40,9 @@ MAX_QUEUE = 2000              # outgoing frames buffered for a slow client befor
 CHAT_MAX = 200
 NAME_MAX = 20
 CREATE_COOLDOWN = 5.0         # seconds between two "create" from one connection
+
+
+LOCALE = Locale()  # localization keys for English texts (docs/LOCALE_KEYS.md)
 
 
 def now():
@@ -121,6 +125,8 @@ class Conn:
         self.addr = getattr(ws, "remote_address", None)
 
     def send(self, obj):
+        if obj.get("t") in ("res", "error"):
+            LOCALE.outgoing(obj)
         self.send_raw(json.dumps(obj, ensure_ascii=False, separators=(",", ":"), allow_nan=False))
 
     def send_raw(self, text):
@@ -191,6 +197,7 @@ class GameServer:
             if t == "sections":
                 room = self.rooms.get(ev["sid"])
                 if room and room.conns:
+                    LOCALE.state(ev["data"])
                     text = json.dumps({"t": "sections", "data": ev["data"]}, ensure_ascii=False,
                                       separators=(",", ":"), allow_nan=False)
                     for c in room.conns.values():
@@ -202,6 +209,7 @@ class GameServer:
                 note = ev["note"] or {}
                 frame = {"t": "notify", "kind": notify_kind(note), "title": str(note.get("title") or ""),
                          "body": str(note.get("body") or ""), "category": note.get("kind"), "sound": note.get("sound")}
+                LOCALE.notify(frame, note)
                 uid = ev.get("userId")
                 if uid is not None:
                     c = room.conns.get(int(uid))
@@ -216,7 +224,7 @@ class GameServer:
                 if c is None:
                     c = self.players.get(ev["userId"])  # joining: the conn is attached after the Lua call
                 if c:
-                    c.send({"t": "snapshot", "state": self.lua.state_py(ev["sid"])})
+                    c.send({"t": "snapshot", "state": LOCALE.state(self.lua.state_py(ev["sid"]))})
             elif t == "profile":
                 p = profiles.setdefault(ev["userId"], {"profile": None, "save": False, "send": False})
                 p["profile"] = ev["profile"]
@@ -502,7 +510,7 @@ class GameServer:
     def on_create(self, conn, msg):
         company = msg.get("company")
         if not isinstance(company, dict):
-            conn.send({"t": "error", "message": "create needs company:{name, colorA, colorB, mode}"})
+            conn.send({"t": "error", "message": "create needs company: name, colorA, colorB, mode"})
             return
         name = clean_name(company.get("name"), 24)
         if name is None:

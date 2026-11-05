@@ -1,10 +1,12 @@
 extends RefCounted
 ## Local settings (user://settings.cfg) and player profile (user://profile.cfg).
 ##   [net] url            server address
-##   [ui] lang            "en" | "ru"
+##   [ui] lang            language code, see loc.gd LANGS ("en", "ru", "uk", "de", ... "zh", "ja")
+##   [audio] master/music/sfx/ui/voice 0..1, voice_mode "tts"|"robot"|"off", voice_<lang> TTS voice id (docs/AUDIO.md)
 ##   [graphics] quality   "lofi" | "clean"   (read by the world for post-processing)
 ##   [profile] name, token, last_code, color_a, color_b
 
+const L := preload("res://ui/lib/loc.gd")
 const SETTINGS := "user://settings.cfg"
 const PROFILE := "user://profile.cfg"
 const DEFAULT_URL := "ws://13.143.162.211:7350/ws"  # the official server
@@ -49,9 +51,14 @@ static func url() -> String:
 
 static func lang() -> String:
 	var l := str(get_setting("ui", "lang", ""))
-	if l == "en" or l == "ru":
+	if L.supported(l):
 		return l
-	return "ru" if OS.get_locale_language() == "ru" else "en"
+	return L.detect()
 
 static func quality() -> String:
 	return str(get_setting("graphics", "quality", "lofi"))
+
+const AUDIO_DEFAULTS := {"master": 0.8, "music": 0.5, "sfx": 0.8, "ui": 0.7, "voice": 0.9, "voice_mode": "tts"}
+
+static func audio(key: String) -> Variant:
+	return get_setting("audio", key, AUDIO_DEFAULTS.get(key, null))

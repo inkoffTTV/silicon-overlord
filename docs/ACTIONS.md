@@ -24,9 +24,11 @@ General rules
 - An action that would need approval returns immediately with `{approvalId, pending:true}`; when the last owner
   approves, the `respondApproval` call returns the executed action's `data` (or its error), and everybody gets a
   `notify` "Request approved and executed" / "Approved request failed".
-- Name rules (from Validate.name, ASCII only for now — see docs/REQUESTS.md): blueprint names 1–32,
-  renameCompany 1–24 characters of `A-Z a-z 0-9 space - . _ ' & !`. Company names given to `create` may be Cyrillic.
+- Name rules (Validate.name, UTF-8 aware): blueprint names 1–32, renameCompany / designChip 1–24 characters
+  (not bytes) of any letters (Cyrillic is fine), digits, space and `- . _ ' & !`.
 - `res` of a successful action arrives after the `sections` it caused; a failed action changes nothing.
+- A failed `res` also carries `errorKey` + `errorParams` (localization, see docs/LOCALE_KEYS.md) when the text is known;
+  always keep showing `error` (English) as the fallback.
 
 ## Time / misc
 | action | perm | args | data on success |
@@ -82,7 +84,7 @@ Example phone slots (all available at start):
 ## Production / supply
 | action | perm | args | data |
 |---|---|---|---|
-| buildLine | Construction | `{kind}`: Assembly / CPUFab / GPUFab / DisplayFab / BatteryFab (fabs need research) | `{id, cost}` |
+| buildLine | Construction | `{kind}`: Assembly / CPUFab / GPUFab / DisplayFab / BatteryFab (fabs need research; Assembly needs the second floor = room AssemblyLine) | `{id, cost}` |
 | upgradeLine | Construction | `{lineId}` | `{cost}` |
 | queueProduction | Manufacturing | `{productId, lineId, quantity}` e.g. lineId `"line_1"`, quantity ≥ 100 | `{id, unitCost, estimatedCost}` |
 | cancelProduction | Manufacturing | `{jobId}` | — |
@@ -91,7 +93,7 @@ Example phone slots (all available at start):
 | setFactoryLayout | Manufacturing | `{cells:[{x,y,kind}]}` (≤ 64) | `{score}` |
 | queueFabJob | Manufacturing | `{lineId, componentId, wafers}` | `{id}` |
 | sellComponents | Finance | `{offerId, componentId}` | `{units, revenue}` |
-| buyResources | Manufacturing | `{resourceId, units}` | `{cost}` |
+| buyResources | Manufacturing | `{resourceId, units}` (a pending negotiation `supplierDiscount` is applied and used up) | `{cost}` |
 | signContract | Manufacturing | `{supplierId, resourceId, unitsPerWeek, weeks}` | `{id, pricePerUnit}` |
 | cancelContract | Manufacturing | `{contractId}` | `{penalty}` |
 
@@ -111,12 +113,12 @@ Example phone slots (all available at start):
 ## Staff
 | action | perm | args | data |
 |---|---|---|---|
-| hire | Hiring | `{candidateId}` (from `state.employees.candidates[].id`) | `{employee}` |
-| fire | Hiring | `{employeeId}` | `{severance}` |
-| setSalary | Hiring | `{employeeId, salary}` | — |
+| hire | Hiring | `{candidateId}` (from `state.employees.candidates[].id`) | `{employee, placedDesk}` (`employee` = the hired record, see Employees below) |
+| fire | Hiring | `{employeeId}` (from `state.employees.list[].id`) | `{severance}` (2 monthly salaries, paid now) |
+| setSalary | Hiring | `{employeeId, salary}` monthly USD, must be within 50 %..300 % of `marketSalary` | — |
 | setPerks | Hiring | `{monthly}` | — |
 | teamParty | Hiring | `{}` | `{cost, morale}` |
-| rerollCandidates | Hiring | `{}` | `{candidates:n}` |
+| rerollCandidates | Hiring | `{}` (costs 20 research points) | `{candidates:n}` |
 | setAutoHire | Hiring | `{on:bool}` | `{autoHire}` |
 
 ## Ecosystem
@@ -176,6 +178,70 @@ AssetManagement, CorporateGovernance. Founder has all; co-founders get all excep
 
 The profile is also pushed as a `profile` frame (see PROTOCOL.md Changes) whenever it changes.
 
+## Employees (state paths) — iteration 2
+- Hired staff: `state.employees.list` (array). Job board / candidate pool: `state.employees.candidates` (array, 8
+  people, refreshed every 30 game days or with `rerollCandidates`). Other fields: `employees.morale` 0..1,
+  `employees.perksBudgetMonthly`, `employees.candidatesRefreshDay`.
+- Every entry (hired or candidate) is `{id, name, role, station, skill 0..1, experience 0..1, satisfaction 0..1,
+  salaryMonthly, marketSalary, hiredDay}` (+ `friend/userId/username` for Roblox friends, never set online).
+  - `role` ∈ HardwareEngineer, SoftwareEngineer, Researcher, Worker, Marketer, FinancialAnalyst, LogisticsManager, QCEngineer.
+  - `station` (stable, derived from role; the world uses it to place the person):
+    `"design"` = HardwareEngineer, SoftwareEngineer (PC desks) · `"research"` = Researcher (whiteboard / lab) ·
+    `"assembly"` = Worker, QCEngineer (workbench / upstairs lines) · `"office"` = Marketer, FinancialAnalyst,
+    LogisticsManager (generic desk). Old saves get it on load.
+  - `marketSalary` = fair monthly salary for this role+skill; `setSalary` accepts 0.5x..3x of it. Hiring pays a
+    signing bonus of one `salaryMonthly`.
+- Staff cap: `Balance.Employees.hqStaffCap` by HQ level (10 at HQ 1) → `"Staff cap reached (10). Upgrade the HQ."`.
+
+## Manual shipping, second floor, challenges — iteration 2
+### State
+- `production.crates`: array of `{id, productId, units, day, bonusPct?}` — finished goods waiting in the garage.
+  Production output goes here first (at most one crate per product per game day; at most
+  `Balance.Production.maxOpenCrates` = 20 open crates — when full, new output is merged into that product's newest
+  crate). Units in crates are NOT sellable until shipped (`products[id].inventory` is what the market sells).
+  `bonusPct` (0..0.1) = extra units from an assembly challenge, applied when the crate ships.
+- Auto-ship: crates older than `Balance.Production.autoShipDays` (7) ship by themselves without the bonus; every crate
+  ships the same day once the company owns a `LogisticsCenter` room. `production.lastAutoShip = {day, crates, units}`.
+- `production.lines[]` have `location`: `"garage"` for the starting hand-assembly workbench `line_1` (also `bench:true`,
+  always available) and `"upstairs"` for lines bought with `buildLine` (they need the second floor).
+- `production.shippedTotal` = units shipped so far (manual + auto).
+- Second floor = room `AssemblyLine`: `hq.rooms.AssemblyLine` exists ⇔ bought. New companies start WITHOUT it.
+  Price `Balance.HQ.roomBuildCostBase.AssemblyLine` = $150,000 (level 1), allowed at HQ level 1. Use `getRoomCatalog`
+  for the live price. Old saves that already had the room keep it.
+- `challenges`: `{cooldowns:{"<kind>:<targetId>": readyDay}, supplierDiscount, retailerPremium, crateBonus:{productId:
+  pct}, history:[{day, kind, targetId, score}]}` (history keeps the last 10). Cooldown left = `readyDay -
+  time.elapsedDays` (game days); a key whose readyDay has passed may still be listed (= ready). `supplierDiscount` /
+  `retailerPremium` > 0 = a negotiation bonus waiting for the next purchase / manual shipment; `crateBonus` = assembly
+  bonus waiting for that product's next crate.
+
+### Actions
+| action | perm | args | data |
+|---|---|---|---|
+| shipCrate | — | `{crateId}` | `{crateId, productId, units, bonusUnits, premium}` — units moved into `products[productId].inventory` (incl. +5 % `Balance.Production.manualShipBonus` "careful handling", rounded down, at least +1 when units ≥ 1); `premium` = cash from a negotiation challenge (0 usually). Error `"Unknown crate"`. |
+| shipAll | — | `{}` | `{shipped:n, units, bonusUnits, premium, crates:[{crateId, productId, units}]}` — ships every crate with the manual bonus. Error `"No crates to ship"`. |
+| getRoomCatalog | — | `{}` (read-only) | `{rooms:{<roomId>:{name, effect, level, maxLevel, minHQLevel, nextCost, canBuild, reason?}}, hqLevel}` — `nextCost` = price of the next level (`null` at max); `reason` = why `canBuild` is false. |
+| challengeReward | — | `{kind, targetId, score}` | `{kind, targetId, score, applied:{...}, cooldownDays, readyDay}` (see below) |
+| buildRoom | Construction | `{roomId:"AssemblyLine"}` = buy the second floor | `{level, cost}` |
+| buildLine | Construction | `{kind:"Assembly"}` needs the second floor: else error `"Build the Assembly Line first"` | `{id, cost}` |
+
+`launchProduct` first ships every crate of that product (no bonus), then needs `inventory > 0`.
+`discontinueProduct` ships that product's crates first (they are salvaged with the rest).
+
+### challengeReward (mini-game results; the server caps everything)
+`score` is clamped to 0..1 (non-numbers → 0). Cooldown is per company, per `kind` + `targetId`, in game days
+(`Balance.Challenges.<kind>.cooldownDays`); a rejected call does not start a cooldown.
+| kind | targetId | reward (scales with score) | cooldown |
+|---|---|---|---|
+| research | techId being researched (`research.active[].techId`) | + up to 8 % of the tech's total progress → `applied:{techId, progress, added}` | 5 days |
+| design | projectId in `state.projects` | score ≥ 0.5 and the project has bugs → fixes one bug for free (`applied:{fixed:"bug"\|"toughBug", bugs, toughBugs}`; tough bugs need score ≥ 0.8); otherwise + up to 3 quality (`applied:{quality, added}`) | 5 days |
+| assembly | lineId (`production.lines[].id`, must have a batch running) or productId | + up to 10 % units on that product's newest open crate (or the next crate if none) → `applied:{productId, crateId?, bonusPct}` | 5 days |
+| negotiation | `"supplier"` (phone) or `"retailer"` (van; alias `"van"`) | supplier: next `buyResources` up to −10 % (`applied:{supplierDiscount}`); retailer: next shipment pays a cash premium of up to 3 % of its retail value (`applied:{retailerPremium}`) | 10 days |
+
+Errors (friendly, with `errorKey`/`errorParams`, see docs/LOCALE_KEYS.md):
+`"Unknown challenge"`, `"Already done: try again in 3 days"` (cooldown, `params.days`),
+`"That technology is not being researched"`, `"That project is not in development"`,
+`"Nothing is being assembled there"`, `"Talk to the supplier or the retailer"`, `"Nothing left to polish on this project"`.
+
 ## Not actions (protocol messages instead)
 | Roblox lobby action | use |
 |---|---|
@@ -191,5 +257,6 @@ The profile is also pushed as a `profile` frame (see PROTOCOL.md Changes) whenev
   mem_1, cam_1, mat_2, biz_intel (first research to try: `arch_arm_2`).
 - Typical first loop: createBlueprint → updateBlueprint (slots + priceUSD) → publishBlueprint (a 30+ day
   development project starts; `finishProjectNow` costs research points) → when the project disappears from
-  `state.projects`: queueProduction (quantity 100..2,000,000) → when `products[id].inventory > 0`: launchProduct →
+  `state.projects`: queueProduction (quantity 100..2,000,000) on `line_1` (the garage workbench) → crates appear in
+  `production.crates` → shipCrate / shipAll (or launchProduct, which ships that product's crates) → launchProduct →
   sales appear weekly in `products[id].unitsSold` / `finance`.

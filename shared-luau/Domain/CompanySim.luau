@@ -34,6 +34,7 @@ local CostModel = require(Shared.Domain.CostModel)
 local Bank = require(Shared.Domain.Bank)
 local Office = require(Shared.Domain.Office)
 local Development = require(Shared.Domain.Development)
+local Shipping = require(Shared.Domain.Shipping)
 
 local T = Balance.Time
 local CompanySim = {}
@@ -66,8 +67,16 @@ function CompanySim.roomLevel(c: Types.CompanyState, room: string): number
 	return r and r.level or 0
 end
 
-function CompanySim.addNews(c: Types.CompanyState, kind: string, title: string, body: string)
-	c.news[#c.news + 1] = { day = c.time.elapsedDays, kind = kind, title = title, body = body }
+-- extra (online, optional): localization fields { key, params, bodyKey, bodyParams, bodyParts } (docs/LOCALE_KEYS.md);
+-- the server fills key/bodyKey from the English text when they are missing.
+function CompanySim.addNews(c: Types.CompanyState, kind: string, title: string, body: string, extra: any?)
+	local item: any = { day = c.time.elapsedDays, kind = kind, title = title, body = body }
+	if type(extra) == "table" then
+		for k, v in pairs(extra) do
+			item[k] = v
+		end
+	end
+	c.news[#c.news + 1] = item
 	TableUtil.trimFront(c.news, GameConfig.MaxNewsItems)
 end
 
@@ -263,7 +272,8 @@ local function tickProduction(c: Types.CompanyState, notes: { Notification })
 							local defective = math.floor(n * defectRate + 0.5)
 							job.defective = job.defective + defective
 							job.produced = job.produced + (n - defective)
-							product.inventory = product.inventory + (n - defective)
+							-- online iteration 2: output waits in a crate until it is shipped (Shipping.luau)
+							Shipping.addOutput(c, product.id, n - defective)
 							product.defectRate = product.defectRate * 0.9 + defectRate * 0.1
 							c.finance.qCogs = c.finance.qCogs + cashNeeded + ProductionRules.energyCost(n, line, evMods.energyMult)
 							line.utilization = MathUtil.clamp01(n / math.max(1, perDay))
@@ -896,6 +906,7 @@ function CompanySim.tickDay(c: Types.CompanyState): { Notification }
 	end
 	tickResearch(c, notes)
 	tickProduction(c, notes)
+	Shipping.autoShip(c)
 	for _, note in ipairs(Development.tickDay(c)) do
 		notes[#notes + 1] = note
 	end
@@ -920,6 +931,7 @@ function CompanySim.tickDay(c: Types.CompanyState): { Notification }
 	end
 	if d % T.daysPerMonth == 0 then
 		tickMonth(c, notes)
+		EmployeeRules.ensureStations(c) -- marketSalary follows quarterly training
 	end
 	if d % T.daysPerQuarter == 0 then
 		tickQuarter(c, notes)

@@ -60,3 +60,14 @@ end
 - Client handles `{}` as an empty list, `null` in `sections` as a removed key, `welcome.lastCompany` (Continue
   button), `left.reason` (`replaced` / `sold` show a toast), `boards` (stored in `Net.boards`, not drawn yet),
   `profile` (stored in `Net.profile`).
+
+## From SERVER agent (iteration 2, 2026-11-05)
+- DONE (no action needed): the Validate.name Cyrillic request above is already in shared-luau (UTF-8 aware); ACTIONS.md updated.
+- For UI / WORLD / AUDIO (nothing blocking, all live on the server now):
+  - `production.crates`, `shipCrate {crateId}`, `shipAll {}`, `getRoomCatalog {}` (price of the second floor =
+    `rooms.AssemblyLine.nextCost`, $150,000), `challengeReward {kind, targetId, score}`, `challenges` section,
+    `employees.list[].station` / `marketSalary`, `production.lines[].location` ("garage" bench `line_1` / "upstairs")
+    — docs/ACTIONS.md "Employees" and "Manual shipping, second floor, challenges".
+  - New companies start WITHOUT `hq.rooms.AssemblyLine` (second floor locked); old saves keep it.
+  - Localization: every notify / failed res / error frame / news item / review carries `key` + `params` next to the
+    English text — docs/LOCALE_KEYS.md (generated, ~1200 keys; `err.*`, `note.*`, `news.*`, `review.*`, `data.*`).

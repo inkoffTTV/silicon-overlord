@@ -377,10 +377,15 @@ func _on_text(text: String) -> void:
 				if msg.has("data") and msg.data != null:
 					r["data"] = msg.data
 				if msg.has("error") and msg.error != null:
-					r["error"] = L.t(str(msg.error))
+					r["error"] = L.server(msg.get("errorKey"), msg.get("errorParams"), str(msg.error))
+					r["errorEn"] = str(msg.error)
+					if msg.get("errorKey") != null:
+						r["errorKey"] = str(msg.errorKey)
 				w.finish(r)
 		"notify":
-			Bus.notify.emit(str(msg.get("kind", "info")), L.t(str(msg.get("title", ""))), L.t(str(msg.get("body", ""))))
+			var nt := L.server(msg.get("key"), msg.get("params"), str(msg.get("title", "")))
+			var nb := L.server(msg.get("bodyKey"), msg.get("bodyParams"), str(msg.get("body", "")) if msg.get("body") != null else "")
+			Bus.notify.emit(str(msg.get("kind", "info")), nt, nb)
 		"members":
 			Game.members = msg.get("list", []) if msg.get("list") is Array else []
 			members_changed.emit(Game.members)
@@ -397,7 +402,7 @@ func _on_text(text: String) -> void:
 				Bus.notify.emit("info", L.t("Company sold"), "")
 			_on_left(reason)
 		"error":
-			var em := L.t(str(msg.get("message", "Error")))
+			var em := L.server(msg.get("key"), msg.get("params"), str(msg.get("message", "Error")))
 			if _join and not _join.fired:
 				_join.finish({"ok": false, "error": em})
 			else:

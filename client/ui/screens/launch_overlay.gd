@@ -107,7 +107,7 @@ func _ready() -> void:
 		tv.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		rv.add_child(tv)
 		tv.add_child(U.caps(str(r.get("outlet", "")), U.MUTED, 10))
-		tv.add_child(U.para("“" + L.t(str(r.get("body", r.get("headline", "")))) + "”", U.SM, U.TEXT))
+		tv.add_child(U.para("“" + (L.review_body(r) if str(r.get("body", "")) != "" else L.review_headline(r)) + "”", U.SM, U.TEXT))
 	var ok := U.btn(L.t("Nice"), "BtnWhite", "check", 0, 48)
 	ok.pressed.connect(dismiss)
 	v.add_child(U.gap(4))

@@ -285,6 +285,14 @@ handlers.rerollCandidates = act("rerollCandidates", { "employees", "research", "
 handlers.setAutoHire = act("setAutoHire", { "office" }, function(s, u, p) return CompanyActions.setAutoHire(s, p.on) end)
 handlers.hire = act("hire", { "employees", "office" }, function(s, u, p) return CompanyActions.hire(s, str(p.candidateId)) end)
 
+-- Online iteration 2: manual shipping, room catalog, challenge rewards (any member)
+handlers.shipCrate = act("shipCrate", { "production", "products", "finance" }, function(s, u, p) return CompanyActions.shipCrate(s, str(p.crateId)) end, function(p) return str(p.crateId) end)
+handlers.shipAll = act("shipAll", { "production", "products", "finance" }, function(s, u, p) return CompanyActions.shipAll(s) end)
+handlers.getRoomCatalog = function(session) return CompanyActions.roomCatalog(session.state) end
+handlers.challengeReward = act("challengeReward", { "challenges", "research", "projects", "production", "inventory" }, function(s, u, p)
+	return CompanyActions.challengeReward(s, p.kind, p.targetId, p.score)
+end, function(p) return str(p.kind) .. " " .. str(p.targetId) end)
+
 function ActionRouter.has(action: string): boolean
 	return handlers[action] ~= nil
 end

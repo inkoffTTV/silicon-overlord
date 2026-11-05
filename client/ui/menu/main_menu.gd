@@ -9,6 +9,7 @@ const Preview := preload("res://phone/phone_preview.gd")
 const Builder := preload("res://phone/phone_builder.gd")
 const Settings := preload("res://ui/menu/settings_panel.gd")
 const D := preload("res://ui/lib/gdata.gd")
+const LangPicker := preload("res://ui/lib/lang_picker.gd")
 
 signal language_changed(lang: String)
 
@@ -100,8 +101,8 @@ func _build() -> void:
 	pv.spin_speed = 0.45
 	pv.anchor_left = 0.44
 	pv.anchor_right = 0.98
-	pv.anchor_top = 0.04
-	pv.anchor_bottom = 0.86
+	pv.anchor_top = 0.02
+	pv.anchor_bottom = 0.79
 	pv.yaw = -0.25
 	pv.pitch = 0.12
 	add_child(pv)
@@ -113,9 +114,9 @@ func _build() -> void:
 	col.anchor_top = 0.0
 	col.anchor_bottom = 1.0
 	col.offset_left = 96
-	col.offset_top = 84
+	col.offset_top = 64
 	col.offset_right = 96 + 430
-	col.offset_bottom = -40
+	col.offset_bottom = -28
 	add_child(col)
 	_col = col
 	var badge_row := U.hbox(10)
@@ -124,7 +125,13 @@ func _build() -> void:
 	badge.add_theme_stylebox_override("panel", U.sbox(U.ACCENT, 9, Color(1, 1, 1, 0.2), 1, 0, 0))
 	(badge.get_child(0).get_child(0) as Control).set("color", Color.WHITE)
 	badge_row.add_child(badge)
-	badge_row.add_child(U.caps(L.t("ONLINE CO-OP TECH TYCOON"), U.MUTED, 11))
+	var tag := U.caps(L.t("ONLINE CO-OP TECH TYCOON"), U.MUTED, 11)
+	tag.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	tag.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	tag.clip_text = true
+	tag.custom_minimum_size.x = 60
+	badge_row.add_child(tag)
+	badge_row.add_child(LangPicker.button(func(code: String) -> void: language_changed.emit(code), 34))
 	var tv := U.vbox(-26)
 	col.add_child(tv)
 	var t1 := U.lbl("SILICON", 60, U.TEXT, "black")
@@ -144,7 +151,9 @@ func _build() -> void:
 	col.add_child(U.gap(6))
 	# pages
 	var stack := U.vbox(0)
-	col.add_child(stack)
+	var sc := U.scroll(stack)
+	sc.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_SHOW_NEVER
+	col.add_child(sc)
 	_pages["home"] = _page_home()
 	_pages["create"] = _page_create()
 	_pages["join"] = _page_join()

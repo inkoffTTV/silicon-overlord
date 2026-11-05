@@ -66,7 +66,54 @@ static func font(weight: String = "medium") -> Font:
 			ff.load_dynamic_font(path)
 			f = ff
 	_fonts[weight] = f
+	if f is FontFile:
+		_attach_cjk(f as FontFile, weight)
 	return f
+
+# ---------------------------------------------------------------- CJK fallback (Noto Sans SC / JP subsets, OFL)
+const CJK_FILES := {"zh": "res://ui/fonts/NotoSansSC-Medium.otf", "ja": "res://ui/fonts/NotoSansJP-Medium.otf"}
+static var _cjk_first := "zh"
+static var _cjk := {}
+
+static func _cjk_font(code: String, bold: bool) -> Font:
+	var k := code + ("b" if bold else "")
+	if _cjk.has(k):
+		return _cjk[k]
+	var base: Font = null
+	if _cjk.has(code):
+		base = _cjk[code]
+	else:
+		base = load(CJK_FILES[code]) as Font
+		if base == null:
+			var ff := FontFile.new()
+			ff.load_dynamic_font(CJK_FILES[code])
+			base = ff
+		_cjk[code] = base
+	if not bold:
+		return base
+	var v := FontVariation.new()
+	v.base_font = base
+	v.variation_embolden = 0.55
+	_cjk[k] = v
+	return v
+
+static func _attach_cjk(f: FontFile, weight: String) -> void:
+	var bold := weight in ["bold", "display", "black", "semibold"]
+	var order := ["ja", "zh"] if _cjk_first == "ja" else ["zh", "ja"]
+	var fb: Array[Font] = []
+	for code in order:
+		fb.append(_cjk_font(code, bold))
+	f.fallbacks = fb
+
+## Japanese text should use Japanese glyph shapes first, everything else Simplified Chinese first.
+static func set_font_lang(lang: String) -> void:
+	var first := "ja" if lang == "ja" else "zh"
+	if first == _cjk_first:
+		return
+	_cjk_first = first
+	for w in _fonts:
+		if _fonts[w] is FontFile:
+			_attach_cjk(_fonts[w], w)
 
 # ---------------------------------------------------------------- styleboxes
 static func sbox(bg: Color, radius: int = RADIUS, border: Color = Color(0, 0, 0, 0), bw: int = 0, mx: float = 12, my: float = 8) -> StyleBoxFlat:

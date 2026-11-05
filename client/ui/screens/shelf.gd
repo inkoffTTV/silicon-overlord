@@ -266,8 +266,8 @@ func _build_detail() -> void:
 			var tv := U.vbox(2)
 			tv.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 			tv.add_child(U.caps(str(r.get("outlet", "")), U.MUTED, 10))
-			tv.add_child(U.para(L.t(str(r.get("headline", ""))), U.SM, U.TEXT, "semibold", 200))
-			tv.add_child(U.para(L.t(str(r.get("body", ""))), U.XS + 1, U.MUTED, "medium", 200))
+			tv.add_child(U.para(L.review_headline(r), U.SM, U.TEXT, "semibold", 200))
+			tv.add_child(U.para(L.review_body(r), U.XS + 1, U.MUTED, "medium", 200))
 			h.add_child(tv)
 			g.add_child(c)
 	if lc not in ["Development", "Discontinued"]:

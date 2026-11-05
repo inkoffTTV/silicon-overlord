@@ -17,7 +17,7 @@ REPLICATED = ["time", "finance", "hq", "employees", "research", "blueprints", "p
               "reputation", "ecosystem", "stock", "world", "milestones", "audit", "news", "owners", "approvals", "invites",
               "tutorialStep", "specialization", "liquidated", "customComponents", "name", "logo", "mode", "projects",
               "unlockedFinishes", "loan", "regionsUnlocked", "office", "goals", "achievements", "awards", "daily",
-              "empire", "legacyMods", "stateVersion"]
+              "empire", "legacyMods", "challenges", "stateVersion"]
 
 
 def norm(v):
@@ -110,10 +110,38 @@ class E2E(unittest.IsolatedAsyncioTestCase):
             await a.wait_for(lambda: proj not in (a.state.get("projects") or {}), 30, "development project done")
         r = await a.act("queueProduction", {"productId": pid, "lineId": "line_1", "quantity": 2000})
         self.assertTrue(r["ok"], r)
-        await a.wait_for(lambda: a.state["products"][pid]["inventory"] > 0, 20, "first units produced")
+        # iteration 2: output waits in crates; units are sellable only after shipping
+        crates = lambda: [c for c in (a.state["production"].get("crates") or []) if c["productId"] == pid]
+        await a.wait_for(lambda: crates(), 20, "first crate")
+        self.assertEqual(a.state["products"][pid]["inventory"], 0, "crates are not inventory")
+        await a.speed(0)
+        crate = crates()[0]
+        r = await a.act("shipCrate", {"crateId": crate["id"]})
+        self.assertTrue(r["ok"], r)
+        expected = crate["units"] + max(1, int(crate["units"] * 0.05))
+        self.assertEqual(r["data"]["units"], expected, r)
+        self.assertEqual(r["data"]["productId"], pid)
+        await a.wait_for(lambda: a.state["products"][pid]["inventory"] == expected, 5, "shipped units in inventory")
+        self.assertNotIn(crate["id"], [c["id"] for c in crates()])
+        r = await a.act("shipCrate", {"crateId": crate["id"]})
+        self.assertFalse(r["ok"])
+        self.assertEqual(r["errorKey"], "err.unknown_crate")
+        # auto-ship: crates older than 7 game days ship by themselves (no bonus)
+        await a.speed(8)
+        await a.wait_for(lambda: a.state["production"].get("lastAutoShip"), 20, "auto-ship after 7 days")
+        today = a.state["time"]["elapsedDays"]
+        self.assertTrue(all(today - c["day"] < 7 for c in crates()), crates())
+        self.assertGreater(a.state["products"][pid]["inventory"], expected)
         r = await a.act("launchProduct", {"productId": pid, "positioning": "Value"})
         self.assertTrue(r["ok"], r)
         self.assertEqual(len(r["data"]["reviews"]), 3)
+        await a.wait_for(lambda: not crates(), 5, "launch ships the product's crates")
+        rev = r["data"]["reviews"][0]
+        self.assertTrue(rev["headlineKey"].startswith("review.headline."), rev)
+        self.assertEqual(rev["headlineParams"]["name"], "Nova")
+        self.assertTrue(rev["bodyParts"] and rev["bodyParts"][0]["key"].startswith("review."), rev)
+        news = [n for n in a.state["news"] if n["kind"] == "Review"][-1]
+        self.assertEqual(news["key"], rev["headlineKey"])
         await a.wait_for(lambda: a.state["products"][pid]["unitsSold"] > 0, 25, "first sales")
         self.assertGreater(a.state["finance"]["cash"], 0)
         await a.speed(0)
@@ -133,6 +161,13 @@ class E2E(unittest.IsolatedAsyncioTestCase):
         mismatch = diff_keys(a.state, b.state)
         self.assertEqual(mismatch, [], "replica (snapshot+sections) differs from a fresh snapshot in %s" % mismatch)
         self.assertTrue(any("joined" in n["title"] for n in a.notes))
+        # iteration 2: notifications carry localization keys + params next to the English text
+        jn = [n for n in a.notes if "joined" in n["title"]][-1]
+        self.assertEqual(jn["key"], "note.displayname_joined_the_company", jn)
+        self.assertEqual(jn["params"], {"DisplayName": "Борис"}, jn)
+        self.assertEqual(jn["bodyKey"], "note.a_new_co_founder_is_on_board", jn)
+        self.assertTrue(all("key" in n and "bodyKey" in n for n in a.notes))
+        self.assertTrue(any(n.get("key") for n in a.state["news"]), "news items carry keys")
 
         # ---- large spend needs the co-founder's approval
         r = await a.act("upgradeHQ")
@@ -218,6 +253,98 @@ class E2E(unittest.IsolatedAsyncioTestCase):
         print("\n    full flow took %.1f s (game days simulated: %d)" % (time.time() - t0, after["time"]["elapsedDays"]))
 
     # ------------------------------------------------------------------------------------------
+    async def test_iteration2_floor_staff_challenges(self):
+        a = await self.client("Iter")
+        await a.hello()
+        await a.create("Second Floor Co")
+        st = a.state
+        # second floor is not owned at start; the garage workbench is
+        self.assertNotIn("AssemblyLine", st["hq"]["rooms"])
+        bench = st["production"]["lines"][0]
+        self.assertEqual((bench["id"], bench["location"], bench["bench"]), ("line_1", "garage", True))
+        self.assertEqual(st["production"]["crates"] or [], [])
+        # stations on staff and candidates
+        stations = {"Researcher": "research", "Worker": "assembly", "HardwareEngineer": "design", "SoftwareEngineer": "design"}
+        for e in st["employees"]["list"]:
+            self.assertEqual(e["station"], stations.get(e["role"], e["station"]), e)
+        for e in st["employees"]["candidates"]:
+            self.assertIn(e["station"], ("design", "research", "assembly", "office"))
+            self.assertGreater(e["marketSalary"], 0)
+        cand = [e for e in st["employees"]["candidates"] if e["role"] == "Marketer"][0]
+        r = await a.act("hire", {"candidateId": cand["id"]})
+        self.assertTrue(r["ok"], r)
+        self.assertEqual(r["data"]["employee"]["station"], "office")
+        await a.wait_for(lambda: any(e["id"] == cand["id"] and e["station"] == "office"
+                                     for e in a.state["employees"]["list"]), 5, "hired with station")
+        # buildLine needs the second floor
+        r = await a.act("buildLine", {"kind": "Assembly"})
+        self.assertFalse(r["ok"])
+        self.assertEqual(r["error"], "Build the Assembly Line first")
+        self.assertEqual(r["errorKey"], "err.build_the_name_first")
+        self.assertEqual(r["errorParams"], {"name": "Assembly Line"})
+        self.assertEqual(r["errorParamKeys"], {"name": "data.rooms.AssemblyLine.name"})
+        r = await a.act("getRoomCatalog")
+        self.assertTrue(r["ok"], r)
+        floor = r["data"]["rooms"]["AssemblyLine"]
+        self.assertEqual((floor["level"], floor["nextCost"], floor["canBuild"]), (0, 150000, True), floor)
+        self.assertEqual(r["data"]["hqLevel"], 1)
+        r = await a.act("buildRoom", {"roomId": "AssemblyLine"})
+        self.assertTrue(r["ok"], r)
+        self.assertEqual(r["data"]["cost"], 150000)
+        await a.wait_for(lambda: "AssemblyLine" in a.state["hq"]["rooms"], 5, "second floor bought")
+        r = await a.act("buildLine", {"kind": "Assembly"})
+        self.assertTrue(r["ok"], r)
+        await a.wait_for(lambda: len(a.state["production"]["lines"]) == 2, 5, "line built")
+        self.assertEqual(a.state["production"]["lines"][1]["location"], "upstairs")
+
+        # ---- challenges: research (score clamped), cooldown, wrong targets
+        r = await a.act("startResearch", {"techId": "arch_arm_2"})
+        self.assertTrue(r["ok"], r)
+        r = await a.act("challengeReward", {"kind": "research", "targetId": "arch_arm_2", "score": 7})
+        self.assertTrue(r["ok"], r)
+        self.assertEqual(r["data"]["score"], 1)
+        self.assertAlmostEqual(r["data"]["applied"]["added"], 0.08, places=4)
+        self.assertEqual(r["data"]["cooldownDays"], 5)
+        await a.wait_for(lambda: a.state["research"]["active"][0]["progress"] >= 0.08, 5, "progress replicated")
+        await a.wait_for(lambda: a.state.get("challenges") and a.state["challenges"]["cooldowns"], 5, "cooldown replicated")
+        r = await a.act("challengeReward", {"kind": "research", "targetId": "arch_arm_2", "score": 1})
+        self.assertFalse(r["ok"])
+        self.assertEqual(r["error"], "Already done: try again in 5 days")
+        self.assertEqual((r["errorKey"], r["errorParams"]), ("err.challenge_cooldown", {"days": 5}))
+        r = await a.act("challengeReward", {"kind": "research", "targetId": "arch_x86_9", "score": 1})
+        self.assertEqual((r["ok"], r.get("errorKey")), (False, "err.challenge_tech_not_active"))
+        r = await a.act("challengeReward", {"kind": "cheat", "targetId": "x", "score": 1})
+        self.assertEqual((r["ok"], r.get("errorKey")), (False, "err.unknown_challenge"))
+        r = await a.act("challengeReward", {"kind": "negotiation", "targetId": "moon", "score": 1})
+        self.assertEqual((r["ok"], r.get("errorKey")), (False, "err.challenge_negotiation_target"))
+        r = await a.act("challengeReward", {"kind": "assembly", "targetId": "line_1", "score": 1})
+        self.assertEqual((r["ok"], r.get("errorKey")), (False, "err.challenge_nothing_assembled"))
+        r = await a.act("challengeReward", {"kind": "design", "targetId": "proj_nope", "score": 1})
+        self.assertEqual((r["ok"], r.get("errorKey")), (False, "err.challenge_project_not_active"))
+        # design: a bad score is clamped to 0 (no reward) but still counts
+        r = await a.act("createBlueprint", {"name": "Polish", "subtype": "MidrangePhone"})
+        bp = r["data"]["id"]
+        await a.act("updateBlueprint", {"id": bp, "slots": PHONE_SLOTS, "priceUSD": 399})
+        r = await a.act("publishBlueprint", {"id": bp})
+        proj = r["data"]["projectId"]
+        r = await a.act("challengeReward", {"kind": "design", "targetId": proj, "score": -3})
+        self.assertTrue(r["ok"], r)
+        self.assertEqual((r["data"]["score"], r["data"]["applied"]["added"]), (0, 0))
+        r = await a.act("challengeReward", {"kind": "design", "targetId": proj, "score": 1})
+        self.assertEqual(r.get("errorKey"), "err.challenge_cooldown")
+        # negotiation with the supplier: the next resource purchase is cheaper (once)
+        r = await a.act("challengeReward", {"kind": "negotiation", "targetId": "phone", "score": 0.5})
+        self.assertTrue(r["ok"], r)
+        self.assertEqual(r["data"]["targetId"], "supplier")
+        self.assertAlmostEqual(r["data"]["applied"]["supplierDiscount"], 0.05)
+        r1 = await a.act("buyResources", {"resourceId": "copper", "units": 100})
+        r2 = await a.act("buyResources", {"resourceId": "copper", "units": 100})
+        self.assertTrue(r1["ok"] and r2["ok"], (r1, r2))
+        self.assertAlmostEqual(r1["data"]["cost"], r2["data"]["cost"] * 0.95, places=2)
+        # every failed res carries errorKey; unknown texts get null
+        r = await a.act("startResearch", {"techId": "nope"})
+        self.assertIn("errorKey", r)
+
     async def test_safety(self):
         x = await self.client("Иван")
         await x.send({"t": "act", "id": 1, "action": "hire", "args": {}})

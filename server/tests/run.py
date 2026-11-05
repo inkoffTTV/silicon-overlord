@@ -5,7 +5,7 @@
     python3 server/tests/run.py --quick    # skip the soak
     python3 server/tests/run.py --soak-only [--companies N --days D]
 
-Unit tests: test_convert.py (Lua <-> JSON). End-to-end: test_e2e.py (real server on a random port, websocket
+Unit tests: test_convert.py (Lua <-> JSON), test_rules.py (iteration-2 rules, locale catalog). End-to-end: test_e2e.py (real server on a random port, websocket
 clients). Soak: soak.py (prints CPU per tick). Exit code 0 = everything passed.
 """
 import logging
@@ -32,7 +32,7 @@ def main():
     if "--soak-only" not in sys.argv:
         loader = unittest.TestLoader()
         suite = unittest.TestSuite()
-        for mod in ("test_convert", "test_e2e"):
+        for mod in ("test_convert", "test_rules", "test_e2e"):
             suite.addTests(loader.loadTestsFromName(mod))
         result = unittest.TextTestRunner(verbosity=2).run(suite)
         ok = result.wasSuccessful()

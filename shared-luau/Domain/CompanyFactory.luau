@@ -18,6 +18,8 @@ local Empire = require(Shared.Domain.Empire)
 local Awards = require(Shared.Domain.Awards)
 local Legacy = require(Shared.Domain.Legacy)
 local Office = require(Shared.Domain.Office)
+local Shipping = require(Shared.Domain.Shipping)
+local Challenges = require(Shared.Domain.Challenges)
 
 local CompanyFactory = {}
 
@@ -93,11 +95,11 @@ function CompanyFactory.new(args: NewCompanyArgs): Types.CompanyState
 			qRevenue = 0, qCogs = 0, qOpex = 0, qCapex = 0, qSubscription = 0, qAppStore = 0, qB2B = 0, qUnits = 0, history = {},
 			researchBudgetPct = 0.2, marketingBudgetPct = 0.1, bankruptMonths = 0, totalRevenue = 0, totalUnits = 0, weeklyRevenue = {},
 		},
-		hq = { level = 1, rooms = { Headquarters = { level = 1, builtDay = 0 }, ResearchLab = { level = 1, builtDay = 0 }, AssemblyLine = { level = 1, builtDay = 0 }, Warehouse = { level = 1, builtDay = 0 } }, theme = "default" },
+		hq = { level = 1, rooms = { Headquarters = { level = 1, builtDay = 0 }, ResearchLab = { level = 1, builtDay = 0 }, Warehouse = { level = 1, builtDay = 0 } }, theme = "default" },
 		employees = { list = employees, morale = 0.7, perksBudgetMonthly = 0, candidates = candidates, candidatesRefreshDay = 1 },
 		research = { unlocked = unlocked, active = {}, processMaturity = {}, patents = {}, licensesOut = {}, labBoost = 0, points = 0 },
 		blueprints = {}, products = {},
-		production = { lines = { ProductionRules.newLine("line_1", "Assembly", 1) }, jobs = {}, fabJobs = {}, qcLevel = 1, layout = {}, layoutSize = 4, incidents = {}, nextIncidentDay = 30 },
+		production = { lines = { ProductionRules.newLine("line_1", "Assembly", 1) }, jobs = {}, fabJobs = {}, qcLevel = 1, layout = {}, layoutSize = 4, incidents = {}, nextIncidentDay = 30, crates = {}, shippedTotal = 0 },
 		inventory = { resources = { silicon_wafers = 0, rare_earth = 120, lithium = 0, copper = 300, aluminum = 200, glass = 1100, battery_materials = 0, memory_chips = 0, advanced_packaging = 550, display_panels = 0 }, components = {}, contracts = {}, b2bOffers = {} },
 		reputation = { recognition = 10, trust = 40, satisfaction = 50, media = 30, reliability = 50, innovation = 30 },
 		ecosystem = { os = {}, appStoreCommission = 0.3, cloud = { storage = false, gaming = false, ai = false, backup = false }, subscribers = 0, subscriptionPriceMonthly = Balance.Ecosystem.subscriptionPriceDefault, serverCapacity = 0, synergy = 1, lockIn = 0.3, gameLibrary = 0 },
@@ -111,7 +113,12 @@ function CompanyFactory.new(args: NewCompanyArgs): Types.CompanyState
 		office = { comfort = 0, productivity = 0, furniture = { desk_folding = 2, chair_stool = 2, pc_beige_crt = 2, lounge_water_cooler = 1 }, desksPlaced = 2 },
 		goals = Goals.defaultState(), daily = DailyRewards.defaultState(), empire = Empire.defaultState(), awards = Awards.defaultState(), achievements = {},
 		legacyMods = Legacy.modsFor(args.legacy),
+		-- online iteration 2: mini-game cooldowns and pending rewards
+		challenges = Challenges.defaultState(),
 	}
+	-- online iteration 2: the second floor (room AssemblyLine) is bought; line_1 is the garage workbench
+	Shipping.ensure(state)
+	EmployeeRules.ensureStations(state)
 	-- legacy perks: seed money and reputation
 	state.finance.cash = state.finance.cash + state.legacyMods.startCash
 	if state.legacyMods.reputationBonus > 0 then
@@ -186,6 +193,10 @@ function CompanyFactory.migrate(state: any): Types.CompanyState
 	template.research.unlocked = {}
 	Office.normalize(state) -- convert count-only office saves before the template fills missing keys (NEXT-PASS-A)
 	TableUtil.reconcile(state, template :: any)
+	-- online iteration 2 (idempotent): crates, line locations, employee stations, challenge state
+	Shipping.ensure(state)
+	EmployeeRules.ensureStations(state)
+	Challenges.state(state)
 	return state
 end
 

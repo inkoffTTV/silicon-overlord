@@ -13,7 +13,7 @@ Everything below the table keeps working as written; these are additions/clarifi
 3. **welcome** has `lastCompany` (company id or null): if not null, `resume` will work → show "Continue".
 4. **joined.you** = `{userId, role, name, color}`; members items = `{userId, name, color, role, title, sharePercent,
    online}`. `role` is "Founder" or "CoFounder". Departed partners are not listed.
-5. **notify** = `{kind, title, body, category, sound}`: `kind` ∈ info/success/warning/error (derived from the Roblox
+5. **notify** = `{kind, title, body, category, sound, key, params, bodyKey, bodyParams}` (localization keys, see 18): `kind` ∈ info/success/warning/error (derived from the Roblox
    sound), `category` = original Roblox notification kind (e.g. Research, Report, Goal, Mission, Governance,
    Award, Achievement, HR, Legacy), `sound` = Roblox sound name (Success, Alert, Error, Launch, ...) or null.
 6. New server → client frames:
@@ -50,6 +50,16 @@ Everything below the table keeps working as written; these are additions/clarifi
 17. A player may own several companies (unlike Roblox): `create` always founds a new one (max one per 5 s per
     connection) and `resume` returns to the company you entered last; older ones are entered by their room code.
     One live connection per token: a new `hello` with the same token replaces the old socket.
+18. **Localization (iteration 2).** English texts keep coming as before, plus stable keys the client can translate
+    (key table + rules: docs/LOCALE_KEYS.md, generated from the server sources):
+    - `notify`: `key`/`params` for `title`, `bodyKey`/`bodyParams` for `body` (`null` when the text is unknown);
+      optional `paramKeys`/`bodyParamKeys` = `{param: key}` when a param is a known data name.
+    - failed `res`: `errorKey`, `errorParams` (+ optional `errorParamKeys`); `error` frames: `key`, `params`.
+    - `state.news[]` items: `key`/`params`, `bodyKey`/`bodyParams` (or `bodyParts` for a launch review).
+    - `products[id].reviews[]`: `headlineKey`/`headlineParams`, `bodyParts:[{key, params}]`.
+19. **Iteration 2 state**: `production.crates` (finished goods waiting to ship), `challenges` (mini-game cooldowns),
+    `employees.list[].station` / `marketSalary`, `production.lines[].location` — see docs/ACTIONS.md
+    "Manual shipping, second floor, challenges" and "Employees". `challenges` is a new top-level section key.
 
 Endpoint: `ws://<host>:7350/ws` (later `wss://` behind a reverse proxy). One JSON object per frame,
 field `t` = message type. Numbers are JSON numbers; Lua maps with non-string keys are sent with string keys.
@@ -78,13 +88,13 @@ publishBlueprint, launchProduct, setPrice, hire, buildRoom, upgradeHQ, ...) with
 | joined | code, companyId, you:{userId, role}, members:[{userId,name,color,role,online}] |
 | snapshot | state: full CompanyState |
 | sections | data:{sectionKey: value} — top-level CompanyState keys that changed (replace whole key) |
-| res | id, ok, data?, error? |
-| notify | kind ("info"/"success"/"warning"/"error"), title, body |
+| res | id, ok, data?, error?, errorKey?, errorParams? |
+| notify | kind ("info"/"success"/"warning"/"error"), title, body, category, sound, key, params, bodyKey, bodyParams |
 | members | list as in joined |
 | peers | list:[{userId, name, color, p, yaw, pitch, anim}] |
 | chat | userId, name, text |
 | left | reason |
-| error | message |
+| error | message, key, params |
 | pong | n |
 
 Room codes: 6 chars from `ABCDEFGHJKMNPQRSTUVWXYZ23456789`, shown as `ABC-123`.

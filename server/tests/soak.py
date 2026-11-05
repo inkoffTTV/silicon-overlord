@@ -74,7 +74,8 @@ async def play(url, i, days, results):
             # full loop: development -> production -> launch -> sales
             await c.wait_for(lambda: proj not in (c.state.get("projects") or {}), 40, "project done")
             await c.act("queueProduction", {"productId": pid, "lineId": "line_1", "quantity": 3000})
-            await c.wait_for(lambda: c.state["products"][pid]["inventory"] > 0, 40, "units")
+            await c.wait_for(lambda: c.state["products"][pid]["inventory"] > 0 or any(
+                cr["productId"] == pid for cr in (c.state["production"].get("crates") or [])), 40, "units")
             await c.act("launchProduct", {"productId": pid, "positioning": "Value"})
         await c.wait_for(lambda: c.state["time"]["elapsedDays"] >= days, days / 4 * 3 + 30, "%d days" % days)
         took = time.time() - t0

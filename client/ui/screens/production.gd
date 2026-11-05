@@ -46,6 +46,7 @@ func refresh() -> void:
 	_build_dev()
 	_build_ready()
 	_build_batch_form()
+	_build_crates()
 	_build_jobs()
 	_build_lines()
 
@@ -176,6 +177,8 @@ func _build_batch_form() -> void:
 	for l in U.arr(U.dict(state().get("production", {})).get("lines", [])):
 		if str(l.get("kind", "")) == "Assembly":
 			lines.append(l)
+	if _pick_line == "" and target_id.begins_with("line_"):
+		_pick_line = target_id
 	if _pick_line == "" and not lines.is_empty():
 		_pick_line = str(lines[0].id)
 	v.add_child(U.caps(L.t("Device")))
@@ -188,7 +191,7 @@ func _build_batch_form() -> void:
 	v.add_child(U.caps(L.t("Line")))
 	var litems := []
 	for l in lines:
-		litems.append([str(l.id), "%s · L%d" % [L.t("Line") + " " + str(l.id).trim_prefix("line_"), int(U.num(l.get("level", 1), 1))]])
+		litems.append([str(l.id), "%s · L%d" % [line_name(l), int(U.num(l.get("level", 1), 1))]])
 	if not litems.is_empty():
 		v.add_child(U.segmented(litems, _pick_line, func(id: String) -> void: _pick_line = id, 34))
 	v.add_child(U.caps(L.t("Quantity")))
@@ -245,20 +248,73 @@ func _build_lines() -> void:
 	var v := U.vbox(8)
 	card.add_child(v)
 	_section(v, "PRODUCTION LINES", "factory", U.ORANGE)
+	var running := {}
+	for j in U.arr(prod.get("jobs", [])):
+		if str(j.get("status", "")) == "Running":
+			running[str(j.get("lineId", ""))] = true
+	var focused: Control = null
 	for l in U.arr(prod.get("lines", [])):
+		var ld: Dictionary = l
+		var lid := str(ld.get("id", ""))
+		var cv := U.vbox(8)
 		var h := U.hbox(10)
-		h.add_child(U.icon_tile("gear", U.ORANGE, 32, 8))
+		cv.add_child(h)
+		h.add_child(U.icon_tile("wrench" if ld.get("bench", false) or str(ld.get("location", "")) == "garage" else "gear", U.ORANGE, 32, 8))
 		var tv := U.vbox(2)
 		tv.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		tv.add_child(U.lbl("%s %s · %s · L%d" % [L.t("Line"), str(l.get("id", "")).trim_prefix("line_"), L.t(str(l.get("kind", ""))), int(U.num(l.get("level", 1), 1))], U.SM, U.TEXT, "semibold"))
-		var health := U.num(l.get("health", 1), 1)
-		tv.add_child(U.lbl(L.f("Capacity {n}/week", {"n": F.number(U.num(l.get("capacityPerWeek", 0)))}) + " · " + L.f("Health {pct}", {"pct": "%d%%" % int(health * 100)}), U.XS, U.MUTED))
+		var where := L.t("Upstairs") if str(ld.get("location", "")) == "upstairs" else (L.t("Garage") if str(ld.get("location", "")) == "garage" else "")
+		tv.add_child(U.clip("%s · %s · L%d%s" % [line_name(ld), L.t(str(ld.get("kind", ""))), int(U.num(ld.get("level", 1), 1)), (" · " + where) if where != "" else ""], U.SM, U.TEXT, "semibold"))
+		var health := U.num(ld.get("health", 1), 1)
+		tv.add_child(U.lbl(L.f("Capacity {n}/week", {"n": F.number(U.num(ld.get("capacityPerWeek", 0)))}) + " · " + L.f("Health {pct}", {"pct": "%d%%" % int(health * 100)}), U.XS, U.MUTED))
 		var hb := U.bar(health, U.SUCCESS if health > 0.6 else (U.WARNING if health > 0.3 else U.DANGER), 4)
 		tv.add_child(hb)
 		h.add_child(tv)
+		if running.has(lid):
+			h.add_child(U.pill(L.t("Running"), U.ACCENT))
+		var acts := HFlowContainer.new()
+		acts.add_theme_constant_override("h_separation", 6)
+		acts.add_theme_constant_override("v_separation", 6)
+		cv.add_child(acts)
+		var up := U.btn(L.t("Upgrade line"), "BtnGhost", "arrow_right", 0, 30)
+		up.pressed.connect(func() -> void: run("upgradeLine", {"lineId": lid}, L.t("Line upgraded"), line_name(ld)))
+		acts.add_child(up)
+		var qc := U.btn(L.t("Quality check"), "BtnGhost", "eye", 0, 30)
+		qc.disabled = not running.has(lid)
+		qc.tooltip_text = L.t("A short inspection mini-game: fewer defects, a few extra units.") if running.has(lid) else L.t("Start a batch on this line first.")
+		qc.pressed.connect(func() -> void:
+			if ui_root and ui_root.has_method("open_screen"):
+				ui_root.open_screen("line_qc", lid))
+		acts.add_child(qc)
 		var c := U.card("CardFlat")
-		c.add_child(h)
+		if lid == target_id:
+			c.add_theme_stylebox_override("panel", U.sbox(Color(U.ORANGE, 0.1), 10, Color(U.ORANGE, 0.7), 2, 12, 10))
+			focused = c
+		c.add_child(cv)
 		v.add_child(c)
+	if focused:
+		_focus_later(focused)
+	# second floor: buy it, or build more lines up there
+	var rooms := U.dict(U.dict(state().get("hq", {})).get("rooms", {}))
+	if rooms.has("AssemblyLine"):
+		var bl := U.btn(L.t("Build a production line"), "", "plus", 0, 36)
+		bl.pressed.connect(func() -> void: run("buildLine", {"kind": "Assembly"}, L.t("New production line"), L.t("It is upstairs, on the second floor.")))
+		v.add_child(bl)
+	else:
+		var lock := U.card("CardFlat")
+		var lh := U.hbox(10)
+		lock.add_child(lh)
+		lh.add_child(U.icon_tile("stairs", U.MUTED, 32, 8))
+		var lv := U.vbox(2)
+		lv.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		lv.add_child(U.lbl(L.t("Second floor is locked"), U.SM, U.TEXT, "semibold"))
+		lv.add_child(U.para(L.t("Buy it to build real production lines."), U.XS + 1, U.MUTED))
+		lh.add_child(lv)
+		var buy := U.btn(L.t("Look"), "BtnGhost", "arrow_right", 0, 32)
+		buy.pressed.connect(func() -> void:
+			if ui_root and ui_root.has_method("open_screen"):
+				ui_root.open_screen("stairs_locked", ""))
+		lh.add_child(buy)
+		v.add_child(lock)
 	var incidents := []
 	for inc in U.arr(prod.get("incidents", [])):
 		if not inc.get("resolved", false):
@@ -271,7 +327,7 @@ func _build_lines() -> void:
 			c.add_theme_stylebox_override("panel", U.sbox(Color(U.DANGER, 0.08), 10, Color(U.DANGER, 0.35), 1, 12, 10))
 			var iv := U.vbox(6)
 			c.add_child(iv)
-			iv.add_child(U.lbl(L.t(_incident_title(ii)), U.SM, U.TEXT, "semibold"))
+			iv.add_child(U.lbl(_incident_title(ii), U.SM, U.TEXT, "semibold"))
 			var row := U.hbox(6)
 			iv.add_child(row)
 			for opt in U.arr(ii.get("options", [])):
@@ -282,15 +338,69 @@ func _build_lines() -> void:
 			v.add_child(c)
 	_right.add_child(card)
 
+static func line_name(l: Dictionary) -> String:
+	if l.get("bench", false):
+		return L.t("Workbench")
+	return L.t("Line") + " " + str(l.get("id", "")).trim_prefix("line_")
+
+func _focus_later(c: Control) -> void:
+	await get_tree().process_frame
+	await get_tree().process_frame
+	if is_instance_valid(c) and is_instance_valid(_right):
+		var sc := _right.get_parent() as ScrollContainer
+		if sc:
+			sc.ensure_control_visible(c)
+
+# ---------------------------------------------------------------- crates waiting in the garage
+func _build_crates() -> void:
+	var prod := U.dict(state().get("production", {}))
+	var crates := U.arr(prod.get("crates", []))
+	if crates.is_empty():
+		return
+	var card := U.card("Card")
+	card.add_theme_stylebox_override("panel", U.card_box(Color(0.12, 0.09, 0.05, 0.92), Color(U.GOLD, 0.45), 16, 14))
+	var v := U.vbox(8)
+	card.add_child(v)
+	_section(v, "WAITING TO SHIP", "truck", U.GOLD)
+	var units := 0.0
+	var now := int(U.num(U.dict(state().get("time", {})).get("elapsedDays", 0)))
+	var auto_days := int(U.num(D.balance("Production").get("autoShipDays", 7), 7))
+	var shown := 0
+	for c in crates:
+		units += U.num(c.get("units", 0))
+		if shown >= 5:
+			continue
+		shown += 1
+		var p: Dictionary = _products().get(str(c.get("productId", "")), {})
+		var h := U.hbox(8)
+		h.add_child(U.icon("box", U.GOLD, 16))
+		h.add_child(U.clip(str(p.get("name", c.get("productId", ""))), U.SM, U.TEXT, "semibold"))
+		h.add_child(U.lbl(L.f("{n} units", {"n": F.number(U.num(c.get("units", 0)))}), U.SM, U.MUTED, "semibold"))
+		var left := auto_days - (now - int(U.num(c.get("day", now))))
+		h.add_child(U.pill(L.f("auto in {d}", {"d": F.days(maxi(0, left))}), U.MUTED))
+		v.add_child(h)
+	if crates.size() > shown:
+		v.add_child(U.lbl(L.f("+{n} more", {"n": crates.size() - shown}), U.XS, U.DIM))
+	v.add_child(U.para(L.t("Units are sold only after shipping. Carry crates into the van, or ship everything from here."), U.XS + 1, U.MUTED))
+	var ship := U.btn(L.f("Ship all · {n} units · +5%", {"n": F.number(units)}), "BtnSuccess", "truck", 0, 38)
+	ship.pressed.connect(func() -> void:
+		var r: Dictionary = await run("shipAll", {})
+		if r.get("ok", false):
+			sfx("cash_register")
+			var d := U.dict(r.get("data", {}))
+			toast("success", L.t("Shipped"), L.f("{n} units are on their way to the shops (+{b} for careful handling).", {"n": F.number(U.num(d.get("units", 0))), "b": F.number(U.num(d.get("bonusUnits", 0)))})))
+	v.add_child(ship)
+	_right.add_child(card)
+
 static func _incident_title(inc: Dictionary) -> String:
 	var kind := str(inc.get("kind", ""))
-	var line := str(inc.get("lineId", "")).trim_prefix("line_")
+	var line := L.t("Line") + " " + str(inc.get("lineId", "")).trim_prefix("line_")
 	if kind == "EquipmentFailure":
-		return "Equipment failure on line " + line
+		return L.f("Equipment failure on {line}", {"line": line})
 	var out := ""
 	for i in kind.length():
 		var ch := kind[i]
 		if i > 0 and ch == ch.to_upper() and ch != ch.to_lower():
 			out += " "
 		out += ch
-	return out + " · " + line
+	return L.t(out) + " · " + line

@@ -5,6 +5,18 @@ const L := preload("res://ui/lib/loc.gd")
 
 const MONTHS_EN := ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
 const MONTHS_RU := ["янв", "фев", "мар", "апр", "мая", "июн", "июл", "авг", "сен", "окт", "ноя", "дек"]
+const MONTHS := {
+	"ru": MONTHS_RU,
+	"uk": ["січ", "лют", "бер", "кві", "тра", "чер", "лип", "сер", "вер", "жов", "лис", "гру"],
+	"de": ["Jan.", "Feb.", "März", "Apr.", "Mai", "Juni", "Juli", "Aug.", "Sep.", "Okt.", "Nov.", "Dez."],
+	"es": ["ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sept", "oct", "nov", "dic"],
+	"pt": ["jan", "fev", "mar", "abr", "mai", "jun", "jul", "ago", "set", "out", "nov", "dez"],
+	"fr": ["janv.", "févr.", "mars", "avr.", "mai", "juin", "juil.", "août", "sept.", "oct.", "nov.", "déc."],
+	"pl": ["sty", "lut", "mar", "kwi", "maj", "cze", "lip", "sie", "wrz", "paź", "lis", "gru"],
+	"tr": ["Oca", "Şub", "Mar", "Nis", "May", "Haz", "Tem", "Ağu", "Eyl", "Eki", "Kas", "Ara"],
+}
+## short "days" unit per language (n is put in front)
+const DAYS_UNIT := {"ru": "дн.", "uk": "дн.", "de": "Tg.", "es": "d", "pt": "d", "fr": "j", "pl": "dni", "tr": "gün", "zh": "天", "ja": "日"}
 
 static func money(v: float, decimals: int = 0) -> String:
 	# same compact format as the Roblox version in both languages ($2.50M, $750.0K)
@@ -61,7 +73,11 @@ static func date(year: int, day: int) -> String:
 	var dq := ((day - 1) % 90)
 	var month := q * 3 + int(dq / 30)
 	var dm := (dq % 30) + 1
-	var names: Array = MONTHS_RU if L.is_ru() else MONTHS_EN
+	if L.lang == "zh" or L.lang == "ja":
+		return "%d年%d月%d日" % [year, clampi(month, 0, 11) + 1, dm]
+	var names: Array = MONTHS.get(L.lang, MONTHS_EN)
+	if L.lang == "de":
+		return "%d. %s %d" % [dm, names[clampi(month, 0, 11)], year]
 	return "%d %s %d" % [dm, names[clampi(month, 0, 11)], year]
 
 ## Date of an absolute game day (elapsed days since start, day 0 = 1 Jan startYear).
@@ -74,8 +90,8 @@ static func quarter(year: int, day: int) -> String:
 	return "Q%d %d" % [int((day - 1) / 90) + 1, year]
 
 static func days(n: int) -> String:
-	if L.is_ru():
-		return "%d дн." % n
+	if DAYS_UNIT.has(L.lang):
+		return ("%d%s" if L.is_cjk() else "%d %s") % [n, DAYS_UNIT[L.lang]]
 	return "%d day%s" % [n, "" if n == 1 else "s"]
 
 static func plural_ru(n: int, one: String, few: String, many: String) -> String:

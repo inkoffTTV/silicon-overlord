@@ -1,20 +1,34 @@
 extends RefCounted
-## Localisation (EN source text -> RU). Port of the Roblox Locale phrase matcher:
-##   * exact phrase table exported from the Roblox client (client/ui/data/locale.json, 2800+ phrases)
+## Localisation. English is the source language: every UI string is written in English in code and
+## translated at display time.
+##   * RU: Roblox phrase table (client/ui/data/locale.json, 2800+ phrases) + client phrases (loc_extra.gd)
+##   * every language (RU too): client/ui/i18n/*.json — one row per English phrase:
+##       "Save": ["Сохранить", "Зберегти", "Speichern", ...]   (columns = COLS; "" = no translation)
 ##   * "#" in a key stands for any number/money token ($3.2M, 49%, 1.25x), "@" for any text (translated recursively)
 ##   * segment fallback: pieces between " · ", ". ", ": " ... are translated one by one
-## plus phrases that only exist in this client (loc_extra.gd). Use:
+##   * anything without a translation falls back to the English text
+##   * server texts carry a stable key (docs/LOCALE_KEYS.md): L.server(key, params, english)
+## Use:
 ##   L.t("Research")                 -> "Исследования"
 ##   L.f("Day {n} of {total}", {...}) -> template translated first, then filled
 
 const Extra := preload("res://ui/lib/loc_extra.gd")
 const NUM := "\\$?[-+]?\\d[\\d,]*\\.?\\d*%?[KMBTx]?"
 
+## [code, native name] in picker order
+const LANGS := [["en", "English"], ["ru", "Русский"], ["uk", "Українська"], ["de", "Deutsch"], ["es", "Español"],
+	["pt", "Português (BR)"], ["fr", "Français"], ["pl", "Polski"], ["tr", "Türkçe"], ["zh", "简体中文"], ["ja", "日本語"]]
+## column order of the rows in ui/i18n/*.json
+const COLS := ["ru", "uk", "de", "es", "pt", "fr", "pl", "tr", "zh", "ja"]
+const I18N_FILES := ["res://ui/i18n/client.json", "res://ui/i18n/game.json", "res://ui/i18n/iter2.json"]
+const SERVER_FILE := "res://ui/i18n/server.json"
+
 static var lang := "en"
 static var _loaded := false
-static var _ru := {}
-static var _hash := {}
-static var _wild: Array = []
+static var _tables := {}        # lang -> {"raw": {}, "hash": {}, "wild": []}
+static var _rows := {}          # english -> Array (COLS)
+static var _server := {}        # key -> Array: [english template] + COLS
+static var _roblox_ru := {}
 static var _cache := {}
 static var _num_re: RegEx
 static var _dict := {}
@@ -24,55 +38,133 @@ static func _load() -> void:
 		return
 	_loaded = true
 	_num_re = RegEx.create_from_string(NUM)
-	var f := FileAccess.open("res://ui/data/locale.json", FileAccess.READ)
-	if f:
-		var data: Variant = JSON.parse_string(f.get_as_text())
-		if data is Dictionary:
-			_ru = (data.get("ru", {}) as Dictionary).duplicate()
-			_dict = data.get("dict", {})
-	for k in Extra.RU:
-		_ru[k] = Extra.RU[k]
-	for k in _ru:
+	var data: Variant = _read_json("res://ui/data/locale.json")
+	if data is Dictionary:
+		_roblox_ru = (data.get("ru", {}) as Dictionary).duplicate()
+		_dict = data.get("dict", {})
+	for path in I18N_FILES:
+		var rows: Variant = _read_json(path)
+		if rows is Dictionary:
+			for k in rows:
+				if str(k).begins_with("_"):
+					continue
+				var row: Variant = rows[k]
+				if row is Array:
+					_rows[str(k)] = row
+	var srv: Variant = _read_json(SERVER_FILE)
+	if srv is Dictionary:
+		for k in srv:
+			if not str(k).begins_with("_") and srv[k] is Array:
+				_server[str(k)] = srv[k]
+
+static func _read_json(path: String) -> Variant:
+	if not FileAccess.file_exists(path):
+		return null
+	var f := FileAccess.open(path, FileAccess.READ)
+	if f == null:
+		return null
+	return JSON.parse_string(f.get_as_text())
+
+## Raw phrase table (english -> translation) of one language.
+static func raw_table(l: String) -> Dictionary:
+	_load()
+	if _tables.has(l):
+		return _tables[l].raw
+	var raw := {}
+	if l == "ru":
+		raw = _roblox_ru.duplicate()
+		for k in Extra.RU:
+			raw[k] = Extra.RU[k]
+	var col := COLS.find(l)
+	if col >= 0:
+		for k in _rows:
+			var row: Array = _rows[k]
+			if col < row.size() and str(row[col]) != "":
+				raw[k] = str(row[col])
+	var hash := {}
+	var wild := []
+	for k in raw:
 		var key: String = k
-		var val: String = str(_ru[k])
 		var nk := _normalise(key)
-		var nv := _normalise(val)
+		var nv := _normalise(str(raw[k]))
 		if key.contains("@"):
 			var literal := nk.replace("#", "").replace("@", "")
 			var re := RegEx.create_from_string(_build_pattern(nk))
 			if re and re.is_valid():
-				_wild.append({"re": re, "value": nv, "weight": literal.length()})
+				wild.append({"re": re, "value": nv, "weight": literal.length()})
 		else:
-			_hash[nk] = nv
-	_wild.sort_custom(func(a: Dictionary, b: Dictionary) -> bool: return a.weight > b.weight)
+			hash[nk] = nv
+	wild.sort_custom(func(a: Dictionary, b: Dictionary) -> bool: return a.weight > b.weight)
+	_tables[l] = {"raw": raw, "hash": hash, "wild": wild}
+	return raw
+
+static func codes() -> Array:
+	var out := []
+	for p in LANGS:
+		out.append(p[0])
+	return out
+
+static func native_name(code: String) -> String:
+	for p in LANGS:
+		if p[0] == code:
+			return p[1]
+	return code
+
+static func supported(l: String) -> bool:
+	return codes().has(l)
 
 static func set_lang(l: String) -> void:
-	if l != "en" and l != "ru":
+	if not supported(l):
 		return
 	lang = l
 	_cache.clear()
 
+## Language from the OS locale ("pt_BR" -> "pt", "zh_CN" -> "zh", "be" -> "ru"), English otherwise.
 static func detect() -> String:
-	return "ru" if OS.get_locale_language() == "ru" else "en"
+	return from_locale(OS.get_locale())
+
+static func from_locale(loc: String) -> String:
+	var l := loc.to_lower().replace("-", "_").split("_")[0]
+	if l == "be" or l == "kk":
+		return "ru"
+	return l if supported(l) else "en"
 
 static func is_ru() -> bool:
 	return lang == "ru"
+
+static func is_cjk() -> bool:
+	return lang == "zh" or lang == "ja"
 
 ## Translate an English UI string to the current language.
 static func t(text: String) -> String:
 	if lang == "en" or text == "":
 		return text
-	_load()
 	if _cache.has(text):
 		return _cache[text]
+	raw_table(lang)
 	var r := _translate(text, 0)
 	if _cache.size() < 6000:
 		_cache[text] = r
 	return r
 
-## Template with {named} placeholders: the template is translated, then filled. String args are translated too.
+## Translation of `text` in `l` without changing the current language ("" when there is none). Tests.
+static func lookup(text: String, l: String) -> String:
+	if l == "en":
+		return text
+	var keep := lang
+	lang = l
+	_cache.clear()
+	raw_table(l)
+	var r := _translate(text, 0)
+	lang = keep
+	_cache.clear()
+	return r if r != text else ""
+
+## Template with {named} placeholders: the template is translated, then filled.
 static func f(template: String, args: Dictionary = {}) -> String:
-	var s := t(template)
+	return fill(t(template), args)
+
+static func fill(s: String, args: Dictionary) -> String:
 	for k in args:
 		var v: Variant = args[k]
 		var vs := str(v)
@@ -81,18 +173,105 @@ static func f(template: String, args: Dictionary = {}) -> String:
 		s = s.replace("{" + str(k) + "}", vs)
 	return s
 
-## Roblox Locale.t(key, args) dictionary (keyed strings).
+## Roblox Locale.t(key, args) dictionary (keyed strings). Other languages: the English entry, translated.
 static func key(k: String, args: Dictionary = {}) -> String:
 	_load()
-	var d: Dictionary = _dict.get(lang, _dict.get("en", {}))
-	var s: String = str(d.get(k, (_dict.get("en", {}) as Dictionary).get(k, k)))
+	var en: Dictionary = _dict.get("en", {})
+	var s := ""
+	if lang == "en" or lang == "ru":
+		var d: Dictionary = _dict.get(lang, en)
+		s = str(d.get(k, en.get(k, k)))
+	else:
+		s = t(str(en.get(k, k)))
 	for a in args:
 		s = s.replace("{" + str(a) + "}", str(args[a]))
 	return s
 
 static func known(text: String) -> bool:
+	return raw_table("ru").has(text)
+
+# ---------------------------------------------------------------- server texts (docs/LOCALE_KEYS.md)
+## Server text with a stable key: our translation of the key's template, else the English text the server sent
+## (run through the phrase table), else the key's English template.
+static func server(k: Variant, params: Variant, english: String) -> String:
 	_load()
-	return _ru.has(text)
+	var ks := str(k) if k != null else ""
+	var p: Dictionary = params if params is Dictionary else {}
+	if ks != "" and _server.has(ks):
+		var row: Array = _server[ks]
+		var col := COLS.find(lang) + 1
+		var tpl := ""
+		if lang == "en":
+			tpl = str(row[0]) if english == "" else ""
+		elif col > 0 and col < row.size():
+			tpl = str(row[col])
+		if tpl != "":
+			return _fill_server(tpl, p)
+	if english != "":
+		return t(english)
+	if ks != "" and _server.has(ks):
+		return _fill_server(t(str(_server[ks][0])), p)
+	return english
+
+## state.news[] entry -> [title, body] in the current language.
+static func news(n: Dictionary) -> Array:
+	return [server(n.get("key"), n.get("params"), str(n.get("title", ""))),
+		server(n.get("bodyKey"), n.get("bodyParams"), str(n.get("body", "")) if n.get("body") != null else "")]
+
+## Review headline / body (body = parts joined with a space, docs/LOCALE_KEYS.md).
+static func review_headline(r: Dictionary) -> String:
+	return server(r.get("headlineKey"), r.get("headlineParams"), str(r.get("headline", "")))
+
+static func review_body(r: Dictionary) -> String:
+	var english := str(r.get("body", ""))
+	var parts: Variant = r.get("bodyParts")
+	if lang != "en" and parts is Array and not (parts as Array).is_empty():
+		var col := COLS.find(lang) + 1
+		var out: Array = []
+		for part in parts:
+			if not (part is Dictionary) or not _server.has(str(part.get("key", ""))):
+				return t(english)
+			var row: Array = _server[str(part.key)]
+			if col <= 0 or col >= row.size() or str(row[col]) == "":
+				return t(english)
+			out.append(_fill_server(str(row[col]), part.get("params", {}) if part.get("params") is Dictionary else {}))
+		return ("" if is_cjk() else " ").join(out)
+	return t(english)
+
+static func has_server_key(k: String) -> bool:
+	_load()
+	return _server.has(k)
+
+static func server_keys() -> Dictionary:
+	_load()
+	return _server
+
+static func _fill_server(tpl: String, p: Dictionary) -> String:
+	var s := tpl
+	for name in p:
+		var v: Variant = p[name]
+		var vs := ""
+		if v is float or v is int:
+			var fv := float(v)
+			if is_equal_approx(fv, round(fv)) and absf(fv) < 1e15:
+				vs = _group(int(round(fv)))
+			else:
+				vs = str(snappedf(fv, 0.01))
+		else:
+			vs = t(str(v))
+		s = s.replace("{" + str(name) + "}", vs)
+	return s
+
+static func _group(n: int) -> String:
+	var s := str(absi(n))
+	var out := ""
+	var count := 0
+	for i in range(s.length() - 1, -1, -1):
+		out = s[i] + out
+		count += 1
+		if count % 3 == 0 and i > 0:
+			out = "," + out
+	return ("-" if n < 0 else "") + out
 
 # ---------------------------------------------------------------- matcher
 static func _normalise(s: String) -> String:
@@ -107,9 +286,9 @@ static func _normalise(s: String) -> String:
 	out += t0.substr(pos)
 	return out.replace("\u0001", "#")
 
-static func _build_pattern(key: String) -> String:
+static func _build_pattern(k: String) -> String:
 	var out := "(?s)^"
-	for ch in key:
+	for ch in k:
 		if ch == "#":
 			out += "(" + NUM + ")"
 		elif ch == "@":
@@ -138,12 +317,14 @@ static func _substitute(template: String, caps: Array, depth: int) -> String:
 static func _translate(text: String, depth: int) -> String:
 	if text == "" or depth > 3:
 		return text
-	if _ru.has(text):
-		return _ru[text]
+	var tb: Dictionary = _tables[lang]
+	var raw: Dictionary = tb.raw
+	if raw.has(text):
+		return raw[text]
 	var core := text.strip_edges()
 	var lead := text.substr(0, text.length() - text.strip_edges(true, false).length())
-	if core != text and _ru.has(core):
-		return lead + str(_ru[core])
+	if core != text and raw.has(core):
+		return lead + str(raw[core])
 	# numeric templates
 	var caps: Array = []
 	var norm := ""
@@ -159,10 +340,10 @@ static func _translate(text: String, depth: int) -> String:
 			norm += "#"
 		pos = m.get_end()
 	norm += core.substr(pos)
-	if _hash.has(norm):
-		return lead + _substitute(_hash[norm], caps, depth)
+	if tb.hash.has(norm):
+		return lead + _substitute(tb.hash[norm], caps, depth)
 	# wildcard templates
-	for w in _wild:
+	for w in tb.wild:
 		var m2: RegExMatch = (w.re as RegEx).search(core)
 		if m2:
 			var c2: Array = []

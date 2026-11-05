@@ -100,6 +100,7 @@ function EmployeeRules.friendCandidate(friend: Types.FriendInfo, companyId: stri
 		id = string.format("emp_f%.0f", friend.userId), name = friend.name, username = friend.username, userId = friend.userId, friend = true,
 		role = role :: any, skill = skill, salaryMonthly = EmployeeRules.salaryFor(role, skill),
 		experience = MathUtil.round(rng:range(0, 0.4), 2), satisfaction = 0.7, hiredDay = day,
+		station = EmployeeRules.stationFor(role), marketSalary = math.floor(EmployeeRules.salaryFor(role, skill)),
 	}
 end
 
@@ -250,7 +251,39 @@ function EmployeeRules.candidate(rng: Rng.Rng, role: string, day: number, market
 		e.skill = MathUtil.round(cap - 0.01 * rng:next(), 2)
 		e.salaryMonthly = EmployeeRules.salaryFor(role, e.skill)
 	end
+	EmployeeRules.tagStation(e)
 	return e
+end
+
+-- Online iteration 2: where the world places a person ("design" PC desks, "research" whiteboard/lab,
+-- "assembly" workbench/lines, "office" generic desk). Stable: derived from the role only.
+local stationByRole: { [string]: string } = {
+	HardwareEngineer = "design", SoftwareEngineer = "design", Researcher = "research", Worker = "assembly", QCEngineer = "assembly",
+	Marketer = "office", FinancialAnalyst = "office", LogisticsManager = "office",
+}
+function EmployeeRules.stationFor(role: string): string
+	return stationByRole[role] or "office"
+end
+
+-- Sets station + marketSalary (the fair monthly salary setSalary is measured against) on one employee record.
+function EmployeeRules.tagStation(e: any)
+	e.station = EmployeeRules.stationFor(e.role)
+	e.marketSalary = math.floor(EmployeeRules.salaryFor(e.role, e.skill or 0))
+end
+
+-- Every hired employee and candidate (new companies, loaded saves, after hiring, monthly after training).
+function EmployeeRules.ensureStations(c: Types.CompanyState)
+	local emp: any = c.employees
+	if type(emp) ~= "table" then
+		return
+	end
+	for _, list in ipairs({ emp.list, emp.candidates }) do
+		if type(list) == "table" then
+			for _, e in ipairs(list) do
+				EmployeeRules.tagStation(e)
+			end
+		end
+	end
 end
 
 -- ---------------------------------------------------------------------------
@@ -282,6 +315,7 @@ function EmployeeRules.friendCandidate(friend: Types.FriendInfo, companyId: stri
 		id = string.format("emp_f%.0f", friend.userId), name = friend.name, username = friend.username, userId = friend.userId, friend = true,
 		role = role :: any, skill = skill, salaryMonthly = EmployeeRules.salaryFor(role, skill),
 		experience = MathUtil.round(rng:range(0, 0.4), 2), satisfaction = 0.7, hiredDay = day,
+		station = EmployeeRules.stationFor(role), marketSalary = math.floor(EmployeeRules.salaryFor(role, skill)),
 	}
 end
 

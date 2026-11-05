@@ -135,6 +135,11 @@ func refresh() -> void:
 		v.add_child(U.caps(L.t(t[0]).to_upper(), U.MUTED, 10))
 		v.add_child(U.lbl(t[1], U.MD, U.TEXT, "bold"))
 		th.add_child(c)
+	var manage := U.btn(L.t("Hire & manage staff"), "BtnGhost", "cv", 0, 36)
+	manage.pressed.connect(func() -> void:
+		if ui_root and ui_root.has_method("open_screen"):
+			ui_root.open_screen("job_board", ""))
+	tv.add_child(manage)
 	tv.add_child(U.caps(L.t("OWNERS")))
 	var owners := U.dict(state().get("owners", {}))
 	for uid in owners:
@@ -166,7 +171,7 @@ func refresh() -> void:
 		var lvl := int(U.num(U.dict(state().get("hq", {})).get("level", 1), 1))
 		var mins := [100000, 250000, 600000, 1500000, 4000000, 10000000, 25000000]
 		var amount: int = mins[clampi(lvl - 1, 0, 6)]
-		var borrow := U.btn(L.f("Borrow {amount}", {"amount": F.money(amount)}) + " · 12 " + L.t("months"), "BtnPrimary", "bank", 0, 38)
+		var borrow := U.btn(L.f("Borrow {amount} for {n} months", {"amount": F.money(amount), "n": 12}), "BtnPrimary", "bank", 0, 38)
 		borrow.pressed.connect(func() -> void: run("takeBankLoan", {"months": 12, "amount": amount}, L.t("Bank loan"), F.money(amount)))
 		bv.add_child(borrow)
 	# news
@@ -183,6 +188,6 @@ func refresh() -> void:
 		var v := U.vbox(1)
 		v.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		v.add_child(U.lbl(F.day_date(int(U.num(n.get("day", 0)))), U.XS, U.DIM))
-		v.add_child(U.para(L.t(str(n.get("title", ""))), U.SM, U.TEXT, "semibold", 260))
+		v.add_child(U.para(L.news(n)[0], U.SM, U.TEXT, "semibold", 260))
 		row.add_child(v)
 		nv2.add_child(row)

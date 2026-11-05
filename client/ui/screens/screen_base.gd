@@ -21,6 +21,8 @@ var header_actions: HBoxContainer
 var _subtitle_label: Label
 ## state keys this screen cares about ([] = everything)
 var watch_keys: Array = []
+## > 0: a centred dialog card of this width (height fits the content) instead of the full-window frame
+var compact_width := 0.0
 
 func setup(root: Node, id: String) -> void:
 	ui_root = root
@@ -45,12 +47,21 @@ func _build_chrome() -> void:
 	add_child(dim)
 	frame = U.card("Glass")
 	frame.add_theme_stylebox_override("panel", U.card_box(Color(0.047, 0.06, 0.1, 0.96), Color(U.BORDER, 0.8), 0, 16))
-	add_child(frame)
-	frame.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	frame.offset_left = 20
-	frame.offset_top = 18
-	frame.offset_right = -20
-	frame.offset_bottom = -18
+	if compact_width > 0:
+		var center := CenterContainer.new()
+		center.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		U.full_rect(center)
+		add_child(center)
+		center.add_child(frame)
+		frame.custom_minimum_size.x = compact_width
+		frame.add_theme_stylebox_override("panel", U.card_box(Color(0.047, 0.06, 0.1, 0.97), Color(U.BORDER, 0.85), 0, 18))
+	else:
+		add_child(frame)
+		frame.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+		frame.offset_left = 20
+		frame.offset_top = 18
+		frame.offset_right = -20
+		frame.offset_bottom = -18
 	var v := U.vbox(0)
 	frame.add_child(v)
 	# header
@@ -61,8 +72,15 @@ func _build_chrome() -> void:
 	var tv := U.vbox(1)
 	tv.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	head.add_child(tv)
-	tv.add_child(U.lbl(L.t(title), U.XL, U.TEXT, "display"))
+	var tl := U.lbl(L.t(title), U.XL, U.TEXT, "display")
+	tl.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	tl.clip_text = true
+	tl.custom_minimum_size.x = 80
+	tv.add_child(tl)
 	_subtitle_label = U.lbl(L.t(subtitle), U.SM, U.MUTED)
+	_subtitle_label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	_subtitle_label.clip_text = true
+	_subtitle_label.custom_minimum_size.x = 80
 	tv.add_child(_subtitle_label)
 	header_actions = U.hbox(8)
 	header_actions.alignment = BoxContainer.ALIGNMENT_END
@@ -78,7 +96,7 @@ func _build_chrome() -> void:
 	body.add_theme_constant_override("margin_right", 20)
 	body.add_theme_constant_override("margin_top", 16)
 	body.add_theme_constant_override("margin_bottom", 18)
-	body.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	body.size_flags_vertical = Control.SIZE_EXPAND_FILL if compact_width <= 0 else Control.SIZE_FILL
 	v.add_child(body)
 
 func set_subtitle(s: String) -> void:
@@ -112,6 +130,11 @@ func request_close() -> void:
 func state() -> Dictionary:
 	return Game.state
 
+func sfx(name: String) -> void:
+	var s: Node = get_node_or_null("/root/Sfx")
+	if s and s.has_method("ui"):
+		s.call("ui", name)
+
 func toast(kind: String, title_text: String, body_text: String = "") -> void:
 	Bus.notify.emit(kind, title_text, body_text)
 
@@ -124,5 +147,6 @@ func run(action: String, args: Dictionary, ok_title: String = "", ok_body: Strin
 		if ok_title != "":
 			toast("success", ok_title, ok_body)
 	else:
+		sfx("error")
 		toast("error", L.t("Something went wrong"), str(r.get("error", "")))
 	return r

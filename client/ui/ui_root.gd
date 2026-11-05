@@ -44,6 +44,7 @@ func _ready() -> void:
 	layer = 10
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	L.set_lang(force_lang if force_lang != "" else Prefs.lang())
+	U.set_font_lang(L.lang)
 	root = Control.new()
 	root.name = "Root"
 	root.theme = U.theme()
@@ -104,6 +105,7 @@ func _build() -> void:
 func set_language(lang: String) -> void:
 	Prefs.set_setting("ui", "lang", lang)
 	L.set_lang(lang)
+	U.set_font_lang(L.lang)
 	var kind := current_kind
 	var tid: String = current.target_id if current else ""
 	var menu_page: String = menu.page if menu else "home"

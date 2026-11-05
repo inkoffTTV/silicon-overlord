@@ -30,6 +30,8 @@ local Office = require(Shared.Domain.Office)
 local Furniture = require(Shared.Data.Furniture)
 local Competitors = require(Shared.Data.Competitors)
 local Development = require(Shared.Domain.Development)
+local Shipping = require(Shared.Domain.Shipping)
+local Challenges = require(Shared.Domain.Challenges)
 
 local CompanyActions = {}
 
@@ -500,6 +502,8 @@ function CompanyActions.launchProduct(c: Types.CompanyState, productId: string, 
 	if p.lifecycle ~= "Development" then
 		return fail("Product already launched")
 	end
+	-- online iteration 2: the launch takes every crate of this product to the shops
+	Shipping.shipProduct(c, productId, false)
 	if p.inventory <= 0 then
 		return fail("Produce at least one batch before the launch")
 	end
@@ -519,7 +523,8 @@ function CompanyActions.launchProduct(c: Types.CompanyState, productId: string, 
 	p.reviewScore = sum / #p.reviews
 	c.reputation.recognition = MathUtil.clamp(c.reputation.recognition + Balance.Reputation.launchRecognition, 0, 100)
 	c.reputation.innovation = MathUtil.clamp(c.reputation.innovation + (p.ratings.innovation - 50) / 10, 0, 100)
-	CompanySim.addNews(c, "Review", p.reviews[1].headline, p.reviews[1].body)
+	local first: any = p.reviews[1]
+	CompanySim.addNews(c, "Review", first.headline, first.body, { key = first.headlineKey, params = first.headlineParams, bodyParts = first.bodyParts })
 	for _, id in ipairs(Progression.newlyAchieved(c)) do
 		CompanySim.addNews(c, "Milestone", Progression.milestoneName(id), "A new entry in the company history.")
 	end
@@ -532,6 +537,7 @@ function CompanyActions.discontinueProduct(c: Types.CompanyState, productId: str
 		return fail("Unknown product")
 	end
 	p.lifecycle = "Discontinued"
+	Shipping.shipProduct(c, productId, false) -- crates are salvaged with the rest
 	-- liquidate inventory at 40% of unit cost
 	local salvage = p.inventory * p.unitCostUSD * 0.4
 	c.finance.cash = c.finance.cash + salvage
@@ -599,7 +605,9 @@ function CompanyActions.buildLine(c: Types.CompanyState, kind: string): (boolean
 		return fail(string.format("Not enough cash ($%.0f)", cost))
 	end
 	local id = nextId(c, "line")
-	c.production.lines[#c.production.lines + 1] = ProductionRules.newLine(id, kind, 1)
+	local line: any = ProductionRules.newLine(id, kind, 1)
+	line.location = "upstairs" -- online iteration 2: bought lines stand on the second floor
+	c.production.lines[#c.production.lines + 1] = line
 	return true, { id = id, cost = cost }
 end
 
@@ -982,9 +990,14 @@ function CompanyActions.buyResources(c: Types.CompanyState, resourceId: string, 
 	local evMods = require(Shared.Domain.EventEngine).modifiers(c.world, c.time.elapsedDays)
 	local mods = ResearchRules.aggregateModifiers(c.research.unlocked)
 	local price = res.basePrice * 1.15 * (evMods.supply[resourceId] or 1) * (mods.material_cost_mult or 1)
-	local cost = price * units
+	local ch: any = c.challenges
+	local discount = ch and tonumber(ch.supplierDiscount) or 0 -- negotiation challenge (online iteration 2)
+	local cost = price * units * (1 - discount)
 	if not spend(c, cost) then
 		return fail(string.format("Not enough cash ($%.0f)", cost))
+	end
+	if discount > 0 then
+		Challenges.takeSupplierDiscount(c)
 	end
 	c.finance.qOpex = c.finance.qOpex - cost -- counts as COGS when consumed, not opex
 	c.finance.qCogs = c.finance.qCogs + cost
@@ -1099,6 +1112,7 @@ function CompanyActions.hire(c: Types.CompanyState, candidateId: string): (boole
 	end
 	table.remove(c.employees.candidates, idx :: number)
 	cand.hiredDay = c.time.elapsedDays
+	EmployeeRules.tagStation(cand)
 	c.employees.list[#c.employees.list + 1] = cand
 	return true, { employee = cand }
 end
@@ -1779,6 +1793,70 @@ function CompanyActions.setAutoHire(c: Types.CompanyState, on: any): (boolean, a
 	local o: any = c.office
 	o.autoHire = on == true
 	return true, { autoHire = o.autoHire }
+end
+
+-- ---------------------------------------------------------------------------
+-- Online iteration 2: manual shipping, room catalog, challenge rewards
+-- ---------------------------------------------------------------------------
+function CompanyActions.shipCrate(c: Types.CompanyState, crateId: string): (boolean, any)
+	local r, err = Shipping.ship(c, crateId, true)
+	if not r then
+		return fail(err or "Unknown crate")
+	end
+	r.premium = Shipping.payPremium(c, { r })
+	return true, r
+end
+
+function CompanyActions.shipAll(c: Types.CompanyState): (boolean, any)
+	local ids = {}
+	for _, cr in ipairs(Shipping.crates(c)) do
+		ids[#ids + 1] = cr.id
+	end
+	if #ids == 0 then
+		return fail("No crates to ship")
+	end
+	local shipped, units, bonus = {}, 0, 0
+	for _, id in ipairs(ids) do
+		local r = Shipping.ship(c, id, true)
+		if r then
+			shipped[#shipped + 1] = { crateId = r.crateId, productId = r.productId, units = r.units }
+			units = units + r.units
+			bonus = bonus + r.bonusUnits
+		end
+	end
+	local premium = Shipping.payPremium(c, shipped)
+	return true, { shipped = #shipped, units = units, bonusUnits = bonus, premium = premium, crates = shipped }
+end
+
+-- Read-only: build status and next-level price of every room (UI: "Buy the second floor" dialog)
+function CompanyActions.roomCatalog(c: Types.CompanyState): (boolean, any)
+	local out = {}
+	for _, def in ipairs(Rooms.list) do
+		local cur = c.hq.rooms[def.id]
+		local level = cur and cur.level or 0
+		local minHQ = Balance.HQ.roomMinHQLevel[def.id] or 1
+		local maxLevel = Balance.HQ.roomMaxLevel
+		local nextCost = nil
+		if level < maxLevel then
+			nextCost = math.floor((Balance.HQ.roomBuildCostBase[def.id] or 0) * (Balance.HQ.roomUpgradeMult ^ level))
+		end
+		local reason = nil
+		if level >= maxLevel then
+			reason = "Room at max level"
+		elseif c.hq.level < minHQ then
+			reason = "Requires HQ level " .. tostring(minHQ)
+		elseif level + 1 > c.hq.level + 1 then
+			reason = "Room level cannot exceed HQ level + 1"
+		elseif nextCost and c.finance.cash < nextCost then
+			reason = string.format("Not enough cash ($%.0f)", nextCost)
+		end
+		out[def.id] = { name = def.name, effect = def.effect, level = level, maxLevel = maxLevel, minHQLevel = minHQ, nextCost = nextCost, canBuild = reason == nil, reason = reason }
+	end
+	return true, { rooms = out, hqLevel = c.hq.level }
+end
+
+function CompanyActions.challengeReward(c: Types.CompanyState, kind: any, targetId: any, score: any): (boolean, any)
+	return Challenges.reward(c, kind, targetId, score)
 end
 
 -- Moving into a bigger office keeps the furniture; the grid only grows

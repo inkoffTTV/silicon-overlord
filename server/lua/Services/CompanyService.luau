@@ -36,6 +36,7 @@ local ALL_KEYS = {
 	"stock", "world", "milestones", "audit", "news", "owners", "approvals", "invites", "tutorialStep", "specialization", "liquidated", "customComponents", "name", "logo", "mode", "projects", "unlockedFinishes",
 	"loan", "regionsUnlocked", "office",
 	"goals", "achievements", "awards", "daily", "empire", "legacyMods",
+	"challenges", -- online iteration 2
 }
 CompanyService.ALL_KEYS = ALL_KEYS
 
@@ -269,6 +270,14 @@ local function dirtyKeysForDay(session, state, notes)
 		end
 	end
 	session.hadProd = prodActive
+	-- online iteration 2: crates waiting to ship (auto-ship can happen on days without production)
+	local crates = state.production.crates
+	local hasCrates = type(crates) == "table" and #crates > 0
+	if hasCrates or session.hadCrates then
+		keys[#keys + 1] = "production"
+		keys[#keys + 1] = "products"
+	end
+	session.hadCrates = hasCrates
 	local fabActive = false
 	for _, j in ipairs(state.production.fabJobs) do
 		if j.status ~= "Done" then

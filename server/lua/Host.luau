@@ -351,7 +351,8 @@ local known = {}
 for name in pairs(RemoteRegistry.ActionPermission) do
 	known[name] = true
 end
-for _, name in ipairs({ "setSpeed", "getSnapshot", "setTutorialStep", "evaluateBlueprint", "respondApproval", "leaveCompany", "getAudit", "claimDaily", "takePerk", "getProfile", "buyTokenItem" }) do
+for _, name in ipairs({ "setSpeed", "getSnapshot", "setTutorialStep", "evaluateBlueprint", "respondApproval", "leaveCompany", "getAudit", "claimDaily", "takePerk", "getProfile", "buyTokenItem",
+	"shipCrate", "shipAll", "getRoomCatalog", "challengeReward" }) do
 	known[name] = true
 end
 

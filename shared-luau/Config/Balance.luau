@@ -147,6 +147,10 @@ Balance.Production = {
 	warehouseCapacityPerLevel = { 5000, 20000, 60000, 150000, 400000, 1000000, 3000000 },
 	qcCostPerUnitPerLevel = 1.8,
 	returnsCostMult = 1.1, -- refund + logistics as multiple of unit cost
+	-- iteration 2 (online): finished goods wait in crates until shipped
+	manualShipBonus = 0.05, -- +5% units when a player ships a crate by hand ("careful handling")
+	autoShipDays = 7, -- crates older than this ship by themselves (no bonus); instantly with a LogisticsCenter
+	maxOpenCrates = 20, -- when full, new output merges into the product's newest crate
 }
 
 -- ---------------- Market ----------------
@@ -266,7 +270,7 @@ Balance.HQ = {
 	upgradeCost = { 0, 1500000, 6000000, 20000000, 60000000, 180000000, 500000000 },
 	roomBuildCostBase = {
 		Headquarters = 0, ExecutiveOffice = 200000, ResearchLab = 800000, SemiconductorFab = 6000000,
-		CPUDepartment = 2500000, GPUDepartment = 3000000, AssemblyLine = 500000, QualityControl = 400000,
+		CPUDepartment = 2500000, GPUDepartment = 3000000, AssemblyLine = 150000, QualityControl = 400000,
 		MarketingDepartment = 350000, Showroom = 300000, ServerRoom = 900000, LogisticsCenter = 700000,
 		Warehouse = 450000, ConferenceRoom = 250000,
 	},
@@ -379,6 +383,16 @@ Balance.Development = {
 	bothHelpedOverall = 3,
 	rushedQualityShare = 0.5, -- launching before completion keeps only half of the quality bonus
 	blockProduction = true, -- no production batches until the prototype is finished
+}
+
+-- ---------------- Challenges (online iteration 2: skill mini-games, server-capped rewards) ----------------
+-- Every reward scales with the client's score (clamped 0..1). Cooldowns are per company, per kind + target, in game days.
+Balance.Challenges = {
+	research = { cooldownDays = 5, maxProgress = 0.08 }, -- + up to 8% of the tech's total progress
+	design = { cooldownDays = 5, maxQuality = 3, bugFixScore = 0.5, toughBugScore = 0.8 }, -- free bug fix or + quality
+	assembly = { cooldownDays = 5, maxCrateBonusPct = 0.10 }, -- + up to 10% units on the product's next/newest crate
+	negotiation = { cooldownDays = 10, maxSupplierDiscount = 0.10, maxRetailerPremium = 0.03 },
+	historyLength = 10,
 }
 
 -- ---------------- Office grid & build mode (NEXT-PASS-A) ----------------

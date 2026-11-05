@@ -1,0 +1,74 @@
+[
+ {
+  "key": "err.unknown_crate",
+  "en": "Unknown crate"
+ },
+ {
+  "key": "err.no_crates_to_ship",
+  "en": "No crates to ship"
+ },
+ {
+  "key": "err.unknown_challenge",
+  "en": "Unknown challenge"
+ },
+ {
+  "key": "err.challenge_cooldown",
+  "en": "Already done: try again in {days} days"
+ },
+ {
+  "key": "err.challenge_tech_not_active",
+  "en": "That technology is not being researched"
+ },
+ {
+  "key": "err.challenge_project_not_active",
+  "en": "That project is not in development"
+ },
+ {
+  "key": "err.challenge_nothing_assembled",
+  "en": "Nothing is being assembled there"
+ },
+ {
+  "key": "err.challenge_negotiation_target",
+  "en": "Talk to the supplier or the retailer"
+ },
+ {
+  "key": "err.challenge_nothing_to_polish",
+  "en": "Nothing left to polish on this project"
+ },
+ {
+  "key": "err.not_enough_cash_cost",
+  "en": "Not enough cash (${cost})"
+ },
+ {
+  "key": "err.too_many_requests",
+  "en": "Too many requests"
+ },
+ {
+  "key": "err.internal_error",
+  "en": "Internal error"
+ },
+ {
+  "key": "err.missing_permission",
+  "en": "Missing permission: {permission}"
+ },
+ {
+  "key": "err.unknown_message_type",
+  "en": "Unknown message type: {type}"
+ },
+ {
+  "key": "err.unsupported_protocol",
+  "en": "Unsupported protocol version (server speaks v{version})"
+ },
+ {
+  "key": "err.player_name_rule",
+  "en": "Name: 1-{max} letters, digits or spaces"
+ },
+ {
+  "key": "err.create_needs_company",
+  "en": "create needs company: name, colorA, colorB, mode"
+ },
+ {
+  "key": "news.daily_gift_cash",
+  "en": "+${amount}"
+ }
+]

@@ -1,0 +1,6087 @@
+[
+ {
+  "key": "err.a_challenge_is_already_active",
+  "en": "A challenge is already active",
+  "group": "err"
+ },
+ {
+  "key": "err.a_live_product_uses_this_blueprint",
+  "en": "A live product uses this blueprint",
+  "group": "err"
+ },
+ {
+  "key": "err.a_tough_bug_needs_fixtoughbugrp_research_points",
+  "en": "A tough bug needs {fixToughBugRp} research points",
+  "group": "err"
+ },
+ {
+  "key": "err.act_needs_an_integer_id",
+  "en": "act needs an integer id",
+  "group": "err"
+ },
+ {
+  "key": "err.additional_partners_can_receive_5_30",
+  "en": "Additional partners can receive 5..30%",
+  "group": "err"
+ },
+ {
+  "key": "err.already_at_the_top_level",
+  "en": "Already at the top level",
+  "group": "err"
+ },
+ {
+  "key": "err.already_bought_today",
+  "en": "Already bought today",
+  "group": "err"
+ },
+ {
+  "key": "err.already_chosen",
+  "en": "Already chosen",
+  "group": "err"
+ },
+ {
+  "key": "err.already_claimed_today",
+  "en": "Already claimed today",
+  "group": "err"
+ },
+ {
+  "key": "err.already_enabled",
+  "en": "Already enabled",
+  "group": "err"
+ },
+ {
+  "key": "err.already_greeted",
+  "en": "Already greeted",
+  "group": "err"
+ },
+ {
+  "key": "err.already_in_progress",
+  "en": "Already in progress",
+  "group": "err"
+ },
+ {
+  "key": "err.already_licensed_to_this_company",
+  "en": "Already licensed to this company",
+  "group": "err"
+ },
+ {
+  "key": "err.already_patented",
+  "en": "Already patented",
+  "group": "err"
+ },
+ {
+  "key": "err.already_researched",
+  "en": "Already researched",
+  "group": "err"
+ },
+ {
+  "key": "err.already_running",
+  "en": "Already running",
+  "group": "err"
+ },
+ {
+  "key": "err.already_started",
+  "en": "Already started",
+  "group": "err"
+ },
+ {
+  "key": "err.already_unlocked",
+  "en": "Already unlocked",
+  "group": "err"
+ },
+ {
+  "key": "err.args_must_be_an_object",
+  "en": "args must be an object",
+  "group": "err"
+ },
+ {
+  "key": "err.bezel_must_be_0_05_1_in",
+  "en": "bezel must be 0.05..1 in",
+  "group": "err"
+ },
+ {
+  "key": "err.blueprint_is_locked_by_a_co_founder",
+  "en": "Blueprint is locked by a co-founder",
+  "group": "err"
+ },
+ {
+  "key": "err.blueprint_limit_reached_40",
+  "en": "Blueprint limit reached (40)",
+  "group": "err"
+ },
+ {
+  "key": "err.build_the_factory_first",
+  "en": "Build the factory first",
+  "group": "err"
+ },
+ {
+  "key": "err.build_the_id_level_level",
+  "en": "Build the {id} (level {level})",
+  "group": "err"
+ },
+ {
+  "key": "err.build_the_name_first",
+  "en": "Build the {name} first",
+  "group": "err"
+ },
+ {
+  "key": "err.build_the_server_infrastructure_room_first",
+  "en": "Build the Server Infrastructure room first",
+  "group": "err"
+ },
+ {
+  "key": "err.candidate_no_longer_available",
+  "en": "Candidate no longer available",
+  "group": "err"
+ },
+ {
+  "key": "err.cannot_afford_the_cancellation_penalty",
+  "en": "Cannot afford the cancellation penalty",
+  "group": "err"
+ },
+ {
+  "key": "err.cannot_start",
+  "en": "Cannot start",
+  "group": "err"
+ },
+ {
+  "key": "err.challenge_already_beaten",
+  "en": "Challenge already beaten",
+  "group": "err"
+ },
+ {
+  "key": "err.challenge_cooldown",
+  "en": "Already done: try again in {days} days",
+  "group": "err"
+ },
+ {
+  "key": "err.challenge_negotiation_target",
+  "en": "Talk to the supplier or the retailer",
+  "group": "err"
+ },
+ {
+  "key": "err.challenge_nothing_assembled",
+  "en": "Nothing is being assembled there",
+  "group": "err"
+ },
+ {
+  "key": "err.challenge_nothing_to_polish",
+  "en": "Nothing left to polish on this project",
+  "group": "err"
+ },
+ {
+  "key": "err.challenge_project_not_active",
+  "en": "That project is not in development",
+  "group": "err"
+ },
+ {
+  "key": "err.challenge_tech_not_active",
+  "en": "That technology is not being researched",
+  "group": "err"
+ },
+ {
+  "key": "err.challenges_can_only_be_taken_in_the_company_s",
+  "en": "Challenges can only be taken in the company's first year",
+  "group": "err"
+ },
+ {
+  "key": "err.chip_design_limit_reached_24",
+  "en": "Chip design limit reached (24)",
+  "group": "err"
+ },
+ {
+  "key": "err.commission_must_be_5_30",
+  "en": "Commission must be 5%..30%",
+  "group": "err"
+ },
+ {
+  "key": "err.company_already_has_the_maximum_number_of_owners",
+  "en": "Company already has the maximum number of owners",
+  "group": "err"
+ },
+ {
+  "key": "err.company_name_1_24_letters_digits_or_spaces",
+  "en": "Company name: 1-24 letters, digits or spaces",
+  "group": "err"
+ },
+ {
+  "key": "err.company_not_found",
+  "en": "Company not found",
+  "group": "err"
+ },
+ {
+  "key": "err.company_not_loaded",
+  "en": "Company not loaded",
+  "group": "err"
+ },
+ {
+  "key": "err.component_does_not_meet_the_buyer_s_requirements",
+  "en": "Component does not meet the buyer's requirements",
+  "group": "err"
+ },
+ {
+  "key": "err.contract_must_run_at_least_minweeks_weeks",
+  "en": "Contract must run at least {minWeeks} weeks",
+  "group": "err"
+ },
+ {
+  "key": "err.create_needs_company",
+  "en": "create needs company: name, colorA, colorB, mode",
+  "group": "err"
+ },
+ {
+  "key": "err.daily_rewards_value_day_streak",
+  "en": "Daily rewards: {value}-day streak",
+  "group": "err"
+ },
+ {
+  "key": "err.day_7_of_your_first_daily_rewards_week",
+  "en": "Day 7 of your first daily-rewards week",
+  "group": "err"
+ },
+ {
+  "key": "err.displayname_is_editing_this_blueprint",
+  "en": "{displayName} is editing this blueprint",
+  "group": "err"
+ },
+ {
+  "key": "err.enter_a_6_character_code_like_abc_123",
+  "en": "Enter a 6-character code like ABC-123",
+  "group": "err"
+ },
+ {
+  "key": "err.every_desk_already_has_one_place_another_desk",
+  "en": "Every desk already has one. Place another desk first",
+  "group": "err"
+ },
+ {
+  "key": "err.every_owner_needs_a_share",
+  "en": "Every owner needs a share",
+  "group": "err"
+ },
+ {
+  "key": "err.fab_is_busy",
+  "en": "Fab is busy",
+  "group": "err"
+ },
+ {
+  "key": "err.factory_is_at_the_maximum_level",
+  "en": "Factory is at the maximum level",
+  "group": "err"
+ },
+ {
+  "key": "err.factory_setup_costs_setup",
+  "en": "Factory setup costs ${setup}",
+  "group": "err"
+ },
+ {
+  "key": "err.feature_locked_name",
+  "en": "Feature locked: {name}",
+  "group": "err"
+ },
+ {
+  "key": "err.feature_not_for_this_device_name",
+  "en": "Feature not for this device: {name}",
+  "group": "err"
+ },
+ {
+  "key": "err.finish_locked_why",
+  "en": "Finish locked: {why}",
+  "group": "err"
+ },
+ {
+  "key": "err.fix_compatibility_errors_first_description",
+  "en": "Fix compatibility errors first: {description}",
+  "group": "err"
+ },
+ {
+  "key": "err.founder_permissions_cannot_be_edited",
+  "en": "Founder permissions cannot be edited",
+  "group": "err"
+ },
+ {
+  "key": "err.internal_error",
+  "en": "Internal error",
+  "group": "err"
+ },
+ {
+  "key": "err.invalid_accent_colour",
+  "en": "Invalid accent colour",
+  "group": "err"
+ },
+ {
+  "key": "err.invalid_amount",
+  "en": "Invalid amount",
+  "group": "err"
+ },
+ {
+  "key": "err.invalid_approval_kind",
+  "en": "Invalid approval kind",
+  "group": "err"
+ },
+ {
+  "key": "err.invalid_architecture",
+  "en": "Invalid architecture",
+  "group": "err"
+ },
+ {
+  "key": "err.invalid_body_colour",
+  "en": "Invalid body colour",
+  "group": "err"
+ },
+ {
+  "key": "err.invalid_budget",
+  "en": "Invalid budget",
+  "group": "err"
+ },
+ {
+  "key": "err.invalid_bus_width",
+  "en": "Invalid bus width",
+  "group": "err"
+ },
+ {
+  "key": "err.invalid_button_side",
+  "en": "Invalid button side",
+  "group": "err"
+ },
+ {
+  "key": "err.invalid_camera_bump",
+  "en": "Invalid camera bump",
+  "group": "err"
+ },
+ {
+  "key": "err.invalid_camera_layout",
+  "en": "Invalid camera layout",
+  "group": "err"
+ },
+ {
+  "key": "err.invalid_cell",
+  "en": "Invalid cell",
+  "group": "err"
+ },
+ {
+  "key": "err.invalid_colorway",
+  "en": "Invalid colorway",
+  "group": "err"
+ },
+ {
+  "key": "err.invalid_core_clock_values",
+  "en": "Invalid core/clock values",
+  "group": "err"
+ },
+ {
+  "key": "err.invalid_features",
+  "en": "Invalid features",
+  "group": "err"
+ },
+ {
+  "key": "err.invalid_finish",
+  "en": "Invalid finish",
+  "group": "err"
+ },
+ {
+  "key": "err.invalid_form_factor",
+  "en": "Invalid form factor",
+  "group": "err"
+ },
+ {
+  "key": "err.invalid_gpu_form_factor",
+  "en": "Invalid GPU form factor",
+  "group": "err"
+ },
+ {
+  "key": "err.invalid_gpu_values",
+  "en": "Invalid GPU values",
+  "group": "err"
+ },
+ {
+  "key": "err.invalid_json",
+  "en": "Invalid JSON",
+  "group": "err"
+ },
+ {
+  "key": "err.invalid_layout",
+  "en": "Invalid layout",
+  "group": "err"
+ },
+ {
+  "key": "err.invalid_light_colour",
+  "en": "Invalid light colour",
+  "group": "err"
+ },
+ {
+  "key": "err.invalid_logo",
+  "en": "Invalid logo",
+  "group": "err"
+ },
+ {
+  "key": "err.invalid_memory_controller",
+  "en": "Invalid memory controller",
+  "group": "err"
+ },
+ {
+  "key": "err.invalid_move",
+  "en": "Invalid move",
+  "group": "err"
+ },
+ {
+  "key": "err.invalid_name",
+  "en": "Invalid name",
+  "group": "err"
+ },
+ {
+  "key": "err.invalid_option",
+  "en": "Invalid option",
+  "group": "err"
+ },
+ {
+  "key": "err.invalid_or_expired_invite_code",
+  "en": "Invalid or expired invite code",
+  "group": "err"
+ },
+ {
+  "key": "err.invalid_path",
+  "en": "Invalid path",
+  "group": "err"
+ },
+ {
+  "key": "err.invalid_permissions",
+  "en": "Invalid permissions",
+  "group": "err"
+ },
+ {
+  "key": "err.invalid_platform",
+  "en": "Invalid platform",
+  "group": "err"
+ },
+ {
+  "key": "err.invalid_positioning",
+  "en": "Invalid positioning",
+  "group": "err"
+ },
+ {
+  "key": "err.invalid_price",
+  "en": "Invalid price",
+  "group": "err"
+ },
+ {
+  "key": "err.invalid_product_line",
+  "en": "Invalid product line",
+  "group": "err"
+ },
+ {
+  "key": "err.invalid_selfie_position",
+  "en": "Invalid selfie position",
+  "group": "err"
+ },
+ {
+  "key": "err.invalid_shares",
+  "en": "Invalid shares",
+  "group": "err"
+ },
+ {
+  "key": "err.invalid_slots",
+  "en": "Invalid slots",
+  "group": "err"
+ },
+ {
+  "key": "err.invalid_spot",
+  "en": "Invalid spot",
+  "group": "err"
+ },
+ {
+  "key": "err.invalid_step",
+  "en": "Invalid step",
+  "group": "err"
+ },
+ {
+  "key": "err.invalid_title",
+  "en": "Invalid title",
+  "group": "err"
+ },
+ {
+  "key": "err.invalid_value",
+  "en": "Invalid value",
+  "group": "err"
+ },
+ {
+  "key": "err.invalid_wallpaper",
+  "en": "Invalid wallpaper",
+  "group": "err"
+ },
+ {
+  "key": "err.invite_expired",
+  "en": "Invite expired",
+  "group": "err"
+ },
+ {
+  "key": "err.inviter_left_the_company",
+  "en": "Inviter left the company",
+  "group": "err"
+ },
+ {
+  "key": "err.job_not_found",
+  "en": "Job not found",
+  "group": "err"
+ },
+ {
+  "key": "err.key_must_be_0_1",
+  "en": "{key} must be 0..1",
+  "group": "err"
+ },
+ {
+  "key": "err.lab_can_run_slots_projects_at_once",
+  "en": "Lab can run {slots} projects at once",
+  "group": "err"
+ },
+ {
+  "key": "err.line_is_busy_wait_for_the_current_batch_or",
+  "en": "Line is busy; wait for the current batch or cancel it",
+  "group": "err"
+ },
+ {
+  "key": "err.line_type_does_not_match_the_chip",
+  "en": "Line type does not match the chip",
+  "group": "err"
+ },
+ {
+  "key": "err.locked",
+  "en": "Locked",
+  "group": "err"
+ },
+ {
+  "key": "err.locked_why",
+  "en": "Locked: {why}",
+  "group": "err"
+ },
+ {
+  "key": "err.logo_locked_why",
+  "en": "Logo locked: {why}",
+  "group": "err"
+ },
+ {
+  "key": "err.max_level",
+  "en": "Max level",
+  "group": "err"
+ },
+ {
+  "key": "err.message_must_be_an_object_with_field_t",
+  "en": "Message must be an object with field t",
+  "group": "err"
+ },
+ {
+  "key": "err.missing_permission",
+  "en": "Missing permission: {permission}",
+  "group": "err"
+ },
+ {
+  "key": "err.move_into_hq_level_minhqlevel_first",
+  "en": "Move into HQ level {minHQLevel} first",
+  "group": "err"
+ },
+ {
+  "key": "err.move_into_the_studio_office_level_4_to_buy_out",
+  "en": "Move into the Studio (office level 4) to buy out rivals",
+  "group": "err"
+ },
+ {
+  "key": "err.name_already_has_equivalent_technology",
+  "en": "{name} already has equivalent technology",
+  "group": "err"
+ },
+ {
+  "key": "err.name_is_not_available_from_suppliers_yet",
+  "en": "{name} is not available from suppliers yet",
+  "group": "err"
+ },
+ {
+  "key": "err.name_is_still_in_development_day_day_of",
+  "en": "{name} is still in development (day {day} of {totalDays}). Finish it now for {cost} RP or wait.",
+  "group": "err"
+ },
+ {
+  "key": "err.need_at_least_2_software_engineers",
+  "en": "Need at least 2 software engineers",
+  "group": "err"
+ },
+ {
+  "key": "err.need_quantity_x_name_in_stock_have_components",
+  "en": "Need {quantity} x {name} in stock (have {components})",
+  "group": "err"
+ },
+ {
+  "key": "err.needs_cost_legacy_point_s",
+  "en": "Needs {cost} legacy point(s)",
+  "group": "err"
+ },
+ {
+  "key": "err.needs_cost_research_points",
+  "en": "Needs {cost} research points",
+  "group": "err"
+ },
+ {
+  "key": "err.needs_cost_research_points_you_have_points",
+  "en": "Needs {cost} research points (you have {points})",
+  "group": "err"
+ },
+ {
+  "key": "err.needs_name",
+  "en": "Needs {name}",
+  "group": "err"
+ },
+ {
+  "key": "err.needs_price_tokens_you_have_tokens",
+  "en": "Needs {price} tokens (you have {tokens})",
+  "group": "err"
+ },
+ {
+  "key": "err.needs_the_own_ai_model",
+  "en": "Needs the Own AI Model",
+  "group": "err"
+ },
+ {
+  "key": "err.no_bugs_to_fix",
+  "en": "No bugs to fix",
+  "group": "err"
+ },
+ {
+  "key": "err.no_company_to_resume",
+  "en": "No company to resume",
+  "group": "err"
+ },
+ {
+  "key": "err.no_company_with_that_code",
+  "en": "No company with that code",
+  "group": "err"
+ },
+ {
+  "key": "err.no_crates_to_ship",
+  "en": "No crates to ship",
+  "group": "err"
+ },
+ {
+  "key": "err.no_executor_for_kind",
+  "en": "No executor for {kind}",
+  "group": "err"
+ },
+ {
+  "key": "err.no_free_seats",
+  "en": "No free seats",
+  "group": "err"
+ },
+ {
+  "key": "err.no_loan_to_repay",
+  "en": "No loan to repay",
+  "group": "err"
+ },
+ {
+  "key": "err.no_mat_there",
+  "en": "No mat there",
+  "group": "err"
+ },
+ {
+  "key": "err.no_room_for_more_desks_level_in_this_office",
+  "en": "No room for more desks ({level} in this office)",
+  "group": "err"
+ },
+ {
+  "key": "err.no_stock",
+  "en": "No stock",
+  "group": "err"
+ },
+ {
+  "key": "err.no_stock_of_name_run_a_fab_job",
+  "en": "No stock of {name} (run a fab job)",
+  "group": "err"
+ },
+ {
+  "key": "err.no_such_invite",
+  "en": "No such invite",
+  "group": "err"
+ },
+ {
+  "key": "err.no_such_open_incident",
+  "en": "No such open incident",
+  "group": "err"
+ },
+ {
+  "key": "err.no_such_project",
+  "en": "No such project",
+  "group": "err"
+ },
+ {
+  "key": "err.no_such_request",
+  "en": "No such request",
+  "group": "err"
+ },
+ {
+  "key": "err.no_such_research_in_progress",
+  "en": "No such research in progress",
+  "group": "err"
+ },
+ {
+  "key": "err.nobody_to_celebrate_with_yet",
+  "en": "Nobody to celebrate with yet",
+  "group": "err"
+ },
+ {
+  "key": "err.not_an_owner",
+  "en": "Not an owner",
+  "group": "err"
+ },
+ {
+  "key": "err.not_connected",
+  "en": "Not connected",
+  "group": "err"
+ },
+ {
+  "key": "err.not_enough_cash",
+  "en": "Not enough cash",
+  "group": "err"
+ },
+ {
+  "key": "err.not_enough_cash_cost",
+  "en": "Not enough cash (${cost})",
+  "group": "err"
+ },
+ {
+  "key": "err.not_enough_cash_for_severance",
+  "en": "Not enough cash for severance",
+  "group": "err"
+ },
+ {
+  "key": "err.not_enough_cash_for_the_buyout",
+  "en": "Not enough cash for the buyout",
+  "group": "err"
+ },
+ {
+  "key": "err.not_enough_cash_for_the_signing_bonus",
+  "en": "Not enough cash for the signing bonus",
+  "group": "err"
+ },
+ {
+  "key": "err.not_enough_cash_remaining_remaining",
+  "en": "Not enough cash: ${remaining} remaining",
+  "group": "err"
+ },
+ {
+  "key": "err.not_enough_cash_research_costs_cost",
+  "en": "Not enough cash: research costs ${cost}",
+  "group": "err"
+ },
+ {
+  "key": "err.not_enough_research_points_points",
+  "en": "Not enough research points ({points})",
+  "group": "err"
+ },
+ {
+  "key": "err.not_in_progress",
+  "en": "Not in progress",
+  "group": "err"
+ },
+ {
+  "key": "err.not_in_storage",
+  "en": "Not in storage",
+  "group": "err"
+ },
+ {
+  "key": "err.nothing_in_storage_fits_a_free_spot",
+  "en": "Nothing in storage fits a free spot",
+  "group": "err"
+ },
+ {
+  "key": "err.nothing_selected",
+  "en": "Nothing selected",
+  "group": "err"
+ },
+ {
+  "key": "err.nothing_there",
+  "en": "Nothing there",
+  "group": "err"
+ },
+ {
+  "key": "err.offer_expired",
+  "en": "Offer expired",
+  "group": "err"
+ },
+ {
+  "key": "err.one_loan_at_a_time_pay_it_back_first",
+  "en": "One loan at a time. Pay it back first.",
+  "group": "err"
+ },
+ {
+  "key": "err.only_the_founder_can_sell_the_company",
+  "en": "Only the founder can sell the company",
+  "group": "err"
+ },
+ {
+  "key": "err.only_your_own_chip_designs_can_be_fabbed",
+  "en": "Only your own chip designs can be fabbed",
+  "group": "err"
+ },
+ {
+  "key": "err.open_a_company_first",
+  "en": "Open a company first",
+  "group": "err"
+ },
+ {
+  "key": "err.outside_the_office",
+  "en": "Outside the office",
+  "group": "err"
+ },
+ {
+  "key": "err.owner_missing",
+  "en": "Owner missing",
+  "group": "err"
+ },
+ {
+  "key": "err.patent_the_technology_first",
+  "en": "Patent the technology first",
+  "group": "err"
+ },
+ {
+  "key": "err.payload_must_be_a_table",
+  "en": "Payload must be a table",
+  "group": "err"
+ },
+ {
+  "key": "err.perk_is_at_max_rank",
+  "en": "Perk is at max rank",
+  "group": "err"
+ },
+ {
+  "key": "err.pick_a_colour",
+  "en": "Pick a colour",
+  "group": "err"
+ },
+ {
+  "key": "err.pick_a_cpu_or_gpu_fab",
+  "en": "Pick a CPU or GPU fab",
+  "group": "err"
+ },
+ {
+  "key": "err.pick_an_assembly_line",
+  "en": "Pick an assembly line",
+  "group": "err"
+ },
+ {
+  "key": "err.place_it_on_a_desk",
+  "en": "Place it on a desk",
+  "group": "err"
+ },
+ {
+  "key": "err.player_name_rule",
+  "en": "Name: 1-{max} letters, digits or spaces",
+  "group": "err"
+ },
+ {
+  "key": "err.portoffset_must_be_1_1",
+  "en": "portOffset must be -1..1",
+  "group": "err"
+ },
+ {
+  "key": "err.price_cannot_be_below_half_the_unit_cost",
+  "en": "Price cannot be below half the unit cost",
+  "group": "err"
+ },
+ {
+  "key": "err.price_must_be_0_99_49_99",
+  "en": "Price must be $0.99..$49.99",
+  "group": "err"
+ },
+ {
+  "key": "err.price_must_be_between_1_and_100_000",
+  "en": "Price must be between $1 and $100,000",
+  "group": "err"
+ },
+ {
+  "key": "err.process_node_not_ramped",
+  "en": "Process node not ramped",
+  "group": "err"
+ },
+ {
+  "key": "err.process_node_not_ramped_research_processnodenm",
+  "en": "Process node not ramped: research {processNodeNm}nm Volume Ramp",
+  "group": "err"
+ },
+ {
+  "key": "err.produce_at_least_one_batch_before_the_launch",
+  "en": "Produce at least one batch before the launch",
+  "group": "err"
+ },
+ {
+  "key": "err.product_already_launched",
+  "en": "Product already launched",
+  "group": "err"
+ },
+ {
+  "key": "err.product_is_discontinued",
+  "en": "Product is discontinued",
+  "group": "err"
+ },
+ {
+  "key": "err.profile_not_loaded",
+  "en": "Profile not loaded",
+  "group": "err"
+ },
+ {
+  "key": "err.qc_level_must_be_0_3",
+  "en": "QC level must be 0..3",
+  "group": "err"
+ },
+ {
+  "key": "err.qclevel_must_be_0_3",
+  "en": "qcLevel must be 0..3",
+  "group": "err"
+ },
+ {
+  "key": "err.quality_is_already_at_the_maximum",
+  "en": "Quality is already at the maximum",
+  "group": "err"
+ },
+ {
+  "key": "err.quantity_must_be_100_2_000_000",
+  "en": "Quantity must be 100..2,000,000",
+  "group": "err"
+ },
+ {
+  "key": "err.reach_mintotalrevenue_m_total_revenue_first",
+  "en": "Reach ${minTotalRevenue}M total revenue first",
+  "group": "err"
+ },
+ {
+  "key": "err.region_already_open",
+  "en": "Region already open",
+  "group": "err"
+ },
+ {
+  "key": "err.repairabilityfocus_must_be_0_1",
+  "en": "repairabilityFocus must be 0..1",
+  "group": "err"
+ },
+ {
+  "key": "err.request_expired",
+  "en": "Request expired",
+  "group": "err"
+ },
+ {
+  "key": "err.requires_hq_level_roomminhqlevel",
+  "en": "Requires HQ level {roomMinHQLevel}",
+  "group": "err"
+ },
+ {
+  "key": "err.requires_name",
+  "en": "Requires {name}",
+  "group": "err"
+ },
+ {
+  "key": "err.requires_research_lab_level_requiredlablevel",
+  "en": "Requires Research Lab level {requiredLabLevel}",
+  "group": "err"
+ },
+ {
+  "key": "err.requires_researcherrequirements_researchers",
+  "en": "Requires {researcherRequirements} researchers",
+  "group": "err"
+ },
+ {
+  "key": "err.research_a_gpu_architecture_first",
+  "en": "Research a GPU architecture first",
+  "group": "err"
+ },
+ {
+  "key": "err.research_application_store_first",
+  "en": "Research Application Store first",
+  "group": "err"
+ },
+ {
+  "key": "err.research_cloud_infrastructure_first",
+  "en": "Research Cloud Infrastructure first",
+  "group": "err"
+ },
+ {
+  "key": "err.research_custom_silicon_design_first",
+  "en": "Research Custom Silicon Design first",
+  "group": "err"
+ },
+ {
+  "key": "err.research_fab_operations_first",
+  "en": "Research Fab Operations first",
+  "group": "err"
+ },
+ {
+  "key": "err.research_kernel_architecture_1_first",
+  "en": "Research Kernel Architecture 1 first",
+  "group": "err"
+ },
+ {
+  "key": "err.research_patent_office_first",
+  "en": "Research Patent Office first",
+  "group": "err"
+ },
+ {
+  "key": "err.research_the_architecture_architecture_first",
+  "en": "Research the {architecture} architecture first",
+  "group": "err"
+ },
+ {
+  "key": "err.research_the_category_platform_first",
+  "en": "Research the {category} platform first",
+  "group": "err"
+ },
+ {
+  "key": "err.room_at_max_level",
+  "en": "Room at max level",
+  "group": "err"
+ },
+ {
+  "key": "err.room_is_full_upgrade_it_or_the_hq",
+  "en": "Room is full; upgrade it or the HQ",
+  "group": "err"
+ },
+ {
+  "key": "err.room_level_cannot_exceed_hq_level_1",
+  "en": "Room level cannot exceed HQ level + 1",
+  "group": "err"
+ },
+ {
+  "key": "err.salary_must_stay_within_50_300_of_market_rate",
+  "en": "Salary must stay within 50%..300% of market rate",
+  "group": "err"
+ },
+ {
+  "key": "err.send_hello_first",
+  "en": "Send hello first",
+  "group": "err"
+ },
+ {
+  "key": "err.share_must_be_50_40_or_30",
+  "en": "Share must be 50, 40 or 30",
+  "group": "err"
+ },
+ {
+  "key": "err.shares_must_sum_to_100",
+  "en": "Shares must sum to 100",
+  "group": "err"
+ },
+ {
+  "key": "err.softwaresupportyears_must_be_1_7",
+  "en": "softwareSupportYears must be 1..7",
+  "group": "err"
+ },
+ {
+  "key": "err.speed_must_be_0_1_2_4_or_8",
+  "en": "Speed must be 0, 1, 2, 4 or 8",
+  "group": "err"
+ },
+ {
+  "key": "err.spend_research_points_in_steps_of_100",
+  "en": "Spend research points in steps of 100",
+  "group": "err"
+ },
+ {
+  "key": "err.staff_cap_reached_cap_upgrade_the_hq",
+  "en": "Staff cap reached ({cap}). Upgrade the HQ.",
+  "group": "err"
+ },
+ {
+  "key": "err.supplier_does_not_sell_that_resource",
+  "en": "Supplier does not sell that resource",
+  "group": "err"
+ },
+ {
+  "key": "err.technology_for_subtype_not_researched",
+  "en": "Technology for {subtype} not researched",
+  "group": "err"
+ },
+ {
+  "key": "err.technology_not_researched",
+  "en": "Technology not researched",
+  "group": "err"
+ },
+ {
+  "key": "err.term_must_be_6_12_or_24_months",
+  "en": "Term must be 6, 12 or 24 months",
+  "group": "err"
+ },
+ {
+  "key": "err.text_frames_only",
+  "en": "Text frames only",
+  "group": "err"
+ },
+ {
+  "key": "err.that_company_is_not_for_sale",
+  "en": "That company is not for sale",
+  "group": "err"
+ },
+ {
+  "key": "err.that_region_cannot_be_bought_it_opens_through_a",
+  "en": "That region cannot be bought; it opens through a megaproject",
+  "group": "err"
+ },
+ {
+  "key": "err.that_spot_is_taken",
+  "en": "That spot is taken",
+  "group": "err"
+ },
+ {
+  "key": "err.the_bank_lends_up_to_limit_credit_limit",
+  "en": "The bank lends up to ${limit} (credit limit)",
+  "group": "err"
+ },
+ {
+  "key": "err.the_company_has_been_liquidated",
+  "en": "The company has been liquidated",
+  "group": "err"
+ },
+ {
+  "key": "err.the_company_has_no_active_owner",
+  "en": "The company has no active owner",
+  "group": "err"
+ },
+ {
+  "key": "err.the_founder_has_no_shares_left_to_offer",
+  "en": "The founder has no shares left to offer",
+  "group": "err"
+ },
+ {
+  "key": "err.the_office_is_full",
+  "en": "The office is full",
+  "group": "err"
+ },
+ {
+  "key": "err.this_invite_is_for_another_player",
+  "en": "This invite is for another player",
+  "group": "err"
+ },
+ {
+  "key": "err.this_is_a_solo_company_only_its_owner_can_enter",
+  "en": "This is a solo company: only its owner can enter",
+  "group": "err"
+ },
+ {
+  "key": "err.title_must_be_ceo_or_cto",
+  "en": "Title must be CEO or CTO",
+  "group": "err"
+ },
+ {
+  "key": "err.to_go_missing",
+  "en": "To go: {missing}",
+  "group": "err"
+ },
+ {
+  "key": "err.token_finish_unlock_research_points",
+  "en": "Token finish: {unlock} research points",
+  "group": "err"
+ },
+ {
+  "key": "err.too_many_contracts",
+  "en": "Too many contracts",
+  "group": "err"
+ },
+ {
+  "key": "err.too_many_features",
+  "en": "Too many features",
+  "group": "err"
+ },
+ {
+  "key": "err.too_many_open_invites",
+  "en": "Too many open invites",
+  "group": "err"
+ },
+ {
+  "key": "err.too_many_pending_approvals",
+  "en": "Too many pending approvals",
+  "group": "err"
+ },
+ {
+  "key": "err.too_many_requests",
+  "en": "Too many requests",
+  "group": "err"
+ },
+ {
+  "key": "err.unknown",
+  "en": "Unknown",
+  "group": "err"
+ },
+ {
+  "key": "err.unknown_action",
+  "en": "Unknown action",
+  "group": "err"
+ },
+ {
+  "key": "err.unknown_blueprint",
+  "en": "Unknown blueprint",
+  "group": "err"
+ },
+ {
+  "key": "err.unknown_challenge",
+  "en": "Unknown challenge",
+  "group": "err"
+ },
+ {
+  "key": "err.unknown_company",
+  "en": "Unknown company",
+  "group": "err"
+ },
+ {
+  "key": "err.unknown_component",
+  "en": "Unknown component",
+  "group": "err"
+ },
+ {
+  "key": "err.unknown_contract",
+  "en": "Unknown contract",
+  "group": "err"
+ },
+ {
+  "key": "err.unknown_crate",
+  "en": "Unknown crate",
+  "group": "err"
+ },
+ {
+  "key": "err.unknown_device_type",
+  "en": "Unknown device type",
+  "group": "err"
+ },
+ {
+  "key": "err.unknown_employee",
+  "en": "Unknown employee",
+  "group": "err"
+ },
+ {
+  "key": "err.unknown_factory",
+  "en": "Unknown factory",
+  "group": "err"
+ },
+ {
+  "key": "err.unknown_feature_id",
+  "en": "Unknown feature {id}",
+  "group": "err"
+ },
+ {
+  "key": "err.unknown_item",
+  "en": "Unknown item",
+  "group": "err"
+ },
+ {
+  "key": "err.unknown_line",
+  "en": "Unknown line",
+  "group": "err"
+ },
+ {
+  "key": "err.unknown_line_type",
+  "en": "Unknown line type",
+  "group": "err"
+ },
+ {
+  "key": "err.unknown_megaproject",
+  "en": "Unknown megaproject",
+  "group": "err"
+ },
+ {
+  "key": "err.unknown_message_type",
+  "en": "Unknown message type: {type}",
+  "group": "err"
+ },
+ {
+  "key": "err.unknown_option",
+  "en": "Unknown option",
+  "group": "err"
+ },
+ {
+  "key": "err.unknown_owner",
+  "en": "Unknown owner",
+  "group": "err"
+ },
+ {
+  "key": "err.unknown_owner_in_share_map",
+  "en": "Unknown owner in share map",
+  "group": "err"
+ },
+ {
+  "key": "err.unknown_partner",
+  "en": "Unknown partner",
+  "group": "err"
+ },
+ {
+  "key": "err.unknown_perk",
+  "en": "Unknown perk",
+  "group": "err"
+ },
+ {
+  "key": "err.unknown_product",
+  "en": "Unknown product",
+  "group": "err"
+ },
+ {
+  "key": "err.unknown_resource",
+  "en": "Unknown resource",
+  "group": "err"
+ },
+ {
+  "key": "err.unknown_room",
+  "en": "Unknown room",
+  "group": "err"
+ },
+ {
+  "key": "err.unknown_service",
+  "en": "Unknown service",
+  "group": "err"
+ },
+ {
+  "key": "err.unknown_supplier",
+  "en": "Unknown supplier",
+  "group": "err"
+ },
+ {
+  "key": "err.unknown_technology",
+  "en": "Unknown technology",
+  "group": "err"
+ },
+ {
+  "key": "err.unsupported_protocol",
+  "en": "Unsupported protocol version (server speaks v{version})",
+  "group": "err"
+ },
+ {
+  "key": "err.use_the_create_join_messages_for_lobby_actions",
+  "en": "Use the create/join messages for lobby actions",
+  "group": "err"
+ },
+ {
+  "key": "err.wafers_must_be_1_5000",
+  "en": "Wafers must be 1..5000",
+  "group": "err"
+ },
+ {
+  "key": "err.wait_a_few_seconds_before_creating_another",
+  "en": "Wait a few seconds before creating another company",
+  "group": "err"
+ },
+ {
+  "key": "err.wallpaper_locked_why",
+  "en": "Wallpaper locked: {why}",
+  "group": "err"
+ },
+ {
+  "key": "err.you_already_own_this_finish",
+  "en": "You already own this finish",
+  "group": "err"
+ },
+ {
+  "key": "err.you_are_already_an_owner",
+  "en": "You are already an owner",
+  "group": "err"
+ },
+ {
+  "key": "err.you_are_no_longer_an_owner_of_this_company",
+  "en": "You are no longer an owner of this company",
+  "group": "err"
+ },
+ {
+  "key": "err.you_are_not_a_member_of_a_company",
+  "en": "You are not a member of a company",
+  "group": "err"
+ },
+ {
+  "key": "err.you_are_not_in_a_company",
+  "en": "You are not in a company",
+  "group": "err"
+ },
+ {
+  "key": "err.you_are_the_only_owner_liquidate_the_company",
+  "en": "You are the only owner; liquidate the company instead",
+  "group": "err"
+ },
+ {
+  "key": "err.you_do_not_own_that_item",
+  "en": "You do not own that item",
+  "group": "err"
+ },
+ {
+  "key": "err.your_empire_starts_in_headquarters_move_into_the",
+  "en": "Your empire starts in Headquarters: move into the Office floor (HQ level 3) first",
+  "group": "err"
+ },
+ {
+  "key": "err.your_share_is_too_small_to_offer_that",
+  "en": "Your share is too small to offer that",
+  "group": "err"
+ },
+ {
+  "key": "note.a_10m_quarter",
+  "en": "A $10M quarter",
+  "group": "note"
+ },
+ {
+  "key": "note.a_new_co_founder_is_on_board",
+  "en": "A new co-founder is on board.",
+  "group": "note"
+ },
+ {
+  "key": "note.a_tough_bug_was_found",
+  "en": "A tough bug was found!",
+  "group": "note"
+ },
+ {
+  "key": "note.achievement_name",
+  "en": "Achievement: {name}",
+  "group": "note"
+ },
+ {
+  "key": "note.added_to_the_corporate_museum",
+  "en": "Added to the corporate museum.",
+  "group": "note"
+ },
+ {
+  "key": "note.approved_request_failed",
+  "en": "Approved request failed",
+  "group": "note"
+ },
+ {
+  "key": "note.auto_hire_name",
+  "en": "Auto-Hire: {name}",
+  "group": "note"
+ },
+ {
+  "key": "note.back_cameras",
+  "en": "Back cameras",
+  "group": "note"
+ },
+ {
+  "key": "note.bankruptcy",
+  "en": "Bankruptcy",
+  "group": "note"
+ },
+ {
+  "key": "note.bankruptmonths_month_s_until_insolvency_cut",
+  "en": "{bankruptMonths} month(s) until insolvency. Cut costs or sell inventory.",
+  "group": "note"
+ },
+ {
+  "key": "note.batch_complete",
+  "en": "Batch complete",
+  "group": "note"
+ },
+ {
+  "key": "note.bestname_wins_the_expo_brand_recognition_rises",
+  "en": "{bestName} wins the expo. Brand recognition rises.",
+  "group": "note"
+ },
+ {
+  "key": "note.body_both_founders_helped_critics_0_3",
+  "en": "{body} Both founders helped: critics +0.3.",
+  "group": "note"
+ },
+ {
+  "key": "note.build_a_corporate_campus",
+  "en": "Build a corporate campus",
+  "group": "note"
+ },
+ {
+  "key": "note.build_a_fab",
+  "en": "Build a fab",
+  "group": "note"
+ },
+ {
+  "key": "note.build_a_showroom",
+  "en": "Build a Showroom",
+  "group": "note"
+ },
+ {
+  "key": "note.build_an_executive_office",
+  "en": "Build an Executive Office",
+  "group": "note"
+ },
+ {
+  "key": "note.case",
+  "en": "Case",
+  "group": "note"
+ },
+ {
+  "key": "note.cash_is_negative",
+  "en": "Cash is negative",
+  "group": "note"
+ },
+ {
+  "key": "note.challenge_beaten",
+  "en": "Challenge beaten!",
+  "group": "note"
+ },
+ {
+  "key": "note.challenge_failed",
+  "en": "Challenge failed",
+  "group": "note"
+ },
+ {
+  "key": "note.charging_port",
+  "en": "Charging port",
+  "group": "note"
+ },
+ {
+  "key": "note.chassis",
+  "en": "Chassis",
+  "group": "note"
+ },
+ {
+  "key": "note.code_code_is_now_active",
+  "en": "Code {code} is now active.",
+  "group": "note"
+ },
+ {
+  "key": "note.colour_branding",
+  "en": "Colour & branding",
+  "group": "note"
+ },
+ {
+  "key": "note.competitors_took_the_awards_this_year_your_best",
+  "en": "Competitors took the awards this year. Your best device scored {best} against {npcBest}.",
+  "group": "note"
+ },
+ {
+  "key": "note.corners_bezels",
+  "en": "Corners & bezels",
+  "group": "note"
+ },
+ {
+  "key": "note.design_your_first_phone",
+  "en": "Design your first phone",
+  "group": "note"
+ },
+ {
+  "key": "note.design_your_own_chip",
+  "en": "Design your own chip",
+  "group": "note"
+ },
+ {
+  "key": "note.development_finished_name",
+  "en": "Development finished: {name}",
+  "group": "note"
+ },
+ {
+  "key": "note.device",
+  "en": "Device",
+  "group": "note"
+ },
+ {
+  "key": "note.device_of_the_year_name",
+  "en": "Device of the Year: {name}",
+  "group": "note"
+ },
+ {
+  "key": "note.displayname_joined_the_company",
+  "en": "{DisplayName} joined the company",
+  "group": "note"
+ },
+ {
+  "key": "note.fab_run_complete",
+  "en": "Fab run complete",
+  "group": "note"
+ },
+ {
+  "key": "note.factory_incident_kind",
+  "en": "Factory incident: {kind}",
+  "group": "note"
+ },
+ {
+  "key": "note.features",
+  "en": "Features",
+  "group": "note"
+ },
+ {
+  "key": "note.final_review",
+  "en": "Final review",
+  "group": "note"
+ },
+ {
+  "key": "note.global_tech_expo",
+  "en": "Global Tech Expo",
+  "group": "note"
+ },
+ {
+  "key": "note.global_tech_expo_best_in_show",
+  "en": "Global Tech Expo: Best in Show",
+  "group": "note"
+ },
+ {
+  "key": "note.goal_complete_title",
+  "en": "Goal complete: {title}",
+  "group": "note"
+ },
+ {
+  "key": "note.gone_employee_s_resigned",
+  "en": "{gone} employee(s) resigned",
+  "group": "note"
+ },
+ {
+  "key": "note.hire_5_more_people",
+  "en": "Hire 5 more people",
+  "group": "note"
+ },
+ {
+  "key": "note.hire_a_new_employee",
+  "en": "Hire a new employee",
+  "group": "note"
+ },
+ {
+  "key": "note.invite_approved",
+  "en": "Invite approved",
+  "group": "note"
+ },
+ {
+  "key": "note.joined_as_role",
+  "en": "Joined as {role}.",
+  "group": "note"
+ },
+ {
+  "key": "note.launch_a_laptop_or_pc",
+  "en": "Launch a laptop or PC",
+  "group": "note"
+ },
+ {
+  "key": "note.launch_a_second_device",
+  "en": "Launch a second device",
+  "group": "note"
+ },
+ {
+  "key": "note.launch_your_first_device",
+  "en": "Launch your first device",
+  "group": "note"
+ },
+ {
+  "key": "note.legacy_points_added_to_your_profile",
+  "en": "Legacy points added to your profile.",
+  "group": "note"
+ },
+ {
+  "key": "note.line_id_needs_a_decision_repair_replace_or",
+  "en": "Line {id} needs a decision: repair, replace or reduce output.",
+  "group": "note"
+ },
+ {
+  "key": "note.loan_repaid",
+  "en": "Loan repaid",
+  "group": "note"
+ },
+ {
+  "key": "note.low_morale_raise_salaries_add_perks_or_reduce",
+  "en": "Low morale. Raise salaries, add perks or reduce workload.",
+  "group": "note"
+ },
+ {
+  "key": "note.market_event_name",
+  "en": "Market event: {name}",
+  "group": "note"
+ },
+ {
+  "key": "note.megaproject_complete_name",
+  "en": "Megaproject complete: {name}",
+  "group": "note"
+ },
+ {
+  "key": "note.milestone_name",
+  "en": "Milestone: {name}",
+  "group": "note"
+ },
+ {
+  "key": "note.mission_complete_text",
+  "en": "Mission complete: {text}",
+  "group": "note"
+ },
+ {
+  "key": "note.monthly_costs_paid",
+  "en": "Monthly costs paid",
+  "group": "note"
+ },
+ {
+  "key": "note.move_to_a_bigger_office",
+  "en": "Move to a bigger office",
+  "group": "note"
+ },
+ {
+  "key": "note.name_founded",
+  "en": "{name} founded",
+  "group": "note"
+ },
+ {
+  "key": "note.name_was_rushed_out_quality_quality_toughbugs",
+  "en": "{name} was rushed out: quality {quality}, {toughBugs} bugs shipped.",
+  "group": "note"
+ },
+ {
+  "key": "note.only_a_senior_4_star_bug_fixer_can_patch_it_or",
+  "en": "Only a senior (4+ star) Bug Fixer can patch it, or spend research points.",
+  "group": "note"
+ },
+ {
+  "key": "note.open_a_second_region",
+  "en": "Open a second region",
+  "group": "note"
+ },
+ {
+  "key": "note.owner_takes_the_top_award_for_year",
+  "en": "{owner} takes the top award for {year}.",
+  "group": "note"
+ },
+ {
+  "key": "note.payroll_payroll_rent_rent_maintenance",
+  "en": "Payroll ${payroll}, rent ${rent}, maintenance ${maintenance}",
+  "group": "note"
+ },
+ {
+  "key": "note.produce_a_batch",
+  "en": "Produce a batch",
+  "group": "note"
+ },
+ {
+  "key": "note.produced_x_name_ready_defective_defective",
+  "en": "{produced} x {name} ready ({defective} defective scrapped)",
+  "group": "note"
+ },
+ {
+  "key": "note.produceddies_good_dies_of_name_yield_yieldrate",
+  "en": "{producedDies} good dies of {name} (yield {yieldRate}%, {goldenDies} golden)",
+  "group": "note"
+ },
+ {
+  "key": "note.production_blocked",
+  "en": "Production blocked",
+  "group": "note"
+ },
+ {
+  "key": "note.publish_a_blueprint",
+  "en": "Publish a blueprint",
+  "group": "note"
+ },
+ {
+  "key": "note.quality_quality_no_known_bugs_ready_for",
+  "en": "Quality {quality}, no known bugs. Ready for production.",
+  "group": "note"
+ },
+ {
+  "key": "note.quality_quality_toughbugs_known_bugs_shipped",
+  "en": "Quality {quality}. {toughBugs} known bugs shipped with it.",
+  "group": "note"
+ },
+ {
+  "key": "note.quarterly_report_netprofit",
+  "en": "Quarterly report: {netProfit}",
+  "group": "note"
+ },
+ {
+  "key": "note.reach_500k_in_cash",
+  "en": "Reach $500K in cash",
+  "group": "note"
+ },
+ {
+  "key": "note.regulators_and_users_criticise_the_closed",
+  "en": "Regulators and users criticise the closed ecosystem. Trust falls.",
+  "group": "note"
+ },
+ {
+  "key": "note.request_approved_and_executed",
+  "en": "Request approved and executed",
+  "group": "note"
+ },
+ {
+  "key": "note.request_rejected",
+  "en": "Request rejected",
+  "group": "note"
+ },
+ {
+  "key": "note.research_10_technologies",
+  "en": "Research 10 technologies",
+  "group": "note"
+ },
+ {
+  "key": "note.research_a_technology",
+  "en": "Research a technology",
+  "group": "note"
+ },
+ {
+  "key": "note.research_complete_name",
+  "en": "Research complete: {name}",
+  "group": "note"
+ },
+ {
+  "key": "note.revenue_revenue_net_netprofit_market_share_share",
+  "en": "Revenue ${revenue}, net ${netProfit}, market share {share}%, valuation ${valuation}M",
+  "group": "note"
+ },
+ {
+  "key": "note.revenue_weekrevenue",
+  "en": "Revenue ${weekRevenue}",
+  "group": "note"
+ },
+ {
+  "key": "note.reward_cash",
+  "en": "Reward ${cash}",
+  "group": "note"
+ },
+ {
+  "key": "note.screen_type",
+  "en": "Screen type",
+  "group": "note"
+ },
+ {
+  "key": "note.selfie_camera",
+  "en": "Selfie camera",
+  "group": "note"
+ },
+ {
+  "key": "note.sell_10_000_units",
+  "en": "Sell 10,000 units",
+  "group": "note"
+ },
+ {
+  "key": "note.sell_1_000_units",
+  "en": "Sell 1,000 units",
+  "group": "note"
+ },
+ {
+  "key": "note.sell_in_three_regions",
+  "en": "Sell in three regions",
+  "group": "note"
+ },
+ {
+  "key": "note.sell_one_million_units",
+  "en": "Sell one million units",
+  "group": "note"
+ },
+ {
+  "key": "note.servers_over_capacity",
+  "en": "Servers over capacity",
+  "group": "note"
+ },
+ {
+  "key": "note.set_a_marketing_budget",
+  "en": "Set a marketing budget",
+  "group": "note"
+ },
+ {
+  "key": "note.ship_your_own_os",
+  "en": "Ship your own OS",
+  "group": "note"
+ },
+ {
+  "key": "note.side_buttons",
+  "en": "Side buttons",
+  "group": "note"
+ },
+ {
+  "key": "note.sign_a_supply_contract",
+  "en": "Sign a supply contract",
+  "group": "note"
+ },
+ {
+  "key": "note.size_shape",
+  "en": "Size & shape",
+  "group": "note"
+ },
+ {
+  "key": "note.specs",
+  "en": "Specs",
+  "group": "note"
+ },
+ {
+  "key": "note.the_bank_loan_is_fully_paid_off",
+  "en": "The bank loan is fully paid off.",
+  "group": "note"
+ },
+ {
+  "key": "note.the_company_could_not_meet_its_obligations_for",
+  "en": "The company could not meet its obligations for three months. Creditors have taken over.",
+  "group": "note"
+ },
+ {
+  "key": "note.the_critics_pick_for_year_prize_money",
+  "en": "The critics' pick for {year}. Prize money ${playerPrize}.",
+  "group": "note"
+ },
+ {
+  "key": "note.the_deadline_passed_or_a_rule_was_broken",
+  "en": "The deadline passed or a rule was broken.",
+  "group": "note"
+ },
+ {
+  "key": "note.tokens_tokens",
+  "en": "+{tokens} tokens",
+  "group": "note"
+ },
+ {
+  "key": "note.two_folding_tables_a_soldering_iron_and_2_5m_of",
+  "en": "Two folding tables, a soldering iron and $2.5M of seed money. Design your first device.",
+  "group": "note"
+ },
+ {
+  "key": "note.users_churn_faster_than_normal_upgrade_the",
+  "en": "Users churn faster than normal. Upgrade the Server Infrastructure room.",
+  "group": "note"
+ },
+ {
+  "key": "note.visit_the_bank",
+  "en": "Visit the bank",
+  "group": "note"
+ },
+ {
+  "key": "note.walled_garden_backlash",
+  "en": "Walled-garden backlash",
+  "group": "note"
+ },
+ {
+  "key": "note.weekly_sales_weekunits_units",
+  "en": "Weekly sales: {weekUnits} units",
+  "group": "note"
+ },
+ {
+  "key": "note.win_the_global_tech_expo",
+  "en": "Win the Global Tech Expo",
+  "group": "note"
+ },
+ {
+  "key": "news.24k_gold_200_research_points_no_research_running",
+  "en": "24K Gold: +200 research points (no research running)",
+  "group": "news"
+ },
+ {
+  "key": "news.24k_gold_current_research_finishes_today",
+  "en": "24K Gold: current research finishes today",
+  "group": "news"
+ },
+ {
+  "key": "news.a_new_entry_in_the_company_history",
+  "en": "A new entry in the company history.",
+  "group": "news"
+ },
+ {
+  "key": "news.amount_research_points",
+  "en": "+{amount} research points",
+  "group": "news"
+ },
+ {
+  "key": "news.awards_year",
+  "en": "Awards {year}",
+  "group": "news"
+ },
+ {
+  "key": "news.bestname_named_device_of_the_year",
+  "en": "{bestName} named device of the year.",
+  "group": "news"
+ },
+ {
+  "key": "news.challenge_taken_name",
+  "en": "Challenge taken: {name}",
+  "group": "news"
+ },
+ {
+  "key": "news.company_liquidated",
+  "en": "Company liquidated",
+  "group": "news"
+ },
+ {
+  "key": "news.daily_gift_cash",
+  "en": "+${amount}",
+  "group": "news"
+ },
+ {
+  "key": "news.daily_gift_day_dayindex_name",
+  "en": "Daily gift, day {dayIndex}: {name}",
+  "group": "news"
+ },
+ {
+  "key": "news.device_of_the_year_name_owner",
+  "en": "Device of the Year: {name} ({owner}).",
+  "group": "news"
+ },
+ {
+  "key": "news.displayname_bought_out",
+  "en": "{displayName} bought out",
+  "group": "news"
+ },
+ {
+  "key": "news.displayname_joins_as_title",
+  "en": "{DisplayName} joins as {title}",
+  "group": "news"
+ },
+ {
+  "key": "news.displayname_steps_back",
+  "en": "{displayName} steps back",
+  "group": "news"
+ },
+ {
+  "key": "news.every_founder_earns_points_legacy_point_s_a_new",
+  "en": "Every founder earns {points} legacy point(s). A new chapter starts in the garage.",
+  "group": "news"
+ },
+ {
+  "key": "news.expo_award",
+  "en": "Expo award",
+  "group": "news"
+ },
+ {
+  "key": "news.headquarters_expanded",
+  "en": "Headquarters expanded",
+  "group": "news"
+ },
+ {
+  "key": "news.influencer_amount_marketing_effect_for",
+  "en": "Influencer: +{amount}% marketing effect for {influencerDays} days",
+  "group": "news"
+ },
+ {
+  "key": "news.keeps_a_dormant_sharepercent_stake_until_bought",
+  "en": "Keeps a dormant {sharePercent}% stake until bought out.",
+  "group": "news"
+ },
+ {
+  "key": "news.mystery_box_50_000_nothing_left_to_unlock",
+  "en": "Mystery box: $50,000 (nothing left to unlock)",
+  "group": "news"
+ },
+ {
+  "key": "news.mystery_box_name_unlocked_for_free",
+  "en": "Mystery box: {name} unlocked for free",
+  "group": "news"
+ },
+ {
+  "key": "news.name_acquires_name2",
+  "en": "{name} acquires {name2}",
+  "group": "news"
+ },
+ {
+  "key": "news.name_complete",
+  "en": "{name} complete",
+  "group": "news"
+ },
+ {
+  "key": "news.name_discontinued",
+  "en": "{name} discontinued",
+  "group": "news"
+ },
+ {
+  "key": "news.name_launches_name2",
+  "en": "{name} launches {name2}",
+  "group": "news"
+ },
+ {
+  "key": "news.name_ships_platform_os_v_version",
+  "en": "{name} ships {platform} OS v{version}",
+  "group": "news"
+ },
+ {
+  "key": "news.name_sold_to_investors",
+  "en": "{name} sold to investors",
+  "group": "news"
+ },
+ {
+  "key": "news.new_market_name",
+  "en": "New market: {name}",
+  "group": "news"
+ },
+ {
+  "key": "news.paid_price_m_their_devices_leave_the_shelves",
+  "en": "Paid ${price}M. Their devices leave the shelves; their buyers come to you.",
+  "group": "news"
+ },
+ {
+  "key": "news.quarter_closed",
+  "en": "Quarter closed",
+  "group": "news"
+ },
+ {
+  "key": "news.r_d_name",
+  "en": "R&D: {name}",
+  "group": "news"
+ },
+ {
+  "key": "news.revenue_revenue_m_net_netprofit_m",
+  "en": "Revenue ${revenue}M, net ${netProfit}M.",
+  "group": "news"
+ },
+ {
+  "key": "news.reward_cash_rp",
+  "en": "Reward ${cash}{rp}.",
+  "group": "news"
+ },
+ {
+  "key": "news.sharepercent_ownership_the_founders_now_share",
+  "en": "{sharePercent}% ownership. The founders now share one balance sheet.",
+  "group": "news"
+ },
+ {
+  "key": "news.stability_stability_optimisation_optimization",
+  "en": "Stability {stability}%, optimisation {optimization}%.",
+  "group": "news"
+ },
+ {
+  "key": "news.subtype_at_priceusd_rated_overall_100",
+  "en": "{subtype} at ${priceUSD}, rated {overall}/100.",
+  "group": "news"
+ },
+ {
+  "key": "news.the_company_moved_into_hqlevels",
+  "en": "The company moved into: {HQLevels}.",
+  "group": "news"
+ },
+ {
+  "key": "news.the_model_has_reached_the_end_of_its_life_cycle",
+  "en": "The model has reached the end of its life cycle.",
+  "group": "news"
+ },
+ {
+  "key": "news.the_owners_agreed_to_wind_the_company_down",
+  "en": "The owners agreed to wind the company down.",
+  "group": "news"
+ },
+ {
+  "key": "news.your_devices_now_ship_to_name",
+  "en": "Your devices now ship to {name}.",
+  "group": "news"
+ },
+ {
+  "key": "review.fallback.device",
+  "en": "A competent, if unremarkable, device.",
+  "group": "review"
+ },
+ {
+  "key": "review.fallback.financial",
+  "en": "A competent product with unremarkable unit economics.",
+  "group": "review"
+ },
+ {
+  "key": "review.finding.battery_long",
+  "en": "Battery life is outstanding at {value} hours. This is the one to buy if you hate charging.",
+  "group": "review"
+ },
+ {
+  "key": "review.finding.battery_short",
+  "en": "We barely made it through a workday: {value} hours of mixed use.",
+  "group": "review"
+ },
+ {
+  "key": "review.finding.camera_great",
+  "en": "The camera system is the star: sharp, fast and reliable in every light.",
+  "group": "review"
+ },
+ {
+  "key": "review.finding.camera_weak",
+  "en": "For {value} dollars the camera is a disappointment: soft detail and poor low-light shots.",
+  "group": "review"
+ },
+ {
+  "key": "review.finding.design_cheap",
+  "en": "The chassis flexes and the finish looks dated.",
+  "group": "review"
+ },
+ {
+  "key": "review.finding.design_premium",
+  "en": "The build quality and materials are premium through and through.",
+  "group": "review"
+ },
+ {
+  "key": "review.finding.display_dated",
+  "en": "The display looks a generation behind, dim and with slow refresh.",
+  "group": "review"
+ },
+ {
+  "key": "review.finding.display_great",
+  "en": "The display is gorgeous: bright, colour-accurate and smooth.",
+  "group": "review"
+ },
+ {
+  "key": "review.finding.ecosystem_moat",
+  "en": "A growing user base of {value} on the company's platform strengthens its moat.",
+  "group": "review"
+ },
+ {
+  "key": "review.finding.ecosystem_small",
+  "en": "Without a mature app ecosystem, much of the hardware potential goes unused.",
+  "group": "review"
+ },
+ {
+  "key": "review.finding.efficiency_high",
+  "en": "Performance per watt is excellent, a credit to the {value}nm process.",
+  "group": "review"
+ },
+ {
+  "key": "review.finding.heavy",
+  "en": "At {value} g it is noticeably heavier than it should be.",
+  "group": "review"
+ },
+ {
+  "key": "review.finding.innovation_lead",
+  "en": "Several first-to-market features give the company pricing power this cycle.",
+  "group": "review"
+ },
+ {
+  "key": "review.finding.margin_high",
+  "en": "At an estimated {value}% gross margin the {name} should be very profitable.",
+  "group": "review"
+ },
+ {
+  "key": "review.finding.margin_negative",
+  "en": "We estimate the company loses money on every unit sold.",
+  "group": "review"
+ },
+ {
+  "key": "review.finding.margin_thin",
+  "en": "Margins look razor-thin at {value}%; a price war would push this into losses.",
+  "group": "review"
+ },
+ {
+  "key": "review.finding.node_old",
+  "en": "Built on an ageing {value}nm node, it draws far more power than rivals for the same work.",
+  "group": "review"
+ },
+ {
+  "key": "review.finding.noise_high",
+  "en": "Fan noise reaches {value} dB under load. Bring headphones.",
+  "group": "review"
+ },
+ {
+  "key": "review.finding.npu_strong",
+  "en": "The NPU delivers {value} TOPS, enough for on-device AI features that rivals push to the cloud.",
+  "group": "review"
+ },
+ {
+  "key": "review.finding.perf_leader",
+  "en": "The {name} posts the highest benchmark numbers we have seen in its class this year.",
+  "group": "review"
+ },
+ {
+  "key": "review.finding.perf_weak",
+  "en": "Performance trails the competition by a wide margin; the silicon is a generation behind.",
+  "group": "review"
+ },
+ {
+  "key": "review.finding.price_above_segment",
+  "en": "Priced {value}% above the segment norm, the device needs a brand premium it does not yet have.",
+  "group": "review"
+ },
+ {
+  "key": "review.finding.price_aggressive",
+  "en": "Aggressive pricing should win share quickly, if supply holds.",
+  "group": "review"
+ },
+ {
+  "key": "review.finding.reliability_risk",
+  "en": "Early reliability data suggests elevated return rates; warranty costs are a risk.",
+  "group": "review"
+ },
+ {
+  "key": "review.finding.repairable",
+  "en": "Repairability is a highlight; the battery swaps in minutes.",
+  "group": "review"
+ },
+ {
+  "key": "review.finding.software_buggy",
+  "en": "The software needs work: we hit crashes and odd glitches during testing.",
+  "group": "review"
+ },
+ {
+  "key": "review.finding.software_polished",
+  "en": "The software is polished and the ecosystem features actually work together.",
+  "group": "review"
+ },
+ {
+  "key": "review.finding.supply_risk",
+  "en": "Launch inventory is limited; lost sales are likely in the first weeks.",
+  "group": "review"
+ },
+ {
+  "key": "review.finding.thermal_ok",
+  "en": "Thermals are well managed: sustained clocks stay within a few percent of peak.",
+  "group": "review"
+ },
+ {
+  "key": "review.finding.thermal_throttle_high",
+  "en": "Under sustained load the {name} sheds {value}% of its performance to thermal throttling. The cooling is simply undersized for this chip.",
+  "group": "review"
+ },
+ {
+  "key": "review.finding.thin_light",
+  "en": "Thin, light and beautifully finished; it feels more expensive than it is.",
+  "group": "review"
+ },
+ {
+  "key": "review.finding.value_great",
+  "en": "Simply the best value in its segment right now.",
+  "group": "review"
+ },
+ {
+  "key": "review.finding.value_poor",
+  "en": "The price is hard to justify against what rivals offer for less.",
+  "group": "review"
+ },
+ {
+  "key": "review.finding.vram_low",
+  "en": "{value} GB of VRAM is not enough for current titles at this price. Expect stutter.",
+  "group": "review"
+ },
+ {
+  "key": "review.headline.Consumer.bad",
+  "en": "{name} review: hard to recommend",
+  "group": "review"
+ },
+ {
+  "key": "review.headline.Consumer.good",
+  "en": "{name} review: a lot to like",
+  "group": "review"
+ },
+ {
+  "key": "review.headline.Consumer.great",
+  "en": "{name} is the easiest recommendation of the year",
+  "group": "review"
+ },
+ {
+  "key": "review.headline.Consumer.mixed",
+  "en": "{name} review: good bones, rough edges",
+  "group": "review"
+ },
+ {
+  "key": "review.headline.Financial.bad",
+  "en": "{name}: the numbers do not add up",
+  "group": "review"
+ },
+ {
+  "key": "review.headline.Financial.good",
+  "en": "{name}: solid unit economics",
+  "group": "review"
+ },
+ {
+  "key": "review.headline.Financial.great",
+  "en": "{name} looks like a margin machine",
+  "group": "review"
+ },
+ {
+  "key": "review.headline.Financial.mixed",
+  "en": "{name}: growth at the cost of margin",
+  "group": "review"
+ },
+ {
+  "key": "review.headline.Hardcore.bad",
+  "en": "{name} review: last year's silicon at this year's prices",
+  "group": "review"
+ },
+ {
+  "key": "review.headline.Hardcore.good",
+  "en": "{name} review: fast, mostly cool",
+  "group": "review"
+ },
+ {
+  "key": "review.headline.Hardcore.great",
+  "en": "{name}: the new benchmark king",
+  "group": "review"
+ },
+ {
+  "key": "review.headline.Hardcore.mixed",
+  "en": "{name} review: potential held back by thermals",
+  "group": "review"
+ },
+ {
+  "key": "data.achievements.above_clouds.desc",
+  "en": "Move into the Sky Campus (HQ level 6)",
+  "group": "data"
+ },
+ {
+  "key": "data.achievements.above_clouds.name",
+  "en": "Above the Clouds",
+  "group": "data"
+ },
+ {
+  "key": "data.achievements.battlestation.desc",
+  "en": "Launch a desktop PC",
+  "group": "data"
+ },
+ {
+  "key": "data.achievements.battlestation.name",
+  "en": "Battlestation",
+  "group": "data"
+ },
+ {
+  "key": "data.achievements.billion.desc",
+  "en": "Reach a $1B valuation",
+  "group": "data"
+ },
+ {
+  "key": "data.achievements.billion.name",
+  "en": "Unicorn",
+  "group": "data"
+ },
+ {
+  "key": "data.achievements.challenger.desc",
+  "en": "Complete a Legacy challenge",
+  "group": "data"
+ },
+ {
+  "key": "data.achievements.challenger.name",
+  "en": "Challenger",
+  "group": "data"
+ },
+ {
+  "key": "data.achievements.co_founded.desc",
+  "en": "Run a company with a co-founder",
+  "group": "data"
+ },
+ {
+  "key": "data.achievements.co_founded.name",
+  "en": "Better Together",
+  "group": "data"
+ },
+ {
+  "key": "data.achievements.cut_the_cord.desc",
+  "en": "Launch a phone with wireless charging",
+  "group": "data"
+ },
+ {
+  "key": "data.achievements.cut_the_cord.name",
+  "en": "Cut the Cord",
+  "group": "data"
+ },
+ {
+  "key": "data.achievements.device_of_year.desc",
+  "en": "Win Device of the Year",
+  "group": "data"
+ },
+ {
+  "key": "data.achievements.device_of_year.name",
+  "en": "Device of the Year",
+  "group": "data"
+ },
+ {
+  "key": "data.achievements.dream_rig.desc",
+  "en": "Launch a desktop PC with a generation 5 graphics card",
+  "group": "data"
+ },
+ {
+  "key": "data.achievements.dream_rig.name",
+  "en": "Dream Rig",
+  "group": "data"
+ },
+ {
+  "key": "data.achievements.ecosystem.desc",
+  "en": "Run all five services",
+  "group": "data"
+ },
+ {
+  "key": "data.achievements.ecosystem.name",
+  "en": "Ecosystem",
+  "group": "data"
+ },
+ {
+  "key": "data.achievements.expo_king.desc",
+  "en": "Win Best in Show at the Global Tech Expo",
+  "group": "data"
+ },
+ {
+  "key": "data.achievements.expo_king.name",
+  "en": "Expo King",
+  "group": "data"
+ },
+ {
+  "key": "data.achievements.eye_contact.desc",
+  "en": "Launch smart glasses",
+  "group": "data"
+ },
+ {
+  "key": "data.achievements.eye_contact.name",
+  "en": "Eye Contact",
+  "group": "data"
+ },
+ {
+  "key": "data.achievements.first_light.name",
+  "en": "First Light",
+  "group": "data"
+ },
+ {
+  "key": "data.achievements.five_stars.desc",
+  "en": "Launch a device that reviewers rate 9.0 or more",
+  "group": "data"
+ },
+ {
+  "key": "data.achievements.five_stars.name",
+  "en": "Five Stars",
+  "group": "data"
+ },
+ {
+  "key": "data.achievements.foldable.desc",
+  "en": "Launch a foldable phone",
+  "group": "data"
+ },
+ {
+  "key": "data.achievements.foldable.name",
+  "en": "Fold It",
+  "group": "data"
+ },
+ {
+  "key": "data.achievements.four_eyes.desc",
+  "en": "Launch a phone with 4 cameras",
+  "group": "data"
+ },
+ {
+  "key": "data.achievements.four_eyes.name",
+  "en": "Four Eyes",
+  "group": "data"
+ },
+ {
+  "key": "data.achievements.full_lineup.desc",
+  "en": "Launch a device in every category",
+  "group": "data"
+ },
+ {
+  "key": "data.achievements.full_lineup.name",
+  "en": "Full Lineup",
+  "group": "data"
+ },
+ {
+  "key": "data.achievements.game_on.desc",
+  "en": "Launch a game console",
+  "group": "data"
+ },
+ {
+  "key": "data.achievements.game_on.name",
+  "en": "Game On",
+  "group": "data"
+ },
+ {
+  "key": "data.achievements.hall_of_fame.desc",
+  "en": "Have six Legends on the team at once",
+  "group": "data"
+ },
+ {
+  "key": "data.achievements.hall_of_fame.name",
+  "en": "Hall of Fame",
+  "group": "data"
+ },
+ {
+  "key": "data.achievements.hologram.desc",
+  "en": "Launch a device with a MicroLED screen",
+  "group": "data"
+ },
+ {
+  "key": "data.achievements.hologram.name",
+  "en": "Hologram",
+  "group": "data"
+ },
+ {
+  "key": "data.achievements.liquid_cooled.desc",
+  "en": "Launch a desktop PC with liquid cooling",
+  "group": "data"
+ },
+ {
+  "key": "data.achievements.liquid_cooled.name",
+  "en": "Liquid Cooled",
+  "group": "data"
+ },
+ {
+  "key": "data.achievements.living_legend.desc",
+  "en": "Hire a Legend (skill 95+)",
+  "group": "data"
+ },
+ {
+  "key": "data.achievements.living_legend.name",
+  "en": "Living Legend",
+  "group": "data"
+ },
+ {
+  "key": "data.achievements.made_in_house.desc",
+  "en": "Upgrade a factory to level 3",
+  "group": "data"
+ },
+ {
+  "key": "data.achievements.made_in_house.name",
+  "en": "Made In-House",
+  "group": "data"
+ },
+ {
+  "key": "data.achievements.market_leader.desc",
+  "en": "Win 30% of the market in a quarter",
+  "group": "data"
+ },
+ {
+  "key": "data.achievements.market_leader.name",
+  "en": "Market Leader",
+  "group": "data"
+ },
+ {
+  "key": "data.achievements.mega.desc",
+  "en": "Move into the Mega Campus (HQ level 7)",
+  "group": "data"
+ },
+ {
+  "key": "data.achievements.mega.name",
+  "en": "Mega",
+  "group": "data"
+ },
+ {
+  "key": "data.achievements.million_users.desc",
+  "en": "Reach one million users on your OS",
+  "group": "data"
+ },
+ {
+  "key": "data.achievements.million_users.name",
+  "en": "Million Users",
+  "group": "data"
+ },
+ {
+  "key": "data.achievements.on_your_wrist.desc",
+  "en": "Launch a smartwatch",
+  "group": "data"
+ },
+ {
+  "key": "data.achievements.on_your_wrist.name",
+  "en": "On Your Wrist",
+  "group": "data"
+ },
+ {
+  "key": "data.achievements.one_small_step.desc",
+  "en": "Finish the Lunar Base",
+  "group": "data"
+ },
+ {
+  "key": "data.achievements.one_small_step.name",
+  "en": "One Small Step",
+  "group": "data"
+ },
+ {
+  "key": "data.achievements.overclocker.desc",
+  "en": "Launch a desktop PC rated 90 or more",
+  "group": "data"
+ },
+ {
+  "key": "data.achievements.overclocker.name",
+  "en": "Overclocker",
+  "group": "data"
+ },
+ {
+  "key": "data.achievements.own_os.desc",
+  "en": "Launch a device on your own operating system",
+  "group": "data"
+ },
+ {
+  "key": "data.achievements.own_os.name",
+  "en": "Platform Owner",
+  "group": "data"
+ },
+ {
+  "key": "data.achievements.own_silicon.desc",
+  "en": "Launch a phone with a chip you designed",
+  "group": "data"
+ },
+ {
+  "key": "data.achievements.own_silicon.name",
+  "en": "Own Silicon",
+  "group": "data"
+ },
+ {
+  "key": "data.achievements.patent_holder.desc",
+  "en": "Hold five patents",
+  "group": "data"
+ },
+ {
+  "key": "data.achievements.patent_holder.name",
+  "en": "Patent Holder",
+  "group": "data"
+ },
+ {
+  "key": "data.achievements.power_user.desc",
+  "en": "Launch a laptop",
+  "group": "data"
+ },
+ {
+  "key": "data.achievements.power_user.name",
+  "en": "Power User",
+  "group": "data"
+ },
+ {
+  "key": "data.achievements.quantum_leap.desc",
+  "en": "Finish the Quantum Lab",
+  "group": "data"
+ },
+ {
+  "key": "data.achievements.quantum_leap.name",
+  "en": "Quantum Leap",
+  "group": "data"
+ },
+ {
+  "key": "data.achievements.red_planet.desc",
+  "en": "Finish the Mars Colony",
+  "group": "data"
+ },
+ {
+  "key": "data.achievements.red_planet.name",
+  "en": "Red Planet",
+  "group": "data"
+ },
+ {
+  "key": "data.achievements.six_gs.desc",
+  "en": "Research generation 6 ARM silicon",
+  "group": "data"
+ },
+ {
+  "key": "data.achievements.six_gs.name",
+  "en": "Six Gs",
+  "group": "data"
+ },
+ {
+  "key": "data.achievements.skyscraper.desc",
+  "en": "Move into Headquarters (HQ level 5)",
+  "group": "data"
+ },
+ {
+  "key": "data.achievements.skyscraper.name",
+  "en": "Skyscraper",
+  "group": "data"
+ },
+ {
+  "key": "data.achievements.sound_check.desc",
+  "en": "Launch wireless headphones",
+  "group": "data"
+ },
+ {
+  "key": "data.achievements.sound_check.name",
+  "en": "Sound Check",
+  "group": "data"
+ },
+ {
+  "key": "data.achievements.spatial.desc",
+  "en": "Launch a VR headset",
+  "group": "data"
+ },
+ {
+  "key": "data.achievements.spatial.name",
+  "en": "Spatial Computing",
+  "group": "data"
+ },
+ {
+  "key": "data.achievements.time_traveller.desc",
+  "en": "Research 20 technologies of tier 5 or higher",
+  "group": "data"
+ },
+ {
+  "key": "data.achievements.time_traveller.name",
+  "en": "Time Traveller",
+  "group": "data"
+ },
+ {
+  "key": "data.achievements.units_10m.desc",
+  "en": "Sell ten million units",
+  "group": "data"
+ },
+ {
+  "key": "data.achievements.units_10m.name",
+  "en": "Household Name",
+  "group": "data"
+ },
+ {
+  "key": "data.achievements.units_1m.name",
+  "en": "Mass Market",
+  "group": "data"
+ },
+ {
+  "key": "data.achievements.zero_bugs.desc",
+  "en": "Launch a device with software rated 90 or more",
+  "group": "data"
+ },
+ {
+  "key": "data.achievements.zero_bugs.name",
+  "en": "Zero Bugs",
+  "group": "data"
+ },
+ {
+  "key": "data.dailyrewards.cash15.name",
+  "en": "Cash",
+  "group": "data"
+ },
+ {
+  "key": "data.dailyrewards.cash15.text",
+  "en": "$15.0K",
+  "group": "data"
+ },
+ {
+  "key": "data.dailyrewards.cash30.text",
+  "en": "$30.0K",
+  "group": "data"
+ },
+ {
+  "key": "data.dailyrewards.gold.name",
+  "en": "24K Gold",
+  "group": "data"
+ },
+ {
+  "key": "data.dailyrewards.gold.text",
+  "en": "+ Instant Dev",
+  "group": "data"
+ },
+ {
+  "key": "data.dailyrewards.influencer.name",
+  "en": "Influencer",
+  "group": "data"
+ },
+ {
+  "key": "data.dailyrewards.influencer.text",
+  "en": "+60% launch hype",
+  "group": "data"
+ },
+ {
+  "key": "data.dailyrewards.mystery.name",
+  "en": "Mystery Box",
+  "group": "data"
+ },
+ {
+  "key": "data.dailyrewards.mystery.text",
+  "en": "Common to Legendary",
+  "group": "data"
+ },
+ {
+  "key": "data.dailyrewards.rp60.name",
+  "en": "Research",
+  "group": "data"
+ },
+ {
+  "key": "data.dailyrewards.rp60.text",
+  "en": "+60 RP",
+  "group": "data"
+ },
+ {
+  "key": "data.dailyrewards.rp90.text",
+  "en": "+90 RP",
+  "group": "data"
+ },
+ {
+  "key": "data.empire.ai.desc",
+  "en": "Your own AI, on every device.",
+  "group": "data"
+ },
+ {
+  "key": "data.empire.ai.name",
+  "en": "AI+",
+  "group": "data"
+ },
+ {
+  "key": "data.empire.arcade.desc",
+  "en": "A library of games, made for your devices.",
+  "group": "data"
+ },
+ {
+  "key": "data.empire.arcade.name",
+  "en": "Arcade",
+  "group": "data"
+ },
+ {
+  "key": "data.empire.battery.name",
+  "en": "Battery Works",
+  "group": "data"
+ },
+ {
+  "key": "data.empire.chip.name",
+  "en": "Chip Fab",
+  "group": "data"
+ },
+ {
+  "key": "data.empire.cloud.desc",
+  "en": "Photos, backups and files on every device.",
+  "group": "data"
+ },
+ {
+  "key": "data.empire.cloud.name",
+  "en": "Cloud",
+  "group": "data"
+ },
+ {
+  "key": "data.empire.display.name",
+  "en": "Display Plant",
+  "group": "data"
+ },
+ {
+  "key": "data.empire.lunar.desc",
+  "en": "A base on the Moon, with a shop in the lobby.",
+  "group": "data"
+ },
+ {
+  "key": "data.empire.lunar.effect",
+  "en": "Opens the Moon as a market",
+  "group": "data"
+ },
+ {
+  "key": "data.empire.lunar.name",
+  "en": "Lunar Base",
+  "group": "data"
+ },
+ {
+  "key": "data.empire.mars.desc",
+  "en": "A city under domes on the red planet.",
+  "group": "data"
+ },
+ {
+  "key": "data.empire.mars.effect",
+  "en": "Opens Mars as a market",
+  "group": "data"
+ },
+ {
+  "key": "data.empire.mars.name",
+  "en": "Mars Colony",
+  "group": "data"
+ },
+ {
+  "key": "data.empire.music.desc",
+  "en": "Every song ever recorded, ad-free.",
+  "group": "data"
+ },
+ {
+  "key": "data.empire.music.name",
+  "en": "Music",
+  "group": "data"
+ },
+ {
+  "key": "data.empire.own_ai.desc",
+  "en": "Train an AI of your own on a city of servers.",
+  "group": "data"
+ },
+ {
+  "key": "data.empire.own_ai.effect",
+  "en": "+15% research points, and the AI+ service",
+  "group": "data"
+ },
+ {
+  "key": "data.empire.own_ai.name",
+  "en": "Own AI Model",
+  "group": "data"
+ },
+ {
+  "key": "data.empire.quantum.desc",
+  "en": "A lab colder than deep space, for computers that think in every direction.",
+  "group": "data"
+ },
+ {
+  "key": "data.empire.quantum.effect",
+  "en": "Research finishes 25% faster",
+  "group": "data"
+ },
+ {
+  "key": "data.empire.quantum.name",
+  "en": "Quantum Lab",
+  "group": "data"
+ },
+ {
+  "key": "data.empire.satellite.desc",
+  "en": "Ten thousand satellites: signal on every mountain and every ocean.",
+  "group": "data"
+ },
+ {
+  "key": "data.empire.satellite.effect",
+  "en": "+8% buyers for every device",
+  "group": "data"
+ },
+ {
+  "key": "data.empire.satellite.name",
+  "en": "Satellite Network",
+  "group": "data"
+ },
+ {
+  "key": "data.empire.tv.desc",
+  "en": "Your own shows and films.",
+  "group": "data"
+ },
+ {
+  "key": "data.empire.tv.name",
+  "en": "TV+",
+  "group": "data"
+ },
+ {
+  "key": "data.events.aaa_release.name",
+  "en": "Major AAA Game Release",
+  "group": "data"
+ },
+ {
+  "key": "data.events.aaa_release.text",
+  "en": "The year's biggest game launches. Everyone wants more frames.",
+  "group": "data"
+ },
+ {
+  "key": "data.events.ai_breakthrough.name",
+  "en": "AI Breakthrough",
+  "group": "data"
+ },
+ {
+  "key": "data.events.ai_breakthrough.text",
+  "en": "A new model runs on-device. NPU TOPS become a headline spec.",
+  "group": "data"
+ },
+ {
+  "key": "data.events.battery_gen.name",
+  "en": "New Battery Generation",
+  "group": "data"
+ },
+ {
+  "key": "data.events.battery_gen.text",
+  "en": "Solid-state cells reach volume. Battery life becomes the headline.",
+  "group": "data"
+ },
+ {
+  "key": "data.events.cloud_shift.name",
+  "en": "Mass Shift to Cloud Computing",
+  "group": "data"
+ },
+ {
+  "key": "data.events.cloud_shift.text",
+  "en": "Thin clients and cloud gaming make raw local horsepower matter less.",
+  "group": "data"
+ },
+ {
+  "key": "data.events.console_exclusive.name",
+  "en": "Popular Console Exclusive",
+  "group": "data"
+ },
+ {
+  "key": "data.events.console_exclusive.text",
+  "en": "A console exclusive goes viral. Shelves empty.",
+  "group": "data"
+ },
+ {
+  "key": "data.events.crypto_boom.name",
+  "en": "Crypto Boom",
+  "group": "data"
+ },
+ {
+  "key": "data.events.crypto_boom.text",
+  "en": "Mining farms are buying every GPU in sight. Prices surge, gamers grumble.",
+  "group": "data"
+ },
+ {
+  "key": "data.events.energy_crisis.name",
+  "en": "Energy Crisis",
+  "group": "data"
+ },
+ {
+  "key": "data.events.energy_crisis.text",
+  "en": "Electricity prices double. Fabs and server rooms feel it first.",
+  "group": "data"
+ },
+ {
+  "key": "data.events.lithium_shortage.name",
+  "en": "Lithium Shortage",
+  "group": "data"
+ },
+ {
+  "key": "data.events.lithium_shortage.text",
+  "en": "Mine closures squeeze lithium supply. Battery costs climb.",
+  "group": "data"
+ },
+ {
+  "key": "data.events.new_competitor.name",
+  "en": "New Competitor Emerges",
+  "group": "data"
+ },
+ {
+  "key": "data.events.new_competitor.text",
+  "en": "A well-funded startup floods emerging markets with cheap phones.",
+  "group": "data"
+ },
+ {
+  "key": "data.events.new_display_tech.name",
+  "en": "New Display Technology",
+  "group": "data"
+ },
+ {
+  "key": "data.events.new_display_tech.text",
+  "en": "Reviewers obsess over panels. Old LCDs look dated overnight.",
+  "group": "data"
+ },
+ {
+  "key": "data.events.new_standard.name",
+  "en": "New Manufacturing Standard",
+  "group": "data"
+ },
+ {
+  "key": "data.events.new_standard.text",
+  "en": "An industry consortium publishes a new packaging standard. Yields improve everywhere.",
+  "group": "data"
+ },
+ {
+  "key": "data.events.recession.name",
+  "en": "Global Recession",
+  "group": "data"
+ },
+ {
+  "key": "data.events.recession.text",
+  "en": "Consumers tighten belts. Budget segments hold up; premium sales fall.",
+  "group": "data"
+ },
+ {
+  "key": "data.events.semi_crisis.name",
+  "en": "Semiconductor Crisis",
+  "group": "data"
+ },
+ {
+  "key": "data.events.semi_crisis.text",
+  "en": "Fabs are booked solid for a year. Chip prices spike; companies with own fabs smile.",
+  "group": "data"
+ },
+ {
+  "key": "data.events.supply_collapse.name",
+  "en": "Supply Chain Collapse",
+  "group": "data"
+ },
+ {
+  "key": "data.events.supply_collapse.text",
+  "en": "Ports are jammed and freight rates triple. Logistics centers earn their keep.",
+  "group": "data"
+ },
+ {
+  "key": "data.events.trade_restrictions.name",
+  "en": "Trade Restrictions",
+  "group": "data"
+ },
+ {
+  "key": "data.events.trade_restrictions.text",
+  "en": "New tariffs between major blocs raise costs for cross-border supply chains.",
+  "group": "data"
+ },
+ {
+  "key": "data.features.always_on.desc",
+  "en": "Time and notifications without waking the phone.",
+  "group": "data"
+ },
+ {
+  "key": "data.features.always_on.name",
+  "en": "Always-on display",
+  "group": "data"
+ },
+ {
+  "key": "data.features.desktop_mode.desc",
+  "en": "Plug into a monitor, get a desktop.",
+  "group": "data"
+ },
+ {
+  "key": "data.features.desktop_mode.name",
+  "en": "Desktop mode",
+  "group": "data"
+ },
+ {
+  "key": "data.features.dual_sim.desc",
+  "en": "Two numbers in one phone.",
+  "group": "data"
+ },
+ {
+  "key": "data.features.dual_sim.name",
+  "en": "Dual SIM",
+  "group": "data"
+ },
+ {
+  "key": "data.features.eco_packaging.desc",
+  "en": "Recycled box, no plastic.",
+  "group": "data"
+ },
+ {
+  "key": "data.features.eco_packaging.name",
+  "en": "Eco packaging",
+  "group": "data"
+ },
+ {
+  "key": "data.features.face_unlock.desc",
+  "en": "Secure 3D face recognition.",
+  "group": "data"
+ },
+ {
+  "key": "data.features.face_unlock.name",
+  "en": "Face unlock",
+  "group": "data"
+ },
+ {
+  "key": "data.features.fast_charging.desc",
+  "en": "0 to 50% in half an hour.",
+  "group": "data"
+ },
+ {
+  "key": "data.features.fast_charging.name",
+  "en": "Fast charging",
+  "group": "data"
+ },
+ {
+  "key": "data.features.fingerprint.desc",
+  "en": "Unlock with a touch.",
+  "group": "data"
+ },
+ {
+  "key": "data.features.fingerprint.name",
+  "en": "Fingerprint sensor",
+  "group": "data"
+ },
+ {
+  "key": "data.features.fm_radio.desc",
+  "en": "Old school, still loved in emerging markets.",
+  "group": "data"
+ },
+ {
+  "key": "data.features.fm_radio.name",
+  "en": "FM radio",
+  "group": "data"
+ },
+ {
+  "key": "data.features.gps.desc",
+  "en": "Navigation and location apps.",
+  "group": "data"
+ },
+ {
+  "key": "data.features.gps.name",
+  "en": "GPS",
+  "group": "data"
+ },
+ {
+  "key": "data.features.hardened_glass.desc",
+  "en": "Scratch-resistant cover glass.",
+  "group": "data"
+ },
+ {
+  "key": "data.features.hardened_glass.name",
+  "en": "Hardened glass",
+  "group": "data"
+ },
+ {
+  "key": "data.features.hdr_video.desc",
+  "en": "Cinematic video capture.",
+  "group": "data"
+ },
+ {
+  "key": "data.features.hdr_video.name",
+  "en": "HDR video",
+  "group": "data"
+ },
+ {
+  "key": "data.features.nfc_payments.desc",
+  "en": "Tap to pay in shops and transit.",
+  "group": "data"
+ },
+ {
+  "key": "data.features.nfc_payments.name",
+  "en": "NFC payments",
+  "group": "data"
+ },
+ {
+  "key": "data.features.on_device_ai.desc",
+  "en": "Assistant that runs locally.",
+  "group": "data"
+ },
+ {
+  "key": "data.features.on_device_ai.name",
+  "en": "On-device AI",
+  "group": "data"
+ },
+ {
+  "key": "data.features.quiet_mode.desc",
+  "en": "Fan curve tuned for silence.",
+  "group": "data"
+ },
+ {
+  "key": "data.features.quiet_mode.name",
+  "en": "Quiet mode",
+  "group": "data"
+ },
+ {
+  "key": "data.features.repair_friendly.desc",
+  "en": "Pull tabs, screws instead of glue.",
+  "group": "data"
+ },
+ {
+  "key": "data.features.repair_friendly.name",
+  "en": "Repair-friendly design",
+  "group": "data"
+ },
+ {
+  "key": "data.features.rgb_lighting.desc",
+  "en": "Gamers want their rainbow.",
+  "group": "data"
+ },
+ {
+  "key": "data.features.rgb_lighting.name",
+  "en": "RGB lighting",
+  "group": "data"
+ },
+ {
+  "key": "data.features.sat_sos.desc",
+  "en": "Emergency messages without a network.",
+  "group": "data"
+ },
+ {
+  "key": "data.features.sat_sos.name",
+  "en": "Satellite SOS",
+  "group": "data"
+ },
+ {
+  "key": "data.features.stereo_speakers.desc",
+  "en": "Two speakers for media and calls.",
+  "group": "data"
+ },
+ {
+  "key": "data.features.stereo_speakers.name",
+  "en": "Stereo speakers",
+  "group": "data"
+ },
+ {
+  "key": "data.features.stylus.desc",
+  "en": "Pressure-sensitive pen input.",
+  "group": "data"
+ },
+ {
+  "key": "data.features.stylus.name",
+  "en": "Stylus support",
+  "group": "data"
+ },
+ {
+  "key": "data.features.water_resistance.desc",
+  "en": "Sealed body, survives the rain.",
+  "group": "data"
+ },
+ {
+  "key": "data.features.water_resistance.name",
+  "en": "Water resistance",
+  "group": "data"
+ },
+ {
+  "key": "data.furniture..text",
+  "en": "Token Shop",
+  "group": "data"
+ },
+ {
+  "key": "data.furniture.BillionQuarter.text",
+  "en": "First billion-dollar quarter",
+  "group": "data"
+ },
+ {
+  "key": "data.furniture.First100KUnits.text",
+  "en": "100,000 units sold",
+  "group": "data"
+ },
+ {
+  "key": "data.furniture.First1MUnits.text",
+  "en": "1 million units sold",
+  "group": "data"
+ },
+ {
+  "key": "data.furniture.FirstCustomGPU.text",
+  "en": "First custom GPU",
+  "group": "data"
+ },
+ {
+  "key": "data.furniture.FirstFab.text",
+  "en": "First fab online",
+  "group": "data"
+ },
+ {
+  "key": "data.furniture.FirstProduct.text",
+  "en": "First launch",
+  "group": "data"
+ },
+ {
+  "key": "data.furniture.FirstProfitableQuarter.text",
+  "en": "First profitable quarter",
+  "group": "data"
+ },
+ {
+  "key": "data.furniture.MillionDollarQuarter.text",
+  "en": "First $1M quarter",
+  "group": "data"
+ },
+ {
+  "key": "data.furniture.chair_diamond.name",
+  "en": "Diamond Throne",
+  "group": "data"
+ },
+ {
+  "key": "data.furniture.chair_ergonomic.name",
+  "en": "Ergonomic Chair",
+  "group": "data"
+ },
+ {
+  "key": "data.furniture.chair_hover.name",
+  "en": "Hover Chair",
+  "group": "data"
+ },
+ {
+  "key": "data.furniture.chair_leather.name",
+  "en": "Leather Chair",
+  "group": "data"
+ },
+ {
+  "key": "data.furniture.chair_massage.name",
+  "en": "Massage Throne",
+  "group": "data"
+ },
+ {
+  "key": "data.furniture.chair_office.name",
+  "en": "Office Chair",
+  "group": "data"
+ },
+ {
+  "key": "data.furniture.chair_racing.name",
+  "en": "Racing Chair",
+  "group": "data"
+ },
+ {
+  "key": "data.furniture.chair_stool.name",
+  "en": "Stool",
+  "group": "data"
+ },
+ {
+  "key": "data.furniture.chairs.text",
+  "en": "Chairs",
+  "group": "data"
+ },
+ {
+  "key": "data.furniture.computers.text",
+  "en": "Computers",
+  "group": "data"
+ },
+ {
+  "key": "data.furniture.decor.text",
+  "en": "Decor",
+  "group": "data"
+ },
+ {
+  "key": "data.furniture.decor_filing_cabinet.name",
+  "en": "Filing Cabinet",
+  "group": "data"
+ },
+ {
+  "key": "data.furniture.decor_first_plaque.name",
+  "en": "First Launch Plaque",
+  "group": "data"
+ },
+ {
+  "key": "data.furniture.decor_globe.name",
+  "en": "Globe",
+  "group": "data"
+ },
+ {
+  "key": "data.furniture.decor_gold_phone.name",
+  "en": "Gold Phone Statue",
+  "group": "data"
+ },
+ {
+  "key": "data.furniture.decor_luxury_rug.name",
+  "en": "Luxury Rug",
+  "group": "data"
+ },
+ {
+  "key": "data.furniture.decor_phone_display.name",
+  "en": "Phone Display",
+  "group": "data"
+ },
+ {
+  "key": "data.furniture.decor_rug.name",
+  "en": "Rug",
+  "group": "data"
+ },
+ {
+  "key": "data.furniture.decor_sculpture.name",
+  "en": "Modern Sculpture",
+  "group": "data"
+ },
+ {
+  "key": "data.furniture.desk_aurora.name",
+  "en": "Aurora Desk",
+  "group": "data"
+ },
+ {
+  "key": "data.furniture.desk_executive.name",
+  "en": "Executive Desk",
+  "group": "data"
+ },
+ {
+  "key": "data.furniture.desk_folding.name",
+  "en": "Folding Table",
+  "group": "data"
+ },
+ {
+  "key": "data.furniture.desk_glass_led.name",
+  "en": "Glass LED Desk",
+  "group": "data"
+ },
+ {
+  "key": "data.furniture.desk_golden_ceo.name",
+  "en": "Golden CEO Desk",
+  "group": "data"
+ },
+ {
+  "key": "data.furniture.desk_office.name",
+  "en": "Office Desk",
+  "group": "data"
+ },
+ {
+  "key": "data.furniture.desk_wooden.name",
+  "en": "Wooden Desk",
+  "group": "data"
+ },
+ {
+  "key": "data.furniture.desks.text",
+  "en": "Desks",
+  "group": "data"
+ },
+ {
+  "key": "data.furniture.floor_checker.name",
+  "en": "Checker Mat",
+  "group": "data"
+ },
+ {
+  "key": "data.furniture.floor_colour.name",
+  "en": "Colour Mat",
+  "group": "data"
+ },
+ {
+  "key": "data.furniture.floor_concrete.name",
+  "en": "Concrete Mat",
+  "group": "data"
+ },
+ {
+  "key": "data.furniture.floor_steel.name",
+  "en": "Steel Mat",
+  "group": "data"
+ },
+ {
+  "key": "data.furniture.floor_tile.name",
+  "en": "Tile Mat",
+  "group": "data"
+ },
+ {
+  "key": "data.furniture.floor_turf.name",
+  "en": "Turf Mat",
+  "group": "data"
+ },
+ {
+  "key": "data.furniture.floor_walnut.name",
+  "en": "Walnut Mat",
+  "group": "data"
+ },
+ {
+  "key": "data.furniture.floor_wood.name",
+  "en": "Wood Mat",
+  "group": "data"
+ },
+ {
+  "key": "data.furniture.floors.text",
+  "en": "Floors",
+  "group": "data"
+ },
+ {
+  "key": "data.furniture.lab.text",
+  "en": "Lab",
+  "group": "data"
+ },
+ {
+  "key": "data.furniture.lab_3d_printer.name",
+  "en": "3D Printer Lab",
+  "group": "data"
+ },
+ {
+  "key": "data.furniture.lab_ai_super.name",
+  "en": "AI Supercomputer",
+  "group": "data"
+ },
+ {
+  "key": "data.furniture.lab_fusion.name",
+  "en": "Fusion Reactor",
+  "group": "data"
+ },
+ {
+  "key": "data.furniture.lab_quantum.name",
+  "en": "Quantum Computer",
+  "group": "data"
+ },
+ {
+  "key": "data.furniture.lab_robot_arm.name",
+  "en": "Robot Arm",
+  "group": "data"
+ },
+ {
+  "key": "data.furniture.lab_server_racks.name",
+  "en": "Server Racks",
+  "group": "data"
+ },
+ {
+  "key": "data.furniture.lab_test_bench.name",
+  "en": "Test Bench",
+  "group": "data"
+ },
+ {
+  "key": "data.furniture.light_arc_lamp.name",
+  "en": "Arc Lamp",
+  "group": "data"
+ },
+ {
+  "key": "data.furniture.light_aurora_ceiling.name",
+  "en": "Aurora Ceiling",
+  "group": "data"
+ },
+ {
+  "key": "data.furniture.light_chandelier.name",
+  "en": "Crystal Chandelier",
+  "group": "data"
+ },
+ {
+  "key": "data.furniture.light_floor_lamp.name",
+  "en": "Floor Lamp",
+  "group": "data"
+ },
+ {
+  "key": "data.furniture.light_led_pillar.name",
+  "en": "LED Pillar",
+  "group": "data"
+ },
+ {
+  "key": "data.furniture.light_neon_sign.name",
+  "en": "Neon Sign",
+  "group": "data"
+ },
+ {
+  "key": "data.furniture.lights.text",
+  "en": "Lights",
+  "group": "data"
+ },
+ {
+  "key": "data.furniture.lounge.text",
+  "en": "Lounge",
+  "group": "data"
+ },
+ {
+  "key": "data.furniture.lounge_arcade.name",
+  "en": "Arcade Machine",
+  "group": "data"
+ },
+ {
+  "key": "data.furniture.lounge_bookshelf.name",
+  "en": "Bookshelf",
+  "group": "data"
+ },
+ {
+  "key": "data.furniture.lounge_coffee.name",
+  "en": "Coffee Corner",
+  "group": "data"
+ },
+ {
+  "key": "data.furniture.lounge_pool.name",
+  "en": "Pool Table",
+  "group": "data"
+ },
+ {
+  "key": "data.furniture.lounge_sofa.name",
+  "en": "Sofa",
+  "group": "data"
+ },
+ {
+  "key": "data.furniture.lounge_vending.name",
+  "en": "Vending Machine",
+  "group": "data"
+ },
+ {
+  "key": "data.furniture.lounge_water_cooler.name",
+  "en": "Water Cooler",
+  "group": "data"
+ },
+ {
+  "key": "data.furniture.lounge_whiteboard.name",
+  "en": "Whiteboard",
+  "group": "data"
+ },
+ {
+  "key": "data.furniture.pc_beige_crt.name",
+  "en": "Beige CRT",
+  "group": "data"
+ },
+ {
+  "key": "data.furniture.pc_dual.name",
+  "en": "Dual Monitors",
+  "group": "data"
+ },
+ {
+  "key": "data.furniture.pc_flat.name",
+  "en": "Flat Monitor",
+  "group": "data"
+ },
+ {
+  "key": "data.furniture.pc_holo.name",
+  "en": "Holo Display",
+  "group": "data"
+ },
+ {
+  "key": "data.furniture.pc_neural.name",
+  "en": "Neural Link Rig",
+  "group": "data"
+ },
+ {
+  "key": "data.furniture.pc_quantum.name",
+  "en": "Quantum Terminal",
+  "group": "data"
+ },
+ {
+  "key": "data.furniture.pc_triple.name",
+  "en": "Triple Rig",
+  "group": "data"
+ },
+ {
+  "key": "data.furniture.pc_widescreen.name",
+  "en": "Widescreen",
+  "group": "data"
+ },
+ {
+  "key": "data.furniture.plant_bonsai.name",
+  "en": "Bonsai",
+  "group": "data"
+ },
+ {
+  "key": "data.furniture.plant_crystal_tree.name",
+  "en": "Crystal Tree",
+  "group": "data"
+ },
+ {
+  "key": "data.furniture.plant_indoor_tree.name",
+  "en": "Indoor Tree",
+  "group": "data"
+ },
+ {
+  "key": "data.furniture.plant_palm.name",
+  "en": "Palm Tree",
+  "group": "data"
+ },
+ {
+  "key": "data.furniture.plant_potted.name",
+  "en": "Potted Plant",
+  "group": "data"
+ },
+ {
+  "key": "data.furniture.plant_sky_tree.name",
+  "en": "Sky Tree",
+  "group": "data"
+ },
+ {
+  "key": "data.furniture.plant_tall.name",
+  "en": "Tall Plant",
+  "group": "data"
+ },
+ {
+  "key": "data.furniture.plants.text",
+  "en": "Plants",
+  "group": "data"
+ },
+ {
+  "key": "data.furniture.storage.text",
+  "en": "Storage",
+  "group": "data"
+ },
+ {
+  "key": "data.furniture.struct_glass_wall.name",
+  "en": "Glass Wall",
+  "group": "data"
+ },
+ {
+  "key": "data.furniture.struct_low_wall.name",
+  "en": "Low Wall",
+  "group": "data"
+ },
+ {
+  "key": "data.furniture.struct_partition.name",
+  "en": "Partition Wall",
+  "group": "data"
+ },
+ {
+  "key": "data.furniture.struct_pillar.name",
+  "en": "Pillar",
+  "group": "data"
+ },
+ {
+  "key": "data.furniture.struct_planter.name",
+  "en": "Planter Divider",
+  "group": "data"
+ },
+ {
+  "key": "data.furniture.structure.text",
+  "en": "Structure",
+  "group": "data"
+ },
+ {
+  "key": "data.goals.bank.desc",
+  "en": "Take a loan to grow faster, or stay debt free for a year.",
+  "group": "data"
+ },
+ {
+  "key": "data.goals.batch.desc",
+  "en": "Open Build and queue a production batch on the assembly line.",
+  "group": "data"
+ },
+ {
+  "key": "data.goals.cash500k.desc",
+  "en": "Profit from sales after payroll and rent.",
+  "group": "data"
+ },
+ {
+  "key": "data.goals.chip.desc",
+  "en": "Research Custom Silicon Design and open the Chip Designer.",
+  "group": "data"
+ },
+ {
+  "key": "data.goals.contract.desc",
+  "en": "Build > Supply: contracts deliver materials every week.",
+  "group": "data"
+ },
+ {
+  "key": "data.goals.design.desc",
+  "en": "Open Design, create a blueprint and fill every slot.",
+  "group": "data"
+ },
+ {
+  "key": "data.goals.execOffice.desc",
+  "en": "Company > Office: the executive office raises morale.",
+  "group": "data"
+ },
+ {
+  "key": "data.goals.expo.desc",
+  "en": "The best device of the year takes Best in Show.",
+  "group": "data"
+ },
+ {
+  "key": "data.goals.fab.desc",
+  "en": "Research Fab Operations and build a chip, display or battery line.",
+  "group": "data"
+ },
+ {
+  "key": "data.goals.hire.desc",
+  "en": "Open Staff and hire someone.",
+  "group": "data"
+ },
+ {
+  "key": "data.goals.hq2.desc",
+  "en": "Company > Office: upgrade the headquarters.",
+  "group": "data"
+ },
+ {
+  "key": "data.goals.hq4.desc",
+  "en": "Headquarters level 4.",
+  "group": "data"
+ },
+ {
+  "key": "data.goals.launch.desc",
+  "en": "Hold a keynote once the first batch is ready.",
+  "group": "data"
+ },
+ {
+  "key": "data.goals.launch2.desc",
+  "en": "A second model keeps sales going when the first one ages.",
+  "group": "data"
+ },
+ {
+  "key": "data.goals.marketing.desc",
+  "en": "Your devices > Products: give a launched device a weekly budget.",
+  "group": "data"
+ },
+ {
+  "key": "data.goals.ownOS.desc",
+  "en": "Research Kernel Architecture 1, then Ecosystem > Develop OS.",
+  "group": "data"
+ },
+ {
+  "key": "data.goals.pc.desc",
+  "en": "Research the PC platform and enter a new category.",
+  "group": "data"
+ },
+ {
+  "key": "data.goals.publish.desc",
+  "en": "Fix compatibility warnings, set a price and publish the design.",
+  "group": "data"
+ },
+ {
+  "key": "data.goals.region.desc",
+  "en": "Company > World: expand beyond your home market.",
+  "group": "data"
+ },
+ {
+  "key": "data.goals.regions3.desc",
+  "en": "Company > World.",
+  "group": "data"
+ },
+ {
+  "key": "data.goals.research.desc",
+  "en": "Open Research and start the first project.",
+  "group": "data"
+ },
+ {
+  "key": "data.goals.rev10m.desc",
+  "en": "Revenue of $10,000,000 in a single quarter.",
+  "group": "data"
+ },
+ {
+  "key": "data.goals.showroom.desc",
+  "en": "Company > Office: show your devices and gain recognition every quarter.",
+  "group": "data"
+ },
+ {
+  "key": "data.goals.staff5.desc",
+  "en": "Workers build, researchers invent, marketers sell.",
+  "group": "data"
+ },
+ {
+  "key": "data.goals.techs10.desc",
+  "en": "Researchers and the lab level speed this up.",
+  "group": "data"
+ },
+ {
+  "key": "data.goals.units10k.desc",
+  "en": "Scale production and marketing.",
+  "group": "data"
+ },
+ {
+  "key": "data.goals.units1k.desc",
+  "en": "Keep the shelves stocked; the market updates every week.",
+  "group": "data"
+ },
+ {
+  "key": "data.goals.units1m.desc",
+  "en": "A household name.",
+  "group": "data"
+ },
+ {
+  "key": "data.hqlevel.1",
+  "en": "Garage",
+  "group": "data"
+ },
+ {
+  "key": "data.hqlevel.2",
+  "en": "Small office",
+  "group": "data"
+ },
+ {
+  "key": "data.hqlevel.3",
+  "en": "Office floor",
+  "group": "data"
+ },
+ {
+  "key": "data.hqlevel.4",
+  "en": "Studio",
+  "group": "data"
+ },
+ {
+  "key": "data.hqlevel.5",
+  "en": "Headquarters",
+  "group": "data"
+ },
+ {
+  "key": "data.hqlevel.6",
+  "en": "Sky Campus",
+  "group": "data"
+ },
+ {
+  "key": "data.legacy.builder.desc",
+  "en": "Factories, services and megaprojects cost 8% less per rank.",
+  "group": "data"
+ },
+ {
+  "key": "data.legacy.builder.name",
+  "en": "Builder",
+  "group": "data"
+ },
+ {
+  "key": "data.legacy.consolePioneer.desc",
+  "en": "Launch a game console rated 8.0 or more before 2022.",
+  "group": "data"
+ },
+ {
+  "key": "data.legacy.consolePioneer.name",
+  "en": "Console Pioneer",
+  "group": "data"
+ },
+ {
+  "key": "data.legacy.consoleWar.desc",
+  "en": "Win Best Game Console of the year 3 times before 2032.",
+  "group": "data"
+ },
+ {
+  "key": "data.legacy.consoleWar.name",
+  "en": "Console War",
+  "group": "data"
+ },
+ {
+  "key": "data.legacy.debtFree.desc",
+  "en": "Reach $25M total revenue before 2015, and never go below $0.",
+  "group": "data"
+ },
+ {
+  "key": "data.legacy.debtFree.name",
+  "en": "Debt Free",
+  "group": "data"
+ },
+ {
+  "key": "data.legacy.evolution.desc",
+  "en": "Launch game consoles in 5 different looks before 2030.",
+  "group": "data"
+ },
+ {
+  "key": "data.legacy.evolution.name",
+  "en": "Evolution",
+  "group": "data"
+ },
+ {
+  "key": "data.legacy.famousFounder.desc",
+  "en": "Start with +1.6 reputation points per rank.",
+  "group": "data"
+ },
+ {
+  "key": "data.legacy.famousFounder.name",
+  "en": "Famous Founder",
+  "group": "data"
+ },
+ {
+  "key": "data.legacy.gamerFans.desc",
+  "en": "+5% money from game console and desktop PC sales per rank.",
+  "group": "data"
+ },
+ {
+  "key": "data.legacy.gamerFans.name",
+  "en": "Gamer Fans",
+  "group": "data"
+ },
+ {
+  "key": "data.legacy.globalReach.desc",
+  "en": "Regions cost 15% less to open per rank.",
+  "group": "data"
+ },
+ {
+  "key": "data.legacy.globalReach.name",
+  "en": "Global Reach",
+  "group": "data"
+ },
+ {
+  "key": "data.legacy.hallOfFame.desc",
+  "en": "Award prizes +25% per rank.",
+  "group": "data"
+ },
+ {
+  "key": "data.legacy.hardwareLab.desc",
+  "en": "Game consoles and desktop PCs take 8% less time to build per rank.",
+  "group": "data"
+ },
+ {
+  "key": "data.legacy.hardwareLab.name",
+  "en": "Hardware Lab",
+  "group": "data"
+ },
+ {
+  "key": "data.legacy.labNotes.desc",
+  "en": "+5% research speed per rank.",
+  "group": "data"
+ },
+ {
+  "key": "data.legacy.labNotes.name",
+  "en": "Lab Notes",
+  "group": "data"
+ },
+ {
+  "key": "data.legacy.loyalFans.desc",
+  "en": "+4% money from every sale per rank.",
+  "group": "data"
+ },
+ {
+  "key": "data.legacy.loyalFans.name",
+  "en": "Loyal Fans",
+  "group": "data"
+ },
+ {
+  "key": "data.legacy.mentors.desc",
+  "en": "Your staff learn 15% faster per rank.",
+  "group": "data"
+ },
+ {
+  "key": "data.legacy.mentors.name",
+  "en": "Mentors",
+  "group": "data"
+ },
+ {
+  "key": "data.legacy.moonshot.desc",
+  "en": "Finish the Lunar Base before 2040.",
+  "group": "data"
+ },
+ {
+  "key": "data.legacy.moonshot.name",
+  "en": "Moonshot",
+  "group": "data"
+ },
+ {
+  "key": "data.legacy.pcMaster.desc",
+  "en": "Win Device of the Year with a desktop PC before 2035.",
+  "group": "data"
+ },
+ {
+  "key": "data.legacy.pcMaster.name",
+  "en": "PC Master",
+  "group": "data"
+ },
+ {
+  "key": "data.legacy.perfectionist.desc",
+  "en": "Launch a device rated 9.0 or more before 2016.",
+  "group": "data"
+ },
+ {
+  "key": "data.legacy.perfectionist.name",
+  "en": "Perfectionist",
+  "group": "data"
+ },
+ {
+  "key": "data.legacy.phonesOnly.desc",
+  "en": "Make only phones, and reach $150M total revenue before 2021.",
+  "group": "data"
+ },
+ {
+  "key": "data.legacy.phonesOnly.name",
+  "en": "Phones Only",
+  "group": "data"
+ },
+ {
+  "key": "data.legacy.seedMoney.desc",
+  "en": "Every new company starts with +$250K per rank.",
+  "group": "data"
+ },
+ {
+  "key": "data.legacy.seedMoney.name",
+  "en": "Seed Money",
+  "group": "data"
+ },
+ {
+  "key": "data.legacy.smallTeam.desc",
+  "en": "Never have more than 6 people, and reach $60M total revenue before 2020.",
+  "group": "data"
+ },
+ {
+  "key": "data.legacy.smallTeam.name",
+  "en": "Small Team",
+  "group": "data"
+ },
+ {
+  "key": "data.legacy.speedrun.desc",
+  "en": "Move into Headquarters (HQ 5) before 2019.",
+  "group": "data"
+ },
+ {
+  "key": "data.legacy.speedrun.name",
+  "en": "Speedrun",
+  "group": "data"
+ },
+ {
+  "key": "data.milestone.BillionQuarter.name",
+  "en": "First Billion-Dollar Quarter",
+  "group": "data"
+ },
+ {
+  "key": "data.milestone.First100KUnits.name",
+  "en": "First 100,000 Units",
+  "group": "data"
+ },
+ {
+  "key": "data.milestone.First1MUnits.name",
+  "en": "First 1 Million Units",
+  "group": "data"
+ },
+ {
+  "key": "data.milestone.FirstCustomGPU.name",
+  "en": "First Custom GPU",
+  "group": "data"
+ },
+ {
+  "key": "data.milestone.FirstFab.name",
+  "en": "First Fab Online",
+  "group": "data"
+ },
+ {
+  "key": "data.milestone.FirstHomeConsole.name",
+  "en": "First Home Console",
+  "group": "data"
+ },
+ {
+  "key": "data.milestone.FirstOwnOS.name",
+  "en": "Own Operating System Shipped",
+  "group": "data"
+ },
+ {
+  "key": "data.milestone.FirstProduct.name",
+  "en": "First Product Launched",
+  "group": "data"
+ },
+ {
+  "key": "data.milestone.FirstProfitableFab.name",
+  "en": "First Profitable Semiconductor Fab",
+  "group": "data"
+ },
+ {
+  "key": "data.milestone.FirstProfitableQuarter.name",
+  "en": "First Profitable Quarter",
+  "group": "data"
+ },
+ {
+  "key": "data.milestone.GlobalOS.name",
+  "en": "First Global Operating System",
+  "group": "data"
+ },
+ {
+  "key": "data.milestone.HQ7.name",
+  "en": "Mega Campus",
+  "group": "data"
+ },
+ {
+  "key": "data.milestone.LargestManufacturer.name",
+  "en": "World's Largest Hardware Manufacturer",
+  "group": "data"
+ },
+ {
+  "key": "data.milestone.MillionDollarQuarter.name",
+  "en": "First Million-Dollar Quarter",
+  "group": "data"
+ },
+ {
+  "key": "data.missions.batch.text",
+  "en": "Finish a production batch",
+  "group": "data"
+ },
+ {
+  "key": "data.missions.cash_bundle.desc",
+  "en": "+$75.0K cash · Once a day",
+  "group": "data"
+ },
+ {
+  "key": "data.missions.cash_bundle.name",
+  "en": "Cash Bundle",
+  "group": "data"
+ },
+ {
+  "key": "data.missions.daily.text",
+  "en": "Open the daily gift",
+  "group": "data"
+ },
+ {
+  "key": "data.missions.develop.text",
+  "en": "Begin developing a device",
+  "group": "data"
+ },
+ {
+  "key": "data.missions.finish_blush_gold.desc",
+  "en": "Phone finish · Yours for keeps",
+  "group": "data"
+ },
+ {
+  "key": "data.missions.finish_blush_gold.name",
+  "en": "Blush Gold",
+  "group": "data"
+ },
+ {
+  "key": "data.missions.finish_glacier.name",
+  "en": "Glacier",
+  "group": "data"
+ },
+ {
+  "key": "data.missions.finish_white_marble.name",
+  "en": "White Marble",
+  "group": "data"
+ },
+ {
+  "key": "data.missions.furniture.text",
+  "en": "Buy 2 pieces of furniture",
+  "group": "data"
+ },
+ {
+  "key": "data.missions.hire.text",
+  "en": "Hire an employee",
+  "group": "data"
+ },
+ {
+  "key": "data.missions.launch.text",
+  "en": "Launch a device",
+  "group": "data"
+ },
+ {
+  "key": "data.missions.marketing.text",
+  "en": "Start a marketing campaign",
+  "group": "data"
+ },
+ {
+  "key": "data.missions.region.text",
+  "en": "Open a new region",
+  "group": "data"
+ },
+ {
+  "key": "data.missions.research.text",
+  "en": "Finish a research",
+  "group": "data"
+ },
+ {
+  "key": "data.missions.research_pack.desc",
+  "en": "+90 RP · Once a day",
+  "group": "data"
+ },
+ {
+  "key": "data.missions.research_pack.name",
+  "en": "Research Pack",
+  "group": "data"
+ },
+ {
+  "key": "data.missions.room.text",
+  "en": "Build or upgrade a room",
+  "group": "data"
+ },
+ {
+  "key": "data.missions.techs3.text",
+  "en": "Finish 3 researches",
+  "group": "data"
+ },
+ {
+  "key": "data.missions.units3000.text",
+  "en": "Sell 3,000 devices",
+  "group": "data"
+ },
+ {
+  "key": "data.missions.units500.text",
+  "en": "Sell 500 devices",
+  "group": "data"
+ },
+ {
+  "key": "data.missions.unlock_aurora_ceiling.desc",
+  "en": "Exclusive light · Build mode",
+  "group": "data"
+ },
+ {
+  "key": "data.missions.unlock_aurora_desk.desc",
+  "en": "Exclusive desk · Build mode",
+  "group": "data"
+ },
+ {
+  "key": "data.missions.unlock_hover_chair.desc",
+  "en": "Exclusive chair · Build mode",
+  "group": "data"
+ },
+ {
+  "key": "data.missions.unlock_neural_rig.desc",
+  "en": "Exclusive computer · Build mode",
+  "group": "data"
+ },
+ {
+  "key": "data.missions.unlock_sky_tree.desc",
+  "en": "Exclusive plant · Build mode",
+  "group": "data"
+ },
+ {
+  "key": "data.regions.ASIA.name",
+  "en": "Asia",
+  "group": "data"
+ },
+ {
+  "key": "data.regions.EMERGING.name",
+  "en": "Emerging Markets",
+  "group": "data"
+ },
+ {
+  "key": "data.regions.EU.name",
+  "en": "Europe",
+  "group": "data"
+ },
+ {
+  "key": "data.regions.NA.name",
+  "en": "North America",
+  "group": "data"
+ },
+ {
+  "key": "data.resources.advanced_packaging.name",
+  "en": "Advanced Packaging Materials",
+  "group": "data"
+ },
+ {
+  "key": "data.resources.aluminum.name",
+  "en": "Aluminum",
+  "group": "data"
+ },
+ {
+  "key": "data.resources.battery_materials.name",
+  "en": "Battery Materials",
+  "group": "data"
+ },
+ {
+  "key": "data.resources.cellchem.name",
+  "en": "CellChem Materials",
+  "group": "data"
+ },
+ {
+  "key": "data.resources.copper.name",
+  "en": "Copper",
+  "group": "data"
+ },
+ {
+  "key": "data.resources.crystal_fab.name",
+  "en": "Crystal Wafer Works",
+  "group": "data"
+ },
+ {
+  "key": "data.resources.display_panels.name",
+  "en": "Display Panel Glass",
+  "group": "data"
+ },
+ {
+  "key": "data.resources.formcraft.name",
+  "en": "FormCraft Materials",
+  "group": "data"
+ },
+ {
+  "key": "data.resources.frostline.name",
+  "en": "Frostline Thermal",
+  "group": "data"
+ },
+ {
+  "key": "data.resources.glass.name",
+  "en": "Glass",
+  "group": "data"
+ },
+ {
+  "key": "data.resources.glassworks.name",
+  "en": "Meridian Glassworks",
+  "group": "data"
+ },
+ {
+  "key": "data.resources.helion.name",
+  "en": "Helion Semiconductors",
+  "group": "data"
+ },
+ {
+  "key": "data.resources.lithium.name",
+  "en": "Lithium",
+  "group": "data"
+ },
+ {
+  "key": "data.resources.lumen.name",
+  "en": "Lumen Panels",
+  "group": "data"
+ },
+ {
+  "key": "data.resources.memory_chips.name",
+  "en": "Memory Chips",
+  "group": "data"
+ },
+ {
+  "key": "data.resources.memstock.name",
+  "en": "MemStock Trading",
+  "group": "data"
+ },
+ {
+  "key": "data.resources.nanodyne.name",
+  "en": "Nanodyne Memory",
+  "group": "data"
+ },
+ {
+  "key": "data.resources.opticore.name",
+  "en": "Opticore Imaging",
+  "group": "data"
+ },
+ {
+  "key": "data.resources.orbita.name",
+  "en": "Orbita Software",
+  "group": "data"
+ },
+ {
+  "key": "data.resources.quantix.name",
+  "en": "Quantix Foundry",
+  "group": "data"
+ },
+ {
+  "key": "data.resources.rare_earth.name",
+  "en": "Rare Earth Materials",
+  "group": "data"
+ },
+ {
+  "key": "data.resources.silicon_wafers.name",
+  "en": "Silicon Wafers",
+  "group": "data"
+ },
+ {
+  "key": "data.resources.spot_market.name",
+  "en": "Spot Market",
+  "group": "data"
+ },
+ {
+  "key": "data.resources.terra_mining.name",
+  "en": "Terra Mining Group",
+  "group": "data"
+ },
+ {
+  "key": "data.resources.vertex.name",
+  "en": "Vertex Graphics",
+  "group": "data"
+ },
+ {
+  "key": "data.resources.voltcell.name",
+  "en": "VoltCell Energy",
+  "group": "data"
+ },
+ {
+  "key": "data.rooms.AssemblyLine.effect",
+  "en": "Hosts assembly lines; +8% line efficiency per level.",
+  "group": "data"
+ },
+ {
+  "key": "data.rooms.AssemblyLine.name",
+  "en": "Assembly Line",
+  "group": "data"
+ },
+ {
+  "key": "data.rooms.CPUDepartment.effect",
+  "en": "+10% CPU fab capacity and binning quality per level.",
+  "group": "data"
+ },
+ {
+  "key": "data.rooms.CPUDepartment.name",
+  "en": "CPU Production Department",
+  "group": "data"
+ },
+ {
+  "key": "data.rooms.ConferenceRoom.effect",
+  "en": "Co-founder approvals resolve faster; hosts keynotes.",
+  "group": "data"
+ },
+ {
+  "key": "data.rooms.ConferenceRoom.name",
+  "en": "Conference Room",
+  "group": "data"
+ },
+ {
+  "key": "data.rooms.ExecutiveOffice.effect",
+  "en": "+5% morale per level; required for co-founder governance.",
+  "group": "data"
+ },
+ {
+  "key": "data.rooms.ExecutiveOffice.name",
+  "en": "Executive Office",
+  "group": "data"
+ },
+ {
+  "key": "data.rooms.GPUDepartment.effect",
+  "en": "+10% GPU fab capacity per level.",
+  "group": "data"
+ },
+ {
+  "key": "data.rooms.GPUDepartment.name",
+  "en": "GPU Production Department",
+  "group": "data"
+ },
+ {
+  "key": "data.rooms.Headquarters.effect",
+  "en": "Unlocks company management. Level raises staff cap by 10% per level.",
+  "group": "data"
+ },
+ {
+  "key": "data.rooms.Headquarters.name",
+  "en": "Corporate Headquarters",
+  "group": "data"
+ },
+ {
+  "key": "data.rooms.LogisticsCenter.effect",
+  "en": "-8% logistics cost per level; faster regional distribution.",
+  "group": "data"
+ },
+ {
+  "key": "data.rooms.LogisticsCenter.name",
+  "en": "Logistics Center",
+  "group": "data"
+ },
+ {
+  "key": "data.rooms.MarketingDepartment.effect",
+  "en": "+10% marketing efficiency per level.",
+  "group": "data"
+ },
+ {
+  "key": "data.rooms.MarketingDepartment.name",
+  "en": "Marketing Department",
+  "group": "data"
+ },
+ {
+  "key": "data.rooms.QualityControl.effect",
+  "en": "-12% defect rate per level; cheaper QC per unit.",
+  "group": "data"
+ },
+ {
+  "key": "data.rooms.QualityControl.name",
+  "en": "Quality Control Department",
+  "group": "data"
+ },
+ {
+  "key": "data.rooms.ResearchLab.effect",
+  "en": "+12% research speed per level; sets parallel research slots.",
+  "group": "data"
+ },
+ {
+  "key": "data.rooms.ResearchLab.name",
+  "en": "Research Laboratory",
+  "group": "data"
+ },
+ {
+  "key": "data.rooms.SemiconductorFab.effect",
+  "en": "Hosts chip fabs; +4% yield per level.",
+  "group": "data"
+ },
+ {
+  "key": "data.rooms.SemiconductorFab.name",
+  "en": "Semiconductor Factory",
+  "group": "data"
+ },
+ {
+  "key": "data.rooms.ServerRoom.effect",
+  "en": "Supports ecosystem users: 0.5M / 2M / 8M / 25M / 80M.",
+  "group": "data"
+ },
+ {
+  "key": "data.rooms.ServerRoom.name",
+  "en": "Server Infrastructure",
+  "group": "data"
+ },
+ {
+  "key": "data.rooms.Showroom.effect",
+  "en": "+1.5 brand recognition per level each quarter; displays your devices in 3D.",
+  "group": "data"
+ },
+ {
+  "key": "data.rooms.Showroom.name",
+  "en": "Product Showroom",
+  "group": "data"
+ },
+ {
+  "key": "data.rooms.Warehouse.effect",
+  "en": "Raises inventory capacity before carrying costs apply.",
+  "group": "data"
+ },
+ {
+  "key": "data.rooms.Warehouse.name",
+  "en": "Warehouse",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.ai_accel_1.description",
+  "en": "Custom NPU blocks: +20% NPU TOPS on self-designed chips.",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.ai_accel_1.name",
+  "en": "AI Accelerator Tier 1",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.ai_accel_2.description",
+  "en": "Custom NPU blocks: +40% NPU TOPS on self-designed chips.",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.ai_accel_2.name",
+  "en": "AI Accelerator Tier 2",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.ai_accel_3.description",
+  "en": "Custom NPU blocks: +60% NPU TOPS on self-designed chips.",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.ai_accel_3.name",
+  "en": "AI Accelerator Tier 3",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.ai_accel_4.description",
+  "en": "Custom NPU blocks: +80% NPU TOPS on self-designed chips.",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.ai_accel_4.name",
+  "en": "AI Accelerator Tier 4",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.ai_accel_5.description",
+  "en": "Custom NPU blocks: +100% NPU TOPS on self-designed chips.",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.ai_accel_5.name",
+  "en": "AI Accelerator Tier 5",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.arch_arm_1.description",
+  "en": "Generation 1 ARM SoCs for phones, tablets and ARM laptops.",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.arch_arm_1.name",
+  "en": "ARM SoC Gen 1",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.arch_arm_2.description",
+  "en": "Generation 2 ARM SoCs for phones, tablets and ARM laptops.",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.arch_arm_2.name",
+  "en": "ARM SoC Gen 2",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.arch_arm_3.description",
+  "en": "Generation 3 ARM SoCs for phones, tablets and ARM laptops.",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.arch_arm_3.name",
+  "en": "ARM SoC Gen 3",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.arch_arm_4.description",
+  "en": "Generation 4 ARM SoCs for phones, tablets and ARM laptops.",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.arch_arm_4.name",
+  "en": "ARM SoC Gen 4",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.arch_arm_5.description",
+  "en": "Generation 5 ARM SoCs for phones, tablets and ARM laptops.",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.arch_arm_5.name",
+  "en": "ARM SoC Gen 5",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.arch_arm_6.description",
+  "en": "Generation 6 ARM SoCs for phones, tablets and ARM laptops.",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.arch_arm_6.name",
+  "en": "ARM SoC Gen 6",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.arch_arm_7.description",
+  "en": "Generation 7 ARM SoCs for phones, tablets and ARM laptops.",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.arch_arm_7.name",
+  "en": "ARM SoC Gen 7",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.arch_riscv_2.description",
+  "en": "Royalty-free cores for wearables and smart home.",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.arch_riscv_2.name",
+  "en": "RISC-V Core Gen 2",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.arch_riscv_3.name",
+  "en": "RISC-V Core Gen 3",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.arch_riscv_4.name",
+  "en": "RISC-V Core Gen 4",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.arch_riscv_5.name",
+  "en": "RISC-V Core Gen 5",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.arch_riscv_6.name",
+  "en": "RISC-V Core Gen 6",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.arch_riscv_7.name",
+  "en": "RISC-V Core Gen 7",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.arch_x86_1.description",
+  "en": "Integrate generation 1 x86 processors and boards into PCs and laptops.",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.arch_x86_1.name",
+  "en": "x86_64 Platform Gen 1",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.arch_x86_2.description",
+  "en": "Integrate generation 2 x86 processors and boards into PCs and laptops.",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.arch_x86_2.name",
+  "en": "x86_64 Platform Gen 2",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.arch_x86_3.description",
+  "en": "Integrate generation 3 x86 processors and boards into PCs and laptops.",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.arch_x86_3.name",
+  "en": "x86_64 Platform Gen 3",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.arch_x86_4.description",
+  "en": "Integrate generation 4 x86 processors and boards into PCs and laptops.",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.arch_x86_4.name",
+  "en": "x86_64 Platform Gen 4",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.arch_x86_5.description",
+  "en": "Integrate generation 5 x86 processors and boards into PCs and laptops.",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.arch_x86_5.name",
+  "en": "x86_64 Platform Gen 5",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.arch_x86_6.description",
+  "en": "Integrate generation 6 x86 processors and boards into PCs and laptops.",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.arch_x86_6.name",
+  "en": "x86_64 Platform Gen 6",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.arch_x86_7.description",
+  "en": "Integrate generation 7 x86 processors and boards into PCs and laptops.",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.arch_x86_7.name",
+  "en": "x86_64 Platform Gen 7",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.bat_1.description",
+  "en": "Baseline cells.",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.bat_1.name",
+  "en": "Lithium-polymer Cells",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.bat_2.description",
+  "en": "Denser cells and fast charging.",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.bat_2.name",
+  "en": "High-density Li-ion",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.bat_3.description",
+  "en": "+15% capacity per gram.",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.bat_3.name",
+  "en": "Silicon-carbon Anodes",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.bat_4.description",
+  "en": "Safer, denser, long-life cells.",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.bat_4.name",
+  "en": "Solid-state Batteries",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.biz_b2b.description",
+  "en": "Sell chips, panels and cells to other companies.",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.biz_b2b.name",
+  "en": "Component Sales Division",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.biz_consortium.description",
+  "en": "Shared standards: +4% market size, NPCs gain some of your tech.",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.biz_consortium.name",
+  "en": "Standards Consortium",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.biz_culture.description",
+  "en": "+10% morale baseline.",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.biz_culture.name",
+  "en": "Corporate Culture",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.biz_esports.description",
+  "en": "Esports and studio deals: gaming trend bonus.",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.biz_esports.name",
+  "en": "Gaming Partnerships",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.biz_expo.description",
+  "en": "Better showing at the Global Tech Expo.",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.biz_expo.name",
+  "en": "Expo Presence",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.biz_feedback.description",
+  "en": "Survey segments before you build.",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.biz_feedback.name",
+  "en": "Consumer Feedback Lab",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.biz_intel.description",
+  "en": "Market research reports on NPC corporations.",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.biz_intel.name",
+  "en": "Competitor Intelligence",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.biz_ma.description",
+  "en": "Acquire small suppliers for capacity and patents.",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.biz_ma.name",
+  "en": "Mergers & Acquisitions",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.biz_mkt_1.description",
+  "en": "+10% marketing efficiency.",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.biz_mkt_1.name",
+  "en": "Marketing Science 1",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.biz_mkt_2.name",
+  "en": "Marketing Science 2",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.biz_mkt_3.name",
+  "en": "Marketing Science 3",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.biz_mkt_4.name",
+  "en": "Marketing Science 4",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.biz_mkt_5.name",
+  "en": "Marketing Science 5",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.biz_patents.description",
+  "en": "Patent researched technologies and license them.",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.biz_patents.name",
+  "en": "Patent Office",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.biz_subs.description",
+  "en": "Monthly cloud and AI subscriptions.",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.biz_subs.name",
+  "en": "Subscription Economy",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.cam_1.description",
+  "en": "Better sensors and computational photography.",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.cam_1.name",
+  "en": "Imaging Gen 1",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.cam_2.name",
+  "en": "Imaging Gen 2",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.cam_3.name",
+  "en": "Imaging Gen 3",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.cam_4.name",
+  "en": "Imaging Gen 4",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.cam_5.name",
+  "en": "Imaging Gen 5",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.chip_designer.description",
+  "en": "Unlocks the Chip Designer: design your own CPUs and GPUs for your fabs.",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.chip_designer.name",
+  "en": "Custom Silicon Design",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.cool_1.description",
+  "en": "Fans, heat pipes, graphite sheets.",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.cool_1.name",
+  "en": "Air Cooling Basics",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.cool_2.description",
+  "en": "AIO loops and console blowers.",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.cool_2.name",
+  "en": "Advanced Cooling",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.cool_3.description",
+  "en": "Vapor chambers for phones and thin laptops.",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.cool_3.name",
+  "en": "Vapor Chambers",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.cool_4.description",
+  "en": "Liquid-metal interface: top-tier laptop cooling.",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.cool_4.name",
+  "en": "Liquid Metal TIM",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.cool_tim.description",
+  "en": "+8% cooling capacity on every cooler.",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.cool_tim.name",
+  "en": "Thermal Interface Materials",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.dev_console.description",
+  "en": "Home and handheld consoles.",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.dev_console.name",
+  "en": "Console Platform",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.dev_laptop.description",
+  "en": "Design and sell laptops.",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.dev_laptop.name",
+  "en": "Laptop Platform",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.dev_pc.description",
+  "en": "Design and sell desktop PCs.",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.dev_pc.name",
+  "en": "PC Platform",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.dev_smarthome.description",
+  "en": "Speakers, hubs, sensors.",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.dev_smarthome.name",
+  "en": "Smart Home",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.dev_vr.description",
+  "en": "VR headsets and smart glasses.",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.dev_wearable.description",
+  "en": "Smartwatches and headphones.",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.dev_wearable.name",
+  "en": "Wearables Platform",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.disp_eff.description",
+  "en": "-15% display power.",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.disp_eff.name",
+  "en": "Energy-efficient Panels",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.disp_flex.description",
+  "en": "Bendable panels for foldables.",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.disp_flex.name",
+  "en": "Flexible OLED",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.disp_fold.description",
+  "en": "Hinge + UTG stack: unlocks foldable phones.",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.disp_fold.name",
+  "en": "Foldable Displays",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.disp_glass.description",
+  "en": "Hardened cover glass: +8% reliability.",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.disp_glass.name",
+  "en": "Advanced Glass",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.disp_ips.description",
+  "en": "Balanced LCD for phones and laptops.",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.disp_ips.name",
+  "en": "IPS Panels",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.disp_ltpo.description",
+  "en": "Variable refresh 1-120Hz: better battery life.",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.disp_ltpo.name",
+  "en": "LTPO Backplanes",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.disp_microled.description",
+  "en": "Inorganic micro-emitters for VR and glasses.",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.disp_microled.name",
+  "en": "MicroLED",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.disp_oled.description",
+  "en": "Self-emissive panels, perfect blacks.",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.disp_oled.name",
+  "en": "OLED Panels",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.disp_tn.description",
+  "en": "Cheap, fast, poor colours.",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.disp_tn.name",
+  "en": "TN Panels",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.disp_va.description",
+  "en": "High-contrast LCD; cheaper panel sourcing.",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.disp_va.name",
+  "en": "VA Panels",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.gpu_arch_1.description",
+  "en": "Generation 1 graphics: more compute units.",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.gpu_arch_1.name",
+  "en": "GPU Architecture Gen 1",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.gpu_arch_2.description",
+  "en": "Generation 2 graphics: more compute units.",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.gpu_arch_2.name",
+  "en": "GPU Architecture Gen 2",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.gpu_arch_3.description",
+  "en": "Generation 3 graphics: more compute units, ray tracing units.",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.gpu_arch_3.name",
+  "en": "GPU Architecture Gen 3",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.gpu_arch_4.description",
+  "en": "Generation 4 graphics: more compute units.",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.gpu_arch_4.name",
+  "en": "GPU Architecture Gen 4",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.gpu_arch_5.description",
+  "en": "Generation 5 graphics: more compute units.",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.gpu_arch_5.name",
+  "en": "GPU Architecture Gen 5",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.gpu_arch_6.description",
+  "en": "Generation 6 graphics: more compute units.",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.gpu_arch_6.name",
+  "en": "GPU Architecture Gen 6",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.gpu_arch_7.description",
+  "en": "Generation 7 graphics: more compute units.",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.gpu_arch_7.name",
+  "en": "GPU Architecture Gen 7",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.litho_duv.description",
+  "en": "Deep-UV immersion lithography: the gateway to 10nm.",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.litho_duv.name",
+  "en": "DUV Lithography",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.litho_duv_multi.description",
+  "en": "Quad patterning for 7nm-class features.",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.litho_duv_multi.name",
+  "en": "DUV Multi-Patterning",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.litho_euv.description",
+  "en": "Extreme-UV exposure. Fewer masks, better yields on 5nm and 3nm.",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.litho_euv.name",
+  "en": "EUV Lithography",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.litho_highna.description",
+  "en": "Next-generation optics for 2nm and beyond.",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.litho_highna.name",
+  "en": "High-NA EUV",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.mat_2.description",
+  "en": "Aluminum and glass chassis.",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.mat_2.name",
+  "en": "Materials Science 2",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.mat_3.description",
+  "en": "Magnesium and foldable frames.",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.mat_3.name",
+  "en": "Materials Science 3",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.mat_4.description",
+  "en": "Titanium and carbon fibre.",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.mat_4.name",
+  "en": "Materials Science 4",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.mem_1.description",
+  "en": "Faster RAM and flash sourcing.",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.mem_1.name",
+  "en": "Memory & Storage Gen 1",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.mem_2.name",
+  "en": "Memory & Storage Gen 2",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.mem_3.name",
+  "en": "Memory & Storage Gen 3",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.mem_4.name",
+  "en": "Memory & Storage Gen 4",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.mem_5.name",
+  "en": "Memory & Storage Gen 5",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.mfg_auto_1.description",
+  "en": "+12% line capacity, -7% labour per unit.",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.mfg_auto_1.name",
+  "en": "Factory Automation 1",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.mfg_auto_2.name",
+  "en": "Factory Automation 2",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.mfg_auto_3.name",
+  "en": "Factory Automation 3",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.mfg_auto_4.name",
+  "en": "Factory Automation 4",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.mfg_auto_5.name",
+  "en": "Factory Automation 5",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.mfg_fab_ops.description",
+  "en": "Build semiconductor, display and battery fabs.",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.mfg_fab_ops.name",
+  "en": "Fab Operations",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.mfg_log_1.description",
+  "en": "-10% logistics cost, better regional distribution.",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.mfg_log_1.name",
+  "en": "Logistics Network 1",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.mfg_log_2.name",
+  "en": "Logistics Network 2",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.mfg_log_3.name",
+  "en": "Logistics Network 3",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.mfg_log_4.name",
+  "en": "Logistics Network 4",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.mfg_log_5.name",
+  "en": "Logistics Network 5",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.mfg_qc_1.description",
+  "en": "-12% defect rate.",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.mfg_qc_1.name",
+  "en": "Quality Systems 1",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.mfg_qc_2.name",
+  "en": "Quality Systems 2",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.mfg_qc_3.name",
+  "en": "Quality Systems 3",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.mfg_qc_4.name",
+  "en": "Quality Systems 4",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.mfg_qc_5.name",
+  "en": "Quality Systems 5",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.mfg_recycle.description",
+  "en": "Recover materials from returns; sustainability trend bonus.",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.mfg_recycle.name",
+  "en": "E-Waste Recycling",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.mfg_repair.description",
+  "en": "+15% repairability; lower warranty costs.",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.mfg_repair.name",
+  "en": "Design for Repair",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.node_10_equipment.description",
+  "en": "Tooling and clean-room certification for 10nm. Expensive, but unlocks the ramp stage.",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.node_10_equipment.name",
+  "en": "10nm Fab Equipment",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.node_10_ramp.description",
+  "en": "Starts volume production at 10nm in your own fabs; yield starts low and matures with use.",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.node_10_ramp.name",
+  "en": "10nm Volume Ramp",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.node_10_research.description",
+  "en": "Lab-scale validation of the 10nm node. Required before equipment can be ordered.",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.node_10_research.name",
+  "en": "10nm Process Research",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.node_14_equipment.description",
+  "en": "Tooling and clean-room certification for 14nm. Expensive, but unlocks the ramp stage.",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.node_14_equipment.name",
+  "en": "14nm Fab Equipment",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.node_14_ramp.description",
+  "en": "Starts volume production at 14nm in your own fabs; yield starts low and matures with use.",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.node_14_ramp.name",
+  "en": "14nm Volume Ramp",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.node_14_research.description",
+  "en": "Lab-scale validation of the 14nm node. Required before equipment can be ordered.",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.node_14_research.name",
+  "en": "14nm Process Research",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.node_1_4_equipment.description",
+  "en": "Tooling and clean-room certification for 1.4nm. Expensive, but unlocks the ramp stage.",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.node_1_4_equipment.name",
+  "en": "1.4nm Fab Equipment",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.node_1_4_ramp.description",
+  "en": "Starts volume production at 1.4nm in your own fabs; yield starts low and matures with use.",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.node_1_4_ramp.name",
+  "en": "1.4nm Volume Ramp",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.node_1_4_research.description",
+  "en": "Lab-scale validation of the 1.4nm node. Required before equipment can be ordered.",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.node_1_4_research.name",
+  "en": "1.4nm Process Research",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.node_2_equipment.description",
+  "en": "Tooling and clean-room certification for 2nm. Expensive, but unlocks the ramp stage.",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.node_2_equipment.name",
+  "en": "2nm Fab Equipment",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.node_2_ramp.description",
+  "en": "Starts volume production at 2nm in your own fabs; yield starts low and matures with use.",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.node_2_ramp.name",
+  "en": "2nm Volume Ramp",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.node_2_research.description",
+  "en": "Lab-scale validation of the 2nm node. Required before equipment can be ordered.",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.node_2_research.name",
+  "en": "2nm Process Research",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.node_3_equipment.description",
+  "en": "Tooling and clean-room certification for 3nm. Expensive, but unlocks the ramp stage.",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.node_3_equipment.name",
+  "en": "3nm Fab Equipment",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.node_3_ramp.description",
+  "en": "Starts volume production at 3nm in your own fabs; yield starts low and matures with use.",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.node_3_ramp.name",
+  "en": "3nm Volume Ramp",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.node_3_research.description",
+  "en": "Lab-scale validation of the 3nm node. Required before equipment can be ordered.",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.node_3_research.name",
+  "en": "3nm Process Research",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.node_5_equipment.description",
+  "en": "Tooling and clean-room certification for 5nm. Expensive, but unlocks the ramp stage.",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.node_5_equipment.name",
+  "en": "5nm Fab Equipment",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.node_5_ramp.description",
+  "en": "Starts volume production at 5nm in your own fabs; yield starts low and matures with use.",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.node_5_ramp.name",
+  "en": "5nm Volume Ramp",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.node_5_research.description",
+  "en": "Lab-scale validation of the 5nm node. Required before equipment can be ordered.",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.node_5_research.name",
+  "en": "5nm Process Research",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.node_7_equipment.description",
+  "en": "Tooling and clean-room certification for 7nm. Expensive, but unlocks the ramp stage.",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.node_7_equipment.name",
+  "en": "7nm Fab Equipment",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.node_7_ramp.description",
+  "en": "Starts volume production at 7nm in your own fabs; yield starts low and matures with use.",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.node_7_ramp.name",
+  "en": "7nm Volume Ramp",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.node_7_research.description",
+  "en": "Lab-scale validation of the 7nm node. Required before equipment can be ordered.",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.node_7_research.name",
+  "en": "7nm Process Research",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.pack_3d.description",
+  "en": "Stacked cache and logic: +8% chip performance.",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.pack_3d.name",
+  "en": "3D Stacking",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.pack_advanced.description",
+  "en": "Fan-out packaging reduces die cost and improves yields.",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.pack_advanced.name",
+  "en": "Advanced Packaging",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.pack_chiplets.description",
+  "en": "Split big dies into chiplets: yield of large chips rises sharply.",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.pack_chiplets.name",
+  "en": "Chiplets",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.power_opt.description",
+  "en": "Firmware power states: -8% device power.",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.power_opt.name",
+  "en": "Power Optimization",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.power_opt_2.description",
+  "en": "Another -8% device power.",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.power_opt_2.name",
+  "en": "Power Optimization II",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.sw_advos.description",
+  "en": "Mature platform: +10% stability, cross-device sync.",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.sw_advos.name",
+  "en": "Advanced Operating Systems",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.sw_appstore.description",
+  "en": "Own app store with adjustable commission.",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.sw_appstore.name",
+  "en": "Application Store",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.sw_cloud.description",
+  "en": "Unlocks cloud services and subscriptions.",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.sw_cloud.name",
+  "en": "Cloud Infrastructure",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.sw_compiler_1.description",
+  "en": "+3% effective performance from better codegen.",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.sw_compiler_1.name",
+  "en": "Compiler Optimization 1",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.sw_compiler_2.name",
+  "en": "Compiler Optimization 2",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.sw_compiler_3.name",
+  "en": "Compiler Optimization 3",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.sw_compiler_4.name",
+  "en": "Compiler Optimization 4",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.sw_compiler_5.name",
+  "en": "Compiler Optimization 5",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.sw_driver_1.description",
+  "en": "Driver stack tier 1: better compatibility and fewer bugs.",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.sw_driver_1.name",
+  "en": "Driver Development 1",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.sw_driver_2.description",
+  "en": "Driver stack tier 2: better compatibility and fewer bugs.",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.sw_driver_2.name",
+  "en": "Driver Development 2",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.sw_driver_3.description",
+  "en": "Driver stack tier 3: better compatibility and fewer bugs.",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.sw_driver_3.name",
+  "en": "Driver Development 3",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.sw_driver_4.description",
+  "en": "Driver stack tier 4: better compatibility and fewer bugs.",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.sw_driver_4.name",
+  "en": "Driver Development 4",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.sw_driver_5.description",
+  "en": "Driver stack tier 5: better compatibility and fewer bugs.",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.sw_driver_5.name",
+  "en": "Driver Development 5",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.sw_gamestore.description",
+  "en": "Exclusive game platform for consoles and PCs.",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.sw_gamestore.name",
+  "en": "Game Platform",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.sw_gfx_api.description",
+  "en": "Low-overhead graphics API: +5% GPU performance.",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.sw_gfx_api.name",
+  "en": "Graphics API",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.sw_kernel_1.description",
+  "en": "Own kernel tier 1: +5% stability on own OS.",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.sw_kernel_1.name",
+  "en": "Kernel Architecture 1",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.sw_kernel_2.description",
+  "en": "Own kernel tier 2: +5% stability on own OS.",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.sw_kernel_2.name",
+  "en": "Kernel Architecture 2",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.sw_kernel_3.description",
+  "en": "Own kernel tier 3: +5% stability on own OS.",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.sw_kernel_3.name",
+  "en": "Kernel Architecture 3",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.sw_kernel_4.description",
+  "en": "Own kernel tier 4: +5% stability on own OS.",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.sw_kernel_4.name",
+  "en": "Kernel Architecture 4",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.sw_kernel_5.description",
+  "en": "Own kernel tier 5: +5% stability on own OS.",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.sw_kernel_5.name",
+  "en": "Kernel Architecture 5",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.sw_llm.description",
+  "en": "On-device assistant: AI trend bonus.",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.sw_llm.name",
+  "en": "Local LLM Systems",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.sw_rt.description",
+  "en": "Hardware RT support in your OS: gaming trend bonus.",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.sw_rt.name",
+  "en": "Ray Tracing Pipeline",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.sw_sync.description",
+  "en": "Cross-device continuity: +5% ecosystem synergy.",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.sw_sync.name",
+  "en": "Device Synchronization",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.sw_upscale.description",
+  "en": "+10% effective gaming performance.",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.sw_upscale.name",
+  "en": "Neural Upscaling",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.transistor_finfet.description",
+  "en": "Lower leakage transistors: -7% chip power.",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.transistor_finfet.name",
+  "en": "Advanced Transistor Architecture (FinFET+)",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.transistor_gaa.description",
+  "en": "Nanosheet transistors: another -10% chip power.",
+  "group": "data"
+ },
+ {
+  "key": "data.techtree.transistor_gaa.name",
+  "en": "Gate-All-Around Transistors",
+  "group": "data"
+ }
+]

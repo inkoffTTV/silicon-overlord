@@ -32,7 +32,7 @@ local function fill(text: string, name: string, value: any): string
 	return s
 end
 
-local function pickHeadline(kind: string, score: number, name: string): string
+local function pickHeadline(kind: string, score: number, name: string): (string, string)
 	local h = Templates.headlines[kind]
 	local key
 	if score >= 8.5 then
@@ -44,7 +44,7 @@ local function pickHeadline(kind: string, score: number, name: string): string
 	else
 		key = "bad"
 	end
-	return fill(h[key], name, "")
+	return fill(h[key], name, ""), "review.headline." .. kind .. "." .. key
 end
 
 -- Each finding: { id, value } collected by kind; tone contributes to the score
@@ -198,21 +198,27 @@ function ReviewGenerator.generate(inp: ReviewInput, rng: Rng.Rng): { Types.Revie
 		end
 		local score = baseScore(kind, inp)
 		local body = {}
+		local parts = {} -- online: localization keys of the body sentences (docs/LOCALE_KEYS.md)
 		for _, f in ipairs(chosen) do
 			local t = Templates.findings[f.id]
 			if t then
 				score = score + t.tone * 0.45
 				body[#body + 1] = fill(t.text, inp.name, f.value)
+				parts[#parts + 1] = { key = "review.finding." .. f.id, params = { name = inp.name, value = f.value } }
 			end
 		end
 		score = MathUtil.clamp(score + rng:gaussian(0, 0.3), 1, 10)
 		if #body == 0 then
 			body[1] = kind == "Financial" and "A competent product with unremarkable unit economics." or "A competent, if unremarkable, device."
+			parts[1] = { key = kind == "Financial" and "review.fallback.financial" or "review.fallback.device", params = {} }
 		end
-		reviews[#reviews + 1] = {
+		local headline, headlineKey = pickHeadline(kind, score, inp.name)
+		local review: any = {
 			outlet = rng:pick(Names.outlets[kind]), kind = kind :: any, score = MathUtil.round(score, 1),
-			headline = pickHeadline(kind, score, inp.name), body = table.concat(body, " "), day = inp.day,
+			headline = headline, body = table.concat(body, " "), day = inp.day,
+			headlineKey = headlineKey, headlineParams = { name = inp.name }, bodyParts = parts,
 		}
+		reviews[#reviews + 1] = review
 	end
 	return reviews
 end
