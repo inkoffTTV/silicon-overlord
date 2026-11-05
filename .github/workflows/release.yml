@@ -1,0 +1,42 @@
+# Creates a GitHub Release when a version tag (v0.2.0, v0.3.1, ...) is pushed.
+# The Windows build itself is produced by tools/release.sh and lives on the `builds` branch
+# (SiliconOverlord.zip + version.json for the in-game auto-updater). This workflow attaches that zip
+# and uses docs/releases/<tag>.md as the release notes.
+name: Release
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout tagged source
+        uses: actions/checkout@v4
+
+      - name: Fetch the Windows build from the builds branch
+        run: |
+          git fetch --depth=1 origin builds
+          git show origin/builds:SiliconOverlord.zip > SiliconOverlord.zip
+          git show origin/builds:version.json > version.json
+          want="${GITHUB_REF_NAME#v}"
+          got="$(python3 -c 'import json;print(json.load(open("version.json"))["version"])')"
+          if [ "$want" != "$got" ]; then
+            echo "builds branch has version $got but the tag is $GITHUB_REF_NAME" >&2
+            exit 1
+          fi
+
+      - name: Create the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          notes="docs/releases/${GITHUB_REF_NAME}.md"
+          if [ -f "$notes" ]; then
+            gh release create "$GITHUB_REF_NAME" SiliconOverlord.zip --title "Silicon Overlord ${GITHUB_REF_NAME#v}" --notes-file "$notes"
+          else
+            gh release create "$GITHUB_REF_NAME" SiliconOverlord.zip --title "Silicon Overlord ${GITHUB_REF_NAME#v}" --generate-notes
+          fi
