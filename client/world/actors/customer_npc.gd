@@ -13,7 +13,7 @@ const Meshes := preload("res://world/lib/meshes.gd")
 const SKINS := [Color(0.96, 0.8, 0.66), Color(0.86, 0.66, 0.5), Color(0.72, 0.52, 0.36), Color(0.55, 0.38, 0.25), Color(0.4, 0.27, 0.18), Color(0.93, 0.76, 0.6)]
 const HAIRS := [Color(0.1, 0.07, 0.05), Color(0.25, 0.16, 0.09), Color(0.55, 0.38, 0.2), Color(0.85, 0.7, 0.4), Color(0.6, 0.25, 0.12), Color(0.82, 0.82, 0.84)]
 ## look presets: [shirt, pants, hair_style, extras...]
-const LOOKS := ["granny", "courier", "student", "office", "kid", "punk", "chef", "gardener", "runner", "grandpa", "influencer", "musician"]
+const LOOKS := ["granny", "courier", "student", "office", "kid", "punk", "chef", "gardener", "runner", "grandpa", "influencer", "musician", "barista"]
 
 var order_id := ""
 var customer := ""
@@ -95,6 +95,12 @@ func setup(order: Dictionary) -> void:
 		"musician":
 			rig.shirt = Color(0.2, 0.25, 0.35)
 			rig.hair_style = 0
+		"barista":
+			rig.shirt = Color(0.9, 0.88, 0.82)
+			rig.hair_style = 3
+	if customer.contains("taxi"):
+		rig.hat_color = Color(0.95, 0.75, 0.1)
+		rig.shirt = Color(0.2, 0.2, 0.22)
 	rig.build()
 	_dress(rng)
 	if look == "kid":
@@ -120,7 +126,8 @@ static func pick_look(cust: String) -> String:
 	for k in LOOKS:
 		if c.contains(k):
 			return k
-	for pair in [["grand", "granny"], ["babushka", "granny"], ["nan", "granny"], ["cook", "chef"], ["pizza", "courier"],
+	for pair in [["grandma", "granny"], ["teacher", "office"], ["gamer", "kid"], ["barista", "barista"], ["taxi", "courier"],
+			["blogger", "influencer"], ["grand", "granny"], ["babushka", "granny"], ["nan", "granny"], ["cook", "chef"], ["pizza", "courier"],
 			["deliver", "courier"], ["boy", "kid"], ["girl", "kid"], ["teen", "student"], ["boss", "office"], ["blog", "influencer"],
 			["star", "influencer"], ["garden", "gardener"], ["jog", "runner"], ["rock", "punk"], ["dj", "musician"], ["grandad", "grandpa"]]:
 		if c.contains(pair[0]):
@@ -180,6 +187,11 @@ func _dress(rng: RandomNumberGenerator) -> void:
 			_glasses(h, true)
 			var ph := _box(rig.farm_l, Vector3(0.08, 0.15, 0.012), Vector3(0, -0.3, 0.08), Mats.m("plastic_black"), 0.006)
 			ph.rotation_degrees.x = 70
+		"barista":
+			_beanie(h, Color(0.3, 0.2, 0.15))
+			_box(sp, Vector3(0.42, 0.55, 0.02), Vector3(0, 0.12, 0.175), Mats.m("fabric", Color.WHITE, {"albedo": Color(0.42, 0.26, 0.15)}), 0.01)
+			var cup := _box(rig.farm_l, Vector3(0.07, 0.11, 0.07), Vector3(0, -0.3, 0.06), Mats.m("paper", Color(1.1, 1.05, 0.95)), 0.015)
+			cup.name = "Coffee"
 		"musician":
 			var beret := Mats.m("fabric", Color.WHITE, {"albedo": Color(0.45, 0.08, 0.12)})
 			_mesh(h, Meshes.sphere(0.21, 12), Vector3(0.03, 0.38, -0.02), beret, Vector3(1.05, 0.35, 1.0)).rotation_degrees.z = -12

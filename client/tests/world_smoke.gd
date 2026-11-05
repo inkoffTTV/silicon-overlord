@@ -6,6 +6,9 @@ extends SceneTree
 ## Iteration 2: crates spawn + ship through the van with a stubbed Net (once, ok + failure), stairs_locked vs loft
 ## (ladder climb, upstairs lines), employees per station, whiteboard research names, workbench prototype,
 ## sit at the PC / stand up on modal close, job board, avatar speech bubble, office dispatch.
+## Iteration 3: repair shop — chapter 0 dark garage (shop door + light switch -> storyEvent), objective highlight,
+## customers + devices per repair order, device snaps into the bench holder, bench seat -> repair_bench, counter
+## take / return prompts, a new customer walks in, a paid customer leaves, parts bins, sign swap + cutscene.
 ## Exit code 0 = pass, 1 = fail.
 
 const REQUIRED_KINDS := ["pc_design", "whiteboard_research", "workbench_production", "phone_shelf", "board_company", "door_exit", "stage_launch",
@@ -147,6 +150,7 @@ func _run() -> void:
 	check(world.peers.is_empty(), "peer avatars removed")
 
 	await _iteration2(world, player)
+	await _story(world, player)
 
 	# 6) HQ level 2 rebuild
 	bus.ui_modal_changed.emit(false)
@@ -319,6 +323,125 @@ func _iteration2(world: Node, player: CharacterBody3D) -> void:
 	check(world.avatar_position(7) is Vector3, "avatar_position for spoken chat")
 	bus.peers_changed.emit([])
 	game.state.production["crates"] = Shots.fake_state().production.crates
+
+const Story := preload("res://world/live/story_state.gd")
+
+func _story(world: Node, player: CharacterBody3D) -> void:
+	bus.ui_modal_changed.emit(false)
+	world.auto_cutscenes = false
+	net_calls.clear()
+	# --- chapter 0: dark garage, shop door shut
+	game.apply_snapshot(Story.fake_state(0, "door_open", ["intro_seen"]))
+	await frames(4)
+	var shop: Node = world.get_shop()
+	check(shop != null, "garage has a repair shop")
+	if shop == null:
+		return
+	var lv: Node3D = world.get_level()
+	check(not shop.door_is_open() and shop.door_ia.is_in_group("interactable") and shop.door_ia.get_meta("kind") == "shop_door", "chapter 0: shop door closed, interactable 'shop_door'")
+	check(not shop.lights_are_on(), "chapter 0: lights off")
+	var bulb_lit := false
+	for l in lv.get_node("Lights").find_children("*", "Light3D", true, false):
+		bulb_lit = bulb_lit or l.visible
+	check(not bulb_lit, "chapter 0: garage lights are dark")
+	check(not lv.dock.visible, "story before chapter 5: no van on the driveway")
+	var lp := lv.to_local(player.global_position)
+	check(lp.distance_to(shop.HOUSE_SPAWN) < 0.6, "chapter 0: player starts by the house door %s" % lp)
+	world.story_stage(0, "door_open")
+	await frames(2)
+	check(world.objective.has_target(shop.door_ia), "story_stage highlights the shop door")
+	world.story_stage(-1, "")
+	# open the door with E
+	await _aim_from(player, lv.to_global(Vector3(-1.5, 0, 2.2)), shop.door_ia.global_position + Vector3(0, 1.2, 0))
+	interacts.clear()
+	check(player.try_interact() and interacts.has(["shop_door", "garage_rollup"]), "E on the shop door emits shop_door %s" % [interacts])
+	await frames(3)
+	check(shop.door_is_open() and net_calls.has(["storyEvent", {"id": "door_open"}]), "door opens + storyEvent door_open %s" % [net_calls])
+	# light switch
+	await _aim_from(player, lv.to_global(shop.SWITCH_POS + Vector3(-0.2, 0, -1.0)), shop.switch_ia.global_position)
+	check(player.try_interact(), "E on the light switch")
+	await frames(3)
+	check(shop.lights_are_on() and net_calls.has(["storyEvent", {"id": "lights_on"}]), "lights on + storyEvent lights_on")
+	await get_root_timer(0.5)
+	bulb_lit = false
+	for l in lv.get_node("Lights").find_children("*", "Light3D", true, false):
+		bulb_lit = bulb_lit or l.visible
+	check(bulb_lit, "garage lights come on")
+	# --- chapter 1: two orders already in the shop (one waiting, one at the bench)
+	var o1 := Story.fake_order("rep_1", "grandma", "phone", "software_glitch", "waiting", 1)
+	var o2 := Story.fake_order("rep_2", "student", "phone", "stuck_button", "inRepair", 1)
+	var st := Story.fake_state(1, "take_device", ["intro_seen", "door_open", "lights_on"], [o1, o2])
+	st["production"] = {"lines": [], "jobs": [], "crates": []}
+	st["inventory"] = {"resources": {"repair_screen": 2, "repair_battery": 0}}
+	game.apply_snapshot(st)
+	await frames(4)
+	check(shop.customer_count() == 2, "one customer NPC per live order (%d)" % shop.customer_count())
+	check(shop.devices.size() == 2 and shop.devices["rep_1"].get_meta("order_id") == "rep_1" and shop.devices["rep_1"].is_in_group("grabbable"), "a grabbable device per order, tagged with orderId")
+	check(shop.devices["rep_2"].place == "bench", "inRepair device sits in the bench holder")
+	check(shop.counter_ia.is_in_group("interactable") and shop.counter_ia.get_meta("id") == "rep_1", "counter interactable id = waiting order (%s)" % shop.counter_ia.get_meta("id"))
+	check(shop.bench_ia.is_in_group("interactable") and shop.bench_ia.get_meta("id") == "rep_2", "repair_bench interactable id = order on the bench")
+	check(shop.devices["rep_1"].get_meta("kind") == "counter", "waiting device itself is a 'counter' interactable")
+	check(shop.bin_shown("repair_screen") == 2 and shop.bin_shown("repair_battery") == 0, "parts bins show inventory.resources")
+	world.story_stage(1, "repair_device")
+	await frames(2)
+	check(not world.objective.targets.is_empty(), "objective follows the repair orders")
+	world.story_stage(-1, "")
+	# sit at the bench -> repair_bench(orderId)
+	interacts.clear()
+	player.sit_at(shop.bench_ia)
+	await frames(20)
+	check(player.seated and interacts.has(["repair_bench", "rep_2"]), "bench seat emits repair_bench(rep_2) %s" % [interacts])
+	bus.ui_modal_changed.emit(true)
+	await frames(2)
+	bus.ui_modal_changed.emit(false)
+	await frames(3)
+	check(not player.seated, "stand up after the repair game")
+	# repaired: pops out of the holder, fixed; dropped on the counter -> "hand it back"
+	o2["status"] = "ready"
+	game.apply_sections({"repairs": {"orders": [o1, o2], "done": 0}})
+	await frames(3)
+	var d2: RigidBody3D = shop.devices["rep_2"]
+	check(d2.place != "bench" and d2.fixed and not d2.freeze, "ready device leaves the holder, fixed")
+	d2.global_transform = Transform3D(Basis(), shop.tray_slot(2))
+	d2.linear_velocity = Vector3.ZERO
+	await get_root_timer(0.5)
+	check(d2.get_meta("kind") == "counter" and str(d2.get_meta("prompt")).begins_with("Hand it back"), "ready device on the counter: 'Hand it back & get paid'")
+	# a new order walks in from the street
+	var o3 := Story.fake_order("rep_3", "courier", "tablet", "cracked_screen", "waiting", 2)
+	game.apply_sections({"repairs": {"orders": [o1, o2, o3], "done": 0}})
+	await frames(3)
+	var c3: Node3D = shop.customers.get("rep_3")
+	check(c3 != null and c3.state == "enter" and lv.to_local(c3.global_position).z > 5.0, "new order: a customer walks in from the street")
+	# paid -> takes the device and leaves
+	o2["status"] = "paid"
+	game.apply_sections({"repairs": {"orders": [o1, o2, o3], "done": 1}})
+	await frames(3)
+	check(not shop.customers.has("rep_2") and not shop.devices.has("rep_2"), "paid order: customer and device leave the shop")
+	# --- story done: company sign + reception, sign-swap cutscene
+	var fin := Story.fake_state(7, "", [], [], true)
+	game.apply_snapshot(fin)
+	await frames(4)
+	check(shop.look == "company", "story done: company look")
+	check(lv.dock.visible, "story done: van back on the driveway")
+	world.cutscenes.speed = 12.0
+	var done := [false]
+	world.cutscene_finished.connect(func(id: String) -> void: done[0] = id == "sign_swap", CONNECT_ONE_SHOT)
+	world.play_cutscene("sign_swap")
+	await frames(2)
+	check(world.is_cutscene_running() and not player.controls_enabled, "cutscene runs, player frozen")
+	var t := 0
+	while not done[0] and t < 600:
+		await frames(1)
+		t += 1
+	check(done[0], "sign_swap cutscene finishes (cutscene_finished)")
+	check(player.controls_enabled and player.cam.current, "player camera + controls restored")
+	world.cutscenes.speed = 1.0
+	world.auto_cutscenes = true
+	game.apply_snapshot(Shots.fake_state())
+	await frames(3)
+
+func get_root_timer(sec: float) -> void:
+	await create_timer(sec).timeout
 
 func _aim_at(player: CharacterBody3D, target: Vector3, dist: float) -> void:
 	var from_dir := (player.global_position - target)

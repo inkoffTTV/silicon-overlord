@@ -115,6 +115,9 @@ func _ready() -> void:
 	refresh.call_deferred()
 
 func _on_state(keys: Array) -> void:
+	# a full snapshot (join / resume / reconnect): orders already in the shop appear in place, no walk-in
+	if keys.size() > 6 and keys.has("story"):
+		_first_sync = true
 	for k in ["story", "repairs", "name", "logo", "inventory", "products", "hq"]:
 		if keys.has(k):
 			refresh()
@@ -1152,9 +1155,13 @@ func _on_interact(kind: String, _id: String) -> void:
 			set_lights(bool(_local_lights), true)
 			if _lights_on:
 				_story_event(Story.EV_LIGHTS, s)
+		"supplier_phone":
+			if Story.active(s) and Story.chapter(s) == 2 and not Story.any_done(s, ["call_supplier"]) and not _sent_events.has(Story.EV_SUPPLIER):
+				_sent_events[Story.EV_SUPPLIER] = true
+				Net.act("storyEvent", {"id": Story.EV_SUPPLIER})
 
 func _story_event(id: String, s: Dictionary) -> void:
-	if not Story.active(s) or Story.chapter(s) > 0 or _sent_events.has(id):
+	if not Story.active(s) or Story.chapter(s) > 0 or _sent_events.has(id) or str(Story.story(s).get("mode", "story")) != "story" and Story.story(s).has("mode"):
 		return
 	if id == Story.EV_DOOR and Story.any_done(s, Story.DOOR_STEPS):
 		return
@@ -1576,6 +1583,10 @@ func _process(dt: float) -> void:
 ## Nodes to highlight for a story step. Repair steps follow the live orders (what to do next).
 func objective_targets(chapter: int, step: String) -> Array:
 	var s := step.to_lower()
+	if s.contains("supplier") or s.contains("buy") or s.contains("call") or s.contains("research") or s.contains("pattern") \
+			or s.contains("intro") or s.contains("investor") or s.contains("seen") or s.contains("sign") or chapter >= 3 and not s.contains("repair"):
+		if not (chapter == 0 and s.contains("intro") and not _door_open):
+			return []
 	if not _door_open and (s.contains("door") or s.contains("open") or chapter == 0 and not s.contains("light")):
 		return [door_ia]
 	if s.contains("light") or s.contains("switch") or (chapter == 0 and _door_open and not _lights_on):

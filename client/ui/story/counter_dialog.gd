@@ -110,7 +110,7 @@ func _receipt() -> void:
 	_box.add_child(paper)
 	var v := U.vbox(6)
 	paper.add_child(v)
-	var shop := str(state().get("name", "")) if U.dict(state().get("story", {})).get("done", true) else "PHONE REPAIR"
+	var shop := str(state().get("name", "")) if U.dict(state().get("story", {})).get("done", true) else SD.ui_text("sign", "PHONE REPAIR")
 	var head := U.lbl(shop.to_upper(), U.LG, INK, "black")
 	head.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	v.add_child(head)

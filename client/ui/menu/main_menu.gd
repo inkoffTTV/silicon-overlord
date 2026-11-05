@@ -513,7 +513,7 @@ func _slot_card(c: Dictionary, newest: bool) -> Button:
 	if c.get("cash") != null:
 		meta.append(F.money(U.num(c.get("cash"))))
 	if str(c.get("role", "")) != "":
-		meta.append(L.t(str(c.get("role"))))
+		meta.append(L.t({"CoFounder": "Co-founder"}.get(str(c.get("role")), str(c.get("role")))))
 	if code != "":
 		meta.append(code)
 	tv.add_child(U.clip(" · ".join(meta), U.SM, U.MUTED))
@@ -606,10 +606,18 @@ func _choice_card(kind: String, icon_name: String, col: Color, title_text: Strin
 	v.add_child(d)
 	v.add_child(U.gap(4))
 	v.add_child(U.para(foot, U.XS + 1, col.lightened(0.2), "semibold", 200))
-	var b := U.content_btn(v, "BtnRow", Vector2(16, 16))
+	# a plain Button with the content laid over it (content_btn would keep the tallest size ever measured)
+	var b := Button.new()
+	b.theme_type_variation = "BtnRow"
+	b.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
+	var m := U.margin(v, 16, 16)
+	U._ignore_mouse(m)
+	m.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	b.add_child(m)
+	m.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	b.focus_mode = Control.FOCUS_ALL
 	b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	b.custom_minimum_size = Vector2(200, 300)
+	b.custom_minimum_size = Vector2(200, 310)
 	b.set_meta("sfx", "confirm")
 	b.set_meta("start_kind", kind)
 	b.add_theme_stylebox_override("normal", U.sbox(Color(0.05, 0.065, 0.11, 0.9), 14, Color(col, 0.45), 1, 16, 16))
@@ -784,7 +792,19 @@ func _show_credits() -> void:
 	_credits_layer.visible = true
 	_credits_layer.mouse_filter = Control.MOUSE_FILTER_STOP
 	if backdrop:
-		backdrop.call("set_dim", 0.7)
+		backdrop.call("set_dim", 1.0)
+	var band := TextureRect.new()
+	var bg := Gradient.new()
+	bg.offsets = PackedFloat32Array([0.0, 0.25, 0.75, 1.0])
+	bg.colors = PackedColorArray([Color(0.01, 0.012, 0.03, 0.0), Color(0.01, 0.012, 0.03, 0.75), Color(0.01, 0.012, 0.03, 0.75), Color(0.01, 0.012, 0.03, 0.0)])
+	var bgt := GradientTexture2D.new()
+	bgt.gradient = bg
+	band.texture = bgt
+	band.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	band.stretch_mode = TextureRect.STRETCH_SCALE
+	band.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	U.full_rect(band)
+	_credits_layer.add_child(band)
 	var clip := Control.new()
 	clip.clip_contents = true
 	clip.mouse_filter = Control.MOUSE_FILTER_IGNORE

@@ -7,6 +7,8 @@ extends SceneTree
 ## Covers: hello/welcome + token save, create company (snapshot), act id matching (createBlueprint, updateBlueprint,
 ## evaluateBlueprint, startResearch), speed -> sections, chat echo, leave -> resume, an unknown action error,
 ## and the real Design Studio flow (commit concept on step 1 -> save -> publishBlueprint) through the UI.
+## Iteration 3: a Story start company: clock paused (speed refused), chapter 0 storyEvents, chapter 1 completed with
+## two real repair orders (one through the UI counter + repair bench screens), listMyCompanies in the lobby.
 
 var port := 7391
 var pid := -1
@@ -50,6 +52,107 @@ func _wait(cond: Callable, seconds: float) -> bool:
 		await create_timer(0.05).timeout
 		t += 0.05
 	return cond.call()
+
+func _story_of() -> Dictionary:
+	var Game: Node = root.get_node("Game")
+	var st: Variant = Game.state.get("story", {})
+	return st if st is Dictionary else {}
+
+func _orders(status: String) -> Array:
+	var Game: Node = root.get_node("Game")
+	var out := []
+	var o: Variant = Game.state.get("repairs", {}).get("orders", [])
+	for x in (o if o is Array else (o as Dictionary).values()):
+		if str(x.get("status", "")) == status:
+			out.append(x)
+	return out
+
+## Story start: chapter 0 -> chapter 2 through real actions; one order through the UI screens.
+func _story(ui: Node) -> void:
+	var Game: Node = root.get_node("Game")
+	var Net: Node = root.get_node("Net")
+	var Bus: Node = root.get_node("Bus")
+	print("ui_net_test: story start")
+	await create_timer(5.5).timeout   # the server allows one create per 5 s per connection
+	var r: Dictionary = await Net.create_company("Story Labs", "#F0883E", "#F2C94C", "coop", true)
+	check(r.get("ok", false), "create story company: %s" % str(r.get("error", "ok")))
+	var ok: bool = await _wait(func() -> bool: return str(Game.state.get("name", "")) == "Story Labs", 5.0)
+	check(ok, "story company snapshot")
+	var st := _story_of()
+	if st.is_empty() or st.get("done", true):
+		print("  (server without story mode: skipped)")
+		return
+	check(int(st.get("chapter", -1)) == 0 and str(st.get("step", "")) == "intro_seen", "chapter 0, step intro_seen (%s)" % str(st.get("step", "")))
+	check(int(Game.state.get("time", {}).get("speed", -1)) == 0, "story clock paused (speed 0)")
+	check(Net.story_clock_paused(), "client knows the clock is paused")
+	var sp: Dictionary = await Net.act("setSpeed", {"speed": 2})
+	check(not sp.get("ok", true) and str(sp.get("errorKey", "")) == "err.story_clock_paused", "server refuses speed in the story (%s)" % str(sp.get("errorKey", "")))
+	# the UI director plays the intro captions and sends intro_seen; the rest are the world's events
+	ui.story.session_ready()
+	ok = await _wait(func() -> bool: return ui.story.cutscene_running(), 6.0)
+	check(ok, "intro cutscene captions start")
+	ui._handle_escape()
+	ok = await _wait(func() -> bool: return _story_of().get("stepsDone", {}).has("intro_seen"), 5.0)
+	check(ok, "UI sent storyEvent intro_seen")
+	for ev in ["door_open", "lights_on"]:
+		var e: Dictionary = await Net.act("storyEvent", {"id": ev})
+		check(e.get("ok", false), "storyEvent %s" % ev)
+	ok = await _wait(func() -> bool: return int(_story_of().get("chapter", 0)) == 1, 5.0)
+	check(ok, "chapter 1 started")
+	ok = await _wait(func() -> bool: return not _orders("waiting").is_empty(), 5.0)
+	check(ok, "a customer is waiting at the counter")
+	ui.story.debug_quiet()
+	# order 1 through the UI: counter receipt -> repair bench mini-game -> counter again
+	var o1: Dictionary = _orders("waiting")[0] if not _orders("waiting").is_empty() else {}
+	var oid := str(o1.get("id", ""))
+	Bus.interact.emit("counter", oid)
+	await create_timer(0.3).timeout
+	check(ui.current_kind == "counter", "counter receipt opens")
+	if ui.current_kind == "counter":
+		await ui.current._take()
+	ok = await _wait(func() -> bool: return _orders("inRepair").any(func(o: Dictionary) -> bool: return str(o.id) == oid), 5.0)
+	check(ok, "repairTake from the UI counter")
+	ui.close_screen()
+	await create_timer(0.3).timeout
+	Bus.interact.emit("repair_bench", oid)
+	await create_timer(0.3).timeout
+	check(ui.current_kind == "repair_bench", "repair bench opens")
+	if ui.current_kind == "repair_bench":
+		ui.current.debug_finish(0.9)
+	ok = await _wait(func() -> bool: return _orders("ready").any(func(o: Dictionary) -> bool: return str(o.id) == oid), 5.0)
+	check(ok, "repairFinish from the UI mini-game -> ready")
+	ui.close_screen()
+	await create_timer(0.3).timeout
+	var cash0 := float(Game.state.get("finance", {}).get("cash", 0))
+	Bus.interact.emit("counter", oid)
+	await create_timer(0.3).timeout
+	if ui.current_kind == "counter":
+		await ui.current._return()
+	ok = await _wait(func() -> bool: return float(Game.state.get("finance", {}).get("cash", 0)) > cash0, 5.0)
+	check(ok, "repairReturn from the UI counter pays")
+	ui.close_screen()
+	# order 2 through plain actions
+	ok = await _wait(func() -> bool: return not _orders("waiting").is_empty(), 5.0)
+	check(ok, "the second customer arrived")
+	if ok:
+		var id2 := str(_orders("waiting")[0].id)
+		for a in [["repairTake", {"orderId": id2}], ["repairFinish", {"orderId": id2, "score": 0.8}], ["repairReturn", {"orderId": id2}]]:
+			var rr: Dictionary = await Net.act(a[0], a[1])
+			check(rr.get("ok", false), "%s: %s" % [a[0], str(rr.get("error", "ok"))])
+	ok = await _wait(func() -> bool: return int(_story_of().get("chapter", 0)) >= 2, 5.0)
+	check(ok, "chapter 1 complete -> chapter 2 (%d)" % int(_story_of().get("chapter", 0)))
+	check(int(Game.state.get("repairs", {}).get("done", 0)) >= 2, "two repairs paid")
+	# lobby: listMyCompanies shows the story company with its chapter
+	Net.leave()
+	await _wait(func() -> bool: return not Game.has_company(), 3.0)
+	var lm: Dictionary = await Net.list_my_companies()
+	check(lm.get("ok", false), "listMyCompanies in the lobby: %s" % str(lm.get("error", "ok")))
+	var found := {}
+	for c in lm.get("data", []):
+		if str(c.get("name", "")) == "Story Labs":
+			found = c
+	check(not found.is_empty() and int(found.get("story", {}).get("chapter", -1)) >= 2, "listMyCompanies has the story company at chapter 2")
+	check(ui.menu.visible, "back in the title menu")
 
 func _run() -> void:
 	var Game: Node = root.get_node("Game")
@@ -200,5 +303,6 @@ func _run() -> void:
 	Net._ws.close()
 	var back: bool = await _wait(func() -> bool: return Net.status == "in_company" and Net._attempt == 0 and Game.has_company(), 12.0)
 	check(back, "auto-reconnect resumed the company")
+	await _story(ui)
 	print("ui_net_test: %d checks, %d failures" % [checks, failures.size()])
 	_finish(0 if failures.is_empty() else 1)

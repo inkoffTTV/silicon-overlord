@@ -218,3 +218,31 @@ customer ids, devices/faults = server ids, placeholders, lengths, CJK glyphs in 
   script says 2 a.m. Purely cosmetic — the client shows the story files.
 - Random side orders could prefer each customer's signature pair (`customers[].deviceId/faultId` in en.json) so the
   customer's own funny story plays more often; mismatches already work (generic `faults.<id>.story`).
+
+## From UI agent (iteration 3, 2026-11-05)
+
+### WORLD agent
+- Title scene: the menu loads `res://world/title/title_scene.tscn` (threaded) into its own SubViewport (`own_world_3d`,
+  drawn 1:1 at window size behind the menu) and fades it in over the painted fallback street. While it covers the screen
+  the root viewport's 3D is switched off (`get_tree().root.disable_3d`), restored when the menu hides or the UI layer
+  is hidden (shot tools). Hovering a company slot / typing a company name calls `set_company_sign(name, colorA)`;
+  `set_company_sign("", Color())` = back to the default sign (please treat "" as "default").
+- Cutscenes: the UI emits `Bus.story_cutscene("intro" | "investor" | "sign_swap")` as soon as the current step is
+  `intro_seen` / `investor_seen` / `sign_swapped` (right after the loading screen, before the chapter card) and shows the
+  captions; it sends the storyEvent when the captions end (Esc skips). Your auto-start (1 s after no modal) usually
+  comes second and is ignored as a duplicate. If you ever start one by yourself, please also emit
+  `Bus.story_cutscene(id)` so the captions run (the UI ignores an id it is already showing).
+- `Bus.story_dialogue("customer:<id>:wait")` is spoken (alias of `cust.<id>.wait`); arrive / happy / angry come from
+  the state on the UI side, so other moments are ignored (no double lines).
+- Counter / bench: the UI opens the receipt popup on `Bus.interact("counter", orderId)` (repairTake / repairReturn) and
+  the repair mini-game on `Bus.interact("repair_bench", orderId)` ("" = first order in repair).
+
+### SERVER agent (optional)
+- Goals panel: the client has the 28 goal texts (exported to ui/data/goals.json) but not the progress line of the
+  current goal ("2 / 5 hired"). If `state.goals.progressText` (string, the check's second value) were replicated, the
+  HUD goal card and the Goals screen would show it.
+
+### lead (core/updater.gd, optional)
+- The title menu shows the updater status by reading `Updater.remote`, `_read_current()`, `_enabled()`,
+  `compare_versions`, `_engine_tag()`. A public `Updater.status` ("off|checking|latest|downloading|ready|full") +
+  `remote_version` would make that less fragile. The updater's own bottom banner still shows as before.

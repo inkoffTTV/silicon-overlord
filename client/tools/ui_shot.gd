@@ -93,6 +93,8 @@ func _run() -> void:
 		_iter2_state(st)
 		Game.apply_snapshot(st)
 	await process_frame
+	if ui.get("story") and not screen in ["chapter", "cutscene"]:
+		ui.story.debug_quiet()
 	var step := int(args.get("step", "0"))
 	match screen:
 		"hud":
@@ -115,25 +117,15 @@ func _run() -> void:
 			await create_timer(0.6).timeout
 			ui.loading.set_status("Opening the garage…", 0.72)
 		"story":
-			ui.story.session_ready()
-			await create_timer(0.2).timeout
-			for c in ui.story.get_children():
-				pass
-			ui.story._director.clear()
-			if ui.story._card:
-				ui.story._card.queue_free()
-				ui.story._card = null
-			ui.story._director_busy = false
-			ui.story._queue.clear()
 			ui.story.say("Grandma Rosa", "It keeps calling my ex-husband all by itself. We split up in 1979! He's very confused.", Color("#38C6D9"), 900575)
 			Bus.focus_changed.emit("Take the device")
 			await create_timer(4.5).timeout
 		"chapter":
+			ui.story.debug_quiet()
 			ui.story.debug_card(int(args.get("chapter", "1")))
 			await create_timer(1.4).timeout
 		"cutscene":
-			ui.story.session_ready()
-			ui.story._director.clear()
+			ui.story.debug_quiet()
 			ui.story.debug_cutscene(str(args.get("id", "intro")))
 			await create_timer(2.6).timeout
 		"repair":
@@ -156,6 +148,8 @@ func _run() -> void:
 			for b in ui._pause.find_children("*", "Button", true, false):
 				if b.get_meta("skip_story_btn", false):
 					(b as Button).pressed.emit()
+		"goals", "rp", "daily":
+			ui.open_screen("goals", "")
 		"final":
 			ui.story.debug_final(args.has("skipped"))
 			await create_timer(2.6).timeout

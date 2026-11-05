@@ -36,6 +36,8 @@ var _cut_played := {}
 var _events_sent := {}
 var _director: Array = []        # [{type: card|cutscene|final, ...}]
 var _director_busy := false
+var _company_id := ""
+var _gen := 0                     # bumped when the director is reset: older coroutines then leave it alone
 var _money_hint := 0.0
 # dialogue
 var _dlg: PanelContainer
@@ -108,37 +110,52 @@ func on_state(keys: Array) -> void:
 		return
 	var st := story(s)
 	var orders := _orders(s)
+	# a whole new snapshot (join, reconnect, another company) is not a story event: no final card, no customer chatter
+	var snapshot := keys.is_empty() or keys.size() > 12
+	var cid := str(s.get("id", s.get("name", "")))
+	if _have_prev and snapshot and cid != _company_id:
+		_reset_soft()
+	_company_id = cid
 	if not _have_prev:
 		_have_prev = true
 		_prev_story = st.duplicate(true)
 		_prev_orders = orders
 		if active(s):
-			_director.append({"type": "card", "chapter": int(U.num(st.get("chapter", 0))), "welcome": true})
+			# a cutscene step opens the chapter itself: cutscene first, then the card
 			_step_became_current(str(st.get("step", "")), true)
+			_director.append({"type": "card", "chapter": int(U.num(st.get("chapter", 0))), "welcome": true})
 		_pump()
 		return
 	var was_active := not _prev_story.is_empty() and not bool(_prev_story.get("done", true))
 	var now_active := active(s)
 	var pch := int(U.num(_prev_story.get("chapter", 0)))
 	var ch := int(U.num(st.get("chapter", 0)))
-	if was_active and not now_active:
-		_director.append({"type": "final", "skipped": bool(U.dict(st.get("flags", {})).get("skipped", false))})
-	elif now_active and ch != pch:
-		_director.append({"type": "card", "chapter": ch})
 	if now_active and str(st.get("step", "")) != str(_prev_story.get("step", "")):
 		_step_became_current(str(st.get("step", "")), false)
+	if was_active and not now_active:
+		if not snapshot:
+			_director.append({"type": "final", "skipped": bool(U.dict(st.get("flags", {})).get("skipped", false))})
+	elif now_active and ch != pch:
+		_director.append({"type": "card", "chapter": ch})
 	# customers
-	for id in orders:
-		var o: Dictionary = orders[id]
-		var was: String = str(U.dict(_prev_orders.get(id, {})).get("status", ""))
-		var now := str(o.get("status", ""))
-		if was == "" and now == "waiting":
-			_customer_arrives(o)
-		elif was != "paid" and now == "paid" and was != "":
-			_customer_pays(o)
+	if not snapshot:
+		for id in orders:
+			var o: Dictionary = orders[id]
+			var was: String = str(U.dict(_prev_orders.get(id, {})).get("status", ""))
+			var now := str(o.get("status", ""))
+			if was == "" and now == "waiting":
+				_customer_arrives(o)
+			elif was != "paid" and now == "paid" and was != "":
+				_customer_pays(o)
 	_prev_story = st.duplicate(true)
 	_prev_orders = orders
 	_pump()
+
+## Another company's snapshot: forget the old one (keeps the presentation running).
+func _reset_soft() -> void:
+	var keep := ready_to_present
+	_reset()
+	ready_to_present = keep
 
 static func _orders(s: Dictionary) -> Dictionary:
 	var out := {}
@@ -148,6 +165,7 @@ static func _orders(s: Dictionary) -> Dictionary:
 	return out
 
 func _reset() -> void:
+	_gen += 1
 	_have_prev = false
 	_prev_story = {}
 	_prev_orders = {}
@@ -255,6 +273,7 @@ func _pump() -> void:
 		return
 	var it: Dictionary = _director.pop_front()
 	_director_busy = true
+	var gen := _gen
 	match str(it.type):
 		"card":
 			await _show_chapter_card(int(it.chapter))
@@ -263,12 +282,28 @@ func _pump() -> void:
 				_send_event(str(it.event))
 			else:
 				_cut_played[it.id] = true
-				await _run_cutscene(str(it.id), str(it.event), not it.get("force", false))
+				await _run_cutscene(str(it.id), str(it.event), false)
 		"final":
 			await _show_final(bool(it.get("skipped", false)))
+	if gen != _gen:
+		return
 	_director_busy = false
 	if is_inside_tree():
 		_pump()
+
+## Drop everything queued or on screen (tests / screenshots).
+func debug_quiet() -> void:
+	_gen += 1
+	_director.clear()
+	_director_busy = false
+	if _card:
+		_card.queue_free()
+		_card = null
+	if _cut_id != "":
+		_end_cutscene(false)
+	_queue.clear()
+	_cur = {}
+	_dlg.visible = false
 
 # ---------------------------------------------------------------- chapter card
 func _show_chapter_card(ch: int) -> void:
@@ -283,13 +318,18 @@ func _show_chapter_card(ch: int) -> void:
 		b.color = Color(0, 0, 0, 0.92)
 		b.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		b.set_anchors_and_offsets_preset(Control.PRESET_TOP_WIDE if top else Control.PRESET_BOTTOM_WIDE)
+		b.grow_vertical = Control.GROW_DIRECTION_END if top else Control.GROW_DIRECTION_BEGIN
 		b.custom_minimum_size.y = 0
-		b.offset_bottom = 0 if top else 0
-		b.offset_top = 0
 		_card.add_child(b)
 		bars.append(b)
+	var shade := ColorRect.new()
+	shade.color = Color(0.0, 0.0, 0.02, 0.3)
+	shade.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	U.full_rect(shade)
+	_card.add_child(shade)
+	_card.move_child(shade, 0)
 	var band := ColorRect.new()
-	band.color = Color(0.02, 0.025, 0.05, 0.62)
+	band.color = Color(0.02, 0.025, 0.05, 0.72)
 	band.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	band.anchor_left = 0.0
 	band.anchor_right = 1.0
@@ -365,6 +405,7 @@ func _build_cutscene_layer() -> void:
 		b.color = Color(0, 0, 0, 1)
 		b.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		b.set_anchors_and_offsets_preset(Control.PRESET_TOP_WIDE if top else Control.PRESET_BOTTOM_WIDE)
+		b.grow_vertical = Control.GROW_DIRECTION_END if top else Control.GROW_DIRECTION_BEGIN
 		_cut_layer.add_child(b)
 		_bars.append(b)
 	var v := U.vbox(6)
@@ -395,10 +436,21 @@ func _build_cutscene_layer() -> void:
 	_skip_hint.add_child(U.lbl(L.t("Skip"), U.XS, U.MUTED))
 	_cut_layer.add_child(_skip_hint)
 
-func _run_cutscene(id: String, event: String, emit_bus: bool = true) -> void:
-	var caps := SD.captions(id)
+## The world plays the camera (world.gd auto-starts a due cutscene about a second after the last modal closes and sends
+## the storyEvent when it ends); the UI shows the captions with it. Without a world that can play it (or if it does not
+## start within a few seconds) the UI shows the captions alone and sends the storyEvent itself, so the story never stalls.
+func _run_cutscene(id: String, event: String, emit_bus: bool = false) -> void:
+	var world := _world()
+	var world_ok: bool = world != null and world.has_method("is_cutscene_running")
+	if emit_bus:
+		Bus.story_cutscene.emit(id)
+	var t := 0.0
+	while world_ok and t < 3.5 and _world_cut() != id and is_inside_tree():
+		await get_tree().process_frame
+		t += get_process_delta_time()
+	var world_runs := world_ok and _world_cut() == id
 	_cut_id = id
-	_cut_caps = caps
+	_cut_caps = SD.captions(id)
 	_cut_i = -1
 	_cut_t = 0.0
 	_cut_layer.visible = true
@@ -409,12 +461,27 @@ func _run_cutscene(id: String, event: String, emit_bus: bool = true) -> void:
 		(b as ColorRect).custom_minimum_size.y = 0
 		tw.tween_property(b, "custom_minimum_size:y", 84.0, 0.8)
 	_set_hud_hidden(true)
-	if emit_bus:
-		Bus.story_cutscene.emit(id)
 	_next_caption()
 	while _cut_id == id and is_inside_tree():
 		await get_tree().process_frame
-	_send_event(event)
+	# keep the letterbox while the world's camera is still moving (max 30 s)
+	t = 0.0
+	while world_runs and _world_cut() == id and t < 30.0 and is_inside_tree():
+		await get_tree().process_frame
+		t += get_process_delta_time()
+	if not world_runs:
+		_send_event(event)
+
+func _world() -> Node:
+	return get_tree().get_first_node_in_group("world") if is_inside_tree() else null
+
+## Id of the cutscene the world is playing now ("" = none).
+func _world_cut() -> String:
+	var w := _world()
+	if w == null or not ("cutscenes" in w) or w.get("cutscenes") == null:
+		return ""
+	var cs: Object = w.get("cutscenes")
+	return str(cs.get("running")) if "running" in cs else ""
 
 func _next_caption() -> void:
 	_cut_i += 1
@@ -454,7 +521,7 @@ func skip() -> bool:
 	return false
 
 func _on_world_cutscene(id: String) -> void:
-	# the world plays the camera; captions come from here (ignore our own emit)
+	# someone asked the world for a cutscene: show its captions too (ignore one we already show)
 	if _cut_id == id or _cut_played.has(id):
 		return
 	_cut_played[id] = true
@@ -468,6 +535,13 @@ func _on_world_dialogue(line_id: String) -> void:
 				_next_caption()
 				return
 		return
+	# the world's customer moments: "customer:<id>:<moment>"; arrive / happy / angry already come from the state
+	if line_id.begins_with("customer:"):
+		var parts := line_id.split(":")
+		if parts.size() == 3 and parts[2] == "wait":
+			line_id = "cust.%s.wait" % parts[1]
+		else:
+			return
 	var ln := SD.line(line_id)
 	if ln.is_empty():
 		return
@@ -705,7 +779,7 @@ func _show_final(skipped: bool) -> void:
 	# the old sign
 	var old := PanelContainer.new()
 	old.add_theme_stylebox_override("panel", U.sbox(Color("#0B0B10"), 10, Color("#33D9FF"), 3, 22, 14))
-	var ol := U.lbl("PHONE REPAIR", 34, Color("#BFF4FF"), "black")
+	var ol := U.lbl(SD.ui_text("sign", "PHONE REPAIR"), 34, Color("#BFF4FF"), "black")
 	ol.add_theme_color_override("font_shadow_color", Color(0.2, 0.85, 1.0, 0.6))
 	ol.add_theme_constant_override("shadow_outline_size", 14)
 	old.add_child(ol)

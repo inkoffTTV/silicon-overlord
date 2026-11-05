@@ -7,11 +7,13 @@ extends Control
 ##   set_dim(0..1)                   -> extra darkening (credits, loading)
 
 const U := preload("res://ui/lib/uit.gd")
+const SD := preload("res://ui/story/story_data.gd")
 
 const SCENE := "res://world/title/title_scene.tscn"
 const DEFAULT_SIGN := "PHONE REPAIR"
 
 var sign_text := DEFAULT_SIGN
+var _default_sign := DEFAULT_SIGN
 var sign_color := Color("#33D9FF")
 var use_3d := true
 var _t := 0.0
@@ -30,6 +32,8 @@ var _root_3d_off := false
 func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 	U.full_rect(self)
+	_default_sign = SD.ui_text("sign", DEFAULT_SIGN)
+	sign_text = _default_sign
 	_rng.seed = 7
 	for i in 26:
 		_city.append([_rng.randf(), _rng.randf_range(0.04, 0.09), _rng.randf_range(0.06, 0.22), _rng.randi()])
@@ -51,7 +55,7 @@ func set_dim(v: float) -> void:
 		queue_redraw(), _dim, clampf(v, 0.0, 1.0), 0.35)
 
 func set_company_sign(text: String, color: Color = Color(0, 0, 0, 0)) -> void:
-	sign_text = text if text.strip_edges() != "" else DEFAULT_SIGN
+	sign_text = text if text.strip_edges() != "" else _default_sign
 	sign_color = color if color.a > 0.0 and text.strip_edges() != "" else Color("#33D9FF")
 	if _scene and _scene.has_method("set_company_sign"):
 		_scene.call("set_company_sign", text.strip_edges(), color)
@@ -102,7 +106,7 @@ func _mount(res: Variant) -> void:
 	U.full_rect(_tex)
 	_tex.modulate.a = 0.0
 	add_child(_tex)
-	if sign_text != DEFAULT_SIGN and _scene.has_method("set_company_sign"):
+	if sign_text != _default_sign and _scene.has_method("set_company_sign"):
 		_scene.call("set_company_sign", sign_text, sign_color)
 	get_viewport().size_changed.connect(func() -> void:
 		if _vp:

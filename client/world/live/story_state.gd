@@ -8,8 +8,11 @@ extends RefCounted
 const HQ := preload("res://world/live/hq_state.gd")
 
 ## storyEvent ids the world sends for purely client-side steps (docs/ACTIONS.md "Story & repairs").
-const EV_DOOR := "shop_door"
-const EV_LIGHTS := "light_switch"
+const EV_DOOR := "door_open"
+const EV_LIGHTS := "lights_on"
+const EV_SUPPLIER := "supplier_called"
+## cutscene -> storyEvent sent by the world when it has been watched
+const CUTSCENE_EVENT := {"intro": "intro_seen", "investor": "investor_seen", "sign_swap": "sign_swapped"}
 ## step ids that mean "the door is open" / "the lights are on" (whatever the server finally names them)
 const DOOR_STEPS := ["shop_door", "open_door", "door", "door_open", "shop_open", "open_shop"]
 const LIGHT_STEPS := ["light_switch", "lights_on", "lights", "light", "turn_on_lights", "switch_lights"]
@@ -119,12 +122,12 @@ static func device_kind(device: String) -> String:
 		return "flip"
 	return "phone"
 
-## Fault look: screen | battery | port | water | button | camera | speaker | other
+## Fault look: screen | battery | port | water | glitch | button | camera | speaker | other
 static func fault_kind(fault: String, part: String = "") -> String:
 	var f := (fault + " " + part).to_lower()
 	for k in [["screen", "screen"], ["crack", "screen"], ["display", "screen"], ["glass", "screen"], ["batter", "battery"],
 			["swoll", "battery"], ["port", "port"], ["charg", "port"], ["water", "water"], ["wet", "water"], ["soup", "water"],
-			["tea", "water"], ["button", "button"], ["camera", "camera"], ["lens", "camera"], ["speaker", "speaker"], ["sound", "speaker"]]:
+			["tea", "water"], ["glitch", "glitch"], ["software", "glitch"], ["button", "button"], ["camera", "camera"], ["lens", "camera"], ["speaker", "speaker"], ["sound", "speaker"]]:
 		if f.contains(k[0]):
 			return k[1]
 	return "other"
@@ -134,11 +137,15 @@ static func fake_story(chapter_n: int, step_id: String, done_steps: Array = [], 
 	var d := {}
 	for id in done_steps:
 		d[id] = true
-	return {"done": finished, "chapter": chapter_n, "step": step_id, "stepsDone": d, "flags": {}, "startedDay": 1}
+	const IDS := ["workshop", "first_customer", "spare_parts", "same_fault", "own_phone", "first_batch", "launch_night", "done"]
+	return {"done": finished, "mode": "story", "chapter": 7 if finished else chapter_n, "chapterId": IDS[7 if finished else clampi(chapter_n, 0, 6)],
+		"step": "" if finished else step_id, "stepsDone": d, "flags": {}, "startedDay": 0}
 
 static func fake_order(id: String, customer: String, device: String, fault: String, status: String, day: int = 1) -> Dictionary:
-	return {"id": id, "customer": customer, "device": device, "fault": fault, "partId": "repair_" + fault_kind(fault),
-		"reward": 80, "status": status, "createdDay": day}
+	var o := {"id": id, "customer": customer, "device": device, "fault": fault, "reward": 80, "status": status, "createdDay": day}
+	if fault_kind(fault) in ["screen", "battery", "port"]:
+		o["partId"] = fault_kind(fault)
+	return o
 
 ## A minimal company state for story tests / shots.
 static func fake_state(chapter_n: int, step_id: String, done_steps: Array = [], orders_list: Array = [], finished: bool = false) -> Dictionary:

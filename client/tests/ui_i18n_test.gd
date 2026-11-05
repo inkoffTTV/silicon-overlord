@@ -5,6 +5,8 @@ extends SceneTree
 ##  * every row of ui/i18n/*.json has all columns and keeps its {placeholders} / # / @ markers
 ##  * every Chinese / Japanese character used by the translations exists in the bundled CJK fonts
 ##  * all screens open in DE (long words), ZH and JA (CJK) with no label or button pushed off the screen
+##  * iteration 3: the title menu, story HUD, repair bench, counter, goals, pause + skip story, final card and loading
+##    screen fit in all 11 languages; every story file has every chapter / step text
 ##
 ##   <godot> --headless --path client -s tests/ui_i18n_test.gd
 
@@ -142,7 +144,11 @@ func _screens() -> void:
 	var D = load("res://ui/lib/gdata.gd")
 	var Prefs = load("res://ui/lib/prefs.gd")
 	var saved_lang: Variant = Prefs.get_setting("ui", "lang", null)
-	Net.set("mock_handler", func(_a: String, _b: Dictionary) -> Dictionary: return {"ok": true})
+	Net.set("mock_handler", func(a: String, _b: Dictionary) -> Dictionary:
+		if a == "listMyCompanies":
+			return {"ok": true, "data": [{"code": "KQ7-4XM", "name": "Nebula Labs", "date": {"year": 2016, "day": 40}, "cash": 6000, "role": "Founder", "lastPlayed": 1700000000, "story": {"done": false, "chapter": 3}},
+				{"code": "ZP3-9QA", "name": "Orbit Mobile", "date": {"year": 2019, "day": 200}, "cash": 48200000, "role": "CoFounder", "lastPlayed": 1600000000}]}
+		return {"ok": true})
 	root.size = Vector2i(1280, 720)
 	var ui: Node = load("res://ui/ui_root.gd").new()
 	ui.set("force_lang", "de")
@@ -183,6 +189,7 @@ func _screens() -> void:
 		await frames(2)
 		_check_onscreen(ui, lang + " quick")
 		ui._close_quick()
+	await _story_all_langs(ui)
 	ui.set_language("en")
 	var cfg := ConfigFile.new()
 	cfg.load(Prefs.SETTINGS)
@@ -192,6 +199,76 @@ func _screens() -> void:
 	else:
 		cfg.set_value("ui", "lang", saved_lang)
 	cfg.save(Prefs.SETTINGS)
+
+## Iteration 3 UI in every language at 1280x720.
+func _story_all_langs(ui: Node) -> void:
+	var Game: Node = root.get_node("Game")
+	var D = load("res://ui/lib/gdata.gd")
+	var L = load("res://ui/lib/loc.gd")
+	var SD = load("res://ui/story/story_data.gd")
+	root.size = Vector2i(1280, 720)
+	for lang in L.codes():
+		ui.set_language(lang)
+		Game.apply_snapshot({})
+		await frames(2)
+		# the story file of this language has every chapter title and step objective
+		var missing := []
+		for ch in 7:
+			var c: Dictionary = SD.chapter(ch)
+			if str(c.get("title", "")) == "":
+				missing.append("chapter %d" % ch)
+			for stp in c.get("steps", []):
+				if str(stp.get("objective", "")) == "":
+					missing.append(str(stp.get("id", "")))
+		check(missing.is_empty(), "%s story texts: %s" % [lang, str(missing.slice(0, 4))])
+		for page in ["home", "play", "new", "create", "join", "settings"]:
+			ui.menu.show_page(page)
+			await frames(2)
+			_check_onscreen(ui, "%s menu %s" % [lang, page])
+		Game.code = "KQ7-4XM"
+		Game.me = {"userId": 1, "role": "Founder", "name": "Alex"}
+		var st: Dictionary = D.sample_state()
+		st["story"] = {"done": false, "chapter": 2, "step": "call_supplier", "objectives": [{"id": "diagnose_part", "done": true}, {"id": "call_supplier", "done": false},
+			{"id": "buy_parts", "done": false}, {"id": "fit_part", "done": false}, {"id": "paid_with_part", "done": false}], "stepsDone": {"diagnose_part": true}, "flags": {}}
+		st["repairs"] = {"done": 2, "earned": 110, "orders": [{"id": "rep_3", "customer": "courier", "device": "phone", "fault": "cracked_screen", "partId": "screen", "reward": 140, "status": "inRepair"},
+			{"id": "rep_4", "customer": "taxi_driver", "device": "tablet", "fault": "dead_battery", "partId": "battery", "reward": 90, "status": "ready", "quality": 0.8, "payout": 76},
+			{"id": "rep_5", "customer": "chef", "device": "tablet", "fault": "broken_port", "partId": "port", "reward": 80, "status": "waiting"}]}
+		st["daily"] = {"dayIndex": 3, "streak": 2, "lastClaimUnix": 0}
+		Game.apply_snapshot(st)
+		ui.story.debug_quiet()
+		var line: Dictionary = SD.line("step.call_supplier.1")
+		ui.story.say(SD.speaker_name(str(line.get("speaker", "mira"))), str(line.get("text", "…")))
+		await create_timer(0.1).timeout
+		_check_onscreen(ui, lang + " story hud")
+		for kind in [["repair_bench", "rep_3"], ["counter", "rep_4"], ["counter", "rep_5"], ["goals", ""]]:
+			ui.open_screen(kind[0], kind[1])
+			await frames(3)
+			_check_onscreen(ui, "%s %s %s" % [lang, kind[0], kind[1]])
+			ui.close_screen()
+			await frames(1)
+		ui._open_pause()
+		await frames(2)
+		for b in ui._pause.find_children("*", "Button", true, false):
+			if b.get_meta("skip_story_btn", false):
+				(b as Button).pressed.emit()
+		await frames(2)
+		_check_onscreen(ui, lang + " pause + skip story")
+		ui._close_pause()
+		ui.story.debug_quiet()
+		ui.story.debug_card(3)
+		await frames(3)
+		_check_onscreen(ui, lang + " chapter card")
+		ui.story.debug_quiet()
+		ui.story.debug_final(false)
+		await frames(3)
+		_check_onscreen(ui, lang + " final card")
+		ui.story.close_final()
+		ui.story.debug_quiet()
+		ui.show_loading("Nebula Labs", L.t("Story start: the repair shop opens tonight"), Color("#4F8CFF"))
+		await frames(2)
+		_check_onscreen(ui, lang + " loading")
+		ui.loading.cancel()
+		await frames(1)
 
 ## Every visible label / button outside scroll areas must lie inside the logical canvas.
 func _check_onscreen(ui: Node, what: String) -> void:

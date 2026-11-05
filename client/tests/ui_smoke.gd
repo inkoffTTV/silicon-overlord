@@ -1,7 +1,10 @@
 extends SceneTree
 ## Headless UI smoke test: builds every screen with fake state (ui/data/sample_state.json), clicks through all
 ## Design Studio steps (mutating options on the way), the research board, production, shelf, company board,
-## launch overlay, menus and a language switch. Fails on any script error.
+## launch overlay, menus and a language switch. Iteration 3: the title menu (pages, company slots, keyboard focus,
+## loading screen), the story UI (objective tracker, speed lock, dialogue, chapter card, cutscene captions + storyEvent,
+## story banners, skip story, final card), the counter receipt, the repair mini-game, goals / daily gift / RP boost.
+## Fails on any script error.
 ##
 ##   <godot> --headless --path client -s tests/ui_smoke.gd
 
@@ -58,6 +61,15 @@ func _run() -> void:
 				return {"ok": true, "data": D.sample_quotes()}
 			"createBlueprint":
 				return {"ok": true, "data": {"id": "bp_test"}}
+			"listMyCompanies":
+				return {"ok": true, "data": [{"companyId": "a", "code": "KQ7-4XM", "name": "Nebula Labs", "date": {"year": 2016, "day": 40}, "cash": 6000, "role": "Founder", "lastPlayed": 1700000000, "story": {"done": false, "chapter": 1}},
+					{"companyId": "b", "code": "ZP3-9QA", "name": "Old Co", "date": {"year": 2018, "day": 10}, "cash": 900000, "role": "CoFounder", "lastPlayed": 1600000000}]}
+			"repairFinish":
+				return {"ok": true, "data": {"payout": 120, "quality": float(args.get("score", 0)), "partUsed": true, "rp": 2}}
+			"repairReturn":
+				return {"ok": true, "data": {"paid": 56, "cash": 6056}}
+			"claimDaily":
+				return {"ok": true, "data": {"reward": {"name": "Cash", "kind": "cash", "amount": 15000}, "dayIndex": 2, "streak": 1, "detail": "$15.0K"}}
 			"updateBlueprint", "evaluateBlueprint":
 				return {"ok": true, "data": {"valid": true, "issues": [], "cost": {"total": 150.0, "bom": 120.0}, "ratings": {"overall": 61, "performance": 40, "design": 70, "software": 70, "buildQuality": 55, "value": 60, "batteryHours": 10}}}
 		return {"ok": true})
@@ -72,11 +84,57 @@ func _run() -> void:
 	await frames(3)
 	check(ui.menu.visible, "menu visible without a company")
 	check(modal_events.size() > 0 and modal_events[-1] == true, "menu is modal")
-	for page in ["create", "join", "settings", "home"]:
+	for page in ["play", "new", "create", "join", "settings", "credits", "home"]:
 		ui.menu.show_page(page)
 		await frames()
+		check(ui.menu.page == page, "menu page " + page)
 	ui.menu.debug_page("create")
 	await frames()
+	# iteration 3: title menu
+	print("ui_smoke: title menu")
+	ui.menu.show_page("home")
+	await frames(3)
+	check(calls.has("listMyCompanies"), "menu lists my companies (lobby action)")
+	var items: Array = ui.menu.home_items()
+	check(items.size() == 5, "home: Continue / Play / Settings / Credits / Quit (got %d)" % items.size())
+	var fo: Control = root.get_viewport().gui_get_focus_owner()
+	check(fo != null and fo == items[0], "keyboard focus starts on the first menu item")
+	ui.menu.show_page("play")
+	await frames(3)
+	var slots := 0
+	for b in ui.menu._slots_box.get_children():
+		if b is Button and b.has_meta("slot"):
+			slots += 1
+	check(slots == 2, "one slot per company (got %d)" % slots)
+	ui.menu.show_page("new")
+	await frames(2)
+	var choice: Button = null
+	for b in ui.menu._pages["new"].find_children("*", "Button", true, false):
+		if b.get_meta("start_kind", "") == "quick":
+			choice = b
+	check(choice != null, "new company: quick start card")
+	if choice:
+		choice.pressed.emit()
+		await frames(2)
+		check(ui.menu.page == "create" and ui.menu.start_kind == "quick", "quick start card -> create page")
+	check(ui.menu.go_back() and ui.menu.page == "new", "Esc / B goes one page back")
+	ui.menu.start_kind = "story"
+	ui.menu.show_page("credits")
+	await frames(3)
+	check(ui.menu.credit_sections().size() >= 3, "credits have sections")
+	ui._handle_escape()
+	await frames(2)
+	check(ui.menu.page == "home", "Esc leaves the credits")
+	ui.menu.set_update_state("ready", "9.9.9")
+	ui.menu.set_update_state("checking", "")
+	# loading screen
+	ui.show_loading("Nebula Labs", "Loading", Color("#4F8CFF"))
+	await frames(2)
+	check(ui.loading != null and ui.is_modal(), "loading screen is up and modal")
+	check(ui.loading.tip_text() != "", "loading screen shows a tip")
+	ui.loading.cancel()
+	await create_timer(0.3).timeout
+	check(ui.loading == null, "loading screen cancelled")
 	print("ui_smoke: company + hud")
 	Game.code = "KQ7-4XM"
 	Game.me = {"userId": 1, "role": "Founder", "name": "Alex"}
@@ -378,6 +436,8 @@ func _run() -> void:
 	Game.apply_sections({"time": t, "finance": Game.state.finance})
 	await frames()
 	ui.close_screen()
+	# ---------------------------------------------------------------- iteration 3: story UI
+	await _story_section(ui, Game, Bus, Net, calls, last_args, modal_events)
 	# ---------------------------------------------------------------- language switch
 	print("ui_smoke: russian")
 	ui.set_language("ru")
@@ -420,6 +480,249 @@ func _run() -> void:
 	for e in log_counter.errors.slice(0, 20):
 		print("  ERROR ", e)
 	quit(0 if failures.is_empty() and log_counter.errors.is_empty() else 1)
+
+## A story company: chapter / step / objectives like docs/ACTIONS.md "Story & repairs".
+static func story_state(base: Dictionary, ch: int, step: String, done_steps: Array, objs: Array) -> Dictionary:
+	var st := base.duplicate(true)
+	var done := {}
+	for d in done_steps:
+		done[d] = true
+	var o := []
+	for id in objs:
+		o.append({"id": id, "done": done.has(id), "optional": false})
+	st["story"] = {"done": false, "mode": "story", "chapter": ch, "chapterId": "x", "step": step, "objectives": o, "stepsDone": done, "flags": {}, "startedDay": 0}
+	st["repairs"] = {"done": 0, "earned": 0, "orders": [
+		{"id": "rep_1", "customer": "grandma", "device": "phone", "fault": "software_glitch", "reward": 60, "status": "waiting", "createdDay": 0}]}
+	st.time["speed"] = 0
+	(st.inventory as Dictionary)["resources"] = {"repair_screen": 0}
+	return st
+
+func _story_section(ui: Node, Game: Node, Bus: Node, Net: Node, calls: Array, last_args: Dictionary, modal_events: Array) -> void:
+	print("ui_smoke: story")
+	var base: Dictionary = Game.state.duplicate(true)
+	var ch1 := ["take_device", "repair_device", "get_paid", "second_customer"]
+	var st := story_state(base, 1, "take_device", [], ch1)
+	Game.me = {"userId": 1, "role": "Founder", "name": "Alex"}
+	Game.apply_snapshot(st)
+	await frames(3)
+	var tr: Control = ui.hud.tracker
+	check(tr.visible, "objective tracker shown in a story company")
+	check(tr._rows.get_child_count() == 4, "tracker lists the chapter's 4 steps (got %d)" % tr._rows.get_child_count())
+	check(tr._clock.visible, "tracker: time starts at chapter 4")
+	check((ui.hud._speed_btns[4] as Button).disabled and not (ui.hud._speed_btns[0] as Button).disabled, "speed buttons locked by the story clock")
+	# speed is not sent while the story clock is paused; the reason is shown once
+	calls.erase("setSpeed")
+	var notes := []
+	var cb := func(_k: String, t: String, _b: String) -> void: notes.append(t)
+	Bus.notify.connect(cb)
+	Net.set_speed(2)
+	Net.set_speed(4)
+	Bus.notify.disconnect(cb)
+	check(not calls.has("setSpeed"), "no setSpeed while the story clock is paused")
+	check(notes.size() == 1, "the 'time starts at chapter 4' note shows once (got %d)" % notes.size())
+	# the welcome chapter card + step lines after session start
+	ui.story.session_ready()
+	await frames(3)
+	check(ui.story._card != null, "chapter card on entering a story company")
+	ui.story.debug_quiet()
+	# a step completes: tracker updates, the next step's lines are spoken
+	var st2 := story_state(base, 1, "repair_device", ["take_device"], ch1)
+	st2.repairs.orders[0]["status"] = "inRepair"
+	Game.apply_sections({"story": st2.story, "repairs": st2.repairs})
+	await frames(3)
+	check(tr._done_ids.has("take_device"), "tracker ticks the finished step")
+	var queued: int = ui.story._queue.size() + (0 if ui.story._cur.is_empty() else 1)
+	check(queued > 0 or ui.story.dialogue_visible(), "the next step's dialogue is queued")
+	await create_timer(0.3).timeout
+	check(ui.story.dialogue_visible(), "dialogue subtitle on screen")
+	# story notify -> banner (not a toast)
+	var toasts_before: int = ui.toasts._stack.get_child_count()
+	Net.last_notify = {"key": "story.step.done", "params": {"chapter": 1, "step": "take_device"}}
+	Bus.notify.emit("success", "Step done", "")
+	Net.last_notify = {}
+	await frames()
+	check(ui.toasts._stack.get_child_count() == toasts_before and ui.story._banner_box.get_child_count() > 0, "story notify -> story banner, not a toast")
+	ui.story.debug_quiet()
+	# chapter change -> chapter card
+	var st3 := story_state(base, 2, "diagnose_part", [], ["diagnose_part", "call_supplier", "buy_parts", "fit_part", "paid_with_part"])
+	Game.apply_sections({"story": st3.story})
+	await frames(3)
+	check(ui.story._card != null, "chapter card on a new chapter")
+	ui.story.debug_quiet()
+	# cutscene step: Bus.story_cutscene + captions, Esc skips, storyEvent sent
+	var cuts := []
+	var cc := func(id: String) -> void: cuts.append(id)
+	Bus.story_cutscene.connect(cc)
+	calls.erase("storyEvent")
+	var st4 := story_state(base, 4, "investor_seen", [], ["investor_seen", "design_phone", "publish_phone", "develop_phone"])
+	Game.apply_sections({"story": st4.story})
+	await frames(4)
+	check(cuts.has("investor"), "investor cutscene asked from the world")
+	check(ui.story.cutscene_running(), "cutscene captions on screen")
+	ui._handle_escape()
+	await frames(4)
+	Bus.story_cutscene.disconnect(cc)
+	check(calls.has("storyEvent") and str(last_args.storyEvent.id) == "investor_seen", "storyEvent investor_seen after the cutscene")
+	ui.story.debug_quiet()
+	# counter receipt: take, return
+	Game.apply_snapshot(story_state(base, 1, "take_device", [], ch1))
+	ui.story.debug_quiet()
+	await frames(2)
+	Bus.interact.emit("counter", "rep_1")
+	await frames(3)
+	check(ui.current_kind == "counter", "counter receipt opened")
+	await ui.current._take()
+	check(calls.has("repairTake") and str(last_args.repairTake.orderId) == "rep_1", "repairTake sent from the counter")
+	await frames(3)
+	var st5 := story_state(base, 1, "get_paid", ["take_device", "repair_device"], ch1)
+	st5.repairs.orders[0]["status"] = "ready"
+	st5.repairs.orders[0]["quality"] = 0.9
+	st5.repairs.orders[0]["payout"] = 56
+	Game.apply_snapshot(st5)
+	ui.story.debug_quiet()
+	Bus.interact.emit("counter", "rep_1")
+	await frames(3)
+	await ui.current._return()
+	check(calls.has("repairReturn"), "repairReturn sent from the counter")
+	check(ui.current.paid_amount == 56.0, "receipt shows the paid amount")
+	ui.close_screen()
+	await frames(2)
+	# repair mini-game: the whole flow with keys
+	var st6 := story_state(base, 2, "fit_part", ["diagnose_part", "call_supplier", "buy_parts"], ["diagnose_part", "call_supplier", "buy_parts", "fit_part", "paid_with_part"])
+	st6.repairs.orders = [{"id": "rep_3", "customer": "courier", "device": "phone", "fault": "cracked_screen", "partId": "screen", "reward": 140, "status": "inRepair", "createdDay": 3}]
+	st6.inventory.resources["repair_screen"] = 1
+	Game.apply_snapshot(st6)
+	ui.story.debug_quiet()
+	Bus.interact.emit("repair_bench", "")
+	await frames(3)
+	var rg: Control = ui.current
+	check(ui.current_kind == "repair_bench" and str(rg.order.get("id", "")) == "rep_3", "repair bench picks the order in repair")
+	rg._play()
+	await frames(2)
+	var board: Control = rg.board
+	check(board.running and board.phase == "open", "repair game running")
+	for i in 8:
+		_key(board, KEY_SPACE)
+	await create_timer(1.6).timeout
+	check(board.phase == "diagnose", "screws out -> cover off -> diagnose (%s)" % board.phase)
+	board._act("battery")
+	board._act("screen")
+	check(board.mistakes == 1 and board.phase == "swap", "a wrong probe counts, the right one finds the fault")
+	board._act("screen")
+	await create_timer(0.7).timeout
+	board._act("screen")
+	await create_timer(0.7).timeout
+	check(board.phase == "close", "broken part out, new part in -> close")
+	board._act("cover")
+	await create_timer(0.6).timeout
+	for i in 8:
+		_key(board, KEY_SPACE)
+	await create_timer(1.4).timeout
+	check(rg.phase == "result", "closed up -> result (%s / %s)" % [board.phase, rg.phase])
+	check(calls.has("repairFinish") and str(last_args.repairFinish.orderId) == "rep_3", "repairFinish sent")
+	var sc := float(last_args.get("repairFinish", {}).get("score", -1))
+	check(sc > 0.0 and sc <= 1.0, "repair score in 0..1 (%s)" % sc)
+	ui.close_screen()
+	await frames(2)
+	# no part in stock -> Order parts -> Purchasing
+	st6.inventory.resources["repair_screen"] = 0
+	Game.apply_snapshot(st6)
+	ui.story.debug_quiet()
+	Bus.interact.emit("repair_bench", "rep_3")
+	await frames(3)
+	var ob: Button = null
+	for b in ui.current.find_children("*", "Button", true, false):
+		if (b as Button).get_child_count() > 0 and b.is_visible_in_tree():
+			for l in b.find_children("*", "Label", true, false):
+				if (l as Label).text == ui.L.t("Order parts"):
+					ob = b
+	check(ob != null, "no part in stock -> Order parts button")
+	if ob:
+		ob.pressed.emit()
+		await frames(4)
+		check(ui.current_kind == "purchasing" and ui.current._sel_material == "repair_screen", "Order parts opens Purchasing on the part")
+	ui.close_screen()
+	await frames(2)
+	# empty bench
+	st6.repairs.orders = []
+	Game.apply_snapshot(st6)
+	ui.story.debug_quiet()
+	Bus.interact.emit("repair_bench", "")
+	await frames(3)
+	check(ui.current.phase == "nothing", "empty bench explains what to do")
+	ui.close_screen()
+	await frames(2)
+	# skip story: founder only, confirm, storySkip
+	ui._open_pause()
+	await frames(2)
+	var skip: Button = null
+	for b in ui._pause.find_children("*", "Button", true, false):
+		if b.get_meta("skip_story_btn", false):
+			skip = b
+	check(skip != null, "pause menu has Skip story for the founder")
+	check(ui._pause.find_children("*", "PanelContainer", true, false).any(func(p: Node) -> bool: return p.get_meta("speed_row", false)), "pause menu has the game speed row")
+	if skip:
+		skip.pressed.emit()
+		await frames(2)
+		for b in ui._pause.find_children("*", "Button", true, false):
+			if b.get_meta("skip_yes", false):
+				(b as Button).pressed.emit()
+		await frames(3)
+		check(calls.has("storySkip"), "storySkip sent after the confirm")
+	ui._close_pause()
+	Game.me = {"userId": 1, "role": "CoFounder", "name": "Alex"}
+	ui._open_pause()
+	await frames(2)
+	check(not ui._pause.find_children("*", "Button", true, false).any(func(b: Node) -> bool: return b.get_meta("skip_story_btn", false)), "no Skip story for a co-founder")
+	ui._close_pause()
+	Game.me = {"userId": 1, "role": "Founder", "name": "Alex"}
+	# story done -> final "Repair shop -> company" card (modal)
+	ui.story.session_ready()
+	var fin := story_state(base, 7, "", [], [])
+	fin.story["done"] = true
+	Game.apply_sections({"story": fin.story})
+	await frames(4)
+	check(ui.story.final_card != null and ui.is_modal(), "final transition card is up and modal")
+	check(not ui.hud.tracker.visible, "tracker hidden after the story")
+	check(ui._handle_escape(), "Esc closes the final card")
+	await create_timer(0.6).timeout
+	check(ui.story.final_card == null, "final card closed")
+	# goals, daily gift, research points
+	print("ui_smoke: goals / daily / rp")
+	var g: Dictionary = base.duplicate(true)
+	g["daily"] = {"dayIndex": 1, "streak": 0, "lastClaimUnix": 0}
+	g["goals"] = {"current": 2, "done": {"hire": 3}}
+	Game.apply_snapshot(g)
+	ui.story.debug_quiet()
+	await frames(2)
+	check(ui.hud._goal_chip.visible and ui.hud._gift_chip.visible, "HUD goal card + daily gift chip")
+	check(ui.hud._rp_btn.tooltip_text.contains("RP"), "research points chip explains RP")
+	ui._open_quick()
+	await frames(2)
+	ui._close_quick()
+	ui.hud._rp_btn.pressed.emit()
+	await frames(3)
+	check(ui.current_kind == "goals", "RP chip opens Goals & gifts")
+	await ui.current.claim()
+	check(calls.has("claimDaily"), "claimDaily sent")
+	ui.close_screen()
+	await frames(2)
+	Bus.interact.emit("whiteboard_research", "wb")
+	await frames(3)
+	var act: Array = U_arr(Game.state.research.active)
+	if not act.is_empty():
+		await ui.current.boost(str(act[0].techId))
+		check(calls.has("boostResearch") and int(last_args.boostResearch.points) == 100, "boostResearch 100 RP sent")
+	ui.close_screen()
+	await frames(2)
+	Game.apply_snapshot(base)
+	await frames(2)
+
+func _key(target: Control, code: int) -> void:
+	var ev := InputEventKey.new()
+	ev.keycode = code
+	ev.pressed = true
+	target.handle_key(ev)
 
 static func U_arr(v: Variant) -> Array:
 	if v is Array:

@@ -32,6 +32,7 @@ var _fixed_vis: Node3D
 var _screen_mat: ShaderMaterial
 var _screen_node: MeshInstance3D
 var _crack_root: Node3D
+var _glitch_mat: ShaderMaterial
 var ticket: Label3D
 ## where the shop wants it: "counter" | "bench" | "free" | "hand" | "gone"
 var place := "free"
@@ -183,6 +184,11 @@ func _build_fault() -> void:
 				_box(_broken, Vector3(0.02, 0.001, 0.0015), Vector3(-s.x * 0.28, -s.y * 0.5 - 0.0075, -s.z * 0.33), Mats.unlit(Color(0.9, 0.95, 1.0)), 0.0).rotation.y = 0.7
 			if fault_kind == "speaker":
 				_box(_broken, Vector3(s.x * 0.5, 0.003, 0.008), Vector3(0, top + 0.003, s.z * 0.45), Mats.m("cardboard"), 0.0)  # taped-over grille
+		"glitch":
+			# software glitch: the screen shows stripy garbage (screen material tinted magenta, code mode)
+			if _screen_node:
+				var gm := Mats.screen(0, Color(1.0, 0.3, 0.8), 0.9, 7.0)
+				_glitch_mat = gm
 		"battery":
 			# swollen battery: the back cover bulges and pops open on one side
 			var bulge := MeshInstance3D.new()
@@ -229,6 +235,8 @@ func set_fixed(on: bool) -> void:
 		_crack_root.visible = not on
 	if _fixed_vis:
 		_fixed_vis.visible = on
+	if _glitch_mat and _screen_node:
+		_screen_node.material_override = _screen_mat if on else _glitch_mat
 	if _screen_mat:
 		# broken: dark glass with a faint dead glow; fixed: bright home screen
 		_screen_mat.set_shader_parameter("energy", 1.5 if on else 0.08)

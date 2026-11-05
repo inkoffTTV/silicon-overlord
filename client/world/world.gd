@@ -38,7 +38,7 @@ signal cutscene_finished(id: String)
 const Objective := preload("res://world/story/objective.gd")
 const Cutscenes := preload("res://world/story/cutscenes.gd")
 const Story := preload("res://world/live/story_state.gd")
-const STAGE_KINDS := [["supplier", "supplier_phone"], ["phone_call", "supplier_phone"], ["call", "supplier_phone"],
+const STAGE_KINDS := [["polish", "pc_challenge"], ["qc_", "line_qc"], ["supplier", "supplier_phone"], ["phone_call", "supplier_phone"], ["call", "supplier_phone"],
 	["part", "supplier_phone"], ["buy", "supplier_phone"], ["purchas", "supplier_phone"], ["material", "supplier_phone"],
 	["whiteboard", "whiteboard_research"], ["research", "whiteboard_research"], ["brainstorm", "whiteboard_challenge"],
 	["challenge", "whiteboard_challenge"], ["design", "pc_design"], ["blueprint", "pc_design"], ["publish", "pc_design"],
@@ -83,10 +83,7 @@ func _ready() -> void:
 	cutscenes = Cutscenes.new()
 	cutscenes.world = self
 	add_child(cutscenes)
-	cutscenes.finished.connect(func(id: String) -> void:
-		_show_running = false
-		_amb = ""
-		cutscene_finished.emit(id))
+	cutscenes.finished.connect(_on_cutscene_done)
 	Bus.story_cutscene.connect(play_cutscene)
 	rebuild()
 
@@ -293,6 +290,7 @@ func _process(delta: float) -> void:
 	if _stage_t <= 0.0:
 		_stage_t = 0.25
 		_update_stage()
+		_auto_cutscene(0.25)
 	_amb_t -= delta
 	if _amb_t > 0.0 or level_node == null or _show_running:
 		return
@@ -477,6 +475,45 @@ func is_cutscene_running() -> bool:
 func play_cutscene(id: String) -> void:
 	if cutscenes == null or cutscenes.is_running() or _show_running:
 		return
+	# just played (e.g. auto-played, and the UI asks for it too): don't run it twice in a row
+	if _played.has(id) and Time.get_ticks_msec() - int(_played[id]) < 20000:
+		return
 	_show_running = true
 	objective.set_targets([])
 	cutscenes.play(id)
+
+## Cutscenes the story needs, played once per session when their step is due (the UI may also emit
+## Bus.story_cutscene(id): duplicates are ignored). Waits until no UI modal (menu / loading) is open.
+var auto_cutscenes := true
+var _played := {}
+var _due_t := 0.0
+
+func _auto_cutscene(dt: float) -> void:
+	if not auto_cutscenes or not Story.active(Game.state) or Bus.modal_open or _show_running or get_shop() == null:
+		_due_t = 0.0
+		return
+	var st := Game.state
+	var ch := Story.chapter(st)
+	var want := ""
+	if ch == 0 and not Story.any_done(st, ["intro_seen"]):
+		want = "intro"
+	elif ch == 4 and not Story.any_done(st, ["investor_seen"]):
+		want = "investor"
+	elif ch == 6 and Story.any_done(st, ["reviews_seen"]) and not Story.any_done(st, ["sign_swapped"]):
+		want = "sign_swap"
+	if want == "" or _played.has(want):
+		_due_t = 0.0
+		return
+	_due_t += dt
+	if _due_t >= 1.0:
+		_due_t = 0.0
+		play_cutscene(want)
+
+func _on_cutscene_done(id: String) -> void:
+	_show_running = false
+	_amb = ""
+	_played[id] = Time.get_ticks_msec()
+	var ev: String = Story.CUTSCENE_EVENT.get(id, "")
+	if ev != "" and Story.active(Game.state) and not Story.any_done(Game.state, [ev]):
+		Net.act("storyEvent", {"id": ev})
+	cutscene_finished.emit(id)

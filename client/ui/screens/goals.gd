@@ -111,7 +111,9 @@ func _fill_goals() -> void:
 	else:
 		tv.add_child(U.para(L.t(str(g.get("title", ""))), U.XL, U.TEXT, "display", 200))
 		if str(g.get("badge", "")) != "":
-			top.add_child(U.pill(L.t(str(g.get("badge", ""))), U.MUTED))
+			var bp := U.pill(L.t(str(g.get("badge", ""))), U.MUTED)
+			bp.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
+			top.add_child(bp)
 		v.add_child(U.para(L.t(str(g.get("desc", ""))), U.MD, Color(U.TEXT, 0.85), "medium", 200))
 		var rr := U.hbox(8)
 		rr.add_child(U.caps(L.t("REWARD"), U.MUTED, 10))
@@ -180,7 +182,11 @@ func _fill_right() -> void:
 		var ic := U.icon({"cash": "cash", "rp": "bulb", "mystery": "cube", "influencer": "star", "gold": "trophy"}.get(str(d.get("kind", "")), "sparkle"), col, 20)
 		ic.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 		tvv.add_child(ic)
-		var tl := U.lbl("✓" if past else str(d.get("text", "")), U.XS, U.TEXT if today else U.MUTED, "bold")
+		var kind := str(d.get("kind", ""))
+		var label := str(d.get("text", "")) if kind in ["cash", "rp"] else L.t(str(d.get("name", "")))
+		var tl := U.lbl("✓" if past else label, U.XS, U.TEXT if today else U.MUTED, "bold")
+		tl.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+		tile.tooltip_text = "%s: %s" % [L.t(str(d.get("name", ""))), str(d.get("text", ""))]
 		tl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		tl.clip_text = true
 		tl.custom_minimum_size.x = 30
