@@ -1,0 +1,35 @@
+# Runs on the `builds` branch. tools/release.sh pushes a new SiliconOverlord.zip + version.json here; this workflow
+# then creates the GitHub Release "v<version>" (tag + notes + zip) if it does not exist yet.
+# Release notes are taken from docs/releases/v<version>.md on the main branch when present.
+name: Release from build
+
+on:
+  push:
+    branches: [builds]
+    paths: ["version.json"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Create release if missing
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          version="$(python3 -c 'import json;print(json.load(open("version.json"))["version"])')"
+          tag="v$version"
+          if gh release view "$tag" >/dev/null 2>&1; then
+            echo "release $tag already exists"; exit 0
+          fi
+          notes_args=(--generate-notes)
+          for ref in online-port main; do
+            if git fetch --depth=1 origin "$ref" 2>/dev/null && git show "FETCH_HEAD:docs/releases/$tag.md" > notes.md 2>/dev/null; then
+              notes_args=(--notes-file notes.md); break
+            fi
+          done
+          gh release create "$tag" SiliconOverlord.zip --target builds --title "Silicon Overlord $version" "${notes_args[@]}"
