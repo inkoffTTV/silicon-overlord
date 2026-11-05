@@ -410,6 +410,90 @@ func _target(moving: float) -> Dictionary:
 				a.er = -0.9
 				a.hx = -0.2
 				a.hy = 0.25
+		# --- iteration 3: customers / investor / title-screen friends
+		"wave":
+			a.ar = -2.75
+			a.arz = 0.25 + sin(t * 9.0) * 0.35
+			a.er = -0.35
+			a.al = 0.05
+			a.hz = -0.06
+			a.sx = -0.04 + breathe
+		"cheer":
+			var hop := absf(sin(t * 8.0))
+			a.py = 0.52 + hop * 0.07
+			a.al = -2.85 + sin(t * 8.0) * 0.15
+			a.ar = -2.85 - sin(t * 8.0) * 0.15
+			a.az = 0.35
+			a.el = -0.25
+			a.er = -0.25
+			a.kl = hop * 0.35
+			a.kr = hop * 0.35
+			a.hx = -0.2
+		"cross_arms", "angry":
+			a.al = -0.95
+			a.ar = -0.95
+			a.el = -1.95
+			a.er = -1.95
+			a.alz = 0.62
+			a.arz = -0.62
+			a.sx = -0.08 + breathe
+			if pose == "angry":
+				a.hy = sin(t * 6.0) * 0.28
+				a.hx = 0.12
+				a.tr = -absf(sin(t * 5.0)) * 0.25  # stomp
+				a.kr = absf(sin(t * 5.0)) * 0.4
+			else:
+				a.hz = sin(t * 0.5) * 0.08
+		"tap_foot":
+			a.tr = -0.08
+			a.kr = maxf(0.0, sin(t * 7.0)) * 0.3
+			a.az = 0.35
+			a.al = -0.15
+			a.el = -1.25
+			a.alz = 0.4
+			a.ar = -1.05
+			a.er = -1.55
+			a.arz = -0.45
+			a.hx = 0.3 if fmod(t, 6.0) < 1.5 else -0.05  # check the watch
+			a.hy = 0.0 if fmod(t, 6.0) < 1.5 else sin(t * 0.7) * 0.4
+			a.sx = breathe
+		"give", "hold":
+			a.al = -1.25
+			a.ar = -1.25
+			a.el = -0.35
+			a.er = -0.35
+			a.az = -0.08
+			a.sx = 0.12
+			a.hx = 0.3
+		"phone":
+			a.ar = -0.95
+			a.er = -1.35 + sin(t * 3.0) * 0.04
+			a.arz = -0.38
+			a.al = 0.02
+			a.hx = 0.38
+			a.hy = -0.12 + sin(t * 0.3) * 0.08
+			a.sx = 0.04 + breathe
+			if fmod(t, 13.0) > 10.5:  # look up and around
+				a.hx = -0.05
+				a.hy = sin(t * 0.8) * 0.45
+		"lean":
+			a.sx = 0.32
+			a.al = -0.75
+			a.ar = -0.7
+			a.el = -0.45
+			a.er = -0.5
+			a.alz = 0.18
+			a.arz = -0.18
+			a.hx = 0.15 + sin(t * 0.4) * 0.05
+			a.hy = sin(t * 0.25) * 0.2
+		"tip_hat":
+			a.ar = -2.65
+			a.er = -1.35
+			a.arz = -0.25
+			a.al = -0.45
+			a.el = -0.4
+			a.hx = 0.12
+			a.sx = 0.08
 	# talking: nod
 	if _talk > 0.0:
 		a.hx = float(a.hx) + sin(t * 11.0) * 0.05

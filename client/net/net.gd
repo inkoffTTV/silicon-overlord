@@ -1,7 +1,8 @@
 extends Node
 ## Network client (autoload "Net"). WebSocket + JSON frames, see docs/PROTOCOL.md.
 ##
-##   var r := await Net.create_company("Nebula", "#4F8CFF", "#B15CFF", "solo")   # {ok, error?}
+##   var r := await Net.create_company("Nebula", "#4F8CFF", "#B15CFF", "solo", true)   # {ok, error?}; true = story start
+##   var r := await Net.list_my_companies()     # lobby: {ok, data: [{companyId, code, name, date, cash, role, lastPlayed}]}
 ##   var r := await Net.join("ABC-123")  /  await Net.resume()
 ##   var r := await Net.act("startResearch", {"techId": "arch_arm_2"})          # {ok, data?, error?}
 ##   Net.set_speed(2); Net.send_pos(pos, yaw, pitch, "walk"); Net.chat("hi"); Net.leave()
@@ -23,6 +24,8 @@ signal boards_changed(boards: Dictionary)
 signal welcomed()
 ## a production job stopped for lack of a material (English name), right after its notify toast
 signal production_blocked(material: String)
+## a server notify with a "story.*" key (story.step.done, story.chapter, ...), emitted before Bus.notify
+signal story_notified(key: String, params: Dictionary)
 
 const PROTOCOL_VERSION := 1
 const ACT_TIMEOUT := 10.0
@@ -32,6 +35,8 @@ const POS_INTERVAL := 0.1
 const PING_INTERVAL := 5.0
 const DEAD_AFTER := 20.0
 const BACKOFF := [1.0, 2.0, 4.0, 8.0, 15.0]
+## actions the server accepts in the lobby (after hello, outside a company)
+const LOBBY_ACTIONS := ["listMyCompanies"]
 
 class Waiter extends RefCounted:
 	signal done(result: Dictionary)
@@ -55,6 +60,8 @@ var profile: Dictionary = {}
 ## company id the server would resume (welcome.lastCompany), "" when none
 var last_company := ""
 var boards: Dictionary = {}
+## the notify frame being delivered right now (Bus.notify handlers may read its key / params)
+var last_notify: Dictionary = {}
 ## Tests/screenshots: Callable(action: String, args: Dictionary) -> Dictionary replaces the socket for act().
 var mock_handler: Callable
 
@@ -118,9 +125,25 @@ func ensure_connected() -> Dictionary:
 	var w := _hello
 	return await w.done
 
-func create_company(company_name: String, color_a: String, color_b: String, mode: String) -> Dictionary:
+## story = true: "Story start" (repair-shop tutorial, docs/STORY.md); false = quick start (the old behaviour).
+func create_company(company_name: String, color_a: String, color_b: String, mode: String, story: bool = false) -> Dictionary:
 	return await _enter({"t": "create", "company": {"name": company_name, "colorA": color_a, "colorB": color_b,
-		"mode": "cofounder" if mode == "coop" or mode == "cofounder" else "solo"}})
+		"mode": "cofounder" if mode == "coop" or mode == "cofounder" else "solo", "storyMode": story}})
+
+## Your companies (lobby action, works right after hello). {ok, data: Array, error?}
+func list_my_companies() -> Dictionary:
+	if mock_handler.is_valid():
+		return await act("listMyCompanies", {})
+	var c: Dictionary = await ensure_connected()
+	if not c.get("ok", false):
+		return c
+	var r: Dictionary = await act("listMyCompanies", {})
+	if r.get("ok", false):
+		var d: Variant = r.get("data")
+		if d is Dictionary:
+			d = (d as Dictionary).get("companies", (d as Dictionary).values())
+		r["data"] = d if d is Array else []
+	return r
 
 func join(code: String) -> Dictionary:
 	return await _enter({"t": "join", "code": normalize_code(code)})
@@ -149,7 +172,7 @@ func act(action: String, args: Dictionary = {}) -> Dictionary:
 		if r is Dictionary:
 			return r
 		return {"ok": true}
-	if not is_in_company():
+	if not is_in_company() and not (action in LOBBY_ACTIONS and is_online()):
 		return {"ok": false, "error": L.t("Not connected to the server")}
 	var id := _next_id
 	_next_id += 1
@@ -160,7 +183,22 @@ func act(action: String, args: Dictionary = {}) -> Dictionary:
 	var r2: Dictionary = await w.done
 	return r2
 
+## The story keeps the clock paused until chapter 4 (docs/ACTIONS.md): speed changes are not sent then; the first
+## attempt explains why (toast), later ones only click.
+var _clock_note_shown := false
+
+func story_clock_paused() -> bool:
+	var st: Variant = Game.state.get("story")
+	if not (st is Dictionary) or (st as Dictionary).get("done", true):
+		return false
+	return int((st as Dictionary).get("chapter", 0)) < 4
+
 func set_speed(speed: int) -> void:
+	if story_clock_paused():
+		if not _clock_note_shown:
+			_clock_note_shown = true
+			Bus.notify.emit("info", L.t("Time is paused for the story"), L.t("Story: time starts at chapter 4"))
+		return
 	if mock_handler.is_valid():
 		mock_handler.call("setSpeed", {"speed": speed})
 		return
@@ -341,6 +379,8 @@ func _on_text(text: String) -> void:
 			Game.me = you
 			Game.members = msg.get("members", []) if msg.get("members") is Array else []
 			Prefs.set_profile("last_code", Game.code)
+			if not (_stay_in_company and _attempt > 0):
+				_clock_note_shown = false
 			var was_reconnect := _stay_in_company and _attempt > 0
 			_stay_in_company = true
 			_attempt = 0
@@ -385,10 +425,15 @@ func _on_text(text: String) -> void:
 						r["errorKey"] = str(msg.errorKey)
 				w.finish(r)
 		"notify":
+			last_notify = msg
+			var nkey := str(msg.get("key", "")) if msg.get("key") != null else ""
+			if nkey.begins_with("story."):
+				story_notified.emit(nkey, msg.get("params") if msg.get("params") is Dictionary else {})
 			var nt := L.server(msg.get("key"), msg.get("params"), str(msg.get("title", "")))
 			var nb := L.server(msg.get("bodyKey"), msg.get("bodyParams"), str(msg.get("body", "")) if msg.get("body") != null else "")
 			Bus.notify.emit(str(msg.get("kind", "info")), nt, nb)
 			var body_en := str(msg.get("body", "")) if msg.get("body") != null else ""
+			last_notify = {}
 			if (str(msg.get("key", "")) == "note.production_blocked" or str(msg.get("title", "")) == "Production blocked") and body_en.contains("Out of "):
 				production_blocked.emit(body_en.substr(body_en.find("Out of ") + 7).strip_edges())
 		"members":
@@ -408,6 +453,10 @@ func _on_text(text: String) -> void:
 			_on_left(reason)
 		"error":
 			var em := L.server(msg.get("key"), msg.get("params"), str(msg.get("message", "Error")))
+			if str(msg.get("key", "")) == "err.story_clock_paused":
+				if _clock_note_shown:
+					return
+				_clock_note_shown = true
 			if _join and not _join.fired:
 				_join.finish({"ok": false, "error": em})
 			else:

@@ -12,6 +12,9 @@ const Chat := preload("res://ui/hud/chat.gd")
 const MainMenu := preload("res://ui/menu/main_menu.gd")
 const Settings := preload("res://ui/menu/settings_panel.gd")
 const LaunchOverlay := preload("res://ui/screens/launch_overlay.gd")
+const StoryUI := preload("res://ui/story/story_ui.gd")
+const Loading := preload("res://ui/menu/loading_screen.gd")
+const SD := preload("res://ui/story/story_data.gd")
 
 const DESIGN := Vector2(1440, 810)
 const SCREENS := {
@@ -31,6 +34,8 @@ const SCREENS := {
 	"whiteboard_challenge": "res://ui/challenges/challenge_screen.gd",
 	"line_qc": "res://ui/challenges/challenge_screen.gd",
 	"negotiation": "res://ui/challenges/challenge_screen.gd",
+	"repair_bench": "res://ui/story/repair_game.gd",
+	"counter": "res://ui/story/counter_dialog.gd",
 }
 
 ## set before _ready to override the language (screenshot tool)
@@ -47,6 +52,8 @@ var current_kind := ""
 var _pause: Control = null
 var _quick: Control = null
 var _launch: Control = null
+var story: Control = null
+var loading: Control = null
 var _modal := false
 var _scale := 1.0
 
@@ -68,9 +75,7 @@ func _ready() -> void:
 	Bus.focus_changed.connect(func(p: String) -> void:
 		if hud:
 			hud.set_prompt(p))
-	Bus.notify.connect(func(k: String, t: String, b: String) -> void:
-		if toasts:
-			toasts.show_toast(k, t, b))
+	Bus.notify.connect(_on_notify)
 	Bus.state_changed.connect(_on_state_changed)
 	Bus.launch_show.connect(func(_pid: String) -> void: pass)
 	Net.status_changed.connect(func(s: String, d: String) -> void:
@@ -83,20 +88,35 @@ func _ready() -> void:
 	Net.left_company.connect(func(_r: String) -> void:
 		close_screen()
 		_close_pause()
+		_close_quick()
 		_refresh_mode())
 	_refresh_mode()
 	get_tree().node_added.connect(_on_node_added)
 
 ## Every button of the UI clicks (docs/AUDIO.md): one hook instead of a call in every screen.
+## Per button: meta "sfx" = sound on press ("" = silent), meta "sfx_hover" = false = no hover sound.
 func _on_node_added(n: Node) -> void:
 	if n is BaseButton and root and root.is_ancestor_of(n):
 		var b := n as BaseButton
 		if not b.has_meta("sfx_hooked"):
 			b.set_meta("sfx_hooked", true)
-			b.pressed.connect(func() -> void: sfx("tab" if b.toggle_mode else "click"))
+			b.pressed.connect(func() -> void:
+				var snd := str(b.get_meta("sfx", "tab" if b.toggle_mode else "click"))
+				if snd != "":
+					sfx(snd))
 			b.mouse_entered.connect(func() -> void:
-				if not b.disabled:
+				if not b.disabled and b.get_meta("sfx_hover", true):
 					sfx("hover"))
+
+## Server notifies: story ones (key "story.*") go to the story banners, the rest to the toast stack.
+func _on_notify(k: String, t: String, b: String) -> void:
+	var key := str(Net.last_notify.get("key", "")) if Net.last_notify.get("key") != null else ""
+	if key.begins_with("story.") and story:
+		var params: Dictionary = Net.last_notify.get("params") if Net.last_notify.get("params") is Dictionary else {}
+		story.on_story_notify(key, t, b, params)
+		return
+	if toasts:
+		toasts.show_toast(k, t, b)
 
 func sfx(name: String) -> void:
 	var s: Node = get_node_or_null("/root/Sfx")
@@ -139,11 +159,22 @@ func _build() -> void:
 	root.add_child(screen_host)
 	menu = MainMenu.new()
 	menu.language_changed.connect(set_language)
+	menu.enter_started.connect(show_loading)
+	menu.enter_finished.connect(func(ok: bool) -> void:
+		if loading:
+			if ok:
+				loading.done()
+			else:
+				loading.cancel())
 	root.add_child(menu)
 	overlay_host = Control.new()
 	overlay_host.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	U.full_rect(overlay_host)
 	root.add_child(overlay_host)
+	story = StoryUI.new()
+	story.ui_root = self
+	story.final_closed.connect(_update_modal)
+	root.add_child(story)
 	toasts = Toasts.new()
 	root.add_child(toasts)
 
@@ -163,8 +194,12 @@ func set_language(lang: String) -> void:
 	_pause = null
 	_quick = null
 	_launch = null
+	loading = null
 	_build()
 	_refresh_mode()
+	SD.reload()
+	if Game.has_company():
+		story.adopt_state()
 	if menu.visible:
 		menu.show_page(menu_page)
 	if kind != "":
@@ -180,7 +215,8 @@ func _refresh_mode() -> void:
 	_update_modal()
 
 func _update_modal() -> void:
-	var open: bool = menu.visible or current != null or _pause != null or _quick != null or _launch != null or (chat and chat.is_open)
+	var open: bool = menu.visible or current != null or _pause != null or _quick != null or _launch != null or (chat and chat.is_open) \
+		or (loading != null and not loading.is_closing()) or (story != null and story.final_card != null)
 	if open != _modal:
 		_modal = open
 		Bus.ui_modal_changed.emit(open)
@@ -195,6 +231,10 @@ func _on_state_changed(keys: Array) -> void:
 	var was_menu := menu.visible
 	if Game.has_company() == was_menu:
 		_refresh_mode()
+	if story:
+		story.on_state(keys)
+		if was_menu and Game.has_company() and loading == null:
+			story.session_ready()
 	if not Game.has_company():
 		return
 	hud.refresh()
@@ -212,6 +252,20 @@ func _on_members_changed(list: Array) -> void:
 	if hud:
 		hud.refresh()
 
+# ---------------------------------------------------------------- loading screen
+func show_loading(title: String, sub: String, color: Color) -> void:
+	if loading:
+		loading.queue_free()
+	loading = Loading.new()
+	root.add_child(loading)
+	loading.begin(title, sub, color)
+	loading.finished.connect(func() -> void:
+		loading = null
+		_update_modal()
+		if story and Game.has_company():
+			story.session_ready())
+	_update_modal()
+
 # ---------------------------------------------------------------- screens
 func _on_interact(kind: String, id: String) -> void:
 	if not Game.has_company():
@@ -221,6 +275,8 @@ func _on_interact(kind: String, id: String) -> void:
 		return
 	if current_kind == kind:
 		return
+	if kind == "supplier_phone" and story:
+		story.story_event("supplier_called")
 	_open_screen(kind, id)
 
 func _open_screen(kind: String, id: String) -> void:
@@ -307,6 +363,8 @@ func show_launch(product_id: String) -> void:
 	o.product_id = product_id
 	o.closed.connect(func() -> void:
 		_launch = null
+		if story:
+			story.story_event("reviews_seen")
 		_update_modal())
 	_launch = o
 	overlay_host.add_child(o)
@@ -348,6 +406,7 @@ func _open_pause() -> void:
 	var resume := U.btn(L.t("Resume"), "BtnPrimary", "play", 0, 46)
 	resume.pressed.connect(_close_pause)
 	v.add_child(resume)
+	v.add_child(speed_row())
 	var set_btn := U.btn(L.t("Settings"), "", "gear", 0, 42)
 	set_btn.set_meta("settings_btn", true)
 	v.add_child(set_btn)
@@ -367,6 +426,11 @@ func _open_pause() -> void:
 				Bus.notify.emit("success", L.t("Saved"), ""))
 			settings_box.add_child(save)
 		settings_scroll.visible = not settings_scroll.visible)
+	if _can_skip_story():
+		var skip := U.btn(L.t("Skip story"), "BtnGhost", "bolt", 0, 40)
+		skip.set_meta("skip_story_btn", true)
+		skip.pressed.connect(func() -> void: _confirm_skip(v, skip))
+		v.add_child(skip)
 	var leave := U.btn(L.t("Leave company"), "BtnDanger", "exit", 0, 42)
 	leave.pressed.connect(func() -> void:
 		_confirm_leave(v, leave))
@@ -399,6 +463,71 @@ func _confirm_leave(v: VBoxContainer, leave_btn: Button) -> void:
 	v.add_child(box)
 	v.move_child(box, leave_btn.get_index() + 1)
 
+## Story running and I'm the founder (storySkip is founder-only, docs/ACTIONS.md).
+func _can_skip_story() -> bool:
+	var st: Dictionary = U.dict(Game.state.get("story", {}))
+	return not st.is_empty() and not bool(st.get("done", true)) and str(Game.me.get("role", "")) == "Founder"
+
+func _confirm_skip(v: VBoxContainer, skip_btn: Button) -> void:
+	skip_btn.visible = false
+	var box := U.card("CardAlt")
+	box.set_meta("skip_confirm", true)
+	var bv := U.vbox(10)
+	box.add_child(bv)
+	bv.add_child(U.lbl(L.t("Skip the story?"), U.LG, U.TEXT, "bold"))
+	bv.add_child(U.para(L.t("The tutorial ends for everyone in the company: the investor comes now, the usual team is hired and the clock starts. Repairs stay as a side job. This can't be undone."), U.SM, U.MUTED))
+	var row := U.hbox(8)
+	bv.add_child(row)
+	var yes := U.btn(L.t("Skip story"), "BtnOrange", "bolt", 0, 38)
+	yes.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	yes.set_meta("skip_yes", true)
+	yes.pressed.connect(func() -> void:
+		yes.disabled = true
+		var r: Dictionary = await Net.act("storySkip", {})
+		if r.get("ok", false):
+			_close_pause()
+		else:
+			yes.disabled = false
+			sfx("error")
+			Bus.notify.emit("error", L.t("Something went wrong"), str(r.get("error", ""))))
+	row.add_child(yes)
+	var no := U.btn(L.t("Cancel"), "BtnGhost", "", 0, 38)
+	no.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	no.pressed.connect(func() -> void:
+		box.queue_free()
+		skip_btn.visible = true)
+	row.add_child(no)
+	v.add_child(box)
+	v.move_child(box, skip_btn.get_index() + 1)
+
+## Time controls for the pause / quick menus (the HUD bar is under their dimmer). Keys: P, 1-4.
+func speed_row() -> Control:
+	var v := U.vbox(6)
+	var h := U.hbox(8)
+	v.add_child(h)
+	h.add_child(U.caps(L.t("GAME SPEED")))
+	h.add_child(U.spacer())
+	var t := U.dict(Game.state.get("time", {}))
+	var cur := int(U.num(t.get("speed", 1), 1))
+	var locked: bool = Net.story_clock_paused()
+	var items := []
+	for sp in [0, 1, 2, 4, 8]:
+		items.append([str(sp), (L.t("Pause") if sp == 0 else "%d×" % sp) + "  " + {0: "P", 1: "1", 2: "2", 4: "3", 8: "4"}[sp]])
+	var seg := U.segmented(items, str(cur), func(id: String) -> void:
+		Net.set_speed(int(id))
+		if hud:
+			hud.refresh(), 34)
+	seg.set_meta("speed_row", true)
+	for b in seg.find_children("*", "Button", true, false):
+		(b as Button).disabled = locked and str(b.get_meta("id", "")) != "0"
+	v.add_child(seg)
+	if locked:
+		var note := U.hbox(6)
+		note.add_child(U.icon("pause", U.WARNING, 12))
+		note.add_child(U.lbl(L.t("Story: time starts at chapter 4"), U.XS + 1, U.WARNING, "semibold"))
+		v.add_child(note)
+	return v
+
 func _close_pause() -> void:
 	if _pause:
 		_pause.queue_free()
@@ -411,6 +540,7 @@ func _open_quick() -> void:
 	var r := _popup_shell("Quick menu", "Open a screen without walking to it.", 520)
 	_quick = r[0]
 	var v: VBoxContainer = r[1]
+	v.add_child(speed_row())
 	var g := U.grid(2, 10, 10)
 	v.add_child(g)
 	for it in [["pc_design", "palette", U.SUCCESS, "Design studio"], ["whiteboard_research", "flask", U.ACCENT_ALT, "Research board"],
@@ -447,6 +577,12 @@ func _handle_escape() -> bool:
 	if chat and chat.is_open:
 		chat.close_input()
 		return true
+	if loading:
+		return true
+	if story and story.close_final():
+		return true
+	if story and story.skip():
+		return true
 	if _launch:
 		_launch.call("dismiss")
 		return true
@@ -462,8 +598,7 @@ func _handle_escape() -> bool:
 		close_screen()
 		return true
 	if menu.visible:
-		if menu.page != "home":
-			menu.show_page("home")
+		menu.go_back()
 		return true
 	if Game.has_company():
 		_open_pause()

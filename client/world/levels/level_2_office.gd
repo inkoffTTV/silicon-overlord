@@ -46,6 +46,7 @@ func _shell(lv: int) -> void:
 		var z := -hd + i * (2 * hd / n)
 		kit.box(g, Vector3(0.12, H - 1.1, 0.08), Vector3(x + 0.04, 0.75 + (H - 1.1) * 0.5, z), Mats.m("steel_dark"), Vector3.ZERO, false, 0.01)
 	kit.box(g, Vector3(0.01, H - 1.1, 2 * hd), Vector3(x, 0.75 + (H - 1.1) * 0.5, 0), Mats.glass(Color(0.5, 0.6, 0.7, 0.1)), Vector3.ZERO, true, 0.0, false).cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	kit.shape(Vector3(0.3, H - 0.6, 2 * hd + 2 * T), Transform3D(Basis(), Vector3(x - 0.05, 0.75 + (H - 0.6) * 0.5, 0)))  # thick invisible window pane
 	# baseboards
 	for s in [-1.0, 1.0]:
 		kit.box(g, Vector3(2 * hw, 0.08, 0.02), Vector3(0, 0.04, s * (hd - 0.01)), Mats.m("plastic_grey"), Vector3.ZERO, false, 0.0)

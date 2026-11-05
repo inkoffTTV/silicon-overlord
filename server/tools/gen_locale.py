@@ -320,6 +320,7 @@ def py_sites(path):
 # ---------------------------------------------------------------------------------------------------------------
 DATA_SKIP = {"ComponentCatalog", "Names", "Competitors", "ReviewTemplates", "DeviceSpecs", "Segments", "Finishes"}
 DATA_FIELDS = ("name", "title", "text", "description", "desc", "effect", "detail")
+DATA_FIRST = ("data.story.",)
 
 
 def data_entries():
@@ -409,6 +410,13 @@ def build():
         keys[k] = en
         entries[en] = {"key": k, "en": en, "group": group}
 
+    # data modules whose texts must keep their data.* key even when the same text is a `title = ...` site
+    # (iteration 3: story chapter/step titles are referenced by data key from notify.bodyKey)
+    data = data_entries()
+    for key, en in data:
+        if key.startswith(DATA_FIRST):
+            put(key, en, "data")
+
     sites = []
     for base in (os.path.join(ROOT, "shared-luau"), os.path.join(SERVER, "lua")):
         for dp, _, files in os.walk(base):
@@ -423,9 +431,9 @@ def build():
         if t in ("CEO", "CTO", "0 / 1") or re.fullmatch(r"[a-z]+", t) or re.search(r"[\u0400-\u04FF]", t):
             continue  # owner titles, internal ids, Russian texts of the Roblox client tutorial (never sent)
         put(slug(cat, t), t, cat)
-    for key, en in data_entries():
+    for key, en in data:
         put(key, en, "data" if key.startswith("data.") else "review")
-    order = {"err": 0, "note": 1, "news": 2, "review": 3, "data": 4}
+    order = {"err": 0, "note": 1, "story": 2, "news": 3, "review": 4, "data": 5}
     out = sorted(entries.values(), key=lambda e: (order.get(e["group"], 9), e["key"]))
     return out
 
@@ -433,6 +441,7 @@ def build():
 GROUP_TITLES = {
     "err": "Errors (`res.errorKey`, `error.key`)",
     "note": "Notifications (`notify.key` / `notify.bodyKey`)",
+    "story": "Story start (iteration 3; `notify.key` / `notify.bodyKey`, preset by the server — see docs/ACTIONS.md \"Story & repairs\")",
     "news": "News feed (`news[].key` / `news[].bodyKey`)",
     "review": "Launch reviews (`headlineKey`, `bodyParts[].key`)",
     "data": "Data texts (sent whole as a title/body, or as a param — see `paramKeys`)",
@@ -464,7 +473,8 @@ the key is missing/unknown (or `null`), it shows the English text that is always
   show the value as it is.
 - A text can be a data text sent whole (e.g. an event's description as a news body): then its key is a `data.*` key.
 - Keys never change meaning. New keys may appear; unknown keys → use the English text. Texts with no key → English.
-- Prefixes: `err.*` action / protocol errors, `note.*` notifications, `news.*` news feed, `review.*` launch reviews,
+- Prefixes: `err.*` action / protocol errors, `note.*` notifications, `story.*` story start notifications,
+  `news.*` news feed, `review.*` launch reviews,
   `data.*` game data texts. The same English text has one key everywhere (an error text reused in a notification
   keeps its `err.` key).
 - Server-side extraction is automatic; a few texts are assembled in ways the extractor cannot see and arrive with
@@ -478,7 +488,7 @@ def render_doc(entries):
     for e in entries:
         by.setdefault(e["group"], []).append(e)
     lines.append("## Keys (%d)\n" % len(entries))
-    for g in ("err", "note", "news", "review", "data"):
+    for g in ("err", "note", "story", "news", "review", "data"):
         if g not in by:
             continue
         lines.append("### %s — %d\n" % (GROUP_TITLES[g], len(by[g])))

@@ -70,5 +70,119 @@
  {
   "key": "news.daily_gift_cash",
   "en": "+${amount}"
+ },
+ {
+  "key": "story.step.done",
+  "en": "Objective complete",
+  "group": "story"
+ },
+ {
+  "key": "story.chapter",
+  "en": "Chapter {chapter}: {title}",
+  "group": "story"
+ },
+ {
+  "key": "story.investor",
+  "en": "An investor believes in you",
+  "group": "story"
+ },
+ {
+  "key": "story.investor.body",
+  "en": "+${amount} to build your own phone. The clock is running now.",
+  "group": "story"
+ },
+ {
+  "key": "story.complete",
+  "en": "Story complete!",
+  "group": "story"
+ },
+ {
+  "key": "story.complete.body",
+  "en": "The garage is now {name}. The sandbox is open; repair orders stay as side income.",
+  "group": "story"
+ },
+ {
+  "key": "story.skipped",
+  "en": "Story skipped",
+  "group": "story"
+ },
+ {
+  "key": "story.skipped.body",
+  "en": "Full budget, full team, the clock is running. Repair orders stay as side income.",
+  "group": "story"
+ },
+ {
+  "key": "story.repair.new",
+  "en": "A customer is waiting at the counter",
+  "group": "story"
+ },
+ {
+  "key": "story.repair.paid",
+  "en": "Repair paid: +${amount}",
+  "group": "story"
+ },
+ {
+  "key": "news.story_opens",
+  "en": "{name} opens its doors"
+ },
+ {
+  "key": "news.story_opens_body",
+  "en": "A garage, a soldering iron and a hand-painted PHONE REPAIR sign. Fixing phones pays the bills... for now."
+ },
+ {
+  "key": "news.story_investor",
+  "en": "An investor believes in {name}"
+ },
+ {
+  "key": "news.story_investor_body",
+  "en": "Fresh money and a small team: the garage is about to build its own phone."
+ },
+ {
+  "key": "news.story_sign_down",
+  "en": "{name} takes down the PHONE REPAIR sign"
+ },
+ {
+  "key": "news.story_sign_down_body",
+  "en": "From fixing other people's phones to launching their own."
+ },
+ {
+  "key": "err.repair_unknown_order",
+  "en": "Unknown repair order"
+ },
+ {
+  "key": "err.repair_busy",
+  "en": "That device is already at the bench"
+ },
+ {
+  "key": "err.repair_not_in_repair",
+  "en": "That device is already repaired"
+ },
+ {
+  "key": "err.repair_no_part",
+  "en": "No spare part: buy a {part} in Purchasing"
+ },
+ {
+  "key": "err.repair_not_ready",
+  "en": "That device is not repaired yet"
+ },
+ {
+  "key": "err.repair_already_paid",
+  "en": "That repair is already paid"
+ },
+ {
+  "key": "err.story_unknown_event",
+  "en": "Unknown story event"
+ },
+ {
+  "key": "err.story_founder_only",
+  "en": "Only the founder can skip the story"
+ },
+ {
+  "key": "err.story_already_done",
+  "en": "The story is already finished"
+ },
+ {
+  "key": "err.story_clock_paused",
+  "en": "Story: time starts at chapter 4"
  }
 ]

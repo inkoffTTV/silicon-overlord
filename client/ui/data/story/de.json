@@ -1,0 +1,861 @@
+{
+ "lang": "de",
+ "version": 1,
+ "speakers": {
+  "narrator": {
+   "name": "",
+   "voice": 901709
+  },
+  "radio": {
+   "name": "Radio Nachtschicht",
+   "voice": 900977
+  },
+  "mira": {
+   "name": "Tante Mira",
+   "voice": 900573
+  },
+  "felix": {
+   "name": "Onkel Felix",
+   "voice": 901266
+  },
+  "zip": {
+   "name": "Zip",
+   "voice": 901509
+  },
+  "critic": {
+   "name": "Vera Benchmark",
+   "voice": 901258
+  }
+ },
+ "chapters": [
+  {
+   "id": 0,
+   "key": "workshop",
+   "title": "Die Werkstatt",
+   "subtitle": "2 Uhr nachts, eine Garage und ein handgemaltes Schild: HANDY-REPARATUR",
+   "steps": [
+    {
+     "id": "intro_seen",
+     "optional": false,
+     "objective": "Zur Garage kommen",
+     "hint": "",
+     "lines": []
+    },
+    {
+     "id": "door_open",
+     "optional": false,
+     "objective": "Die Ladentür öffnen",
+     "hint": "Geh zur Tür und drück E. Zu dunkel? F schaltet die Taschenlampe ein.",
+     "lines": [
+      {
+       "id": "step.door_open.1",
+       "speaker": "mira",
+       "text": "Die Tür klemmt. Griff anheben und drücken. Die Garage respektiert Selbstbewusstsein."
+      }
+     ]
+    },
+    {
+     "id": "lights_on",
+     "optional": false,
+     "objective": "Das Licht einschalten",
+     "hint": "Der Schalter ist an der Wand neben der Tür. Schau ihn an und drück E.",
+     "lines": [
+      {
+       "id": "step.lights_on.1",
+       "speaker": "mira",
+       "text": "Es werde Licht! Eine Werkstatt im Dunkeln ist einfach nur eine gruselige Garage."
+      },
+      {
+       "id": "step.lights_on.2",
+       "speaker": "mira",
+       "text": "Reparaturtisch, Tresen, Klingel. Die Klingel ist hier das wichtigste Werkzeug. Glaubt mir."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": 1,
+   "key": "first_customer",
+   "title": "Der erste Kunde",
+   "subtitle": "Jemand hat etwas fallen lassen. Schon wieder.",
+   "steps": [
+    {
+     "id": "take_device",
+     "optional": false,
+     "objective": "Das Gerät vom Tresen nehmen",
+     "hint": "Drück E am Tresen, um den Auftrag anzunehmen, und trag das Gerät zum Reparaturtisch.",
+     "lines": [
+      {
+       "id": "step.take_device.1",
+       "speaker": "mira",
+       "text": "Pling-pling! Euer erster Kunde. Lächeln, die riechen Angst. Und Lötzinn."
+      }
+     ]
+    },
+    {
+     "id": "repair_device",
+     "optional": false,
+     "objective": "Am Reparaturtisch reparieren",
+     "hint": "Leg es auf den Reparaturtisch und drück E: öffnen, Fehler finden, reparieren, zuschrauben.",
+     "lines": [
+      {
+       "id": "step.repair_device.1",
+       "speaker": "mira",
+       "text": "Lampe an, Lupe runter. Schrauben kommen in den Becher, nicht in die Hosentasche."
+      }
+     ]
+    },
+    {
+     "id": "get_paid",
+     "optional": false,
+     "objective": "Am Tresen zurückgeben und kassieren",
+     "hint": "Trag das Gerät zurück und drück E am Tresen. Saubere Arbeit wird besser bezahlt.",
+     "lines": [
+      {
+       "id": "step.get_paid.1",
+       "speaker": "mira",
+       "text": "Repariert? Jetzt kommt das Beste: ein glückliches Gesicht und echtes Geld."
+      }
+     ]
+    },
+    {
+     "id": "second_customer",
+     "optional": false,
+     "objective": "Ein zweites Gerät reparieren",
+     "hint": "Ihr spielt zu zweit? Einer nimmt Aufträge an, der andere repariert. Schneller als Heldentum.",
+     "lines": [
+      {
+       "id": "step.second_customer.1",
+       "speaker": "mira",
+       "text": "In dieser Straße spricht sich alles schnell herum. Da kommt schon der Nächste."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": 2,
+   "key": "spare_parts",
+   "title": "Ersatzteile",
+   "subtitle": "Mit guten Absichten repariert man kein Display",
+   "steps": [
+    {
+     "id": "diagnose_part",
+     "optional": false,
+     "objective": "Den neuen Auftrag zum Tisch bringen",
+     "hint": "Drück E am Tresen und sieh dir das Gerät auf dem Reparaturtisch genau an.",
+     "lines": [
+      {
+       "id": "step.diagnose_part.1",
+       "speaker": "mira",
+       "text": "Oh, das knirscht ja richtig. Da braucht es ein neues Teil, nicht nur einen Schraubenzieher."
+      }
+     ]
+    },
+    {
+     "id": "call_supplier",
+     "optional": false,
+     "objective": "Den Lieferanten am Wandtelefon anrufen",
+     "hint": "Drück E am Telefon an der Wand. Der Einkauf öffnet sich.",
+     "lines": [
+      {
+       "id": "step.call_supplier.1",
+       "speaker": "mira",
+       "text": "Keine Displays mehr? Glas repariert man nicht mit guten Absichten."
+      },
+      {
+       "id": "step.call_supplier.2",
+       "speaker": "mira",
+       "text": "Ruft Zip an. Zip geht zu jeder Uhrzeit ran. Ich bin nicht sicher, ob Zip überhaupt schläft."
+      }
+     ]
+    },
+    {
+     "id": "buy_parts",
+     "optional": false,
+     "objective": "Ersatzteile im Einkauf kaufen",
+     "hint": "Such die Displays in der Liste und kauf ein paar. Eine Handvoll reicht fürs Erste.",
+     "lines": [
+      {
+       "id": "step.buy_parts.1",
+       "speaker": "zip",
+       "text": "Zip-Teile, Zip am Apparat! Displays, Akkus, Buchsen. Was ist kaputt, Freunde?"
+      },
+      {
+       "id": "step.buy_parts.2",
+       "speaker": "zip",
+       "text": "Geliefert, bevor euer Tee kalt wird. Außer es ist Eistee. Dann ist es ein Wettrennen."
+      }
+     ]
+    },
+    {
+     "id": "fit_part",
+     "optional": false,
+     "objective": "Das neue Teil einbauen",
+     "hint": "Zurück zum Reparaturtisch: Das neue Teil wird während der Reparatur eingesetzt.",
+     "lines": [
+      {
+       "id": "step.fit_part.1",
+       "speaker": "mira",
+       "text": "Altes Glas raus, neues Glas rein. Vorsichtig. Es ist dünner als meine Geduld."
+      }
+     ]
+    },
+    {
+     "id": "paid_with_part",
+     "optional": false,
+     "objective": "Gerät zurückgeben und kassieren",
+     "hint": "Der Preis deckt das Teil, also macht ihr trotzdem Gewinn. Gutes Geschäft!",
+     "lines": [
+      {
+       "id": "step.paid_with_part.1",
+       "speaker": "mira",
+       "text": "Euer Kunde wartet immer noch. Tapfer. Testen wir diese Tapferkeit lieber nicht."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": 3,
+   "key": "same_fault",
+   "title": "Immer derselbe Defekt",
+   "subtitle": "Jedes Handy geht an derselben Stelle kaputt. Interessant …",
+   "steps": [
+    {
+     "id": "pattern_repair",
+     "optional": false,
+     "objective": "Noch eine kaputte Ladebuchse reparieren",
+     "hint": "Zwei Kunden, zwei kaputte Buchsen. Keine Buchsen mehr? Kauft welche im Einkauf nach.",
+     "lines": [
+      {
+       "id": "step.pattern_repair.1",
+       "speaker": "mira",
+       "text": "Zwei Kunden auf einmal, und beide mit kaputter Ladebuchse. Hm."
+      }
+     ]
+    },
+    {
+     "id": "notice_pattern",
+     "optional": false,
+     "objective": "Über das Muster reden",
+     "hint": "Hört Tante Mira zu. Mit diesen Handys stimmt etwas nicht.",
+     "lines": [
+      {
+       "id": "step.notice_pattern.1",
+       "speaker": "mira",
+       "text": "Dieselbe Buchse, dasselbe Wackeln, dasselbe Modell. Die dritte diese Woche."
+      },
+      {
+       "id": "step.notice_pattern.2",
+       "speaker": "mira",
+       "text": "Handys werden von Leuten entworfen, die nie ein Handy fallen lassen. Ihr schon, täglich. Das ist ein Vorteil."
+      },
+      {
+       "id": "step.notice_pattern.3",
+       "speaker": "mira",
+       "text": "Ihr repariert sie eins nach dem anderen. Was, wenn ihr eins baut, das nicht kaputtgeht?"
+      }
+     ]
+    },
+    {
+     "id": "start_research",
+     "optional": false,
+     "objective": "Die erste Forschung am Whiteboard starten",
+     "hint": "Drück E am Whiteboard und wähl eine Technologie. Die erste ist gratis.",
+     "lines": [
+      {
+       "id": "step.start_research.1",
+       "speaker": "mira",
+       "text": "Ein Handy reparieren ist eine Reparatur. Alle auf einmal reparieren nennt man Forschung."
+      }
+     ]
+    },
+    {
+     "id": "research_challenge",
+     "optional": true,
+     "objective": "Brainstorming am Whiteboard",
+     "hint": "Ein kurzes Minispiel bringt die Forschung voran. Optional, aber lustig.",
+     "lines": [
+      {
+       "id": "step.research_challenge.1",
+       "speaker": "mira",
+       "text": "Marker raus! Erst die schlechten Ideen: Die versperren den guten die Tür."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": 4,
+   "key": "own_phone",
+   "title": "Unser eigenes Handy",
+   "subtitle": "Was, wenn wir eins bauen, das nicht kaputtgeht?",
+   "steps": [
+    {
+     "id": "investor_seen",
+     "optional": false,
+     "objective": "Den Besuch an der Tür begrüßen",
+     "hint": "",
+     "lines": []
+    },
+    {
+     "id": "design_phone",
+     "optional": false,
+     "objective": "Am PC das erste Handy entwerfen",
+     "hint": "PC → Designstudio. Die Standardwerte passen; behebt einfach, was eure Kunden genervt hat.",
+     "lines": [
+      {
+       "id": "step.design_phone.1",
+       "speaker": "felix",
+       "text": "Denkt an die wackeligen Buchsen und die Akkus, die mittags leer sind. Fangt da an."
+      }
+     ]
+    },
+    {
+     "id": "publish_phone",
+     "optional": false,
+     "objective": "Den Entwurf veröffentlichen",
+     "hint": "Drück im letzten Schritt „Entwicklung starten“. Euer Prototyp ist unterwegs.",
+     "lines": [
+      {
+       "id": "step.publish_phone.1",
+       "speaker": "mira",
+       "text": "Ein Name, ein Preis und ein Knopf. Der gruseligste Knopf in dieser Garage."
+      }
+     ]
+    },
+    {
+     "id": "develop_phone",
+     "optional": false,
+     "objective": "Den Prototyp fertig entwickeln",
+     "hint": "Jetzt läuft die Zeit: Spul vor oder hilf mit einer Bugjagd am PC.",
+     "lines": [
+      {
+       "id": "step.develop_phone.1",
+       "speaker": "felix",
+       "text": "Entwicklung ist wie Suppe. Nicht alle fünf Minuten den Deckel heben."
+      }
+     ]
+    },
+    {
+     "id": "polish_challenge",
+     "optional": true,
+     "objective": "Bugjagd am PC",
+     "hint": "Setz dich auf den PC-Stuhl für eine schnelle Bugjagd. Optional.",
+     "lines": [
+      {
+       "id": "step.polish_challenge.1",
+       "speaker": "felix",
+       "text": "Einen Bug gefunden? Gut. Besser ihr als die Kritiker."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": 5,
+   "key": "first_batch",
+   "title": "Die erste Charge",
+   "subtitle": "Handarbeit, eine winzige Schraube nach der anderen",
+   "steps": [
+    {
+     "id": "queue_batch",
+     "optional": false,
+     "objective": "Eine Charge an der Werkbank starten",
+     "hint": "Drück E an der Werkbank, wähl dein Handy und eine Menge. Material gibt es im Einkauf.",
+     "lines": [
+      {
+       "id": "step.queue_batch.1",
+       "speaker": "mira",
+       "text": "Handmontage! Wie in alten Zeiten, nur mit weniger Brandblasen. Hoffentlich."
+      }
+     ]
+    },
+    {
+     "id": "first_crate",
+     "optional": false,
+     "objective": "Auf die erste Kiste warten",
+     "hint": "Fertige Handys werden neben der Werkbank in Kisten verpackt.",
+     "lines": [
+      {
+       "id": "step.first_crate.1",
+       "speaker": "mira",
+       "text": "Jedes Handy in dieser Kiste ist mit euren Händen gebaut. Komisches Gefühl, oder?"
+      }
+     ]
+    },
+    {
+     "id": "ship_crate",
+     "optional": false,
+     "objective": "Eine Kiste in den Lieferwagen tragen",
+     "hint": "Nimm die Kiste und stell sie in den Lieferwagen. Sorgfältiges Verladen bringt +5 % Stück.",
+     "lines": [
+      {
+       "id": "step.ship_crate.1",
+       "speaker": "felix",
+       "text": "Vorsichtig! Diese Kiste ist unsere Zukunft. Und meine Investition. Vor allem meine Investition."
+      }
+     ]
+    },
+    {
+     "id": "qc_challenge",
+     "optional": true,
+     "objective": "Qualitätskontrolle an der Werkbank",
+     "hint": "Finde die fehlerhaften Handys und hol ein paar Extra-Stück raus. Optional.",
+     "lines": [
+      {
+       "id": "step.qc_challenge.1",
+       "speaker": "mira",
+       "text": "Prüft jedes Handy, als würde ein Kunde es fallen lassen. Denn das wird er."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": 6,
+   "key": "launch_night",
+   "title": "Die Launch-Nacht",
+   "subtitle": "Scheinwerfer, Kritiker und ein brandneues Schild",
+   "steps": [
+    {
+     "id": "launch_phone",
+     "optional": false,
+     "objective": "Das Handy auf der Bühne vorstellen",
+     "hint": "Drück E an der Bühne, wenn ihr bereit seid. Die Kritiker sitzen schon.",
+     "lines": [
+      {
+       "id": "step.launch_phone.1",
+       "speaker": "critic",
+       "text": "Guten Abend, ich bin Vera Benchmark. Dreitausend Tests. Jedes einzelne Handy habe ich fallen lassen."
+      },
+      {
+       "id": "step.launch_phone.2",
+       "speaker": "critic",
+       "text": "Ein Team aus einer Garage? Mal sehen, ob es meine Hosentasche überlebt. Und meine Treppe."
+      }
+     ]
+    },
+    {
+     "id": "reviews_seen",
+     "optional": false,
+     "objective": "Lesen, was die Kritiker sagen",
+     "hint": "Egal welche Wertung: Ihr habt ein echtes Handy rausgebracht. Die meisten reden nur davon.",
+     "lines": [
+      {
+       "id": "step.reviews_seen.1",
+       "speaker": "critic",
+       "text": "Unter uns: Auf dem Weg hierher ist es mir zweimal runtergefallen. Respekt."
+      }
+     ]
+    },
+    {
+     "id": "sign_swapped",
+     "optional": false,
+     "objective": "Das neue Firmenschild aufhängen",
+     "hint": "Seht zu, wie das alte Schild abgenommen wird.",
+     "lines": [
+      {
+       "id": "step.sign_swapped.1",
+       "speaker": "mira",
+       "text": "Noch eine Sache, ihr Lieben. Das alte Schild passt nicht mehr zu euch."
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "customers": [
+  {
+   "id": "grandma",
+   "voice": 900575,
+   "deviceId": "phone",
+   "faultId": "software_glitch",
+   "name": "Oma Rosa",
+   "device": "Handy (ein Geschenk vom Enkel)",
+   "fault": "Ruft von selbst ihren Ex-Mann an. Getrennt seit 1979",
+   "lines": {
+    "arrive": "Guten Abend, ihr Lieben! Mein Enkel sagt, das ist ein Handy. Ich knacke damit meistens Walnüsse.",
+    "story": "Es ruft ganz von selbst meinen Ex-Mann an! Wir sind seit 1979 geschieden. Er ist sehr verwirrt.",
+    "wait": "Lasst euch Zeit. Ich habe Kuchen mitgebracht. Na ja, für mich.",
+    "happy": "Wunderbar! Hier sind {money}. Und ein Stück Kuchen. Erzählt meinem Enkel nichts von den Walnüssen.",
+    "angry": "Zu meiner Zeit ging das Reparieren schneller. Und die Walnüsse waren weicher."
+   }
+  },
+  {
+   "id": "student",
+   "voice": 900621,
+   "deviceId": "phone",
+   "faultId": "stuck_button",
+   "name": "Max, der Student",
+   "device": "Handy voller Sticker",
+   "fault": "Seitentaste klemmt nach tausendmal Schlummern",
+   "lines": {
+    "arrive": "Hi … sorry, ich hab zwei Stunden geschlafen. Kann man Handys mit Studi-Budget reparieren?",
+    "story": "Ich hab den Wecker so oft auf Schlummern gedrückt, dass die Taste aufgegeben hat. Jetzt klemmt sie für immer.",
+    "wait": "Ich mach nur kurz die Augen zu. Weckt mich, wenn's fertig ist. Oder nie.",
+    "happy": "Ihr seid Helden! Hier sind {money}. Das war mein ganzes Nudelbudget für die Woche.",
+    "angry": "Ich hätte die ganze Reparatur verschlafen können. Fast hab ich das auch."
+   }
+  },
+  {
+   "id": "courier",
+   "voice": 901656,
+   "deviceId": "phone",
+   "faultId": "cracked_screen",
+   "name": "Dina, die Kurierin",
+   "device": "Handy, mit Klebeband geflickt",
+   "fault": "Fallen gelassen, als sie eine Torte in den 9. Stock trug",
+   "lines": {
+    "arrive": "Schnell, schnell! Ich hab vier Minuten und elf Pakete.",
+    "story": "Ich hab eine Torte in den neunten Stock getragen und das Handy auf der letzten Stufe fallen lassen. Die Torte hat's überlebt!",
+    "wait": "Meine Pause dauert vier Minuten. Jetzt noch drei. Zweieinhalb …",
+    "happy": "Wie neu! Hier sind {money}. Fünf Sterne, und zwar schnell!",
+    "angry": "Zu langsam! Ich hätte schon vierzig Pizzas ausliefern können."
+   }
+  },
+  {
+   "id": "teacher",
+   "voice": 900906,
+   "deviceId": "phone",
+   "faultId": "broken_port",
+   "name": "Herr Pell, der Lehrer",
+   "device": "Handy in einer sehr vernünftigen Hülle",
+   "fault": "Ladebuchse voller Kreidestaub aus dreißig Jahren",
+   "lines": {
+    "arrive": "Guten Abend. Keine Eile, bitte. Geduld bringe ich als Erstes bei. Rechtschreibung als Zweites.",
+    "story": "Die Ladebuchse ist voller Kreidestaub. Dreißig Jahre an der Tafel. Die Kreide hat endlich gewonnen.",
+    "wait": "Während wir warten: Wer kann drei Teile eines Handys nennen? Bitte melden.",
+    "happy": "Ausgezeichnete Arbeit. Hier sind {money}. Eine Eins mit Sternchen, und die gebe ich fast nie.",
+    "angry": "Diese Reparatur benote ich später. Rechnet mit einer Vier minus."
+   }
+  },
+  {
+   "id": "gamer",
+   "voice": 901217,
+   "deviceId": "phone",
+   "faultId": "broken_port",
+   "name": "Kit, der Gamer",
+   "device": "Gaming-Handy mit RGB-Beleuchtung",
+   "fault": "„Nicht geworfen, es ist geflogen.“ Buchse mit dem Kabel weg",
+   "lines": {
+    "arrive": "Hey. Also, erstens: Ich hab's nicht geworfen. Es ist geflogen.",
+    "story": "Das Kabel blieb in der Steckdose und die Ladebuchse ist irgendwie … mitgegangen. Das war der Lag.",
+    "wait": "Gibt's hier WLAN? Frag für mein anderes Handy.",
+    "happy": "GG! Es lädt! Hier sind {money}. Das ist eine Woche Mittagessen, nur damit ihr's wisst.",
+    "angry": "Laaag. Sogar Omas Router ist schneller."
+   }
+  },
+  {
+   "id": "barista",
+   "voice": 901011,
+   "deviceId": "watch",
+   "faultId": "water_damage",
+   "name": "Lou, die Barista",
+   "device": "Smartwatch, die nach Espresso riecht",
+   "fault": "Beim Latte Art in die Milchkanne getaucht",
+   "lines": {
+    "arrive": "Hallihallo! Ich hab euch Kaffee mitgebracht. Na ja, mir. Aber riechen dürft ihr.",
+    "story": "Ich hab ein Herz auf einen Latte gemalt und mein Handgelenk direkt in die Milch getaucht. Jetzt ist es eine Milchshake-Uhr.",
+    "wait": "Das dauert länger als ein dreifacher Espresso. Aber kürzer als Entkoffeinierter. Alles gut.",
+    "happy": "Ihr seid die Besten! Hier sind {money}. Eine Woche lang Cappuccino gratis für euch.",
+    "angry": "Mein Kaffee ist kalt geworden. Mein Herz auch. Ein bisschen."
+   }
+  },
+  {
+   "id": "taxi_driver",
+   "voice": 901313,
+   "deviceId": "phone",
+   "faultId": "dead_battery",
+   "name": "Sam, der Taxifahrer",
+   "device": "Handy in einer Armaturenbrett-Halterung",
+   "fault": "Navi 16 Stunden am Tag. Der Akku hat die ganze Stadt gesehen",
+   "lines": {
+    "arrive": "Abend, Chef! Sam vom Taxi. Ich kenne jede Straße in der Stadt und jedes Schlagloch beim Namen.",
+    "story": "Das Navi läuft sechzehn Stunden am Tag. Dieser Akku hat mehr von der Stadt gesehen als ich.",
+    "wait": "Ich hab mal einen berühmten Sänger durch diese Straße gefahren. Wen, sag ich nicht. Fängt mit einem Buchstaben an.",
+    "happy": "Top-Service! Hier sind {money}. Braucht ihr mal eine Fahrt? Für euch zum halben Preis.",
+    "angry": "Das Taxameter läuft, Leute! Na ja, würde es, wenn wir im Taxi säßen."
+   }
+  },
+  {
+   "id": "musician",
+   "voice": 900431,
+   "deviceId": "laptop",
+   "faultId": "cracked_screen",
+   "name": "Jo, die Drummerin",
+   "device": "Laptop voller Bandsticker",
+   "fault": "Ein Drumstick flog beim Solo weg. Direkt ins Display",
+   "lines": {
+    "arrive": "Yo! Jo, Drummerin. Keine Sorge, mein Schlagzeug ist zu Hause. Größtenteils.",
+    "story": "Episches Drumsolo, der Stick ist mir weggerutscht und direkt ins Laptop-Display geflogen. Bestes Solo meines Lebens.",
+    "wait": "Ba-dum-tss. Sorry, beim Warten trommle ich auf allem rum.",
+    "happy": "Klingt perfekt! Hier sind {money}. Ihr steht ab jetzt alle auf der Gästeliste.",
+    "angry": "Diese Reparatur ist langsamer als unser Bassist. Und das will was heißen."
+   }
+  },
+  {
+   "id": "chef",
+   "voice": 901216,
+   "deviceId": "tablet",
+   "faultId": "broken_port",
+   "name": "Chefkoch Arno",
+   "device": "Rezept-Tablet in einer mehligen Hülle",
+   "fault": "Die Ladebuchse ist voller Mehl",
+   "lines": {
+    "arrive": "Guten Abend, meine Freunde! Chefkoch Arno. Ich vertraue euch das an wie mein bestes Messer.",
+    "story": "Mein Tablet hat mir beim Teigtaschenmachen geholfen. Jetzt ist die Ladebuchse voller Mehl.",
+    "wait": "Geduld ist wie Teig, meine Freunde. Lasst ihn in Ruhe, dann geht er auf.",
+    "happy": "Sternewürdig! Hier sind {money}. Kommt bei mir essen. Tablets bleiben weg vom Teig.",
+    "angry": "Verkocht! Wie diese Reparatur. Viel zu lang, meine Freunde."
+   }
+  },
+  {
+   "id": "blogger",
+   "voice": 900873,
+   "deviceId": "phone",
+   "faultId": "cracked_screen",
+   "name": "Mia, die Bloggerin",
+   "device": "Handy mit drei Ringlichtern",
+   "fault": "Selfiestick gegen Deckenventilator. Der Ventilator hat gewonnen",
+   "lines": {
+    "arrive": "Hiii, Chat! Wir sind in einer echten Werkstatt! Sagt hallo zu meinen Followern!",
+    "story": "Mein Selfiestick hat einen Deckenventilator getroffen. Der Ventilator hat gewonnen. Darf ich filmen, wie ihr's repariert?",
+    "wait": "Warte-Content! Sooo authentisch. Okay, mir ist langweilig.",
+    "happy": "Ich bin besessen! Hier sind {money}. Ich markiere euch überall.",
+    "angry": "Ich entfolge euch. Emotional."
+   }
+  }
+ ],
+ "devices": {
+  "phone": "Handy",
+  "tablet": "Tablet",
+  "laptop": "Laptop",
+  "watch": "Smartwatch"
+ },
+ "faults": {
+  "cracked_screen": {
+   "name": "Gesprungenes Display",
+   "part": "screen",
+   "story": "Lange Geschichte. Ziegen-Yoga. Eine Ziege ist draufgetreten. Der Ziege geht's gut."
+  },
+  "dead_battery": {
+   "name": "Leerer Akku",
+   "part": "battery",
+   "story": "Es hat vierzigtausend Schritte gezählt und ist gestorben. Ich glaube, es ist einfach müde."
+  },
+  "broken_port": {
+   "name": "Kaputte Ladebuchse",
+   "part": "port",
+   "story": "Ein Kleinkind auf einer Party wollte es mit einer Banane aufladen. Der Banane geht's gut."
+  },
+  "water_damage": {
+   "name": "Wasserschaden",
+   "part": null,
+   "story": "Auf der Packung stand wasserdicht. Der See war anderer Meinung."
+  },
+  "software_glitch": {
+   "name": "Softwarefehler",
+   "part": null,
+   "story": "Seit Dienstag spricht es nur noch Französisch. Ich nicht. Es scheint aber glücklich zu sein."
+  },
+  "stuck_button": {
+   "name": "Klemmende Taste",
+   "part": null,
+   "story": "Meine Katze hat eine Woche lang darauf geschlafen. Die Taste hat vor der Katze aufgegeben."
+  }
+ },
+ "parts": {
+  "screen": "Ersatzdisplay",
+  "battery": "Ersatzakku",
+  "port": "Ladebuchse"
+ },
+ "cutscenes": {
+  "intro": {
+   "captions": [
+    {
+     "id": "cut.intro.1",
+     "speaker": "radio",
+     "text": "Radio Nachtschicht, zwei Uhr nachts. Irgendwo da draußen ist gerade ein Handy in die Badewanne gerutscht."
+    },
+    {
+     "id": "cut.intro.2",
+     "speaker": "radio",
+     "text": "Und irgendwo eröffnen ein paar Freunde eine Werkstatt in einer Garage. Viel Glück, ihr Nachteulen."
+    },
+    {
+     "id": "cut.intro.3",
+     "speaker": "narrator",
+     "text": "Eine ruhige Straße. Eine gemietete Garage. Ein handgemaltes Schild: HANDY-REPARATUR."
+    },
+    {
+     "id": "cut.intro.4",
+     "speaker": "mira",
+     "text": "Die Garage gehört euch, ihr Lieben. Die Miete ist günstig: Einmal im Monat repariert ihr meinen Wasserkocher."
+    },
+    {
+     "id": "cut.intro.5",
+     "speaker": "narrator",
+     "text": "Heute Nacht öffnet die Werkstatt. Und morgen? Das weiß noch niemand."
+    }
+   ]
+  },
+  "investor": {
+   "captions": [
+    {
+     "id": "cut.investor.1",
+     "speaker": "narrator",
+     "text": "Ein sehr leises Auto hält vor der Tür. Elektrisch, glänzend und eindeutig teuer."
+    },
+    {
+     "id": "cut.investor.2",
+     "speaker": "felix",
+     "text": "Abend! Ich bin Felix, Miras Bruder. Sie sagt, ihr repariert um 2 Uhr nachts Handys und redet nett mit ihnen."
+    },
+    {
+     "id": "cut.investor.3",
+     "speaker": "felix",
+     "text": "Ich bin mit Saugrobotern reich geworden. Die blieben ständig unter Sofas stecken, also hab ich das behoben."
+    },
+    {
+     "id": "cut.investor.4",
+     "speaker": "felix",
+     "text": "Ich investiere nicht in Firmen. Ich investiere in Leute, die Dinge aufschrauben, nur um zu sehen, warum sie kaputt sind."
+    },
+    {
+     "id": "cut.investor.5",
+     "speaker": "felix",
+     "text": "Hier sind {money}. Baut ein Handy, das ich nicht kaputt kriege. Ich werde mich sehr, sehr anstrengen."
+    },
+    {
+     "id": "cut.investor.6",
+     "speaker": "mira",
+     "text": "Er hat drei meiner Wasserkocher kaputt gemacht. Glaubt mir, er wird sich anstrengen."
+    },
+    {
+     "id": "cut.investor.7",
+     "speaker": "narrator",
+     "text": "Der Kalender läuft. Ab heute sind Miete, Konkurrenz und Gehälter echt."
+    }
+   ]
+  },
+  "sign_swap": {
+   "captions": [
+    {
+     "id": "cut.sign_swap.1",
+     "speaker": "mira",
+     "text": "Vorsicht mit dem alten Schild. Es ist älter als euer Lötkolben."
+    },
+    {
+     "id": "cut.sign_swap.2",
+     "speaker": "narrator",
+     "text": "HANDY-REPARATUR kommt runter. {company} kommt rauf."
+    },
+    {
+     "id": "cut.sign_swap.3",
+     "speaker": "felix",
+     "text": "Dieselbe Garage, größere Pläne. Ich bin im Auto. Und weine ein bisschen."
+    },
+    {
+     "id": "cut.sign_swap.4",
+     "speaker": "mira",
+     "text": "Den Tresen behaltet ihr aber. Alte Kunden bringen euch trotzdem noch gesprungene Displays."
+    },
+    {
+     "id": "cut.sign_swap.5",
+     "speaker": "radio",
+     "text": "Radio Nachtschicht: eine brandneue Handyfirma in unserer Straße. Zwei Uhr nachts war noch nie so hell."
+    },
+    {
+     "id": "cut.sign_swap.6",
+     "speaker": "narrator",
+     "text": "Die Geschichte ist vorbei. Die Garage gehört euch. Jetzt baut etwas Großes."
+    }
+   ]
+  }
+ },
+ "tips": [
+  "Das aktuelle Ziel leuchtet sanft. Im Zweifel: dem Leuchten nach.",
+  "Linke Maustaste greift, rechte dreht. Ja, werfen geht auch. Bitte nicht die Handys der Kunden.",
+  "F schaltet die Taschenlampe ein. Die dunklen Ecken der Garage sind Absicht.",
+  "E funktioniert fast überall: Türen, Tresen, Tische, PC, Whiteboard und Lieferwagen.",
+  "Tab öffnet das Schnellmenü mit allen Firmenbildschirmen.",
+  "T öffnet den Chat. Jede Zeile, die du tippst, spricht deine Figur laut aus.",
+  "Lade Freunde mit dem Raumcode aus der oberen Leiste ein. Eine Firma kann bis zu vier Gründer haben.",
+  "Zu zweit? Einer nimmt am Tresen Aufträge an, der andere repariert. Teamwork schlägt Heldentum.",
+  "Saubere Arbeit zahlt sich aus: Das Ergebnis des Minispiels bestimmt, wie viel der Kunde bezahlt.",
+  "Keine Displays oder Akkus mehr? Ruf den Lieferanten am Garagentelefon an und kauf Teile im Einkauf.",
+  "Kisten kommen erst nach dem Versand in die Läden. Trag sie zum Lieferwagen für +5 % Stück.",
+  "Kisten, die in der Garage stehen bleiben, gehen nach einer Woche von selbst raus, aber ohne Sorgfaltsbonus.",
+  "Challenges am PC, am Whiteboard und an der Werkbank beschleunigen die Arbeit. Jede hat eine Abklingzeit.",
+  "Das Designstudio zeigt nach jeder Wahl die Prognose der Kritiker. Schau sie dir vor dem Veröffentlichen an.",
+  "Lieferverträge können bis zu 10 % günstiger sein als der Kauf zum Tagespreis.",
+  "In einer Firma mit Mitgründern müssen alle Gründer große Ausgaben genehmigen.",
+  "Bugs aus der Entwicklung lassen sich mit Forschungspunkten beheben, oder ein Bugfixer erledigt das mit der Zeit.",
+  "Stelle Leute an der Jobbörse ein. Zufriedene Leute arbeiten besser, unterbezahlte … kreativ.",
+  "Die Werkbank ist erst der Anfang: Im Obergeschoss ist Platz für echte Produktionslinien.",
+  "Die Konkurrenz bringt auch Handys raus. Schau dir ihre Preise an, bevor du deinen festlegst.",
+  "Im Story-Modus startet die Firmenuhr in Kapitel 4. Bis dahin habt ihr alle Zeit der Welt.",
+  "Auch nach der Story kommen Reparaturaufträge. Ein kleiner Nebenverdienst, bis die Firma der Garage entwächst.",
+  "Fakt: Reparieren ist zu 90 % Aufschrauben. Die restlichen 10 % sucht man die Schraube, die runtergefallen ist.",
+  "Wenn ein Kunde sagt: „Ich hab nichts gemacht, es ist einfach kaputt“, dann war es im Wasser.",
+  "Ein gutes Handy würdest du selbst kaufen. Ein großartiges kann deine Oma bedienen.",
+  "Kaffee beschleunigt die Spielzeit nicht. Es fühlt sich nur so an.",
+  "Die Klingel auf dem Tresen wurde noch nie repariert. Muss sie auch nicht. Sie ist perfekt."
+ ],
+ "credits": {
+  "title": "Silicon Overlord Online",
+  "sections": [
+   {
+    "id": "idea",
+    "heading": "Idee & Gamedesign",
+    "lines": [
+     "inkoffTTV"
+    ]
+   },
+   {
+    "id": "made",
+    "heading": "Code, Grafik, Sound und Texte",
+    "lines": [
+     "Gemacht von KI-Agenten (Claude von Anthropic) unter der Leitung von inkoffTTV"
+    ]
+   },
+   {
+    "id": "tech",
+    "heading": "Erstellt mit",
+    "lines": [
+     "Godot Engine 4.5 (MIT)",
+     "Python · lupa (Lua) · websockets",
+     "Inter · Noto Sans CJK (SIL OFL 1.1)",
+     "Alle Sounds und Songs wurden für dieses Spiel von Grund auf synthetisiert"
+    ]
+   },
+   {
+    "id": "cast",
+    "heading": "Mitwirkende",
+    "lines": [
+     "Tante Mira · Onkel Felix · Zip · Vera Benchmark · Radio Nachtschicht",
+     "Alle Kunden der Werkstatt und eine sehr geduldige Ziege"
+    ]
+   },
+   {
+    "id": "thanks",
+    "heading": "Danke",
+    "lines": [
+     "An alle, die je ein Handy fallen gelassen und trotzdem an die Reparatur geglaubt haben"
+    ]
+   }
+  ],
+  "closing": "Danke fürs Spielen. Und jetzt repariert etwas."
+ },
+ "ui": {
+  "chapter": "Kapitel {n}",
+  "optional": "Optional",
+  "story_complete": "Story abgeschlossen",
+  "final_title": "Werkstatt → {company}",
+  "final_sub": "Dieselbe Garage, neues Schild. Ab und zu kommen noch Reparaturaufträge.",
+  "customer_waiting": "Am Tresen wartet ein Kunde"
+ }
+}

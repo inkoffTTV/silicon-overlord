@@ -1,0 +1,861 @@
+{
+ "lang": "es",
+ "version": 1,
+ "speakers": {
+  "narrator": {
+   "name": "",
+   "voice": 901709
+  },
+  "radio": {
+   "name": "Radio Turno de Noche",
+   "voice": 900977
+  },
+  "mira": {
+   "name": "Tía Mira",
+   "voice": 900573
+  },
+  "felix": {
+   "name": "Tío Félix",
+   "voice": 901266
+  },
+  "zip": {
+   "name": "Zip",
+   "voice": 901509
+  },
+  "critic": {
+   "name": "Vera Benchmark",
+   "voice": 901258
+  }
+ },
+ "chapters": [
+  {
+   "id": 0,
+   "key": "workshop",
+   "title": "El taller",
+   "subtitle": "Las 2 de la madrugada, un garaje y un cartel a mano: REPARACIÓN DE MÓVILES",
+   "steps": [
+    {
+     "id": "intro_seen",
+     "optional": false,
+     "objective": "Llegar al garaje",
+     "hint": "",
+     "lines": []
+    },
+    {
+     "id": "door_open",
+     "optional": false,
+     "objective": "Abrir la puerta del taller",
+     "hint": "Acércate a la puerta y pulsa E. ¿Muy oscuro? La F enciende la linterna.",
+     "lines": [
+      {
+       "id": "step.door_open.1",
+       "speaker": "mira",
+       "text": "La puerta se atasca. Levantad la manilla y empujad. El garaje respeta la seguridad."
+      }
+     ]
+    },
+    {
+     "id": "lights_on",
+     "optional": false,
+     "objective": "Encender la luz",
+     "hint": "El interruptor está en la pared junto a la puerta. Míralo y pulsa E.",
+     "lines": [
+      {
+       "id": "step.lights_on.1",
+       "speaker": "mira",
+       "text": "¡Hágase la luz! Un taller a oscuras es solo un garaje que da miedo."
+      },
+      {
+       "id": "step.lights_on.2",
+       "speaker": "mira",
+       "text": "Mesa de reparación, mostrador, timbre. El timbre es la herramienta más importante. Creedme."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": 1,
+   "key": "first_customer",
+   "title": "El primer cliente",
+   "subtitle": "A alguien se le cayó algo. Otra vez.",
+   "steps": [
+    {
+     "id": "take_device",
+     "optional": false,
+     "objective": "Coger el aparato del mostrador",
+     "hint": "Pulsa E en el mostrador para aceptar el encargo y lleva el aparato a la mesa de reparación.",
+     "lines": [
+      {
+       "id": "step.take_device.1",
+       "speaker": "mira",
+       "text": "¡Din-don! Vuestro primer cliente. Sonreíd, huelen el miedo. Y el estaño."
+      }
+     ]
+    },
+    {
+     "id": "repair_device",
+     "optional": false,
+     "objective": "Repararlo en la mesa de reparación",
+     "hint": "Déjalo en la mesa de reparación y pulsa E: ábrelo, busca la avería, arréglala y ciérralo.",
+     "lines": [
+      {
+       "id": "step.repair_device.1",
+       "speaker": "mira",
+       "text": "Lámpara encendida, lupa abajo. Los tornillos van al vaso, no al bolsillo."
+      }
+     ]
+    },
+    {
+     "id": "get_paid",
+     "optional": false,
+     "objective": "Devolverlo en el mostrador y cobrar",
+     "hint": "Lleva el aparato de vuelta y pulsa E en el mostrador. Un trabajo limpio se paga mejor.",
+     "lines": [
+      {
+       "id": "step.get_paid.1",
+       "speaker": "mira",
+       "text": "¿Arreglado? Ahora lo mejor: una cara feliz y dinero de verdad."
+      }
+     ]
+    },
+    {
+     "id": "second_customer",
+     "optional": false,
+     "objective": "Reparar un segundo aparato",
+     "hint": "¿Jugáis juntos? Uno atiende el mostrador y otro repara. Más rápido que hacerse el héroe.",
+     "lines": [
+      {
+       "id": "step.second_customer.1",
+       "speaker": "mira",
+       "text": "En esta calle todo se sabe enseguida. Ahí viene otro."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": 2,
+   "key": "spare_parts",
+   "title": "Repuestos",
+   "subtitle": "Una pantalla no se arregla con buenas intenciones",
+   "steps": [
+    {
+     "id": "diagnose_part",
+     "optional": false,
+     "objective": "Llevar el nuevo encargo a la mesa",
+     "hint": "Pulsa E en el mostrador y luego mira bien el aparato en la mesa de reparación.",
+     "lines": [
+      {
+       "id": "step.diagnose_part.1",
+       "speaker": "mira",
+       "text": "Uy, este cruje. Aquí hace falta una pieza nueva, no solo un destornillador."
+      }
+     ]
+    },
+    {
+     "id": "call_supplier",
+     "optional": false,
+     "objective": "Llamar al proveedor desde el teléfono de pared",
+     "hint": "Pulsa E en el teléfono de la pared. Se abrirá Compras.",
+     "lines": [
+      {
+       "id": "step.call_supplier.1",
+       "speaker": "mira",
+       "text": "¿No quedan pantallas? El cristal no se arregla con buenas intenciones."
+      },
+      {
+       "id": "step.call_supplier.2",
+       "speaker": "mira",
+       "text": "Llamad a Zip. Zip contesta a cualquier hora. No estoy segura de que Zip duerma."
+      }
+     ]
+    },
+    {
+     "id": "buy_parts",
+     "optional": false,
+     "objective": "Comprar repuestos en Compras",
+     "hint": "Busca las pantallas en la lista y compra unas cuantas. Con un puñado basta por ahora.",
+     "lines": [
+      {
+       "id": "step.buy_parts.1",
+       "speaker": "zip",
+       "text": "¡Repuestos Zip, al habla Zip! Pantallas, baterías, conectores. ¿Qué se ha roto, amigos?"
+      },
+      {
+       "id": "step.buy_parts.2",
+       "speaker": "zip",
+       "text": "Entregado antes de que se os enfríe el té. Salvo que sea té helado. Entonces es una carrera."
+      }
+     ]
+    },
+    {
+     "id": "fit_part",
+     "optional": false,
+     "objective": "Montar la pieza nueva",
+     "hint": "Vuelve a la mesa de reparación: la pieza nueva se pone durante la reparación.",
+     "lines": [
+      {
+       "id": "step.fit_part.1",
+       "speaker": "mira",
+       "text": "Fuera el cristal viejo, dentro el nuevo. Con cariño. Es más fino que mi paciencia."
+      }
+     ]
+    },
+    {
+     "id": "paid_with_part",
+     "optional": false,
+     "objective": "Devolver el aparato y cobrar",
+     "hint": "El precio cubre la pieza, así que seguís ganando. ¡Buen negocio!",
+     "lines": [
+      {
+       "id": "step.paid_with_part.1",
+       "speaker": "mira",
+       "text": "Vuestro cliente sigue esperando. Con valentía. Mejor no pongamos a prueba esa valentía."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": 3,
+   "key": "same_fault",
+   "title": "La misma avería",
+   "subtitle": "Todos los móviles se rompen por el mismo sitio. Curioso…",
+   "steps": [
+    {
+     "id": "pattern_repair",
+     "optional": false,
+     "objective": "Arreglar otro conector de carga roto",
+     "hint": "Dos clientes, dos conectores rotos. ¿No quedan? Comprad más en Compras.",
+     "lines": [
+      {
+       "id": "step.pattern_repair.1",
+       "speaker": "mira",
+       "text": "Dos clientes a la vez, y los dos con el conector de carga roto. Mmm."
+      }
+     ]
+    },
+    {
+     "id": "notice_pattern",
+     "optional": false,
+     "objective": "Hablar del patrón",
+     "hint": "Escuchad a la tía Mira. Algo pasa con estos móviles.",
+     "lines": [
+      {
+       "id": "step.notice_pattern.1",
+       "speaker": "mira",
+       "text": "El mismo conector, la misma holgura, el mismo modelo. El tercero esta semana."
+      },
+      {
+       "id": "step.notice_pattern.2",
+       "speaker": "mira",
+       "text": "Los móviles los diseña gente que nunca deja caer un móvil. Vosotros, a diario. Eso es una ventaja."
+      },
+      {
+       "id": "step.notice_pattern.3",
+       "speaker": "mira",
+       "text": "Los arregláis uno a uno. ¿Y si fabricáis uno que no se rompa?"
+      }
+     ]
+    },
+    {
+     "id": "start_research",
+     "optional": false,
+     "objective": "Empezar la primera investigación en la pizarra",
+     "hint": "Pulsa E en la pizarra y elige una tecnología. La primera es gratis.",
+     "lines": [
+      {
+       "id": "step.start_research.1",
+       "speaker": "mira",
+       "text": "Arreglar un móvil es una reparación. Arreglarlos todos a la vez se llama investigación."
+      }
+     ]
+    },
+    {
+     "id": "research_challenge",
+     "optional": true,
+     "objective": "Lluvia de ideas en la pizarra",
+     "hint": "Un minijuego rápido impulsa la investigación. Opcional, pero divertido.",
+     "lines": [
+      {
+       "id": "step.research_challenge.1",
+       "speaker": "mira",
+       "text": "¡Rotuladores en mano! Primero las malas ideas: les tapan la puerta a las buenas."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": 4,
+   "key": "own_phone",
+   "title": "Nuestro propio móvil",
+   "subtitle": "¿Y si hacemos uno que no se rompa?",
+   "steps": [
+    {
+     "id": "investor_seen",
+     "optional": false,
+     "objective": "Recibir la visita en la puerta",
+     "hint": "",
+     "lines": []
+    },
+    {
+     "id": "design_phone",
+     "optional": false,
+     "objective": "Diseñar vuestro primer móvil en el PC",
+     "hint": "PC → Estudio de diseño. Los valores por defecto sirven; corregid lo que odiaban los clientes.",
+     "lines": [
+      {
+       "id": "step.design_phone.1",
+       "speaker": "felix",
+       "text": "¿Recordáis los conectores flojos y las baterías que mueren a mediodía? Empezad por ahí."
+      }
+     ]
+    },
+    {
+     "id": "publish_phone",
+     "optional": false,
+     "objective": "Publicar el diseño",
+     "hint": "En el último paso pulsa «Empezar desarrollo». Vuestro prototipo ya está en camino.",
+     "lines": [
+      {
+       "id": "step.publish_phone.1",
+       "speaker": "mira",
+       "text": "Un nombre, un precio y un botón. El botón que más miedo da de todo el garaje."
+      }
+     ]
+    },
+    {
+     "id": "develop_phone",
+     "optional": false,
+     "objective": "Terminar el desarrollo del prototipo",
+     "hint": "Ahora el tiempo corre: acelera el reloj o ayuda con una caza de errores en el PC.",
+     "lines": [
+      {
+       "id": "step.develop_phone.1",
+       "speaker": "felix",
+       "text": "El desarrollo es como una sopa. No levantéis la tapa cada cinco minutos."
+      }
+     ]
+    },
+    {
+     "id": "polish_challenge",
+     "optional": true,
+     "objective": "Caza de errores en el PC",
+     "hint": "Siéntate en la silla del PC para una caza de errores rápida. Opcional.",
+     "lines": [
+      {
+       "id": "step.polish_challenge.1",
+       "speaker": "felix",
+       "text": "¿Habéis encontrado un error? Bien. Mejor vosotros que los críticos."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": 5,
+   "key": "first_batch",
+   "title": "El primer lote",
+   "subtitle": "Hecho a mano, tornillito a tornillito",
+   "steps": [
+    {
+     "id": "queue_batch",
+     "optional": false,
+     "objective": "Empezar un lote en el banco de trabajo",
+     "hint": "Pulsa E en el banco de trabajo, elige tu móvil y una cantidad. Los materiales salen de Compras.",
+     "lines": [
+      {
+       "id": "step.queue_batch.1",
+       "speaker": "mira",
+       "text": "¡Montaje a mano! Como en los viejos tiempos, pero con menos quemaduras. Espero."
+      }
+     ]
+    },
+    {
+     "id": "first_crate",
+     "optional": false,
+     "objective": "Esperar la primera caja",
+     "hint": "Los móviles terminados se empaquetan en cajas junto al banco de trabajo.",
+     "lines": [
+      {
+       "id": "step.first_crate.1",
+       "speaker": "mira",
+       "text": "Cada móvil de esa caja lo han montado vuestras manos. Qué sensación tan rara, ¿eh?"
+      }
+     ]
+    },
+    {
+     "id": "ship_crate",
+     "optional": false,
+     "objective": "Llevar una caja a la furgoneta",
+     "hint": "Coge la caja y métela en la furgoneta. Cargar con cuidado da +5 % de unidades.",
+     "lines": [
+      {
+       "id": "step.ship_crate.1",
+       "speaker": "felix",
+       "text": "¡Con cuidado! Esa caja es nuestro futuro. Y mi inversión. Sobre todo mi inversión."
+      }
+     ]
+    },
+    {
+     "id": "qc_challenge",
+     "optional": true,
+     "objective": "Control de calidad en el banco",
+     "hint": "Encuentra los móviles defectuosos y gana unas unidades extra. Opcional.",
+     "lines": [
+      {
+       "id": "step.qc_challenge.1",
+       "speaker": "mira",
+       "text": "Revisad cada móvil como si un cliente fuera a tirarlo al suelo. Porque lo hará."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": 6,
+   "key": "launch_night",
+   "title": "Noche de lanzamiento",
+   "subtitle": "Focos, críticos y un cartel nuevecito",
+   "steps": [
+    {
+     "id": "launch_phone",
+     "optional": false,
+     "objective": "Presentar el móvil en el escenario",
+     "hint": "Pulsa E en el escenario cuando estéis listos. Los críticos ya están sentados.",
+     "lines": [
+      {
+       "id": "step.launch_phone.1",
+       "speaker": "critic",
+       "text": "Buenas noches, soy Vera Benchmark. Tres mil análisis. Se me han caído todos y cada uno de los móviles."
+      },
+      {
+       "id": "step.launch_phone.2",
+       "speaker": "critic",
+       "text": "¿Un equipo salido de un garaje? A ver si sobrevive a mi bolsillo. Y a mis escaleras."
+      }
+     ]
+    },
+    {
+     "id": "reviews_seen",
+     "optional": false,
+     "objective": "Leer lo que dicen los críticos",
+     "hint": "Sea cual sea la nota, habéis sacado un móvil de verdad. Casi todos solo hablan de ello.",
+     "lines": [
+      {
+       "id": "step.reviews_seen.1",
+       "speaker": "critic",
+       "text": "Entre nosotros: se me ha caído dos veces de camino aquí. Respeto."
+      }
+     ]
+    },
+    {
+     "id": "sign_swapped",
+     "optional": false,
+     "objective": "Colgar el nuevo cartel de la empresa",
+     "hint": "Mirad cómo descuelgan el cartel viejo.",
+     "lines": [
+      {
+       "id": "step.sign_swapped.1",
+       "speaker": "mira",
+       "text": "Una cosa más, queridos. Ese cartel viejo ya os queda pequeño."
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "customers": [
+  {
+   "id": "grandma",
+   "voice": 900575,
+   "deviceId": "phone",
+   "faultId": "software_glitch",
+   "name": "Abuela Rosa",
+   "device": "Móvil (regalo de su nieto)",
+   "fault": "Llama solo a su exmarido. Se separaron en 1979",
+   "lines": {
+    "arrive": "¡Buenas noches, cielos! Mi nieto dice que esto es un móvil. Yo lo uso sobre todo para cascar nueces.",
+    "story": "¡Llama solito a mi exmarido! Nos separamos en 1979. El pobre está muy confundido.",
+    "wait": "Tomaos vuestro tiempo. He traído empanadillas. Bueno, para mí.",
+    "happy": "¡Maravilloso! Aquí tenéis {money}. Y una empanadilla. Ni una palabra a mi nieto de las nueces.",
+    "angry": "En mis tiempos las reparaciones eran más rápidas. Y las nueces, más blanditas."
+   }
+  },
+  {
+   "id": "student",
+   "voice": 900621,
+   "deviceId": "phone",
+   "faultId": "stuck_button",
+   "name": "Max el estudiante",
+   "device": "Móvil lleno de pegatinas",
+   "fault": "Botón lateral atascado tras mil alarmas pospuestas",
+   "lines": {
+    "arrive": "Hola… perdón, he dormido dos horas. ¿Se arreglan móviles con presupuesto de estudiante?",
+    "story": "He pospuesto la alarma tantas veces que el botón se ha rendido. Ahora está atascado para siempre.",
+    "wait": "Voy a cerrar los ojos un segundito. Despertadme cuando esté. O nunca.",
+    "happy": "¡Sois unos héroes! Aquí tenéis {money}. Era todo mi presupuesto de fideos de la semana.",
+    "angry": "Podría haber dormido toda la reparación. Casi lo hago."
+   }
+  },
+  {
+   "id": "courier",
+   "voice": 901656,
+   "deviceId": "phone",
+   "faultId": "cracked_screen",
+   "name": "Dina la mensajera",
+   "device": "Móvil sujeto con cinta adhesiva",
+   "fault": "Se le cayó subiendo una tarta a un noveno. La tarta sobrevivió",
+   "lines": {
+    "arrive": "¡Rápido, rápido! Tengo cuatro minutos y once paquetes.",
+    "story": "Subí una tarta a un noveno piso y se me cayó el móvil en el último escalón. ¡La tarta sobrevivió!",
+    "wait": "Mi descanso es de cuatro minutos. Ya van tres. Dos y medio…",
+    "happy": "¡Como nuevo! Aquí tenéis {money}. Cinco estrellas, ¡y os las pongo rapidito!",
+    "angry": "¡Qué lento! Ya habría repartido cuarenta pizzas."
+   }
+  },
+  {
+   "id": "teacher",
+   "voice": 900906,
+   "deviceId": "phone",
+   "faultId": "broken_port",
+   "name": "El profesor Pell",
+   "device": "Móvil con una funda muy sensata",
+   "fault": "Conector lleno de polvo de tiza de treinta años",
+   "lines": {
+    "arrive": "Buenas noches. Sin prisa, por favor. La paciencia es lo primero que enseño. La ortografía, lo segundo.",
+    "story": "El conector de carga está lleno de polvo de tiza. Treinta años de pizarra. La tiza por fin ha ganado.",
+    "wait": "Mientras esperamos: ¿quién sabe nombrar tres piezas de un móvil? Levantad la mano.",
+    "happy": "Un trabajo excelente. Aquí tenéis {money}. Un diez, y yo casi nunca pongo dieces.",
+    "angry": "Esta reparación la calificaré luego. Contad con un aprobado raspado."
+   }
+  },
+  {
+   "id": "gamer",
+   "voice": 901217,
+   "deviceId": "phone",
+   "faultId": "broken_port",
+   "name": "Kit el gamer",
+   "device": "Móvil gaming con luces RGB",
+   "fault": "«No lo tiré, salió volando». El conector se fue con el cable",
+   "lines": {
+    "arrive": "Ey. Vale, lo primero: no lo tiré. Salió volando.",
+    "story": "El cable se quedó en el enchufe y el conector de carga como que… se fue con él. Fue culpa del lag.",
+    "wait": "¿Hay wifi aquí? Lo pregunto por mi otro móvil.",
+    "happy": "¡GG! ¡Carga! Aquí tenéis {money}. Que sepáis que son mis almuerzos de una semana.",
+    "angry": "Laaag. Hasta el router de mi abuela va más rápido."
+   }
+  },
+  {
+   "id": "barista",
+   "voice": 901011,
+   "deviceId": "watch",
+   "faultId": "water_damage",
+   "name": "Lou la barista",
+   "device": "Reloj inteligente que huele a espresso",
+   "fault": "Lo metió en la jarra de leche haciendo latte art",
+   "lines": {
+    "arrive": "¡Holi! Os he traído café. Bueno, me he traído café, pero podéis olerlo.",
+    "story": "Estaba dibujando un corazón en un latte y metí la muñeca en la leche. Ahora es un reloj batido.",
+    "wait": "Esto tarda más que un triple espresso. Pero menos que un descafeinado. Estoy bien.",
+    "happy": "¡Sois lo más! Aquí tenéis {money}. Capuchinos gratis para vosotros toda la semana.",
+    "angry": "Se me ha enfriado el café. Y el corazón también. Un poquito."
+   }
+  },
+  {
+   "id": "taxi_driver",
+   "voice": 901313,
+   "deviceId": "phone",
+   "faultId": "dead_battery",
+   "name": "Sam el taxista",
+   "device": "Móvil en un soporte del salpicadero",
+   "fault": "GPS 16 horas al día. La batería ha visto toda la ciudad",
+   "lines": {
+    "arrive": "¡Buenas, jefe! Sam, el del taxi. Conozco cada calle de la ciudad y cada bache por su nombre.",
+    "story": "El GPS va dieciséis horas al día. Esta batería ha visto más ciudad que yo.",
+    "wait": "Una vez llevé por esta calle a un cantante famoso. No diré quién. Empieza por una letra.",
+    "happy": "¡Servicio de diez! Aquí tenéis {money}. Si os hace falta un viaje, a mitad de precio.",
+    "angry": "¡El taxímetro corre, amigos! Bueno, correría si estuviéramos en mi taxi."
+   }
+  },
+  {
+   "id": "musician",
+   "voice": 900431,
+   "deviceId": "laptop",
+   "faultId": "cracked_screen",
+   "name": "Jo la baterista",
+   "device": "Portátil cubierto de pegatinas de grupos",
+   "fault": "Una baqueta salió volando en un solo. Directa a la pantalla",
+   "lines": {
+    "arrive": "¡Ey! Jo, baterista. Tranquilos, la batería me la he dejado en casa. Casi toda.",
+    "story": "Solo épico, se me escapó la baqueta y fue directa a la pantalla del portátil. Eso sí, el mejor solo de mi vida.",
+    "wait": "Ba-dum-tss. Perdón, cuando espero aporreo todo lo que pillo.",
+    "happy": "¡Suena perfecto! Aquí tenéis {money}. Estáis todos en la lista de invitados.",
+    "angry": "Esta reparación va más lenta que nuestro bajista. Y eso es mucho decir."
+   }
+  },
+  {
+   "id": "chef",
+   "voice": 901216,
+   "deviceId": "tablet",
+   "faultId": "broken_port",
+   "name": "Chef Arno",
+   "device": "Tableta de recetas con funda enharinada",
+   "fault": "El conector de carga está lleno de harina",
+   "lines": {
+    "arrive": "¡Buenas noches, amigos míos! Chef Arno. Os confío esto como confío en mi mejor cuchillo.",
+    "story": "Mi tableta me ayudó a hacer empanadillas. Ahora el conector de carga está lleno de harina.",
+    "wait": "La paciencia es como la masa, amigos. Si la dejáis tranquila, sube.",
+    "happy": "¡Para chuparse los dedos! Aquí tenéis {money}. Venid a comer a mi casa. Las tabletas, lejos de la masa.",
+    "angry": "¡Pasado de cocción! Como esta reparación. Demasiado tiempo, amigos."
+   }
+  },
+  {
+   "id": "blogger",
+   "voice": 900873,
+   "deviceId": "phone",
+   "faultId": "cracked_screen",
+   "name": "Mia la bloguera",
+   "device": "Móvil con tres aros de luz",
+   "fault": "Palo selfi contra ventilador de techo. Ganó el ventilador",
+   "lines": {
+    "arrive": "¡Holiii, chat! ¡Estamos en un taller de verdad! ¡Saludad a mis seguidores!",
+    "story": "Mi palo selfi se encontró con un ventilador de techo. Ganó el ventilador. ¿Puedo grabaros arreglándolo?",
+    "wait": "¡Contenido de espera! Superauténtico. Vale, me aburro.",
+    "happy": "¡Me obsesiona! Aquí tenéis {money}. Os etiqueto en todo.",
+    "angry": "Os dejo de seguir. Emocionalmente."
+   }
+  }
+ ],
+ "devices": {
+  "phone": "Móvil",
+  "tablet": "Tableta",
+  "laptop": "Portátil",
+  "watch": "Reloj inteligente"
+ },
+ "faults": {
+  "cracked_screen": {
+   "name": "Pantalla rota",
+   "part": "screen",
+   "story": "Larga historia. Yoga con cabras. Una cabra lo pisó. La cabra está bien."
+  },
+  "dead_battery": {
+   "name": "Batería agotada",
+   "part": "battery",
+   "story": "Contó cuarenta mil pasos y se murió. Creo que solo está cansado."
+  },
+  "broken_port": {
+   "name": "Conector de carga roto",
+   "part": "port",
+   "story": "Un niño pequeño en una fiesta intentó cargarlo con un plátano. El plátano está bien."
+  },
+  "water_damage": {
+   "name": "Daños por agua",
+   "part": null,
+   "story": "La caja decía resistente al agua. El lago opinó otra cosa."
+  },
+  "software_glitch": {
+   "name": "Fallo de software",
+   "part": null,
+   "story": "Desde el martes solo habla alemán. Yo no. Él parece contento, eso sí."
+  },
+  "stuck_button": {
+   "name": "Botón atascado",
+   "part": null,
+   "story": "Mi gato durmió encima toda la semana. El botón se rindió antes que el gato."
+  }
+ },
+ "parts": {
+  "screen": "Pantalla de repuesto",
+  "battery": "Batería de repuesto",
+  "port": "Conector de carga"
+ },
+ "cutscenes": {
+  "intro": {
+   "captions": [
+    {
+     "id": "cut.intro.1",
+     "speaker": "radio",
+     "text": "Radio Turno de Noche, las dos de la madrugada. En algún lugar, un móvil acaba de resbalar a la bañera."
+    },
+    {
+     "id": "cut.intro.2",
+     "speaker": "radio",
+     "text": "Y en algún otro, unos amigos abren un taller de reparación en un garaje. Suerte, búhos nocturnos."
+    },
+    {
+     "id": "cut.intro.3",
+     "speaker": "narrator",
+     "text": "Una calle tranquila. Un garaje alquilado. Un cartel pintado a mano: REPARACIÓN DE MÓVILES."
+    },
+    {
+     "id": "cut.intro.4",
+     "speaker": "mira",
+     "text": "El garaje es vuestro, queridos. El alquiler es barato: una vez al mes me arregláis la tetera."
+    },
+    {
+     "id": "cut.intro.5",
+     "speaker": "narrator",
+     "text": "Esta noche abre el taller. ¿Y mañana? Nadie lo sabe todavía."
+    }
+   ]
+  },
+  "investor": {
+   "captions": [
+    {
+     "id": "cut.investor.1",
+     "speaker": "narrator",
+     "text": "Un coche muy silencioso se detiene fuera. Eléctrico, reluciente y claramente caro."
+    },
+    {
+     "id": "cut.investor.2",
+     "speaker": "felix",
+     "text": "¡Buenas noches! Soy Félix, el hermano de Mira. Dice que arregláis móviles a las 2 de la mañana y les habláis con cariño."
+    },
+    {
+     "id": "cut.investor.3",
+     "speaker": "felix",
+     "text": "Hice fortuna con robots aspiradores. Se quedaban atascados bajo los sofás, así que lo arreglé."
+    },
+    {
+     "id": "cut.investor.4",
+     "speaker": "felix",
+     "text": "No invierto en empresas. Invierto en gente que abre las cosas solo para ver por qué se rompieron."
+    },
+    {
+     "id": "cut.investor.5",
+     "speaker": "felix",
+     "text": "Aquí tenéis {money}. Fabricad un móvil que yo no pueda romper. Me esforzaré muchísimo."
+    },
+    {
+     "id": "cut.investor.6",
+     "speaker": "mira",
+     "text": "Me rompió tres teteras. Creedme, se esforzará."
+    },
+    {
+     "id": "cut.investor.7",
+     "speaker": "narrator",
+     "text": "El calendario empieza a correr. Desde hoy, el alquiler, los rivales y los sueldos van en serio."
+    }
+   ]
+  },
+  "sign_swap": {
+   "captions": [
+    {
+     "id": "cut.sign_swap.1",
+     "speaker": "mira",
+     "text": "Cuidado con el cartel viejo. Es más viejo que vuestro soldador."
+    },
+    {
+     "id": "cut.sign_swap.2",
+     "speaker": "narrator",
+     "text": "Baja REPARACIÓN DE MÓVILES. Sube {company}."
+    },
+    {
+     "id": "cut.sign_swap.3",
+     "speaker": "felix",
+     "text": "El mismo garaje, planes más grandes. Estaré en el coche. Llorando un poquito."
+    },
+    {
+     "id": "cut.sign_swap.4",
+     "speaker": "mira",
+     "text": "Pero quedaos el mostrador. Los clientes de siempre os seguirán trayendo pantallas rotas."
+    },
+    {
+     "id": "cut.sign_swap.5",
+     "speaker": "radio",
+     "text": "Radio Turno de Noche: una nueva empresa de móviles en nuestra calle. Las dos de la madrugada nunca brillaron tanto."
+    },
+    {
+     "id": "cut.sign_swap.6",
+     "speaker": "narrator",
+     "text": "La historia ha terminado. El garaje es vuestro. Ahora construid algo enorme."
+    }
+   ]
+  }
+ },
+ "tips": [
+  "El objetivo actual brilla suavemente. Si dudas, sigue el brillo.",
+  "Clic izquierdo para coger cosas, derecho para girarlas. Sí, puedes lanzarlas. Los móviles de los clientes no, por favor.",
+  "La F enciende la linterna. Los rincones oscuros del garaje son a propósito.",
+  "La E sirve para casi todo: puertas, mostrador, mesas, PC, pizarra y furgoneta.",
+  "Tab abre el menú rápido con todas las pantallas de la empresa.",
+  "La T abre el chat. Tu personaje dice en voz alta cada frase que escribes.",
+  "Invita a tus amigos con el código de sala de la barra superior. Una empresa puede tener hasta cuatro fundadores.",
+  "¿Jugáis juntos? Uno atiende el mostrador y otro repara. El trabajo en equipo gana al heroísmo.",
+  "Un trabajo limpio se paga mejor: la puntuación del minijuego decide cuánto paga el cliente.",
+  "¿Sin pantallas ni baterías? Llama al proveedor desde el teléfono del garaje y compra piezas en Compras.",
+  "Las cajas solo llegan a las tiendas tras enviarlas. Llévalas a la furgoneta para un +5 % de unidades.",
+  "Las cajas olvidadas en el garaje se envían solas tras una semana, pero sin la bonificación por cuidado.",
+  "Los desafíos del PC, la pizarra y el banco de trabajo aceleran las cosas. Cada uno tiene su tiempo de espera.",
+  "El Estudio de diseño muestra la previsión de los críticos tras cada elección. Revísala antes de publicar.",
+  "Los contratos con proveedores pueden salir hasta un 10 % más baratos que comprar al precio del día.",
+  "En una empresa con cofundadores, los gastos grandes necesitan la aprobación de todos.",
+  "Los errores del desarrollo se arreglan con puntos de investigación, o con el tiempo un corrector de errores.",
+  "Contrata gente en el tablón de empleo. Un equipo feliz rinde más; uno mal pagado trabaja… con creatividad.",
+  "El banco de trabajo es solo el principio: en la segunda planta caben líneas de producción de verdad.",
+  "Los rivales también lanzan móviles. Mira sus precios antes de fijar el tuyo.",
+  "Modo historia: el reloj de la empresa arranca en el capítulo 4. Hasta entonces, tomaos todo el tiempo del mundo.",
+  "Tras la historia siguen llegando encargos de reparación. Un dinerillo extra hasta que la empresa se quede grande para el garaje.",
+  "Dato: el 90 % de reparar es desatornillar. El otro 10 % es buscar el tornillo que se te cayó.",
+  "Si un cliente dice «no hice nada, se rompió solo», es que se cayó al agua.",
+  "Un buen móvil es uno que comprarías tú. Uno genial es uno que tu abuela sabe usar.",
+  "El café no acelera el reloj del juego. Solo lo parece.",
+  "El timbre del mostrador nunca se ha reparado. No le hace falta. Es perfecto."
+ ],
+ "credits": {
+  "title": "Silicon Overlord Online",
+  "sections": [
+   {
+    "id": "idea",
+    "heading": "Idea y diseño de juego",
+    "lines": [
+     "inkoffTTV"
+    ]
+   },
+   {
+    "id": "made",
+    "heading": "Código, arte, sonido y textos",
+    "lines": [
+     "Hecho por agentes de IA (Claude, de Anthropic) bajo la dirección de inkoffTTV"
+    ]
+   },
+   {
+    "id": "tech",
+    "heading": "Creado con",
+    "lines": [
+     "Godot Engine 4.5 (MIT)",
+     "Python · lupa (Lua) · websockets",
+     "Inter · Noto Sans CJK (SIL OFL 1.1)",
+     "Todos los sonidos y canciones se sintetizaron desde cero para este juego"
+    ]
+   },
+   {
+    "id": "cast",
+    "heading": "Reparto",
+    "lines": [
+     "Tía Mira · Tío Félix · Zip · Vera Benchmark · Radio Turno de Noche",
+     "Todos los clientes del taller y una cabra muy paciente"
+    ]
+   },
+   {
+    "id": "thanks",
+    "heading": "Gracias",
+    "lines": [
+     "A todos los que alguna vez dejaron caer un móvil y aun así creyeron que tenía arreglo"
+    ]
+   }
+  ],
+  "closing": "Gracias por jugar. Ahora id a arreglar algo."
+ },
+ "ui": {
+  "chapter": "Capítulo {n}",
+  "optional": "Opcional",
+  "story_complete": "Historia completada",
+  "final_title": "Taller → {company}",
+  "final_sub": "El mismo garaje, cartel nuevo. De vez en cuando aún llegan encargos de reparación.",
+  "customer_waiting": "Un cliente espera en el mostrador"
+ }
+}

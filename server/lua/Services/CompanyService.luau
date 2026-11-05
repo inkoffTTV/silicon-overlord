@@ -17,6 +17,7 @@ local Balance = require(Shared.Config.Balance)
 local Signal = require(Shared.Utils.Signal)
 local CompanySim = require(Shared.Domain.CompanySim)
 local CompanyFactory = require(Shared.Domain.CompanyFactory)
+local Story = require(Shared.Domain.Story)
 
 local CompanyService = {}
 
@@ -37,6 +38,7 @@ local ALL_KEYS = {
 	"loan", "regionsUnlocked", "office",
 	"goals", "achievements", "awards", "daily", "empire", "legacyMods",
 	"challenges", -- online iteration 2
+	"story", "repairs", -- online iteration 3 (story start, garage repair orders)
 }
 CompanyService.ALL_KEYS = ALL_KEYS
 
@@ -198,7 +200,7 @@ function CompanyService.load(stateTable)
 		return existing
 	end
 	local state = CompanyFactory.migrate(stateTable)
-	state.time.speed = 1
+	state.time.speed = Story.clockPaused(state) and 0 or 1 -- story chapters 0..3: the clock waits for the investor
 	return newSession(state)
 end
 
@@ -250,13 +252,16 @@ local function dirtyKeysForDay(session, state, notes)
 	-- Roblox rule: replicate production/research/projects while they are active. (server extension) also on the
 	-- day they became inactive, so the finished state (job Done, empty project map) reaches the replicas.
 	local prodActive = false
+	local prodSig = #state.production.jobs -- (online iteration 3) a batch can be queued and finish on the same day
 	for _, j in ipairs(state.production.jobs) do
 		if j.status ~= "Done" then
 			prodActive = true
-			break
 		end
+		prodSig = prodSig + (tonumber(j.produced) or 0) + (tonumber(j.defective) or 0)
 	end
-	if prodActive or session.hadProd then
+	local prodChanged = prodSig ~= session.lastProdSig
+	session.lastProdSig = prodSig
+	if prodActive or session.hadProd or prodChanged then
 		keys[#keys + 1] = "production"
 		keys[#keys + 1] = "products"
 		keys[#keys + 1] = "inventory"
@@ -292,9 +297,11 @@ local function dirtyKeysForDay(session, state, notes)
 	end
 	session.hadFab = fabActive
 	local resActive = #state.research.active > 0
-	if resActive or session.hadResearch then
-		keys[#keys + 1] = "research"
+	local rp = state.research.points
+	if resActive or session.hadResearch or rp ~= session.lastRp then
+		keys[#keys + 1] = "research" -- (online iteration 3) also when passive research points grew
 	end
+	session.lastRp = rp
 	session.hadResearch = resActive
 	local projActive = type(state.projects) == "table" and next(state.projects) ~= nil
 	if projActive or session.hadProjects then
@@ -328,7 +335,7 @@ end
 -- Advances one session by dt real seconds. Returns the number of game days simulated.
 function CompanyService.stepSession(session, dt)
 	local state = session.state
-	if state.liquidated or state.time.speed <= 0 or next(session.members) == nil then
+	if state.liquidated or state.time.speed <= 0 or next(session.members) == nil or Story.clockPaused(state) then
 		return 0
 	end
 	session.accumulator = session.accumulator + dt * state.time.speed
@@ -338,7 +345,9 @@ function CompanyService.stepSession(session, dt)
 		session.accumulator = session.accumulator - secondsPerDay
 		steps = steps + 1
 		local notes = CompanySim.tickDay(state)
+		Story.onDay(state) -- online iteration 3: day checks of story steps + random repair orders
 		CompanyService.markDirty(session, dirtyKeysForDay(session, state, notes))
+		CompanyService.collectStory(session)
 		for _, note in ipairs(notes) do
 			CompanyService.notify(session, note)
 		end
@@ -353,6 +362,7 @@ function CompanyService.stepSession(session, dt)
 	if steps > 0 then
 		flush(session)
 	end
+	CompanyService.emitStory(session)
 	return steps
 end
 
@@ -374,10 +384,57 @@ function CompanyService.flushNow(session)
 	flush(session)
 end
 
+-- ---------------------------------------------------------------------------
+-- story (online iteration 3): Story queues notes + dirty keys per state; keys are marked now (they go out with the
+-- next flush), notes wait in the session until emitStory so the client gets the state before the "step done" toast.
+-- ---------------------------------------------------------------------------
+function CompanyService.collectStory(session)
+	local notes, dirty = Story.take(session.state)
+	if #dirty > 0 then
+		CompanyService.markDirty(session, dirty)
+	end
+	if #notes > 0 then
+		session.storyNotes = session.storyNotes or {}
+		for _, n in ipairs(notes) do
+			session.storyNotes[#session.storyNotes + 1] = n
+		end
+	end
+end
+
+-- after a successful action, inside its transaction (before the transaction flushes)
+function CompanyService.storyAfterAction(session, action, payload, data)
+	Story.afterAction(session.state, action, payload, data)
+	CompanyService.collectStory(session)
+end
+
+-- a failed action changes nothing: drop whatever was queued
+function CompanyService.storyDiscard(session)
+	Story.take(session.state)
+end
+
+-- sends dirty story keys (if any are still unsent) and then the queued story notifications
+function CompanyService.emitStory(session)
+	CompanyService.collectStory(session)
+	if next(session.dirty) ~= nil then
+		flush(session)
+	end
+	local notes = session.storyNotes
+	if notes and #notes > 0 then
+		session.storyNotes = nil
+		for _, n in ipairs(notes) do
+			CompanyService.notify(session, n)
+		end
+	end
+end
+
 function CompanyService.setSpeed(session, speed)
+	if Story.clockPaused(session.state) then
+		return false, "Story: time starts at chapter 4"
+	end
 	session.state.time.speed = speed
 	CompanyService.markDirty(session, { "time" })
 	flush(session)
+	return true, nil
 end
 
 return CompanyService

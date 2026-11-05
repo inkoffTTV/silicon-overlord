@@ -124,6 +124,10 @@ Balance.Research = {
 	leakChanceClosed = 0.05,
 	leakChanceOpen = 0.35,
 	costPerQuarterInflation = 0.01,
+	-- research points (RP) income (online iteration 3; RP pay for boostResearch / finishProjectNow / bug fixes / quality)
+	rpPerResearcherPerDay = 1.0, -- every employee with station "research", x (1 + rpLabLevelBonus x ResearchLab level)
+	rpLabLevelBonus = 0.15,
+	rpPerTechTier = 5, -- bonus when a technology finishes: 5 x tier
 }
 
 -- ---------------- Production ----------------
@@ -393,6 +397,30 @@ Balance.Challenges = {
 	assembly = { cooldownDays = 5, maxCrateBonusPct = 0.10 }, -- + up to 10% units on the product's next/newest crate
 	negotiation = { cooldownDays = 10, maxSupplierDiscount = 0.10, maxRetailerPremium = 0.03 },
 	historyLength = 10,
+}
+
+-- ---------------- Story start (online iteration 3: repair shop -> phone company) ----------------
+-- docs/STORY.md, docs/ACTIONS.md "Story & repairs". Quick start keeps Balance.Start.
+Balance.Story = {
+	startCash = 6000, -- story companies start small; the investor tops up to Balance.Start.cash at chapter 4
+	startCreditLine = 0, -- no bank credit for a garage repair shop; the investor brings Balance.Start.creditLine
+	clockStartsChapter = 4, -- the game clock is paused (no rivals, salaries, rent) in chapters before this
+	chapters = 7, -- 0..6; story.chapter = 7 when done
+	startStaff = { "Researcher", "Worker" }, -- helpers in the garage before the investor
+	investorStaff = { "HardwareEngineer", "SoftwareEngineer", "Worker" }, -- hired at chapter 4 (= the quick-start team)
+	freeFirstResearch = true, -- chapters 0..3: the first research costs nothing (no refund on cancel)
+	repairs = {
+		minQuality = 0.4, -- payout = reward * (minQuality + (1 - minQuality) * score), never above reward
+		spawnDaysMin = 5, -- random side orders while the clock runs (story companies only)
+		spawnDaysMax = 9,
+		maxOpen = 2, -- open random orders (waiting / inRepair / ready)
+		expireDays = 30, -- a waiting random customer leaves after this many game days
+		keepPaid = 3, -- paid orders kept in the list (world plays the "pay & leave" moment)
+		stopAtHQLevel = 2, -- no new random orders once the HQ reaches this level
+		rewardJitter = 0.15, -- random orders: reward * (1 +- jitter), rounded to $5
+		deviceMult = { phone = 1, tablet = 1.25, laptop = 1.6, watch = 0.8 },
+		rpPerfect = 3, -- research points for a perfect repair (x score): "you learn from every broken phone"
+	},
 }
 
 -- ---------------- Office grid & build mode (NEXT-PASS-A) ----------------

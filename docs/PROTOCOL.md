@@ -61,6 +61,18 @@ Everything below the table keeps working as written; these are additions/clarifi
     `employees.list[].station` / `marketSalary`, `production.lines[].location` — see docs/ACTIONS.md
     "Manual shipping, second floor, challenges" and "Employees". `challenges` is a new top-level section key.
 
+20. **Iteration 3 (story start)** — details in docs/ACTIONS.md "Story & repairs":
+    - `create.company.storyMode` (bool, default false): true = story start (small cash, clock paused until chapter 4,
+      repair orders); false/missing = quick start exactly as before.
+    - New top-level state sections `story` and `repairs` (in the snapshot and in `sections`, like `challenges`).
+      Old saves load with `story.done = true`.
+    - While a story company is in chapters 0–3 the clock does not run; `speed` frames / `setSpeed` answer
+      `error {message:"Story: time starts at chapter 4", key:"err.story_clock_paused"}`.
+    - New actions: `repairTake`, `repairFinish`, `repairReturn`, `storyEvent`, `storySkip` (company) and the lobby
+      action `listMyCompanies` (allowed right after `hello`, no company needed) → your company slots.
+    - New `notify.key`s `story.*` (step done, chapter card, investor, complete, skipped, repair new/paid); `notify` may
+      also carry `paramKeys` / `bodyParamKeys` set by the server.
+
 Endpoint: `ws://<host>:7350/ws` (later `wss://` behind a reverse proxy). One JSON object per frame,
 field `t` = message type. Numbers are JSON numbers; Lua maps with non-string keys are sent with string keys.
 
@@ -68,7 +80,7 @@ field `t` = message type. Numbers are JSON numbers; Lua maps with non-string key
 | t | fields | reply |
 |---|---|---|
 | hello | v:1, name, token? (saved from a previous welcome) | welcome {playerId, token, name} |
-| create | company:{name, colorA:"#RRGGBB", colorB, mode:"solo"/"cofounder"} | joined + snapshot |
+| create | company:{name, colorA:"#RRGGBB", colorB, mode:"solo"/"cofounder", storyMode?:bool} | joined + snapshot |
 | join | code:"ABC-123" | joined + snapshot, or error |
 | resume | — (rejoin last company of this token) | joined + snapshot, or error |
 | leave | — | left |

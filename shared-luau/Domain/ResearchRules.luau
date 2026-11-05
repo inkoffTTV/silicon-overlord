@@ -46,6 +46,31 @@ function ResearchRules.canStart(tech: any, research: Types.ResearchState, labLev
 	return true, nil
 end
 
+-- Online iteration 3: research points with fractional accumulation (research.rpFraction keeps the remainder,
+-- research.points stays a whole number). Returns the whole points added now.
+function ResearchRules.addPoints(research: any, amount: number): number
+	if type(research) ~= "table" or not (amount > 0) then
+		return 0
+	end
+	local acc = (tonumber(research.rpFraction) or 0) + amount
+	local whole = math.floor(acc + 1e-9)
+	research.rpFraction = math.floor((acc - whole) * 10000 + 0.5) / 10000
+	research.points = (tonumber(research.points) or 0) + whole
+	return whole
+end
+
+-- passive RP per game day: employees at the "research" station x rate x (1 + bonus x lab level)
+function ResearchRules.dailyPoints(employees: { any }, labLevel: number): number
+	local n = 0
+	for _, e in ipairs(employees) do
+		local station = e.station or (e.role == "Researcher" and "research" or nil)
+		if station == "research" then
+			n = n + 1
+		end
+	end
+	return n * R.rpPerResearcherPerDay * (1 + R.rpLabLevelBonus * labLevel)
+end
+
 -- progress per day for a job given the lab, researchers (sum of skill), morale productivity, collaborators
 function ResearchRules.dailyProgress(tech: any, labLevel: number, researcherSkillSum: number, activeJobs: number, productivity: number, collaborators: number): number
 	local days = ResearchRules.days(tech)

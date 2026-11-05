@@ -152,6 +152,19 @@ class Store:
                         (_dumps(members), name, mode, _dumps(state), version, time.time(), cash, devices,
                          1 if state.get("liquidated") else 0, cid))
 
+    def companies_of(self, pid):
+        """id, code, name, mode, updated of companies whose saved member list (active owners) contains pid."""
+        out = []
+        for r in self.db.execute("SELECT id, code, owner, members, name, mode, updated FROM companies "
+                                 "WHERE liquidated=0 AND (owner=? OR members LIKE ?)", (pid, "%" + str(pid) + "%")):
+            try:
+                members = json.loads(r["members"] or "[]")
+            except ValueError:
+                members = []
+            if pid in members or r["owner"] == pid:
+                out.append(dict(r))
+        return out
+
     def board_rows(self):
         """id, name, cash, devices of every company that is still playing (for the leaderboards)."""
         return [dict(r) for r in self.db.execute("SELECT id, name, cash, devices FROM companies WHERE liquidated=0")]

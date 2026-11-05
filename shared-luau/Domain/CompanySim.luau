@@ -189,6 +189,8 @@ end
 -- ---------------------------------------------------------------------------
 local function tickResearch(c: Types.CompanyState, notes: { Notification })
 	local labLevel = CompanySim.roomLevel(c, "ResearchLab")
+	-- online iteration 3: passive research points from the research staff (fractional accumulation)
+	ResearchRules.addPoints(c.research, ResearchRules.dailyPoints(c.employees.list, labLevel))
 	local skill = EmployeeRules.sumSkill(c.employees.list, "Researcher") + 0.5 * EmployeeRules.sumSkill(c.employees.list, "SoftwareEngineer") * 0.3
 	local productivity = EmployeeRules.productivity(c.employees.morale) * Office.researchBonus(c) * Office.staffFactor(c)
 	for i = #c.research.active, 1, -1 do
@@ -207,6 +209,7 @@ local function tickResearch(c: Types.CompanyState, notes: { Notification })
 						c.research.processMaturity[nm] = 0.05
 					end
 				end
+				ResearchRules.addPoints(c.research, Balance.Research.rpPerTechTier * tech.tier) -- online iteration 3
 				notes[#notes + 1] = { kind = "Research", title = "Research complete: " .. tech.name, body = tech.description, sound = "Research" }
 				CompanySim.addNews(c, "Company", "R&D: " .. tech.name, tech.description)
 				c.reputation.innovation = MathUtil.clamp(c.reputation.innovation + 0.4 * tech.tier, 0, 100)

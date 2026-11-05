@@ -13,6 +13,10 @@ Resources.list = {
 	{ id = "memory_chips", name = "Memory Chips", unit = "chip", basePrice = 14 },
 	{ id = "advanced_packaging", name = "Advanced Packaging Materials", unit = "kit", basePrice = 22 },
 	{ id = "display_panels", name = "Display Panel Glass", unit = "sheet", basePrice = 30 },
+	-- online iteration 3: spare parts for the garage repair shop (repair orders consume them; no production bill)
+	{ id = "repair_screen", name = "Replacement Screen", unit = "pcs", basePrice = 38 },
+	{ id = "repair_battery", name = "Replacement Battery", unit = "pcs", basePrice = 22 },
+	{ id = "repair_port", name = "Charging Port", unit = "pcs", basePrice = 9 },
 }
 Resources.byId = {}
 for _, r in ipairs(Resources.list) do
@@ -56,11 +60,12 @@ end
 -- Raw material suppliers (contracts): cheaper per unit with longer commitments
 Resources.materialSuppliers = {
 	{ id = "terra_mining", name = "Terra Mining Group", reliability = 0.9, priceMult = 0.92, minWeeks = 12, resources = { "lithium", "rare_earth", "copper", "aluminum" } },
-	{ id = "spot_market", name = "Spot Market", reliability = 1.0, priceMult = 1.15, minWeeks = 1, resources = { "silicon_wafers", "rare_earth", "lithium", "copper", "aluminum", "glass", "battery_materials", "memory_chips", "advanced_packaging", "display_panels" } },
+	{ id = "spot_market", name = "Spot Market", reliability = 1.0, priceMult = 1.15, minWeeks = 1, resources = { "silicon_wafers", "rare_earth", "lithium", "copper", "aluminum", "glass", "battery_materials", "memory_chips", "advanced_packaging", "display_panels", "repair_screen", "repair_battery", "repair_port" } },
 	{ id = "crystal_fab", name = "Crystal Wafer Works", reliability = 0.93, priceMult = 0.9, minWeeks = 8, resources = { "silicon_wafers", "advanced_packaging" } },
 	{ id = "glassworks", name = "Meridian Glassworks", reliability = 0.95, priceMult = 0.88, minWeeks = 6, resources = { "glass", "display_panels" } },
 	{ id = "cellchem", name = "CellChem Materials", reliability = 0.9, priceMult = 0.9, minWeeks = 8, resources = { "battery_materials", "lithium" } },
 	{ id = "memstock", name = "MemStock Trading", reliability = 0.96, priceMult = 0.95, minWeeks = 4, resources = { "memory_chips" } },
+	{ id = "parts_depot", name = "Gadget Parts Depot", reliability = 0.97, priceMult = 0.95, minWeeks = 4, resources = { "repair_screen", "repair_battery", "repair_port" } },
 }
 
 return Resources

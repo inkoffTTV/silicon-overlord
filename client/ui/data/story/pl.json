@@ -1,0 +1,861 @@
+{
+ "lang": "pl",
+ "version": 1,
+ "speakers": {
+  "narrator": {
+   "name": "",
+   "voice": 901709
+  },
+  "radio": {
+   "name": "Radio Nocna Zmiana",
+   "voice": 900977
+  },
+  "mira": {
+   "name": "Ciocia Mira",
+   "voice": 900573
+  },
+  "felix": {
+   "name": "Wujek Feliks",
+   "voice": 901266
+  },
+  "zip": {
+   "name": "Zip",
+   "voice": 901509
+  },
+  "critic": {
+   "name": "Vera Benchmark",
+   "voice": 901258
+  }
+ },
+ "chapters": [
+  {
+   "id": 0,
+   "key": "workshop",
+   "title": "Warsztat",
+   "subtitle": "Druga w nocy, garaż i ręcznie malowany szyld: NAPRAWA TELEFONÓW",
+   "steps": [
+    {
+     "id": "intro_seen",
+     "optional": false,
+     "objective": "Dotrzeć do garażu",
+     "hint": "",
+     "lines": []
+    },
+    {
+     "id": "door_open",
+     "optional": false,
+     "objective": "Otworzyć drzwi warsztatu",
+     "hint": "Podejdź do drzwi i naciśnij E. Za ciemno? F włącza latarkę.",
+     "lines": [
+      {
+       "id": "step.door_open.1",
+       "speaker": "mira",
+       "text": "Drzwi się zacinają. Podnieście klamkę i pchnijcie. Garaż szanuje pewność siebie."
+      }
+     ]
+    },
+    {
+     "id": "lights_on",
+     "optional": false,
+     "objective": "Włączyć światło",
+     "hint": "Włącznik jest na ścianie przy drzwiach. Spójrz na niego i naciśnij E.",
+     "lines": [
+      {
+       "id": "step.lights_on.1",
+       "speaker": "mira",
+       "text": "Niech stanie się światłość! Warsztat po ciemku to po prostu straszny garaż."
+      },
+      {
+       "id": "step.lights_on.2",
+       "speaker": "mira",
+       "text": "Stół naprawczy, lada, dzwonek. Dzwonek to tu najważniejsze narzędzie. Wierzcie mi."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": 1,
+   "key": "first_customer",
+   "title": "Pierwszy klient",
+   "subtitle": "Ktoś znowu coś upuścił.",
+   "steps": [
+    {
+     "id": "take_device",
+     "optional": false,
+     "objective": "Zabrać urządzenie z lady",
+     "hint": "Naciśnij E przy ladzie, by przyjąć zlecenie, i zanieś urządzenie na stół naprawczy.",
+     "lines": [
+      {
+       "id": "step.take_device.1",
+       "speaker": "mira",
+       "text": "Dzyń-dzyń! Wasz pierwszy klient. Uśmiechajcie się, oni wyczuwają strach. I kalafonię."
+      }
+     ]
+    },
+    {
+     "id": "repair_device",
+     "optional": false,
+     "objective": "Naprawić je przy stole naprawczym",
+     "hint": "Połóż je na stole naprawczym i naciśnij E: otwórz, znajdź usterkę, napraw, zamknij.",
+     "lines": [
+      {
+       "id": "step.repair_device.1",
+       "speaker": "mira",
+       "text": "Lampa włączona, lupa w dół. Śrubki do kubeczka, nie do kieszeni."
+      }
+     ]
+    },
+    {
+     "id": "get_paid",
+     "optional": false,
+     "objective": "Oddać przy ladzie i dostać zapłatę",
+     "hint": "Zanieś urządzenie z powrotem i naciśnij E przy ladzie. Staranna naprawa jest lepiej płatna.",
+     "lines": [
+      {
+       "id": "step.get_paid.1",
+       "speaker": "mira",
+       "text": "Naprawione? Teraz najlepsze: szczęśliwa mina i prawdziwe pieniądze."
+      }
+     ]
+    },
+    {
+     "id": "second_customer",
+     "optional": false,
+     "objective": "Naprawić drugie urządzenie",
+     "hint": "Gracie razem? Jedno przyjmuje zlecenia, drugie naprawia. Szybciej niż bohaterstwo.",
+     "lines": [
+      {
+       "id": "step.second_customer.1",
+       "speaker": "mira",
+       "text": "Na tej ulicy wieści szybko się rozchodzą. O, idzie następny."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": 2,
+   "key": "spare_parts",
+   "title": "Części zamienne",
+   "subtitle": "Ekranu nie naprawisz dobrymi chęciami",
+   "steps": [
+    {
+     "id": "diagnose_part",
+     "optional": false,
+     "objective": "Zanieść nowe zlecenie na stół",
+     "hint": "Naciśnij E przy ladzie, a potem dokładnie obejrzyj urządzenie na stole naprawczym.",
+     "lines": [
+      {
+       "id": "step.diagnose_part.1",
+       "speaker": "mira",
+       "text": "Oj, ten aż chrupie. Tu trzeba nowej części, sam śrubokręt nie wystarczy."
+      }
+     ]
+    },
+    {
+     "id": "call_supplier",
+     "optional": false,
+     "objective": "Zadzwonić do dostawcy z telefonu na ścianie",
+     "hint": "Naciśnij E na telefonie na ścianie. Otworzą się Zakupy.",
+     "lines": [
+      {
+       "id": "step.call_supplier.1",
+       "speaker": "mira",
+       "text": "Skończyły się ekrany? Szkła nie naprawisz dobrymi chęciami."
+      },
+      {
+       "id": "step.call_supplier.2",
+       "speaker": "mira",
+       "text": "Dzwońcie do Zipa. Zip odbiera o każdej porze. Nie jestem pewna, czy Zip w ogóle śpi."
+      }
+     ]
+    },
+    {
+     "id": "buy_parts",
+     "optional": false,
+     "objective": "Kupić części w Zakupach",
+     "hint": "Znajdź na liście ekrany i kup kilka. Na początek wystarczy garstka.",
+     "lines": [
+      {
+       "id": "step.buy_parts.1",
+       "speaker": "zip",
+       "text": "Części Zip, Zip przy telefonie! Ekrany, baterie, gniazda. Co się zepsuło, przyjacielu?"
+      },
+      {
+       "id": "step.buy_parts.2",
+       "speaker": "zip",
+       "text": "Dowiozę, zanim wystygnie wam herbata. Chyba że to mrożona herbata. Wtedy to wyścig."
+      }
+     ]
+    },
+    {
+     "id": "fit_part",
+     "optional": false,
+     "objective": "Zamontować nową część",
+     "hint": "Z powrotem do stołu naprawczego: nowa część trafia na miejsce podczas naprawy.",
+     "lines": [
+      {
+       "id": "step.fit_part.1",
+       "speaker": "mira",
+       "text": "Stare szkło precz, nowe na miejsce. Delikatnie. Jest cieńsze niż moja cierpliwość."
+      }
+     ]
+    },
+    {
+     "id": "paid_with_part",
+     "optional": false,
+     "objective": "Oddać urządzenie i dostać zapłatę",
+     "hint": "Cena naprawy pokrywa część, więc i tak jesteście na plusie. To jest biznes!",
+     "lines": [
+      {
+       "id": "step.paid_with_part.1",
+       "speaker": "mira",
+       "text": "Klient wciąż czeka. Dzielnie. Lepiej nie sprawdzajmy, jak długo."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": 3,
+   "key": "same_fault",
+   "title": "Ta sama usterka",
+   "subtitle": "Każdy telefon psuje się w tym samym miejscu. Ciekawe…",
+   "steps": [
+    {
+     "id": "pattern_repair",
+     "optional": false,
+     "objective": "Naprawić kolejne gniazdo ładowania",
+     "hint": "Dwóch klientów, dwa zepsute gniazda. Brak gniazd? Dokupcie je w Zakupach.",
+     "lines": [
+      {
+       "id": "step.pattern_repair.1",
+       "speaker": "mira",
+       "text": "Dwóch klientów naraz i obaj z zepsutym gniazdem ładowania. Hmm."
+      }
+     ]
+    },
+    {
+     "id": "notice_pattern",
+     "optional": false,
+     "objective": "Porozmawiać o tej prawidłowości",
+     "hint": "Posłuchajcie cioci Miry. Z tymi telefonami coś jest nie tak.",
+     "lines": [
+      {
+       "id": "step.notice_pattern.1",
+       "speaker": "mira",
+       "text": "To samo gniazdo, ten sam luz, ten sam model. Trzeci w tym tygodniu."
+      },
+      {
+       "id": "step.notice_pattern.2",
+       "speaker": "mira",
+       "text": "Telefony projektują ludzie, którzy nigdy ich nie upuszczają. Wy upuszczacie codziennie. To przewaga."
+      },
+      {
+       "id": "step.notice_pattern.3",
+       "speaker": "mira",
+       "text": "Naprawiacie je po jednym. A gdyby tak zrobić taki, który się nie psuje?"
+      }
+     ]
+    },
+    {
+     "id": "start_research",
+     "optional": false,
+     "objective": "Rozpocząć pierwsze badanie przy tablicy",
+     "hint": "Naciśnij E przy tablicy i wybierz technologię. Pierwsze badanie jest za darmo.",
+     "lines": [
+      {
+       "id": "step.start_research.1",
+       "speaker": "mira",
+       "text": "Naprawić jeden telefon to naprawa. Naprawić wszystkie naraz to już badania."
+      }
+     ]
+    },
+    {
+     "id": "research_challenge",
+     "optional": true,
+     "objective": "Burza mózgów przy tablicy",
+     "hint": "Szybka minigra popchnie badania. Opcjonalnie, ale zabawnie.",
+     "lines": [
+      {
+       "id": "step.research_challenge.1",
+       "speaker": "mira",
+       "text": "Markery w dłoń! Najpierw złe pomysły: zastawiają drzwi tym dobrym."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": 4,
+   "key": "own_phone",
+   "title": "Nasz własny telefon",
+   "subtitle": "A gdyby tak zrobić taki, który się nie psuje?",
+   "steps": [
+    {
+     "id": "investor_seen",
+     "optional": false,
+     "objective": "Przywitać gościa w drzwiach",
+     "hint": "",
+     "lines": []
+    },
+    {
+     "id": "design_phone",
+     "optional": false,
+     "objective": "Zaprojektować pierwszy telefon na PC",
+     "hint": "PC → Studio projektowe. Domyślne ustawienia są OK; poprawcie to, czego klienci nie znosili.",
+     "lines": [
+      {
+       "id": "step.design_phone.1",
+       "speaker": "felix",
+       "text": "Pamiętacie chwiejne gniazda i baterie padające przed obiadem? Od nich zacznijcie."
+      }
+     ]
+    },
+    {
+     "id": "publish_phone",
+     "optional": false,
+     "objective": "Opublikować projekt",
+     "hint": "W ostatnim kroku naciśnij „Rozpocznij rozwój”. Prototyp już w drodze.",
+     "lines": [
+      {
+       "id": "step.publish_phone.1",
+       "speaker": "mira",
+       "text": "Nazwa, cena i jeden przycisk. Najstraszniejszy przycisk w tym garażu."
+      }
+     ]
+    },
+    {
+     "id": "develop_phone",
+     "optional": false,
+     "objective": "Dokończyć prace nad prototypem",
+     "hint": "Teraz czas płynie: przyspiesz go albo pomóż, polując na błędy przy PC.",
+     "lines": [
+      {
+       "id": "step.develop_phone.1",
+       "speaker": "felix",
+       "text": "Praca nad telefonem jest jak zupa. Nie podnoście pokrywki co pięć minut."
+      }
+     ]
+    },
+    {
+     "id": "polish_challenge",
+     "optional": true,
+     "objective": "Polowanie na błędy przy PC",
+     "hint": "Usiądź na krześle przy PC i szybko zapoluj na błędy. Opcjonalnie.",
+     "lines": [
+      {
+       "id": "step.polish_challenge.1",
+       "speaker": "felix",
+       "text": "Znaleźliście błąd? Świetnie. Lepiej wy niż krytycy."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": 5,
+   "key": "first_batch",
+   "title": "Pierwsza partia",
+   "subtitle": "Ręczna robota, śrubka po śrubce",
+   "steps": [
+    {
+     "id": "queue_batch",
+     "optional": false,
+     "objective": "Uruchomić partię przy stole warsztatowym",
+     "hint": "Naciśnij E przy stole warsztatowym, wybierz telefon i liczbę sztuk. Materiały są w Zakupach.",
+     "lines": [
+      {
+       "id": "step.queue_batch.1",
+       "speaker": "mira",
+       "text": "Ręczny montaż! Jak za dawnych lat, tylko z mniejszą liczbą oparzeń. Mam nadzieję."
+      }
+     ]
+    },
+    {
+     "id": "first_crate",
+     "optional": false,
+     "objective": "Poczekać na pierwszą skrzynię",
+     "hint": "Gotowe telefony są pakowane do skrzyń obok stołu warsztatowego.",
+     "lines": [
+      {
+       "id": "step.first_crate.1",
+       "speaker": "mira",
+       "text": "Każdy telefon w tej skrzyni zrobiły wasze ręce. Dziwne uczucie, prawda?"
+      }
+     ]
+    },
+    {
+     "id": "ship_crate",
+     "optional": false,
+     "objective": "Zanieść skrzynię do furgonetki",
+     "hint": "Weź skrzynię i włóż ją do furgonetki. Ostrożny załadunek daje +5% sztuk.",
+     "lines": [
+      {
+       "id": "step.ship_crate.1",
+       "speaker": "felix",
+       "text": "Ostrożnie! Ta skrzynia to nasza przyszłość. I moja inwestycja. Głównie moja inwestycja."
+      }
+     ]
+    },
+    {
+     "id": "qc_challenge",
+     "optional": true,
+     "objective": "Kontrola jakości przy stole warsztatowym",
+     "hint": "Wyłap wadliwe telefony i zyskaj kilka dodatkowych sztuk. Opcjonalnie.",
+     "lines": [
+      {
+       "id": "step.qc_challenge.1",
+       "speaker": "mira",
+       "text": "Sprawdzajcie każdy telefon tak, jakby klient miał go upuścić. Bo upuści."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": 6,
+   "key": "launch_night",
+   "title": "Noc premiery",
+   "subtitle": "Reflektory, krytycy i nowiutki szyld",
+   "steps": [
+    {
+     "id": "launch_phone",
+     "optional": false,
+     "objective": "Zaprezentować telefon na scenie",
+     "hint": "Naciśnij E przy scenie, gdy będziecie gotowi. Krytycy już siedzą.",
+     "lines": [
+      {
+       "id": "step.launch_phone.1",
+       "speaker": "critic",
+       "text": "Dobry wieczór, jestem Vera Benchmark. Trzy tysiące recenzji. Upuściłam każdy telefon, co do jednego."
+      },
+      {
+       "id": "step.launch_phone.2",
+       "speaker": "critic",
+       "text": "Ekipa z garażu? Zobaczymy, czy przetrwa moją kieszeń. I moje schody."
+      }
+     ]
+    },
+    {
+     "id": "reviews_seen",
+     "optional": false,
+     "objective": "Przeczytać, co piszą krytycy",
+     "hint": "Bez względu na ocenę wypuściliście prawdziwy telefon. Większość ludzi tylko o tym gada.",
+     "lines": [
+      {
+       "id": "step.reviews_seen.1",
+       "speaker": "critic",
+       "text": "Nieoficjalnie: po drodze upuściłam go dwa razy. Szacunek."
+      }
+     ]
+    },
+    {
+     "id": "sign_swapped",
+     "optional": false,
+     "objective": "Powiesić nowy szyld firmy",
+     "hint": "Zobaczcie, jak zdejmują stary szyld.",
+     "lines": [
+      {
+       "id": "step.sign_swapped.1",
+       "speaker": "mira",
+       "text": "Jeszcze jedno, moi drodzy. Ten stary szyld już do was nie pasuje."
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "customers": [
+  {
+   "id": "grandma",
+   "voice": 900575,
+   "deviceId": "phone",
+   "faultId": "software_glitch",
+   "name": "Babcia Róża",
+   "device": "Telefon (prezent od wnuka)",
+   "fault": "Sam dzwoni do jej byłego męża. Rozstali się w 1979",
+   "lines": {
+    "arrive": "Dobry wieczór, kochani! Wnuczek mówi, że to telefon. Ja nim głównie łupię orzechy.",
+    "story": "Sam dzwoni do mojego byłego męża! Rozstaliśmy się w 1979. Biedak jest bardzo zdezorientowany.",
+    "wait": "Nie spieszcie się. Przyniosłam pierożki. No, dla siebie.",
+    "happy": "Cudownie! Proszę, {money}. I pierożek. Tylko nie mówcie wnuczkowi o orzechach.",
+    "angry": "Za moich czasów naprawiali szybciej. I orzechy były bardziej miękkie."
+   }
+  },
+  {
+   "id": "student",
+   "voice": 900621,
+   "deviceId": "phone",
+   "faultId": "stuck_button",
+   "name": "Student Max",
+   "device": "Telefon cały w naklejkach",
+   "fault": "Boczny przycisk zaciął się po tysiącu drzemek budzika",
+   "lines": {
+    "arrive": "Cześć… sorki, spałem dwie godziny. Naprawiacie telefony za studencki budżet?",
+    "story": "Tyle razy dawałem budzikowi drzemkę, że przycisk się poddał. Teraz zaciął się na zawsze.",
+    "wait": "Zamknę oczy tylko na sekundkę. Obudźcie mnie, jak będzie gotowe. Albo nigdy.",
+    "happy": "Jesteście bohaterami! Proszę, {money}. To był cały mój budżet na zupki chińskie na tydzień.",
+    "angry": "Mogłem przespać całą tę naprawę. Prawie przespałem."
+   }
+  },
+  {
+   "id": "courier",
+   "voice": 901656,
+   "deviceId": "phone",
+   "faultId": "cracked_screen",
+   "name": "Kurierka Dina",
+   "device": "Telefon sklejony taśmą",
+   "fault": "Upadł, gdy niosła tort na 9. piętro. Tort przeżył",
+   "lines": {
+    "arrive": "Szybko, szybko! Mam cztery minuty i jedenaście paczek.",
+    "story": "Niosłam tort na dziewiąte piętro i upuściłam telefon na ostatnim stopniu. Tort przeżył!",
+    "wait": "Przerwę mam czterominutową. Zostały trzy. Dwie i pół…",
+    "happy": "Jak nowy! Proszę, {money}. Pięć gwiazdek, i to szybko!",
+    "angry": "Za wolno! Rozwiozłabym już czterdzieści pizz."
+   }
+  },
+  {
+   "id": "teacher",
+   "voice": 900906,
+   "deviceId": "phone",
+   "faultId": "broken_port",
+   "name": "Pan Pell, nauczyciel",
+   "device": "Telefon w bardzo rozsądnym etui",
+   "fault": "Gniazdo zapchane pyłem kredy z trzydziestu lat",
+   "lines": {
+    "arrive": "Dobry wieczór. Bez pośpiechu, proszę. Cierpliwości uczę w pierwszej kolejności. Ortografii w drugiej.",
+    "story": "Gniazdo ładowania jest pełne kredy. Trzydzieści lat przy tablicy. Kreda w końcu wygrała.",
+    "wait": "Skoro czekamy: kto wymieni trzy części telefonu? Ręka w górę.",
+    "happy": "Znakomita robota. Proszę, {money}. Szóstka, a ja prawie nigdy nie stawiam szóstek.",
+    "angry": "Tę naprawę ocenię później. Spodziewajcie się trójki z minusem."
+   }
+  },
+  {
+   "id": "gamer",
+   "voice": 901217,
+   "deviceId": "phone",
+   "faultId": "broken_port",
+   "name": "Gracz Kit",
+   "device": "Telefon gamingowy z podświetleniem RGB",
+   "fault": "„Nie rzuciłem, sam poleciał”. Gniazdo poszło razem z kablem",
+   "lines": {
+    "arrive": "Siema. Dobra, po pierwsze: nie rzuciłem nim. Sam poleciał.",
+    "story": "Kabel został w gniazdku, a gniazdo ładowania jakby… poszło z nim. To przez lagi.",
+    "wait": "Jest tu Wi-Fi? Pytam dla mojego drugiego telefonu.",
+    "happy": "GG! Ładuje się! Proszę, {money}. To moje drugie śniadania z całego tygodnia, tak w ogóle.",
+    "angry": "Laaagi. Nawet router mojej babci jest szybszy."
+   }
+  },
+  {
+   "id": "barista",
+   "voice": 901011,
+   "deviceId": "watch",
+   "faultId": "water_damage",
+   "name": "Baristka Lou",
+   "device": "Smartwatch pachnący espresso",
+   "fault": "Zanurzony w dzbanku z mlekiem przy robieniu latte art",
+   "lines": {
+    "arrive": "Hejka! Przyniosłam wam kawę. No dobra, sobie przyniosłam, ale możecie powąchać.",
+    "story": "Rysowałam serduszko na latte i zanurzyłam nadgarstek prosto w mleku. Teraz to zegarek-koktajl mleczny.",
+    "wait": "To trwa dłużej niż potrójne espresso. Ale krócej niż bezkofeinowa. Jest okej.",
+    "happy": "Jesteście najlepsi! Proszę, {money}. Darmowe cappuccino dla was przez cały tydzień.",
+    "angry": "Wystygła mi kawa. Serce też. Troszeczkę."
+   }
+  },
+  {
+   "id": "taxi_driver",
+   "voice": 901313,
+   "deviceId": "phone",
+   "faultId": "dead_battery",
+   "name": "Taksówkarz Sam",
+   "device": "Telefon w uchwycie na desce rozdzielczej",
+   "fault": "Nawigacja 16 godzin dziennie. Bateria widziała całe miasto",
+   "lines": {
+    "arrive": "Wieczór dobry, szefie! Sam, taksówka. Znam każdą ulicę w mieście i każdą dziurę po imieniu.",
+    "story": "Nawigacja chodzi szesnaście godzin na dobę. Ta bateria widziała więcej miasta niż ja.",
+    "wait": "Raz wiozłem tą ulicą słynnego piosenkarza. Nie powiem kogo. Zaczyna się na literę.",
+    "happy": "Obsługa na medal! Proszę, {money}. Jak będziecie potrzebować kursu, dla was za pół ceny.",
+    "angry": "Licznik bije, przyjaciele! No, biłby, gdybyśmy siedzieli w taksówce."
+   }
+  },
+  {
+   "id": "musician",
+   "voice": 900431,
+   "deviceId": "laptop",
+   "faultId": "cracked_screen",
+   "name": "Perkusistka Jo",
+   "device": "Laptop oklejony naklejkami zespołów",
+   "fault": "Pałeczka wyleciała podczas solówki. Prosto w ekran",
+   "lines": {
+    "arrive": "Joł! Jo, perkusistka. Spokojnie, perkusję zostawiłam w domu. Prawie całą.",
+    "story": "Epicka solówka, pałeczka mi się wyślizgnęła i wleciała prosto w ekran laptopa. Ale solówka życia.",
+    "wait": "Ba-dum-tss. Sorki, jak czekam, to bębnię we wszystko.",
+    "happy": "Brzmi idealnie! Proszę, {money}. Jesteście wszyscy na liście gości.",
+    "angry": "Ta naprawa jest wolniejsza niż nasz basista. A to coś znaczy."
+   }
+  },
+  {
+   "id": "chef",
+   "voice": 901216,
+   "deviceId": "tablet",
+   "faultId": "broken_port",
+   "name": "Szef Arno",
+   "device": "Tablet z przepisami w etui oprószonym mąką",
+   "fault": "Gniazdo ładowania zapchane mąką",
+   "lines": {
+    "arrive": "Dobry wieczór, przyjaciele! Szef Arno. Powierzam wam to jak mój najlepszy nóż.",
+    "story": "Mój tablet pomagał mi lepić pierogi. Teraz gniazdo ładowania jest zapchane mąką.",
+    "wait": "Cierpliwość jest jak ciasto, przyjaciele. Zostawcie je w spokoju, a wyrośnie.",
+    "happy": "Palce lizać! Proszę, {money}. Przyjdźcie do mnie na kolację. Tablety z dala od ciasta.",
+    "angry": "Rozgotowane! Jak ta naprawa. Zdecydowanie za długo, przyjaciele."
+   }
+  },
+  {
+   "id": "blogger",
+   "voice": 900873,
+   "deviceId": "phone",
+   "faultId": "cracked_screen",
+   "name": "Blogerka Mia",
+   "device": "Telefon z trzema lampami pierścieniowymi",
+   "fault": "Kijek do selfie kontra wentylator sufitowy. Wygrał wentylator",
+   "lines": {
+    "arrive": "Hejooo, czat! Jesteśmy w prawdziwym warsztacie! Pomachajcie moim obserwującym!",
+    "story": "Mój kijek do selfie spotkał wentylator sufitowy. Wentylator wygrał. Mogę nagrać, jak naprawiacie?",
+    "wait": "Content z czekania! Bardzo autentyczny. Dobra, nudzę się.",
+    "happy": "Mam obsesję! Proszę, {money}. Oznaczę was wszędzie.",
+    "angry": "Przestaję was obserwować. Emocjonalnie."
+   }
+  }
+ ],
+ "devices": {
+  "phone": "Telefon",
+  "tablet": "Tablet",
+  "laptop": "Laptop",
+  "watch": "Smartwatch"
+ },
+ "faults": {
+  "cracked_screen": {
+   "name": "Pęknięty ekran",
+   "part": "screen",
+   "story": "Długa historia. Joga z kozami. Koza na niego nadepnęła. Kozie nic nie jest."
+  },
+  "dead_battery": {
+   "name": "Padnięta bateria",
+   "part": "battery",
+   "story": "Naliczył czterdzieści tysięcy kroków i umarł. Chyba jest po prostu zmęczony."
+  },
+  "broken_port": {
+   "name": "Zepsute gniazdo ładowania",
+   "part": "port",
+   "story": "Maluch na imprezie próbował go naładować bananem. Bananowi nic nie jest."
+  },
+  "water_damage": {
+   "name": "Zalanie",
+   "part": null,
+   "story": "Na pudełku pisało „wodoodporny”. Jezioro się nie zgodziło."
+  },
+  "software_glitch": {
+   "name": "Błąd oprogramowania",
+   "part": null,
+   "story": "Od wtorku mówi tylko po niemiecku. Ja nie. Ale on wydaje się szczęśliwy."
+  },
+  "stuck_button": {
+   "name": "Zacięty przycisk",
+   "part": null,
+   "story": "Mój kot spał na nim cały tydzień. Przycisk poddał się przed kotem."
+  }
+ },
+ "parts": {
+  "screen": "Zapasowy ekran",
+  "battery": "Zapasowa bateria",
+  "port": "Gniazdo ładowania"
+ },
+ "cutscenes": {
+  "intro": {
+   "captions": [
+    {
+     "id": "cut.intro.1",
+     "speaker": "radio",
+     "text": "Radio Nocna Zmiana, druga w nocy. Gdzieś tam właśnie czyjś telefon wpadł do wanny."
+    },
+    {
+     "id": "cut.intro.2",
+     "speaker": "radio",
+     "text": "A gdzieś kilkoro przyjaciół otwiera warsztat w garażu. Powodzenia, nocne marki."
+    },
+    {
+     "id": "cut.intro.3",
+     "speaker": "narrator",
+     "text": "Cicha ulica. Wynajęty garaż. Ręcznie malowany szyld: NAPRAWA TELEFONÓW."
+    },
+    {
+     "id": "cut.intro.4",
+     "speaker": "mira",
+     "text": "Garaż jest wasz, moi drodzy. Czynsz niewielki: raz w miesiącu naprawiacie mi czajnik."
+    },
+    {
+     "id": "cut.intro.5",
+     "speaker": "narrator",
+     "text": "Dziś w nocy warsztat rusza. A jutro? Jeszcze nikt nie wie."
+    }
+   ]
+  },
+  "investor": {
+   "captions": [
+    {
+     "id": "cut.investor.1",
+     "speaker": "narrator",
+     "text": "Przed domem zatrzymuje się bardzo cichy samochód. Elektryczny, lśniący i wyraźnie drogi."
+    },
+    {
+     "id": "cut.investor.2",
+     "speaker": "felix",
+     "text": "Dobry wieczór! Jestem Feliks, brat Miry. Mówi, że naprawiacie telefony o drugiej w nocy i mówicie do nich czule."
+    },
+    {
+     "id": "cut.investor.3",
+     "speaker": "felix",
+     "text": "Dorobiłem się na robotach sprzątających. Ciągle utykały pod kanapami, więc to naprawiłem."
+    },
+    {
+     "id": "cut.investor.4",
+     "speaker": "felix",
+     "text": "Nie inwestuję w firmy. Inwestuję w ludzi, którzy rozkręcają rzeczy, żeby zobaczyć, czemu się zepsuły."
+    },
+    {
+     "id": "cut.investor.5",
+     "speaker": "felix",
+     "text": "Oto {money}. Zróbcie telefon, którego nie zdołam zepsuć. A będę się bardzo, bardzo starał."
+    },
+    {
+     "id": "cut.investor.6",
+     "speaker": "mira",
+     "text": "Zepsuł mi trzy czajniki. Wierzcie mi, będzie się starał."
+    },
+    {
+     "id": "cut.investor.7",
+     "speaker": "narrator",
+     "text": "Kalendarz rusza. Od dziś czynsz, konkurencja i pensje są naprawdę."
+    }
+   ]
+  },
+  "sign_swap": {
+   "captions": [
+    {
+     "id": "cut.sign_swap.1",
+     "speaker": "mira",
+     "text": "Ostrożnie ze starym szyldem. Jest starszy niż wasza lutownica."
+    },
+    {
+     "id": "cut.sign_swap.2",
+     "speaker": "narrator",
+     "text": "NAPRAWA TELEFONÓW idzie w dół. {company} idzie w górę."
+    },
+    {
+     "id": "cut.sign_swap.3",
+     "speaker": "felix",
+     "text": "Ten sam garaż, większe plany. Będę w samochodzie. Trochę popłaczę."
+    },
+    {
+     "id": "cut.sign_swap.4",
+     "speaker": "mira",
+     "text": "Ale ladę zostawcie. Starzy klienci i tak będą wam przynosić pęknięte ekrany."
+    },
+    {
+     "id": "cut.sign_swap.5",
+     "speaker": "radio",
+     "text": "Radio Nocna Zmiana: nowa firma telefoniczna na naszej ulicy. Druga w nocy jeszcze nigdy tak nie lśniła."
+    },
+    {
+     "id": "cut.sign_swap.6",
+     "speaker": "narrator",
+     "text": "Historia dobiegła końca. Garaż jest wasz. Teraz zbudujcie coś ogromnego."
+    }
+   ]
+  }
+ },
+ "tips": [
+  "Bieżący cel delikatnie świeci. W razie wątpliwości idź za światłem.",
+  "Lewy przycisk myszy chwyta, prawy obraca. Tak, można rzucać. Tylko nie telefonami klientów, proszę.",
+  "F włącza latarkę. Ciemne kąty garażu są celowe.",
+  "E działa prawie ze wszystkim: drzwi, lada, stoły, PC, tablica i furgonetka.",
+  "Tab otwiera szybkie menu ze wszystkimi ekranami firmy.",
+  "T otwiera czat. Twoja postać wypowiada na głos każdą wpisaną linijkę.",
+  "Zaproś znajomych kodem pokoju z górnego paska. Firma może mieć do czterech założycieli.",
+  "Gracie razem? Jedno przyjmuje zlecenia przy ladzie, drugie naprawia. Drużyna wygrywa z bohaterstwem.",
+  "Staranna naprawa jest lepiej płatna: wynik minigry decyduje, ile zapłaci klient.",
+  "Brak ekranów albo baterii? Zadzwoń do dostawcy z telefonu w garażu i kup części w Zakupach.",
+  "Skrzynie trafiają do sklepów dopiero po wysyłce. Zanieś je do furgonetki po +5% sztuk.",
+  "Skrzynie zostawione w garażu po tygodniu wyjadą same, ale bez premii za ostrożność.",
+  "Wyzwania przy PC, tablicy i stole warsztatowym przyspieszają pracę. Każde ma czas odnowienia.",
+  "Studio projektowe pokazuje prognozę krytyków po każdym wyborze. Zerknij na nią przed publikacją.",
+  "Kontrakty z dostawcami mogą być nawet o 10% tańsze niż zakup po bieżącej cenie.",
+  "W firmie ze współzałożycielami duże wydatki muszą zatwierdzić wszyscy założyciele.",
+  "Błędy znalezione w trakcie prac naprawisz punktami badań albo z czasem zrobi to tester.",
+  "Zatrudniaj ludzi na tablicy ogłoszeń. Zadowoleni pracują lepiej, a niedopłaceni… kreatywnie.",
+  "Stół warsztatowy to dopiero początek: na piętrze zmieszczą się prawdziwe linie produkcyjne.",
+  "Konkurencja też wypuszcza telefony. Zerknij na ich ceny, zanim ustalisz swoją.",
+  "W trybie fabularnym zegar firmy rusza w rozdziale 4. Do tego czasu nie musicie się spieszyć.",
+  "Po zakończeniu fabuły zlecenia naprawy wciąż przychodzą. Mały dodatkowy zarobek, póki firma nie wyrośnie z garażu.",
+  "Fakt: 90% naprawy to odkręcanie. Pozostałe 10% to szukanie śrubki, która spadła.",
+  "Jeśli klient mówi „nic nie robiłem, samo się zepsuło”, to telefon wpadł do wody.",
+  "Dobry telefon to taki, który sam byś kupił. Świetny to taki, z którym poradzi sobie twoja babcia.",
+  "Kawa nie przyspiesza czasu w grze. Tylko tak się wydaje.",
+  "Dzwonka na ladzie nigdy nie naprawiano. Nie musi. Jest idealny."
+ ],
+ "credits": {
+  "title": "Silicon Overlord Online",
+  "sections": [
+   {
+    "id": "idea",
+    "heading": "Pomysł i projekt gry",
+    "lines": [
+     "inkoffTTV"
+    ]
+   },
+   {
+    "id": "made",
+    "heading": "Kod, grafika, dźwięk i teksty",
+    "lines": [
+     "Stworzone przez agentów AI (Claude od Anthropic) pod kierunkiem inkoffTTV"
+    ]
+   },
+   {
+    "id": "tech",
+    "heading": "Zbudowane z użyciem",
+    "lines": [
+     "Godot Engine 4.5 (MIT)",
+     "Python · lupa (Lua) · websockets",
+     "Inter · Noto Sans CJK (SIL OFL 1.1)",
+     "Wszystkie dźwięki i utwory zsyntetyzowano od zera specjalnie dla tej gry"
+    ]
+   },
+   {
+    "id": "cast",
+    "heading": "Występują",
+    "lines": [
+     "Ciocia Mira · Wujek Feliks · Zip · Vera Benchmark · Radio Nocna Zmiana",
+     "Wszyscy klienci warsztatu i jedna bardzo cierpliwa koza"
+    ]
+   },
+   {
+    "id": "thanks",
+    "heading": "Podziękowania",
+    "lines": [
+     "Dla wszystkich, którzy kiedyś upuścili telefon i wciąż wierzyli, że da się go naprawić"
+    ]
+   }
+  ],
+  "closing": "Dzięki za grę. A teraz idźcie coś naprawić."
+ },
+ "ui": {
+  "chapter": "Rozdział {n}",
+  "optional": "Opcjonalne",
+  "story_complete": "Fabuła ukończona",
+  "final_title": "Warsztat → {company}",
+  "final_sub": "Ten sam garaż, nowy szyld. Zlecenia naprawy wciąż czasem przychodzą.",
+  "customer_waiting": "Przy ladzie czeka klient"
+ }
+}

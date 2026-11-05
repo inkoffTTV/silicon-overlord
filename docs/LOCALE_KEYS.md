@@ -24,15 +24,16 @@ the key is missing/unknown (or `null`), it shows the English text that is always
   show the value as it is.
 - A text can be a data text sent whole (e.g. an event's description as a news body): then its key is a `data.*` key.
 - Keys never change meaning. New keys may appear; unknown keys → use the English text. Texts with no key → English.
-- Prefixes: `err.*` action / protocol errors, `note.*` notifications, `news.*` news feed, `review.*` launch reviews,
+- Prefixes: `err.*` action / protocol errors, `note.*` notifications, `story.*` story start notifications,
+  `news.*` news feed, `review.*` launch reviews,
   `data.*` game data texts. The same English text has one key everywhere (an error text reused in a notification
   keeps its `err.` key).
 - Server-side extraction is automatic; a few texts are assembled in ways the extractor cannot see and arrive with
   `key: null` — show the English text.
 
-## Keys (1217)
+## Keys (1309)
 
-### Errors (`res.errorKey`, `error.key`) — 282
+### Errors (`res.errorKey`, `error.key`) — 292
 
 | key | English template |
 |---|---|
@@ -227,6 +228,12 @@ the key is missing/unknown (or `null`), it shows the English text that is always
 | err.quantity_must_be_100_2_000_000 | Quantity must be 100..2,000,000 |
 | err.reach_mintotalrevenue_m_total_revenue_first | Reach ${minTotalRevenue}M total revenue first |
 | err.region_already_open | Region already open |
+| err.repair_already_paid | That repair is already paid |
+| err.repair_busy | That device is already at the bench |
+| err.repair_no_part | No spare part: buy a {part} in Purchasing |
+| err.repair_not_in_repair | That device is already repaired |
+| err.repair_not_ready | That device is not repaired yet |
+| err.repair_unknown_order | Unknown repair order |
 | err.repairabilityfocus_must_be_0_1 | repairabilityFocus must be 0..1 |
 | err.request_expired | Request expired |
 | err.requires_hq_level_roomminhqlevel | Requires HQ level {roomMinHQLevel} |
@@ -253,6 +260,10 @@ the key is missing/unknown (or `null`), it shows the English text that is always
 | err.speed_must_be_0_1_2_4_or_8 | Speed must be 0, 1, 2, 4 or 8 |
 | err.spend_research_points_in_steps_of_100 | Spend research points in steps of 100 |
 | err.staff_cap_reached_cap_upgrade_the_hq | Staff cap reached ({cap}). Upgrade the HQ. |
+| err.story_already_done | The story is already finished |
+| err.story_clock_paused | Story: time starts at chapter 4 |
+| err.story_founder_only | Only the founder can skip the story |
+| err.story_unknown_event | Unknown story event |
 | err.supplier_does_not_sell_that_resource | Supplier does not sell that resource |
 | err.technology_for_subtype_not_researched | Technology for {subtype} not researched |
 | err.technology_not_researched | Technology not researched |
@@ -430,7 +441,22 @@ the key is missing/unknown (or `null`), it shows the English text that is always
 | note.weekly_sales_weekunits_units | Weekly sales: {weekUnits} units |
 | note.win_the_global_tech_expo | Win the Global Tech Expo |
 
-### News feed (`news[].key` / `news[].bodyKey`) — 40
+### Story start (iteration 3; `notify.key` / `notify.bodyKey`, preset by the server — see docs/ACTIONS.md "Story & repairs") — 10
+
+| key | English template |
+|---|---|
+| story.chapter | Chapter {chapter}: {title} |
+| story.complete | Story complete! |
+| story.complete.body | The garage is now {name}. The sandbox is open; repair orders stay as side income. |
+| story.investor | An investor believes in you |
+| story.investor.body | +${amount} to build your own phone. The clock is running now. |
+| story.repair.new | A customer is waiting at the counter |
+| story.repair.paid | Repair paid: +${amount} |
+| story.skipped | Story skipped |
+| story.skipped.body | Full budget, full team, the clock is running. Repair orders stay as side income. |
+| story.step.done | Objective complete |
+
+### News feed (`news[].key` / `news[].bodyKey`) — 46
 
 | key | English template |
 |---|---|
@@ -469,6 +495,12 @@ the key is missing/unknown (or `null`), it shows the English text that is always
 | news.reward_cash_rp | Reward ${cash}{rp}. |
 | news.sharepercent_ownership_the_founders_now_share | {sharePercent}% ownership. The founders now share one balance sheet. |
 | news.stability_stability_optimisation_optimization | Stability {stability}%, optimisation {optimization}%. |
+| news.story_investor | An investor believes in {name} |
+| news.story_investor_body | Fresh money and a small team: the garage is about to build its own phone. |
+| news.story_opens | {name} opens its doors |
+| news.story_opens_body | A garage, a soldering iron and a hand-painted PHONE REPAIR sign. Fixing phones pays the bills... for now. |
+| news.story_sign_down | {name} takes down the PHONE REPAIR sign |
+| news.story_sign_down_body | From fixing other people's phones to launching their own. |
 | news.subtype_at_priceusd_rated_overall_100 | {subtype} at ${priceUSD}, rated {overall}/100. |
 | news.the_company_moved_into_hqlevels | The company moved into: {HQLevels}. |
 | news.the_model_has_reached_the_end_of_its_life_cycle | The model has reached the end of its life cycle. |
@@ -528,7 +560,7 @@ the key is missing/unknown (or `null`), it shows the English text that is always
 | review.headline.Hardcore.great | {name}: the new benchmark king |
 | review.headline.Hardcore.mixed | {name} review: potential held back by thermals |
 
-### Data texts (sent whole as a title/body, or as a param — see `paramKeys`) — 741
+### Data texts (sent whole as a title/body, or as a param — see `paramKeys`) — 807
 
 | key | English template |
 |---|---|
@@ -952,8 +984,12 @@ the key is missing/unknown (or `null`), it shows the English text that is always
 | data.resources.nanodyne.name | Nanodyne Memory |
 | data.resources.opticore.name | Opticore Imaging |
 | data.resources.orbita.name | Orbita Software |
+| data.resources.parts_depot.name | Gadget Parts Depot |
 | data.resources.quantix.name | Quantix Foundry |
 | data.resources.rare_earth.name | Rare Earth Materials |
+| data.resources.repair_battery.name | Replacement Battery |
+| data.resources.repair_port.name | Charging Port |
+| data.resources.repair_screen.name | Replacement Screen |
 | data.resources.silicon_wafers.name | Silicon Wafers |
 | data.resources.spot_market.name | Spot Market |
 | data.resources.terra_mining.name | Terra Mining Group |
@@ -987,6 +1023,68 @@ the key is missing/unknown (or `null`), it shows the English text that is always
 | data.rooms.Showroom.name | Product Showroom |
 | data.rooms.Warehouse.effect | Raises inventory capacity before carrying costs apply. |
 | data.rooms.Warehouse.name | Warehouse |
+| data.story.barista.name | Lou the barista |
+| data.story.blogger.name | Mia the blogger |
+| data.story.broken_port.name | Broken charging port |
+| data.story.buy_parts.title | Buy spare parts in Purchasing |
+| data.story.call_supplier.title | Call the supplier on the wall phone |
+| data.story.chef.name | Chef Arno |
+| data.story.courier.name | Dina the courier |
+| data.story.cracked_screen.name | Cracked screen |
+| data.story.dead_battery.name | Dead battery |
+| data.story.design_phone.title | Design your first phone on the PC |
+| data.story.develop_phone.title | Finish developing the prototype |
+| data.story.diagnose_part.title | Look at the broken device at the bench |
+| data.story.door_open.title | Open the shop door |
+| data.story.first_batch.description | Hand-assemble the first batch at the bench and send it out. |
+| data.story.first_batch.title | First Batch |
+| data.story.first_crate.title | Wait for the first crate |
+| data.story.first_customer.description | The bell on the counter rings. Somebody needs their phone back by tomorrow. |
+| data.story.first_customer.title | First Customer |
+| data.story.fit_part.title | Fit the new part at the bench |
+| data.story.gamer.name | Kit the gamer |
+| data.story.get_paid.title | Return it at the counter and get paid |
+| data.story.grandma.name | Grandma Rosa |
+| data.story.intro_seen.title | Arrive at the garage |
+| data.story.investor_seen.title | Meet the investor |
+| data.story.laptop.name | Laptop |
+| data.story.launch_night.description | The stage is set. Show the world what you built. |
+| data.story.launch_night.title | Launch Night |
+| data.story.launch_phone.title | Launch the phone on stage |
+| data.story.lights_on.title | Turn on the lights |
+| data.story.musician.name | Jo the musician |
+| data.story.notice_pattern.title | Talk about the pattern |
+| data.story.own_phone.description | An investor believes in you. Time to design a phone that does not break. |
+| data.story.own_phone.title | Our Own Phone |
+| data.story.paid_with_part.title | Return the device and get paid |
+| data.story.pattern_repair.title | Fix another broken charging port |
+| data.story.phone.name | Phone |
+| data.story.polish_challenge.title | Optional: hunt bugs at the PC |
+| data.story.publish_phone.title | Publish the design |
+| data.story.qc_challenge.title | Optional: QC inspection at the bench |
+| data.story.queue_batch.title | Start a production batch at the workbench |
+| data.story.repair_device.title | Repair it at the bench |
+| data.story.research_challenge.title | Optional: brainstorm at the whiteboard |
+| data.story.reviews_seen.title | Read what the critics say |
+| data.story.same_fault.description | Another broken charging port. And another. Every phone breaks in the same place. |
+| data.story.same_fault.title | The Same Fault |
+| data.story.second_customer.title | Fix a second device |
+| data.story.ship_crate.title | Carry a crate to the van and ship it |
+| data.story.sign_swapped.title | Hang up the new company sign |
+| data.story.software_glitch.name | Software glitch |
+| data.story.spare_parts.description | This one needs a new screen, and the parts box is empty. |
+| data.story.spare_parts.title | Spare Parts |
+| data.story.start_research.title | Start your first research at the whiteboard |
+| data.story.stuck_button.name | Stuck button |
+| data.story.student.name | Max the student |
+| data.story.tablet.name | Tablet |
+| data.story.take_device.title | Take the device from the counter to the repair bench |
+| data.story.taxi_driver.name | Sam the taxi driver |
+| data.story.teacher.name | Mr. Pell the teacher |
+| data.story.watch.name | Smartwatch |
+| data.story.water_damage.name | Water damage |
+| data.story.workshop.description | Late evening. A garage, a soldering iron and a hand-painted PHONE REPAIR sign. Time to open the shop. |
+| data.story.workshop.title | The Workshop |
 | data.techtree.ai_accel_1.description | Custom NPU blocks: +20% NPU TOPS on self-designed chips. |
 | data.techtree.ai_accel_1.name | AI Accelerator Tier 1 |
 | data.techtree.ai_accel_2.description | Custom NPU blocks: +40% NPU TOPS on self-designed chips. |

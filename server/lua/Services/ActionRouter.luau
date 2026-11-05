@@ -13,6 +13,7 @@ local ProductionRules = require(Shared.Domain.ProductionRules)
 local CompanyService = require(script.Parent.CompanyService)
 local TransactionService = require(script.Parent.TransactionService)
 local GovernanceService = require(script.Parent.GovernanceService)
+local Story = require(Shared.Domain.Story)
 
 local ActionRouter = {}
 
@@ -87,9 +88,18 @@ local function act(operation: string, dirty: { string }, run: (state: Types.Comp
 			end)
 			return GovernanceService.requestApproval(session, player.UserId, "LargeSpend", { action = operation, payload = p }, string.format("%s (about $%s)", operation, tostring(math.floor(cost))))
 		end
-		return TransactionService.execute(session, player.UserId, operation, dirty, noteOf and noteOf(p) or nil, function()
-			return run(session.state, player.UserId, p)
+		local ok, data = TransactionService.execute(session, player.UserId, operation, dirty, noteOf and noteOf(p) or nil, function()
+			local ok2, data2 = run(session.state, player.UserId, p)
+			-- online iteration 3: story steps come from real actions (part of the same transaction)
+			if ok2 then
+				CompanyService.storyAfterAction(session, operation, p, data2)
+			else
+				CompanyService.storyDiscard(session)
+			end
+			return ok2, data2
 		end)
+		CompanyService.emitStory(session)
+		return ok, data
 	end
 end
 
@@ -103,8 +113,7 @@ handlers.setSpeed = function(session, player, payload)
 	if not speed or not Validate.oneOf(tostring(speed), { "0", "1", "2", "4", "8" }) then
 		return false, "Speed must be 0, 1, 2, 4 or 8"
 	end
-	CompanyService.setSpeed(session, speed)
-	return true, nil
+	return CompanyService.setSpeed(session, speed)
 end
 handlers.getSnapshot = function(session, player)
 	CompanyService.sendSnapshot(session, player)
@@ -295,6 +304,13 @@ handlers.getRoomCatalog = function(session) return CompanyActions.roomCatalog(se
 handlers.challengeReward = act("challengeReward", { "challenges", "research", "projects", "production", "inventory" }, function(s, u, p)
 	return CompanyActions.challengeReward(s, p.kind, p.targetId, p.score)
 end, function(p) return str(p.kind) .. " " .. str(p.targetId) end)
+
+-- Online iteration 3: story start + garage repair orders (docs/ACTIONS.md "Story & repairs"; any member, skip = founder)
+handlers.repairTake = act("repairTake", { "repairs" }, function(s, u, p) return Story.repairTake(s, u, str(p.orderId)) end, function(p) return str(p.orderId) end)
+handlers.repairFinish = act("repairFinish", { "repairs", "inventory" }, function(s, u, p) return Story.repairFinish(s, u, str(p.orderId), p.score) end, function(p) return str(p.orderId) end)
+handlers.repairReturn = act("repairReturn", { "repairs" }, function(s, u, p) return Story.repairReturn(s, u, str(p.orderId)) end, function(p) return str(p.orderId) end)
+handlers.storyEvent = act("storyEvent", { "story" }, function(s, u, p) return Story.event(s, p.id) end, function(p) return str(p.id) end)
+handlers.storySkip = act("storySkip", { "story", "repairs", "employees", "time", "news", "office" }, function(s, u, p) return Story.skip(s, u) end)
 
 function ActionRouter.has(action: string): boolean
 	return handlers[action] ~= nil

@@ -152,3 +152,36 @@ modal, so the player stays frozen and the later crate / PC-seat checks fail. Ver
 		bus.ui_modal_changed.emit(false)
 ```
 With it world_smoke passes (checked locally on a temporary copy; the file itself is not mine, so I did not edit it).
+
+## From SERVER agent (iteration 3, story start) — contract: docs/ACTIONS.md "Story & repairs" + "Research points"
+Server side is done and tested (server/tests/test_story.py, test_e2e_story.py). Notes for the client:
+
+### UI agent
+- New company: send `storyMode: true` in `create.company` for "Story start"; omit/false = quick start (unchanged).
+- Title menu slots: `act listMyCompanies {}` works right after `hello` (no company needed) →
+  `[{companyId, code "ABC-123", name, date:{year, day, elapsedDays}, cash, role, lastPlayed (unix s), mode, logo, story:{done, chapter}, online}]`,
+  newest first. Continue a slot = `join {code}` (owners re-enter by room code).
+- Speed while the story clock is paused: `speed` frame → `error` with `key:"err.story_clock_paused"`; `setSpeed` act →
+  `errorKey` the same. `time.speed` is 0 in chapters 0–3 and becomes 1 when chapter 4 starts (investor).
+- Objective tracker: `state.story.objectives` = current chapter `[{id, done, optional}]`, `story.step` = current step,
+  `story.chapterId`; hide when `story.done`. Chapter card on `notify.key == "story.chapter"` (`params.chapter/id`);
+  the chapter 0 card arrives right after `create` (only to the creator — a friend joining later can show the card
+  from state). Toasts: `story.step.done`, `story.investor`, `story.complete`, `story.skipped`, `story.repair.new`,
+  `story.repair.paid` (all keys in docs/LOCALE_KEYS.md, group "Story start").
+- Repair mini-game: `repairFinish {orderId, score}` → `{payout, quality, partUsed, rp}`; error `err.repair_no_part`
+  (`errorParams.part` = part name, `errorParamKeys.part` = `data.resources.repair_<part>.name`) → offer "Buy in Purchasing".
+  Parts `repair_screen/battery/port` are now in `getMaterialQuotes` (3 extra rows, supplier "Gadget Parts Depot").
+- "Skip story" (pause menu): only for the Founder (`joined.you.role == "Founder"`); `storySkip {}`.
+- Daily gift button: `claimDaily {}` (any member) → `{reward:{name, kind, amount, text}, dayIndex, streak, detail}`;
+  `err.already_claimed_today` when used. Research points now also grow every day (`research.points`).
+- `client/tools/export_data.py` (lead/UI): re-running it adds `story`/`repairs` (quick start = done) to sample_state.json.
+
+### WORLD agent
+- Counter / bench: `repairTake {orderId}` when the device leaves the counter for the bench (status waiting → inRepair;
+  in chapter 1 this also brings the next customer), `repairReturn {orderId}` when a `ready` device is handed back at
+  the counter (customer pays, status paid; paid orders stay in the list until 3 newer ones are paid, then disappear).
+  `repairFinish` straight from `waiting` is also accepted (auto-take), so a missing repairTake never blocks the story.
+- NPC customers = `repairs.orders` (customer id, device, status). Random side orders only in story companies,
+  never in quick start / old saves; they stop arriving at HQ level ≥ 2.
+- storyEvent ids the world may send: `door_open`, `lights_on`, `supplier_called` (supplier phone used),
+  `sign_swapped` (sign cutscene done). Unknown ids → `err.story_unknown_event`; repeats are harmless (`counted:false`).

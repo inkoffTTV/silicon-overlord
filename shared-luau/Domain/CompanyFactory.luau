@@ -20,6 +20,7 @@ local Legacy = require(Shared.Domain.Legacy)
 local Office = require(Shared.Domain.Office)
 local Shipping = require(Shared.Domain.Shipping)
 local Challenges = require(Shared.Domain.Challenges)
+local Story = require(Shared.Domain.Story)
 
 local CompanyFactory = {}
 
@@ -51,6 +52,7 @@ export type NewCompanyArgs = {
 	seed: number,
 	now: number,
 	legacy: Types.LegacyProfile?, -- founder's legacy profile (perks applied at creation)
+	storyMode: boolean?, -- online iteration 3: story start (docs/STORY.md); nil/false = quick start
 }
 
 function CompanyFactory.new(args: NewCompanyArgs): Types.CompanyState
@@ -127,6 +129,8 @@ function CompanyFactory.new(args: NewCompanyArgs): Types.CompanyState
 			rep[k] = math.min(100, v + state.legacyMods.reputationBonus)
 		end
 	end
+	-- online iteration 3: story start (small cash, helpers only, paused clock) or quick start (story done)
+	Story.setupNew(state, args.storyMode == true)
 	Office.refresh(state) -- grid placement for the starter furniture (NEXT-PASS-A)
 	return state
 end
@@ -192,11 +196,13 @@ function CompanyFactory.migrate(state: any): Types.CompanyState
 	end
 	template.research.unlocked = {}
 	Office.normalize(state) -- convert count-only office saves before the template fills missing keys (NEXT-PASS-A)
+	local hadStory = type(state.story) == "table" -- online iteration 3: saves without a story are finished stories
 	TableUtil.reconcile(state, template :: any)
 	-- online iteration 2 (idempotent): crates, line locations, employee stations, challenge state
 	Shipping.ensure(state)
 	EmployeeRules.ensureStations(state)
 	Challenges.state(state)
+	Story.ensure(state, hadStory)
 	return state
 end
 

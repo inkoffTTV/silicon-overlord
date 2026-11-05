@@ -955,6 +955,36 @@
   "group": "err"
  },
  {
+  "key": "err.repair_already_paid",
+  "en": "That repair is already paid",
+  "group": "err"
+ },
+ {
+  "key": "err.repair_busy",
+  "en": "That device is already at the bench",
+  "group": "err"
+ },
+ {
+  "key": "err.repair_no_part",
+  "en": "No spare part: buy a {part} in Purchasing",
+  "group": "err"
+ },
+ {
+  "key": "err.repair_not_in_repair",
+  "en": "That device is already repaired",
+  "group": "err"
+ },
+ {
+  "key": "err.repair_not_ready",
+  "en": "That device is not repaired yet",
+  "group": "err"
+ },
+ {
+  "key": "err.repair_unknown_order",
+  "en": "Unknown repair order",
+  "group": "err"
+ },
+ {
   "key": "err.repairabilityfocus_must_be_0_1",
   "en": "repairabilityFocus must be 0..1",
   "group": "err"
@@ -1082,6 +1112,26 @@
  {
   "key": "err.staff_cap_reached_cap_upgrade_the_hq",
   "en": "Staff cap reached ({cap}). Upgrade the HQ.",
+  "group": "err"
+ },
+ {
+  "key": "err.story_already_done",
+  "en": "The story is already finished",
+  "group": "err"
+ },
+ {
+  "key": "err.story_clock_paused",
+  "en": "Story: time starts at chapter 4",
+  "group": "err"
+ },
+ {
+  "key": "err.story_founder_only",
+  "en": "Only the founder can skip the story",
+  "group": "err"
+ },
+ {
+  "key": "err.story_unknown_event",
+  "en": "Unknown story event",
   "group": "err"
  },
  {
@@ -1940,6 +1990,56 @@
   "group": "note"
  },
  {
+  "key": "story.chapter",
+  "en": "Chapter {chapter}: {title}",
+  "group": "story"
+ },
+ {
+  "key": "story.complete",
+  "en": "Story complete!",
+  "group": "story"
+ },
+ {
+  "key": "story.complete.body",
+  "en": "The garage is now {name}. The sandbox is open; repair orders stay as side income.",
+  "group": "story"
+ },
+ {
+  "key": "story.investor",
+  "en": "An investor believes in you",
+  "group": "story"
+ },
+ {
+  "key": "story.investor.body",
+  "en": "+${amount} to build your own phone. The clock is running now.",
+  "group": "story"
+ },
+ {
+  "key": "story.repair.new",
+  "en": "A customer is waiting at the counter",
+  "group": "story"
+ },
+ {
+  "key": "story.repair.paid",
+  "en": "Repair paid: +${amount}",
+  "group": "story"
+ },
+ {
+  "key": "story.skipped",
+  "en": "Story skipped",
+  "group": "story"
+ },
+ {
+  "key": "story.skipped.body",
+  "en": "Full budget, full team, the clock is running. Repair orders stay as side income.",
+  "group": "story"
+ },
+ {
+  "key": "story.step.done",
+  "en": "Objective complete",
+  "group": "story"
+ },
+ {
   "key": "news.24k_gold_200_research_points_no_research_running",
   "en": "24K Gold: +200 research points (no research running)",
   "group": "news"
@@ -2112,6 +2212,36 @@
  {
   "key": "news.stability_stability_optimisation_optimization",
   "en": "Stability {stability}%, optimisation {optimization}%.",
+  "group": "news"
+ },
+ {
+  "key": "news.story_investor",
+  "en": "An investor believes in {name}",
+  "group": "news"
+ },
+ {
+  "key": "news.story_investor_body",
+  "en": "Fresh money and a small team: the garage is about to build its own phone.",
+  "group": "news"
+ },
+ {
+  "key": "news.story_opens",
+  "en": "{name} opens its doors",
+  "group": "news"
+ },
+ {
+  "key": "news.story_opens_body",
+  "en": "A garage, a soldering iron and a hand-painted PHONE REPAIR sign. Fixing phones pays the bills... for now.",
+  "group": "news"
+ },
+ {
+  "key": "news.story_sign_down",
+  "en": "{name} takes down the PHONE REPAIR sign",
+  "group": "news"
+ },
+ {
+  "key": "news.story_sign_down_body",
+  "en": "From fixing other people's phones to launching their own.",
   "group": "news"
  },
  {
@@ -4480,6 +4610,11 @@
   "group": "data"
  },
  {
+  "key": "data.resources.parts_depot.name",
+  "en": "Gadget Parts Depot",
+  "group": "data"
+ },
+ {
   "key": "data.resources.quantix.name",
   "en": "Quantix Foundry",
   "group": "data"
@@ -4487,6 +4622,21 @@
  {
   "key": "data.resources.rare_earth.name",
   "en": "Rare Earth Materials",
+  "group": "data"
+ },
+ {
+  "key": "data.resources.repair_battery.name",
+  "en": "Replacement Battery",
+  "group": "data"
+ },
+ {
+  "key": "data.resources.repair_port.name",
+  "en": "Charging Port",
+  "group": "data"
+ },
+ {
+  "key": "data.resources.repair_screen.name",
+  "en": "Replacement Screen",
   "group": "data"
  },
  {
@@ -4652,6 +4802,316 @@
  {
   "key": "data.rooms.Warehouse.name",
   "en": "Warehouse",
+  "group": "data"
+ },
+ {
+  "key": "data.story.barista.name",
+  "en": "Lou the barista",
+  "group": "data"
+ },
+ {
+  "key": "data.story.blogger.name",
+  "en": "Mia the blogger",
+  "group": "data"
+ },
+ {
+  "key": "data.story.broken_port.name",
+  "en": "Broken charging port",
+  "group": "data"
+ },
+ {
+  "key": "data.story.buy_parts.title",
+  "en": "Buy spare parts in Purchasing",
+  "group": "data"
+ },
+ {
+  "key": "data.story.call_supplier.title",
+  "en": "Call the supplier on the wall phone",
+  "group": "data"
+ },
+ {
+  "key": "data.story.chef.name",
+  "en": "Chef Arno",
+  "group": "data"
+ },
+ {
+  "key": "data.story.courier.name",
+  "en": "Dina the courier",
+  "group": "data"
+ },
+ {
+  "key": "data.story.cracked_screen.name",
+  "en": "Cracked screen",
+  "group": "data"
+ },
+ {
+  "key": "data.story.dead_battery.name",
+  "en": "Dead battery",
+  "group": "data"
+ },
+ {
+  "key": "data.story.design_phone.title",
+  "en": "Design your first phone on the PC",
+  "group": "data"
+ },
+ {
+  "key": "data.story.develop_phone.title",
+  "en": "Finish developing the prototype",
+  "group": "data"
+ },
+ {
+  "key": "data.story.diagnose_part.title",
+  "en": "Look at the broken device at the bench",
+  "group": "data"
+ },
+ {
+  "key": "data.story.door_open.title",
+  "en": "Open the shop door",
+  "group": "data"
+ },
+ {
+  "key": "data.story.first_batch.description",
+  "en": "Hand-assemble the first batch at the bench and send it out.",
+  "group": "data"
+ },
+ {
+  "key": "data.story.first_batch.title",
+  "en": "First Batch",
+  "group": "data"
+ },
+ {
+  "key": "data.story.first_crate.title",
+  "en": "Wait for the first crate",
+  "group": "data"
+ },
+ {
+  "key": "data.story.first_customer.description",
+  "en": "The bell on the counter rings. Somebody needs their phone back by tomorrow.",
+  "group": "data"
+ },
+ {
+  "key": "data.story.first_customer.title",
+  "en": "First Customer",
+  "group": "data"
+ },
+ {
+  "key": "data.story.fit_part.title",
+  "en": "Fit the new part at the bench",
+  "group": "data"
+ },
+ {
+  "key": "data.story.gamer.name",
+  "en": "Kit the gamer",
+  "group": "data"
+ },
+ {
+  "key": "data.story.get_paid.title",
+  "en": "Return it at the counter and get paid",
+  "group": "data"
+ },
+ {
+  "key": "data.story.grandma.name",
+  "en": "Grandma Rosa",
+  "group": "data"
+ },
+ {
+  "key": "data.story.intro_seen.title",
+  "en": "Arrive at the garage",
+  "group": "data"
+ },
+ {
+  "key": "data.story.investor_seen.title",
+  "en": "Meet the investor",
+  "group": "data"
+ },
+ {
+  "key": "data.story.laptop.name",
+  "en": "Laptop",
+  "group": "data"
+ },
+ {
+  "key": "data.story.launch_night.description",
+  "en": "The stage is set. Show the world what you built.",
+  "group": "data"
+ },
+ {
+  "key": "data.story.launch_night.title",
+  "en": "Launch Night",
+  "group": "data"
+ },
+ {
+  "key": "data.story.launch_phone.title",
+  "en": "Launch the phone on stage",
+  "group": "data"
+ },
+ {
+  "key": "data.story.lights_on.title",
+  "en": "Turn on the lights",
+  "group": "data"
+ },
+ {
+  "key": "data.story.musician.name",
+  "en": "Jo the musician",
+  "group": "data"
+ },
+ {
+  "key": "data.story.notice_pattern.title",
+  "en": "Talk about the pattern",
+  "group": "data"
+ },
+ {
+  "key": "data.story.own_phone.description",
+  "en": "An investor believes in you. Time to design a phone that does not break.",
+  "group": "data"
+ },
+ {
+  "key": "data.story.own_phone.title",
+  "en": "Our Own Phone",
+  "group": "data"
+ },
+ {
+  "key": "data.story.paid_with_part.title",
+  "en": "Return the device and get paid",
+  "group": "data"
+ },
+ {
+  "key": "data.story.pattern_repair.title",
+  "en": "Fix another broken charging port",
+  "group": "data"
+ },
+ {
+  "key": "data.story.phone.name",
+  "en": "Phone",
+  "group": "data"
+ },
+ {
+  "key": "data.story.polish_challenge.title",
+  "en": "Optional: hunt bugs at the PC",
+  "group": "data"
+ },
+ {
+  "key": "data.story.publish_phone.title",
+  "en": "Publish the design",
+  "group": "data"
+ },
+ {
+  "key": "data.story.qc_challenge.title",
+  "en": "Optional: QC inspection at the bench",
+  "group": "data"
+ },
+ {
+  "key": "data.story.queue_batch.title",
+  "en": "Start a production batch at the workbench",
+  "group": "data"
+ },
+ {
+  "key": "data.story.repair_device.title",
+  "en": "Repair it at the bench",
+  "group": "data"
+ },
+ {
+  "key": "data.story.research_challenge.title",
+  "en": "Optional: brainstorm at the whiteboard",
+  "group": "data"
+ },
+ {
+  "key": "data.story.reviews_seen.title",
+  "en": "Read what the critics say",
+  "group": "data"
+ },
+ {
+  "key": "data.story.same_fault.description",
+  "en": "Another broken charging port. And another. Every phone breaks in the same place.",
+  "group": "data"
+ },
+ {
+  "key": "data.story.same_fault.title",
+  "en": "The Same Fault",
+  "group": "data"
+ },
+ {
+  "key": "data.story.second_customer.title",
+  "en": "Fix a second device",
+  "group": "data"
+ },
+ {
+  "key": "data.story.ship_crate.title",
+  "en": "Carry a crate to the van and ship it",
+  "group": "data"
+ },
+ {
+  "key": "data.story.sign_swapped.title",
+  "en": "Hang up the new company sign",
+  "group": "data"
+ },
+ {
+  "key": "data.story.software_glitch.name",
+  "en": "Software glitch",
+  "group": "data"
+ },
+ {
+  "key": "data.story.spare_parts.description",
+  "en": "This one needs a new screen, and the parts box is empty.",
+  "group": "data"
+ },
+ {
+  "key": "data.story.spare_parts.title",
+  "en": "Spare Parts",
+  "group": "data"
+ },
+ {
+  "key": "data.story.start_research.title",
+  "en": "Start your first research at the whiteboard",
+  "group": "data"
+ },
+ {
+  "key": "data.story.stuck_button.name",
+  "en": "Stuck button",
+  "group": "data"
+ },
+ {
+  "key": "data.story.student.name",
+  "en": "Max the student",
+  "group": "data"
+ },
+ {
+  "key": "data.story.tablet.name",
+  "en": "Tablet",
+  "group": "data"
+ },
+ {
+  "key": "data.story.take_device.title",
+  "en": "Take the device from the counter to the repair bench",
+  "group": "data"
+ },
+ {
+  "key": "data.story.taxi_driver.name",
+  "en": "Sam the taxi driver",
+  "group": "data"
+ },
+ {
+  "key": "data.story.teacher.name",
+  "en": "Mr. Pell the teacher",
+  "group": "data"
+ },
+ {
+  "key": "data.story.watch.name",
+  "en": "Smartwatch",
+  "group": "data"
+ },
+ {
+  "key": "data.story.water_damage.name",
+  "en": "Water damage",
+  "group": "data"
+ },
+ {
+  "key": "data.story.workshop.description",
+  "en": "Late evening. A garage, a soldering iron and a hand-painted PHONE REPAIR sign. Time to open the shop.",
+  "group": "data"
+ },
+ {
+  "key": "data.story.workshop.title",
+  "en": "The Workshop",
   "group": "data"
  },
  {

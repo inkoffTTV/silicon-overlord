@@ -266,3 +266,142 @@ Errors (friendly, with `errorKey`/`errorParams`, see docs/LOCALE_KEYS.md):
   `daysLeft` = -1 when nothing currently consumes it. `spotPrice` already includes events, research and a pending negotiation discount.
 - Buy now: `buyResources {resourceId, units}` (spot price). Contract: `signContract {supplierId, resourceId, unitsPerWeek, weeks}` (weeks ≥ supplier.minWeeks; longer = up to 10% cheaper, delivered weekly). Cancel: `cancelContract {contractId}`.
 - Production jobs block with `blockedReason = "Out of <material>"` when stock is short.
+
+## Story & repairs — iteration 3 (story start: "From the repair shop to a phone company")
+Design: docs/STORY.md. The server is authoritative: a step is completed only by a real action (or a whitelisted
+`storyEvent` for things only the client can see). Quick start, old saves and joined friends work as before.
+
+### New company: story or quick start
+`{"t":"create","company":{..., "storyMode": true}}` → story start. `storyMode` missing/false = quick start (old clients).
+| | story start | quick start (unchanged) |
+|---|---|---|
+| cash | `Balance.Story.startCash` = **6 000** | `Balance.Start.cash` = 2 500 000 (+ legacy perk) |
+| credit line | 0 (the investor brings the normal 1 000 000) | 1 000 000 |
+| staff | 2 helpers: Researcher + Worker | 5 (2 engineers, researcher, 2 workers) |
+| clock | **paused** (`time.speed = 0`) until chapter 4 | speed 1 |
+| repair orders | yes (scripted in chapters 1–3, then random side income) | none |
+| `story` | `{done:false, mode:"story", chapter:0, ...}` | `{done:true, mode:"quick", chapter:7, ...}` |
+Old saves (no `story` key) load as `{done:true, mode:"legacy", chapter:7}` and never get repair orders.
+
+### State (both are replicated top-level sections, like `challenges`)
+`state.story`
+| field | meaning |
+|---|---|
+| `done` | true = story finished / skipped / quick start / old save → sandbox; hide the objective tracker |
+| `mode` | `"story"` (created with storyMode), `"quick"`, `"legacy"` (old save) |
+| `chapter` | 0..6 while playing; **7** when done |
+| `chapterId` | id of the chapter (table below; `"done"` when done) — use it for texts |
+| `step` | id of the first unfinished **required** step of the current chapter (`""` when done) |
+| `objectives` | current chapter's steps in display order: `[{id, done, optional}]` (`[]`/`{}` when done) |
+| `stepsDone` | `{stepId: true}` — every step completed so far (ids are unique over all chapters) |
+| `flags` | `{investor?:true, skipped?:true, freeResearch?:bool, ...}` (`freeResearch` = the first research is still free) |
+| `startedDay` | `time.elapsedDays` when the story started (0) |
+Steps of a chapter may be completed **in any order** by **any member** (co-op: one takes orders, one repairs).
+When all required steps are done the next chapter starts at once (optional steps may be skipped). Steps of later
+chapters never complete early; on entering a chapter, steps whose result already exists are completed immediately
+(e.g. a research that is already running completes `start_research`).
+
+`state.repairs` = `{orders:[...], done, earned, nextDay}` — `done` = repairs paid so far, `earned` = $ earned,
+`nextDay` = earliest game day of the next random order (internal: `seq`, `rng`). Each order:
+`{id, customer, device, fault, partId?, reward, status, createdDay, chapter?, takenBy?, quality?, payout?, paid?}`
+- `id` e.g. `"rep_3"`; `status`: `"waiting"` (customer at the counter, device on the counter) → `"inRepair"` (taken
+  to the bench) → `"ready"` (repaired, back to the counter) → `"paid"` (customer pays and leaves). Paid orders stay in
+  the list briefly (the 3 newest) so the world can play the "pay & leave" moment, then disappear.
+- `customer` ∈ `grandma, student, courier, teacher, gamer, barista, taxi_driver, musician, chef, blogger`
+  (original NPCs; English fallback names in `shared-luau/Data/Story.luau`, keys `data.story.<id>.name`).
+- `device` ∈ `phone, tablet, laptop, watch`. `fault` ∈ `cracked_screen` (part `screen`), `dead_battery` (part
+  `battery`), `broken_port` (part `port`), `water_damage`, `software_glitch`, `stuck_button` (no part).
+- `partId` (only for faults that need one) → the part resource is `"repair_" .. partId`.
+- `reward` = the price the customer agreed to; `quality` (0..1) and `payout` are set by `repairFinish`; `paid` by `repairReturn`.
+- `chapter` = story chapter of a scripted order (nil for random side orders); `takenBy` = userId.
+- Random side orders (clock running, story companies only): one every 5–9 game days, at most 2 open, only while
+  `hq.level < 2`; a waiting customer leaves after 30 game days.
+
+### Actions (any member unless noted)
+| action | args | data | errors (`errorKey`) |
+|---|---|---|---|
+| repairTake | `{orderId}` | `{order}` → status `inRepair` (device taken from the counter to the bench) | `err.repair_unknown_order`, `err.repair_busy` (not waiting) |
+| repairFinish | `{orderId, score}` score 0..1 from the mini-game (clamped, non-number → 0) | `{order, quality, payout, partUsed, rp}` → status `ready`; consumes 1 `repair_<partId>`; `rp` = research points earned (see Research points) | `err.repair_unknown_order`, `err.repair_not_in_repair` (already finished), `err.repair_no_part` `{part}` (= part resource name: buy it in Purchasing) |
+| repairReturn | `{orderId}` | `{order, paid, cash}` → status `paid`, cash += payout | `err.repair_unknown_order`, `err.repair_not_ready`, `err.repair_already_paid` |
+| storyEvent | `{id}` — whitelist below | `{id, counted}` (`counted` = it completed a step now; repeats / other chapters → `false`) | `err.story_unknown_event` |
+| storySkip | `{}` — **founder only** | `{skipped:true, investor}` → story done instantly with the quick-start economy (cash topped up, team hired, clock running) | `err.story_founder_only`, `err.story_already_done` |
+| listMyCompanies | `{}` — **lobby**: works right after `hello`, also inside a company | `[{companyId, code, name, date:{year, day, elapsedDays}, cash, role, lastPlayed, mode, logo, story:{done, chapter}, online}]` newest first | — |
+`listMyCompanies`: every company where you are an active owner (not liquidated, not left); `code` = room code
+`"ABC-123"` (enter with `join`), `role` = "Founder"/"CoFounder", `lastPlayed` = unix seconds of the last save
+(now for a company that is loaded with players online), `online` = members online now.
+
+Payout: `payout = round(reward × (0.4 + 0.6 × score))` — never more than `reward` (Balance.Story.repairs.minQuality).
+Speed while the clock is paused (story, chapter < 4): `setSpeed` / `speed` frame → error
+`"Story: time starts at chapter 4"` (`err.story_clock_paused`). In chapters 0–3 the first `startResearch` is free
+(`data.free = true`; cancelling it refunds nothing).
+
+### Purchasing: repair parts (resources)
+`repair_screen` "Replacement Screen" (base $38), `repair_battery` "Replacement Battery" ($22), `repair_port`
+"Charging Port" ($9). They appear in `getMaterialQuotes` (spot = base × 1.15, supplier `parts_depot` "Gadget Parts
+Depot" contracts from 4 weeks) and are bought with `buyResources {resourceId:"repair_screen", units:n}`; stock is
+`inventory.resources.repair_screen`. No production uses them. A new story company has 0 of each.
+
+### storyEvent whitelist (client-only moments; each counts once, only in its chapter)
+`intro_seen`, `door_open`, `lights_on`, `supplier_called`, `pattern_noticed`, `investor_seen`, `reviews_seen`, `sign_swapped`
+
+### Chapters and step ids (exact; `opt` = optional)
+| # | chapterId | step id | completed by |
+|---|---|---|---|
+| 0 | `workshop` | `intro_seen` | storyEvent `intro_seen` (intro cutscene watched) |
+| | | `door_open` | storyEvent `door_open` (interactable `shop_door`) |
+| | | `lights_on` | storyEvent `lights_on` (interactable `light_switch`) |
+| 1 | `first_customer` | `take_device` | `repairTake` (any order) |
+| | | `repair_device` | `repairFinish` (any order) |
+| | | `get_paid` | `repairReturn` (any order) |
+| | | `second_customer` | a 2nd repair paid (`repairs.done ≥ 2`) |
+| 2 | `spare_parts` | `diagnose_part` | `repairTake` of an order that needs a part |
+| | | `call_supplier` | storyEvent `supplier_called` (supplier phone used) — also done by `buy_parts` |
+| | | `buy_parts` | `buyResources` of any `repair_*` resource |
+| | | `fit_part` | `repairFinish` of an order with a part (the part is used) |
+| | | `paid_with_part` | `repairReturn` of an order with a part |
+| 3 | `same_fault` | `pattern_repair` | `repairReturn` of a chapter-3 order (the same fault again) |
+| | | `notice_pattern` | storyEvent `pattern_noticed` (the "same fault" dialogue) |
+| | | `start_research` | `startResearch` (free) — or a research already running |
+| | | `research_challenge` opt | `challengeReward {kind:"research"}` |
+| 4 | `own_phone` | `investor_seen` | storyEvent `investor_seen` (investor cutscene; the money already arrived on entering chapter 4) |
+| | | `design_phone` | `createBlueprint` / `copyBlueprint` (or a blueprint exists) |
+| | | `publish_phone` | `publishBlueprint` (or a product exists) |
+| | | `develop_phone` | a product's development project finished (days pass now; `finishProjectNow` too) |
+| | | `polish_challenge` opt | `challengeReward {kind:"design"}` |
+| 5 | `first_batch` | `queue_batch` | `queueProduction` (or a production job exists) |
+| | | `first_crate` | a crate appears in `production.crates` (or units were shipped) |
+| | | `ship_crate` | `shipCrate` / `shipAll` / auto-ship / launch (`production.shippedTotal > 0`) |
+| | | `qc_challenge` opt | `challengeReward {kind:"assembly"}` |
+| 6 | `launch_night` | `launch_phone` | `launchProduct` (or a product is launched) |
+| | | `reviews_seen` | storyEvent `reviews_seen` (critics card closed) |
+| | | `sign_swapped` | storyEvent `sign_swapped` (sign-change cutscene done) → **story complete** |
+
+Scripted orders: ch1 start → `grandma/phone/software_glitch` $60; when it is taken → `student/phone/stuck_button`
+$50. Ch2 start → `courier/phone/cracked_screen` (part `screen`) $140. Ch3 start → `teacher/phone/broken_port` and
+`gamer/phone/broken_port` (part `port`) $70 each. From chapter 4 on (clock running) random side orders.
+Entering chapter 4 = the investor: cash += max(normal start cash − cash, normal start − 6 000) (so earnings are kept and
+cash is at least the quick-start amount), credit line 1 000 000, the rest of the starting team is hired, `time.speed` = 1.
+
+### Notifications (`notify.key`, English `title`/`body` as fallback; category `Story` / `Repair`)
+| key | params | when |
+|---|---|---|
+| `story.step.done` | `{chapter, step}` (`bodyKey` = `data.story.<step>.title`) | a step completed |
+| `story.chapter` | `{chapter, id, title}` (`bodyKey` = `data.story.<id>.description`) | a new chapter started (show the chapter card) |
+| `story.investor` | `{amount}` | chapter 4 investor money arrived, clock started |
+| `story.complete` | `{name}` | story finished (after `sign_swapped`) |
+| `story.skipped` | `{}` | founder skipped the story |
+| `story.repair.new` | `{orderId, customer, device, fault}` + `paramKeys` (`data.story.<id>.name` for customer/device/fault) | a customer put a device on the counter |
+| `story.repair.paid` | `{orderId, amount}` | a repaired device was returned and paid |
+
+## Research points (RP) — iteration 3
+`state.research.points` (whole number; `research.rpFraction` keeps the fractional remainder, internal). RP are spent on
+`boostResearch` (100 RP = +25 % progress), `finishProjectNow`, `fixProjectBug` / `addProjectQuality` (30 / 60 RP),
+`rerollCandidates` (20 RP) and the token shop. Sources:
+| source | amount | where |
+|---|---|---|
+| research staff (passive) | every employee with `station:"research"`: `Balance.Research.rpPerResearcherPerDay` (1.0) × (1 + 0.15 × ResearchLab level) RP per game day (lab 1 → 1.15) | every simulated day (not while the story clock is paused) |
+| a technology finishes | `5 × tier` RP (`Balance.Research.rpPerTechTier`) | the day the research completes (notify "Research complete: …") |
+| repair orders (story companies) | `3 × score` RP per finished repair (perfect repair = 3; `Balance.Story.repairs.rpPerfect`) | `repairFinish` → `data.rp` = whole points added now |
+| daily gift | `claimDaily {}` → `{reward:{name, kind, amount}, dayIndex, streak, detail, streakBonus}`; kinds `cash` / `rp` / `mystery` / `influencer` / `gold`. Once per real (UTC) day per company; one missed day per week keeps the streak; error `"Already claimed today"` (`err.already_claimed_today`). Button state: claimable when `state.daily.lastClaimUnix` is 0 or on an earlier UTC day; next gift = `daily.dayIndex` (1..7, `shared-luau/Data/DailyRewards.luau`) | any member, any time (also during the story) |
+| goals / missions / challenges | as before (goal rewards, token-shop items, research challenge credit) | — |
+The `research` section is replicated on every day the points change.

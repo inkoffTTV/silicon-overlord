@@ -95,6 +95,7 @@ function Host.createCompany(userId, args, nameChecked)
 	local session = CompanyService.create({
 		id = p.id, name = p.name, logo = logo, mode = mode, founderUserId = userId, founderName = player.DisplayName,
 		founderShare = share, seed = tonumber(p.seed) or (os.time() % 1000000 + userId % 1000), now = os.time(), legacy = profile and profile.legacy or nil,
+		storyMode = p.storyMode == true, -- online iteration 3
 	})
 	if profile then
 		profile.companyId = session.id
@@ -102,6 +103,7 @@ function Host.createCompany(userId, args, nameChecked)
 	end
 	CompanyService.addMember(session, player)
 	LegacyService.sendProfile(player)
+	CompanyService.emitStory(session) -- story start: the chapter 0 card
 	return true, session.id
 end
 
@@ -352,7 +354,8 @@ for name in pairs(RemoteRegistry.ActionPermission) do
 	known[name] = true
 end
 for _, name in ipairs({ "setSpeed", "getSnapshot", "setTutorialStep", "evaluateBlueprint", "respondApproval", "leaveCompany", "getAudit", "claimDaily", "takePerk", "getProfile", "buyTokenItem",
-	"shipCrate", "shipAll", "getRoomCatalog", "challengeReward", "getMaterialQuotes" }) do
+	"shipCrate", "shipAll", "getRoomCatalog", "challengeReward", "getMaterialQuotes",
+	"repairTake", "repairFinish", "repairReturn", "storyEvent", "storySkip" }) do
 	known[name] = true
 end
 

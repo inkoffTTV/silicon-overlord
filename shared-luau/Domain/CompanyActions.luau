@@ -32,6 +32,7 @@ local Competitors = require(Shared.Data.Competitors)
 local Development = require(Shared.Domain.Development)
 local Shipping = require(Shared.Domain.Shipping)
 local Challenges = require(Shared.Domain.Challenges)
+local Story = require(Shared.Domain.Story)
 
 local CompanyActions = {}
 
@@ -74,11 +75,20 @@ function CompanyActions.startResearch(c: Types.CompanyState, userId: number, tec
 	end
 	local quarters = math.floor(c.time.elapsedDays / Balance.Time.daysPerQuarter)
 	local cost = ResearchRules.cost(tech, quarters)
+	local free = Story.freeResearchAvailable(c) -- online iteration 3: the story's first research is free
+	if free then
+		cost = 0
+	end
 	if not spend(c, cost) then
 		return fail(string.format("Not enough cash: research costs $%.0f", cost))
 	end
-	c.research.active[#c.research.active + 1] = { techId = techId, progress = 0, startedDay = c.time.elapsedDays, assignedBy = userId, collaborators = { [tostring(userId)] = true } }
-	return true, { cost = cost, days = ResearchRules.days(tech) }
+	local job: any = { techId = techId, progress = 0, startedDay = c.time.elapsedDays, assignedBy = userId, collaborators = { [tostring(userId)] = true } }
+	if free then
+		job.free = true
+		Story.useFreeResearch(c)
+	end
+	c.research.active[#c.research.active + 1] = job
+	return true, { cost = cost, days = ResearchRules.days(tech), free = free or nil }
 end
 
 function CompanyActions.joinResearch(c: Types.CompanyState, userId: number, techId: string): (boolean, any)
@@ -96,7 +106,8 @@ function CompanyActions.cancelResearch(c: Types.CompanyState, techId: string): (
 		if job.techId == techId then
 			table.remove(c.research.active, i)
 			local tech = TechTree.byId[techId]
-			local refund = ResearchRules.cost(tech, 0) * 0.5 * (1 - job.progress)
+			local jobAny: any = job
+			local refund = jobAny.free and 0 or ResearchRules.cost(tech, 0) * 0.5 * (1 - job.progress) -- a free story research refunds nothing
 			c.finance.cash = c.finance.cash + refund
 			return true, { refund = refund }
 		end

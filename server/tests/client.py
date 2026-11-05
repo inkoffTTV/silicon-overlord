@@ -118,9 +118,12 @@ class Client:
         await self.send(msg)
         return await self.wait_frame("welcome", after=n)
 
-    async def create(self, name, mode="solo"):
+    async def create(self, name, mode="solo", story=None):
         n = len(self.frames)
-        await self.send({"t": "create", "company": {"name": name, "colorA": "#2F80ED", "colorB": "#56CCF2", "mode": mode}})
+        company = {"name": name, "colorA": "#2F80ED", "colorB": "#56CCF2", "mode": mode}
+        if story is not None:
+            company["storyMode"] = story
+        await self.send({"t": "create", "company": company})
         await self.wait_for(lambda: any(f["t"] in ("joined", "error") for f in self.frames[n:]), 5, "joined")
         await self.wait_frame("snapshot", after=n)
         return self.joined

@@ -1,0 +1,861 @@
+{
+ "lang": "en",
+ "version": 1,
+ "speakers": {
+  "narrator": {
+   "name": "",
+   "voice": 901709
+  },
+  "radio": {
+   "name": "Night Shift FM",
+   "voice": 900977
+  },
+  "mira": {
+   "name": "Aunt Mira",
+   "voice": 900573
+  },
+  "felix": {
+   "name": "Uncle Felix",
+   "voice": 901266
+  },
+  "zip": {
+   "name": "Zip",
+   "voice": 901509
+  },
+  "critic": {
+   "name": "Vera Benchmark",
+   "voice": 901258
+  }
+ },
+ "chapters": [
+  {
+   "id": 0,
+   "key": "workshop",
+   "title": "The Workshop",
+   "subtitle": "2 a.m., a garage and a hand-painted sign: PHONE REPAIR",
+   "steps": [
+    {
+     "id": "intro_seen",
+     "optional": false,
+     "objective": "Arrive at the garage",
+     "hint": "",
+     "lines": []
+    },
+    {
+     "id": "door_open",
+     "optional": false,
+     "objective": "Open the shop door",
+     "hint": "Walk to the door and press E. Too dark? F turns on the flashlight.",
+     "lines": [
+      {
+       "id": "step.door_open.1",
+       "speaker": "mira",
+       "text": "The door sticks. Lift the handle and push. The garage respects confidence."
+      }
+     ]
+    },
+    {
+     "id": "lights_on",
+     "optional": false,
+     "objective": "Turn on the lights",
+     "hint": "The switch is on the wall by the door. Look at it and press E.",
+     "lines": [
+      {
+       "id": "step.lights_on.1",
+       "speaker": "mira",
+       "text": "Let there be light! A repair shop in the dark is just a scary garage."
+      },
+      {
+       "id": "step.lights_on.2",
+       "speaker": "mira",
+       "text": "Bench, counter, bell. The bell is the most important tool here. Trust me."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": 1,
+   "key": "first_customer",
+   "title": "First Customer",
+   "subtitle": "Somebody dropped something. Again.",
+   "steps": [
+    {
+     "id": "take_device",
+     "optional": false,
+     "objective": "Take the device from the counter",
+     "hint": "Press E at the counter to accept the order, then carry the device to the bench.",
+     "lines": [
+      {
+       "id": "step.take_device.1",
+       "speaker": "mira",
+       "text": "Ding-ding! Your first customer. Smile, they can smell fear. And solder."
+      }
+     ]
+    },
+    {
+     "id": "repair_device",
+     "optional": false,
+     "objective": "Repair it at the bench",
+     "hint": "Put it on the repair bench and press E: open it up, find the fault, fix it, close it.",
+     "lines": [
+      {
+       "id": "step.repair_device.1",
+       "speaker": "mira",
+       "text": "Lamp on, magnifier down. Screws go in the cup, not in your pocket."
+      }
+     ]
+    },
+    {
+     "id": "get_paid",
+     "optional": false,
+     "objective": "Return it at the counter and get paid",
+     "hint": "Carry it back and press E at the counter. A neater repair pays more.",
+     "lines": [
+      {
+       "id": "step.get_paid.1",
+       "speaker": "mira",
+       "text": "Fixed? Now the best part: a happy face and real money."
+      }
+     ]
+    },
+    {
+     "id": "second_customer",
+     "optional": false,
+     "objective": "Fix a second device",
+     "hint": "Playing together? One of you takes orders, another repairs. Faster than heroics.",
+     "lines": [
+      {
+       "id": "step.second_customer.1",
+       "speaker": "mira",
+       "text": "Word travels fast on this street. Here comes another one."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": 2,
+   "key": "spare_parts",
+   "title": "Spare Parts",
+   "subtitle": "You can't fix a screen with good intentions",
+   "steps": [
+    {
+     "id": "diagnose_part",
+     "optional": false,
+     "objective": "Take the new order to the bench",
+     "hint": "Press E at the counter, then take a close look at the device on the bench.",
+     "lines": [
+      {
+       "id": "step.diagnose_part.1",
+       "speaker": "mira",
+       "text": "Ooh, that one's crunchy. I think it needs a new part, not just a screwdriver."
+      }
+     ]
+    },
+    {
+     "id": "call_supplier",
+     "optional": false,
+     "objective": "Call the supplier on the wall phone",
+     "hint": "Press E on the phone on the wall. It opens Purchasing.",
+     "lines": [
+      {
+       "id": "step.call_supplier.1",
+       "speaker": "mira",
+       "text": "No screens left? You can't fix glass with good intentions."
+      },
+      {
+       "id": "step.call_supplier.2",
+       "speaker": "mira",
+       "text": "Call Zip. Zip answers at any hour. I'm not sure Zip sleeps at all."
+      }
+     ]
+    },
+    {
+     "id": "buy_parts",
+     "optional": false,
+     "objective": "Buy spare parts in Purchasing",
+     "hint": "Find the screens in the list and buy a few. A handful is plenty for now.",
+     "lines": [
+      {
+       "id": "step.buy_parts.1",
+       "speaker": "zip",
+       "text": "Zip Parts, Zip speaking! Screens, batteries, ports. What broke, friend?"
+      },
+      {
+       "id": "step.buy_parts.2",
+       "speaker": "zip",
+       "text": "Delivered before your tea gets cold. Unless it's iced tea. Then it's a race."
+      }
+     ]
+    },
+    {
+     "id": "fit_part",
+     "optional": false,
+     "objective": "Fit the new part at the bench",
+     "hint": "Back to the bench: the new part goes in during the repair.",
+     "lines": [
+      {
+       "id": "step.fit_part.1",
+       "speaker": "mira",
+       "text": "Old glass out, new glass in. Gently. It's thinner than my patience."
+      }
+     ]
+    },
+    {
+     "id": "paid_with_part",
+     "optional": false,
+     "objective": "Return the device and get paid",
+     "hint": "The price covers the part, so you still make a profit. Good business!",
+     "lines": [
+      {
+       "id": "step.paid_with_part.1",
+       "speaker": "mira",
+       "text": "Your customer is still waiting. Bravely. Let's not test that bravery."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": 3,
+   "key": "same_fault",
+   "title": "The Same Fault",
+   "subtitle": "Every phone breaks in the same place. Interesting…",
+   "steps": [
+    {
+     "id": "pattern_repair",
+     "optional": false,
+     "objective": "Fix another broken charging port",
+     "hint": "Two customers, two broken ports. Out of ports? Buy more in Purchasing.",
+     "lines": [
+      {
+       "id": "step.pattern_repair.1",
+       "speaker": "mira",
+       "text": "Two customers at once, and both with broken charging ports. Hmm."
+      }
+     ]
+    },
+    {
+     "id": "notice_pattern",
+     "optional": false,
+     "objective": "Talk about the pattern",
+     "hint": "Listen to Aunt Mira. Something is going on with these phones.",
+     "lines": [
+      {
+       "id": "step.notice_pattern.1",
+       "speaker": "mira",
+       "text": "Same port, same wobble, same model. Third one this week."
+      },
+      {
+       "id": "step.notice_pattern.2",
+       "speaker": "mira",
+       "text": "Phones are designed by people who never drop phones. You drop them daily. That's an advantage."
+      },
+      {
+       "id": "step.notice_pattern.3",
+       "speaker": "mira",
+       "text": "You fix them one by one. What if you built one that doesn't break?"
+      }
+     ]
+    },
+    {
+     "id": "start_research",
+     "optional": false,
+     "objective": "Start your first research at the whiteboard",
+     "hint": "Press E at the whiteboard and pick a technology. The first one is free.",
+     "lines": [
+      {
+       "id": "step.start_research.1",
+       "speaker": "mira",
+       "text": "Fixing one phone is a repair. Fixing all of them is called research."
+      }
+     ]
+    },
+    {
+     "id": "research_challenge",
+     "optional": true,
+     "objective": "Brainstorm at the whiteboard",
+     "hint": "A quick mini-game pushes the research forward. Optional, but fun.",
+     "lines": [
+      {
+       "id": "step.research_challenge.1",
+       "speaker": "mira",
+       "text": "Markers out! Bad ideas first: they're blocking the door for the good ones."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": 4,
+   "key": "own_phone",
+   "title": "Our Own Phone",
+   "subtitle": "What if we built one that doesn't break?",
+   "steps": [
+    {
+     "id": "investor_seen",
+     "optional": false,
+     "objective": "Meet the visitor at the door",
+     "hint": "",
+     "lines": []
+    },
+    {
+     "id": "design_phone",
+     "optional": false,
+     "objective": "Design your first phone on the PC",
+     "hint": "PC → Design Studio. The defaults work; just fix what your customers hated.",
+     "lines": [
+      {
+       "id": "step.design_phone.1",
+       "speaker": "felix",
+       "text": "Remember the wobbly ports and the batteries that die by noon? Start there."
+      }
+     ]
+    },
+    {
+     "id": "publish_phone",
+     "optional": false,
+     "objective": "Publish the design",
+     "hint": "On the last step press \"Begin development\". Your prototype is on its way.",
+     "lines": [
+      {
+       "id": "step.publish_phone.1",
+       "speaker": "mira",
+       "text": "A name, a price and one button. The scariest button in this garage."
+      }
+     ]
+    },
+    {
+     "id": "develop_phone",
+     "optional": false,
+     "objective": "Finish developing the prototype",
+     "hint": "The clock runs now: speed it up, or help with a bug hunt at the PC.",
+     "lines": [
+      {
+       "id": "step.develop_phone.1",
+       "speaker": "felix",
+       "text": "Development is like soup. Don't lift the lid every five minutes."
+      }
+     ]
+    },
+    {
+     "id": "polish_challenge",
+     "optional": true,
+     "objective": "Hunt bugs at the PC",
+     "hint": "Sit on the PC chair for a quick bug hunt. Optional.",
+     "lines": [
+      {
+       "id": "step.polish_challenge.1",
+       "speaker": "felix",
+       "text": "Found a bug? Good. Better you than the critics."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": 5,
+   "key": "first_batch",
+   "title": "First Batch",
+   "subtitle": "Handmade, one tiny screw at a time",
+   "steps": [
+    {
+     "id": "queue_batch",
+     "optional": false,
+     "objective": "Start a batch at the workbench",
+     "hint": "Press E at the workbench, pick your phone and a quantity. Materials come from Purchasing.",
+     "lines": [
+      {
+       "id": "step.queue_batch.1",
+       "speaker": "mira",
+       "text": "Hand assembly! Like the old days, only with fewer burns. Hopefully."
+      }
+     ]
+    },
+    {
+     "id": "first_crate",
+     "optional": false,
+     "objective": "Wait for the first crate",
+     "hint": "Finished phones are packed into crates next to the workbench.",
+     "lines": [
+      {
+       "id": "step.first_crate.1",
+       "speaker": "mira",
+       "text": "Every phone in that crate was made by your hands. Strange feeling, right?"
+      }
+     ]
+    },
+    {
+     "id": "ship_crate",
+     "optional": false,
+     "objective": "Carry a crate to the van and ship it",
+     "hint": "Grab the crate and put it in the van. Careful handling gives +5% units.",
+     "lines": [
+      {
+       "id": "step.ship_crate.1",
+       "speaker": "felix",
+       "text": "Gently! That box is our future. And my investment. Mostly my investment."
+      }
+     ]
+    },
+    {
+     "id": "qc_challenge",
+     "optional": true,
+     "objective": "QC inspection at the bench",
+     "hint": "Spot the faulty phones for a few extra units. Optional.",
+     "lines": [
+      {
+       "id": "step.qc_challenge.1",
+       "speaker": "mira",
+       "text": "Check every phone as if a customer will drop it. Because they will."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": 6,
+   "key": "launch_night",
+   "title": "Launch Night",
+   "subtitle": "Spotlights, critics and a brand-new sign",
+   "steps": [
+    {
+     "id": "launch_phone",
+     "optional": false,
+     "objective": "Launch your phone on stage",
+     "hint": "Press E at the stage when you're ready. The critics are already seated.",
+     "lines": [
+      {
+       "id": "step.launch_phone.1",
+       "speaker": "critic",
+       "text": "Good evening, I'm Vera Benchmark. Three thousand phones reviewed. Every single one dropped."
+      },
+      {
+       "id": "step.launch_phone.2",
+       "speaker": "critic",
+       "text": "A team from a garage? Let's see if it survives my pocket. And my stairs."
+      }
+     ]
+    },
+    {
+     "id": "reviews_seen",
+     "optional": false,
+     "objective": "Read what the critics say",
+     "hint": "Whatever the score, you shipped a real phone. Most people only talk about it.",
+     "lines": [
+      {
+       "id": "step.reviews_seen.1",
+       "speaker": "critic",
+       "text": "Off the record: I dropped it twice on the way here. Respect."
+      }
+     ]
+    },
+    {
+     "id": "sign_swapped",
+     "optional": false,
+     "objective": "Hang up the new company sign",
+     "hint": "Watch the old sign come down.",
+     "lines": [
+      {
+       "id": "step.sign_swapped.1",
+       "speaker": "mira",
+       "text": "One more thing, my dears. That old sign doesn't fit you anymore."
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "customers": [
+  {
+   "id": "grandma",
+   "voice": 900575,
+   "deviceId": "phone",
+   "faultId": "software_glitch",
+   "name": "Grandma Rosa",
+   "device": "Phone (a gift from her grandson)",
+   "fault": "Calls her ex-husband by itself. They split up in 1979",
+   "lines": {
+    "arrive": "Good evening, dears! My grandson says this is a phone. I mostly use it to crack walnuts.",
+    "story": "It keeps calling my ex-husband all by itself. We split up in 1979! He's very confused.",
+    "wait": "Take your time. I brought pies. Well, I brought pies for me.",
+    "happy": "Wonderful! Here's {money}. And a pie. Don't tell my grandson about the walnuts.",
+    "angry": "In my day repairs were quicker. And walnuts were softer."
+   }
+  },
+  {
+   "id": "student",
+   "voice": 900621,
+   "deviceId": "phone",
+   "faultId": "stuck_button",
+   "name": "Max the Student",
+   "device": "Phone covered in stickers",
+   "fault": "Side button stuck after a thousand snoozed alarms",
+   "lines": {
+    "arrive": "Hi… sorry, I slept two hours. Can phones be fixed on a student budget?",
+    "story": "I snoozed my alarm so many times the button just gave up. Now it's stuck forever.",
+    "wait": "I'll just close my eyes for a second. Wake me when it's ready. Or never.",
+    "happy": "You're heroes! Here's {money}. That was my whole noodle budget for the week.",
+    "angry": "I could have slept through this whole repair. I almost did."
+   }
+  },
+  {
+   "id": "courier",
+   "voice": 901656,
+   "deviceId": "phone",
+   "faultId": "cracked_screen",
+   "name": "Dina the Courier",
+   "device": "Phone held together with tape",
+   "fault": "Dropped it carrying a cake up nine floors. The cake survived",
+   "lines": {
+    "arrive": "Quick, quick! I've got four minutes and eleven parcels.",
+    "story": "I carried a cake up nine floors and dropped my phone on the last step. The cake survived!",
+    "wait": "My break is four minutes. Three now. Two and a half…",
+    "happy": "Like new! Here's {money}. Five stars, and I'm giving them fast!",
+    "angry": "Too slow! I could have delivered forty pizzas by now."
+   }
+  },
+  {
+   "id": "teacher",
+   "voice": 900906,
+   "deviceId": "phone",
+   "faultId": "broken_port",
+   "name": "Mr. Pell the Teacher",
+   "device": "Phone in a very sensible case",
+   "fault": "Charging port packed with thirty years of chalk dust",
+   "lines": {
+    "arrive": "Good evening. No rush, please. Patience is the first thing I teach. Spelling is the second.",
+    "story": "The charging port is full of chalk dust. Thirty years at the blackboard. The chalk finally won.",
+    "wait": "While we wait: who can name three parts of a phone? Hands up, please.",
+    "happy": "Excellent work. Here's {money}. An A-plus, and I almost never give those.",
+    "angry": "I will grade this repair later. Expect a C minus."
+   }
+  },
+  {
+   "id": "gamer",
+   "voice": 901217,
+   "deviceId": "phone",
+   "faultId": "broken_port",
+   "name": "Kit the Gamer",
+   "device": "Gaming phone with RGB lights",
+   "fault": "\"Didn't throw it, it flew.\" The port left with the cable",
+   "lines": {
+    "arrive": "Hey. Okay, first of all: I didn't throw it. It flew.",
+    "story": "The cable stayed in the wall and the charging port kind of… went with it. Lag did this.",
+    "wait": "Is there Wi-Fi here? Asking for my other phone.",
+    "happy": "GG! It charges! Here's {money}. That's a week of lunch money, you know.",
+    "angry": "Laaag. Even my grandma's router is faster."
+   }
+  },
+  {
+   "id": "barista",
+   "voice": 901011,
+   "deviceId": "watch",
+   "faultId": "water_damage",
+   "name": "Lou the Barista",
+   "device": "Smartwatch that smells of espresso",
+   "fault": "Dipped it in the milk jug while making latte art",
+   "lines": {
+    "arrive": "Hi-hi! I brought you coffee. Well, I brought me coffee, but you can smell it.",
+    "story": "I was drawing a heart on a latte and dipped my wrist right into the milk. Now it's a milkshake watch.",
+    "wait": "This is longer than a triple espresso. But shorter than decaf. I'm fine.",
+    "happy": "You're the best! Here's {money}. Free cappuccinos for you all week.",
+    "angry": "My coffee went cold. My heart did too. A little."
+   }
+  },
+  {
+   "id": "taxi_driver",
+   "voice": 901313,
+   "deviceId": "phone",
+   "faultId": "dead_battery",
+   "name": "Sam the Taxi Driver",
+   "device": "Phone on a dashboard mount",
+   "fault": "Navigation on 16 hours a day. The battery has seen the whole city",
+   "lines": {
+    "arrive": "Evening, chief! Sam the taxi. I know every street in this city and every pothole by name.",
+    "story": "Navigation runs sixteen hours a day. This battery has seen more of the city than I have.",
+    "wait": "I once drove a famous singer down this street. Can't say who. Starts with a letter.",
+    "happy": "Top service! Here's {money}. Need a ride anywhere? Half price, for you.",
+    "angry": "The meter's running, friends! Well, it would be, in my taxi."
+   }
+  },
+  {
+   "id": "musician",
+   "voice": 900431,
+   "deviceId": "laptop",
+   "faultId": "cracked_screen",
+   "name": "Jo the Drummer",
+   "device": "Laptop covered in band stickers",
+   "fault": "A drumstick flew off during a solo. Right into the screen",
+   "lines": {
+    "arrive": "Yo! Jo, drummer. Don't worry, I left my drums at home. Mostly.",
+    "story": "Epic drum solo, the stick slipped and flew straight into my laptop screen. Best solo of my life, though.",
+    "wait": "Ba-dum-tss. Sorry, I drum on everything when I wait.",
+    "happy": "Sounds perfect! Here's {money}. You're all on the guest list now.",
+    "angry": "This repair is slower than our bass player. And that's saying something."
+   }
+  },
+  {
+   "id": "chef",
+   "voice": 901216,
+   "deviceId": "tablet",
+   "faultId": "broken_port",
+   "name": "Chef Arno",
+   "device": "Recipe tablet in a flour-dusted case",
+   "fault": "The charging port is packed with flour",
+   "lines": {
+    "arrive": "Good evening, my friends! Chef Arno. I trust you with this like I trust my best knife.",
+    "story": "My tablet helped me make dumplings. Now the charging port is packed with flour.",
+    "wait": "Patience is like dough, my friends. Leave it alone and it rises.",
+    "happy": "Chef's kiss! Here's {money}. Come eat at my place. Tablets stay away from the dough.",
+    "angry": "Overcooked! Like this repair. Far too long, my friends."
+   }
+  },
+  {
+   "id": "blogger",
+   "voice": 900873,
+   "deviceId": "phone",
+   "faultId": "cracked_screen",
+   "name": "Mia the Blogger",
+   "device": "Phone with three ring lights",
+   "fault": "Selfie stick vs. ceiling fan. The fan won",
+   "lines": {
+    "arrive": "Hiii, chat! We're at a real repair shop! Say hi to my followers!",
+    "story": "My selfie stick met a ceiling fan. The fan won. Can I film you fixing it?",
+    "wait": "Waiting content! So authentic. Okay, I'm bored.",
+    "happy": "Obsessed! Here's {money}. I'm tagging you in everything.",
+    "angry": "Unfollowing you. Emotionally."
+   }
+  }
+ ],
+ "devices": {
+  "phone": "Phone",
+  "tablet": "Tablet",
+  "laptop": "Laptop",
+  "watch": "Smartwatch"
+ },
+ "faults": {
+  "cracked_screen": {
+   "name": "Cracked screen",
+   "part": "screen",
+   "story": "Long story. Goat yoga. A goat stepped on it. The goat is fine."
+  },
+  "dead_battery": {
+   "name": "Dead battery",
+   "part": "battery",
+   "story": "It counted forty thousand steps and died. I think it's just tired."
+  },
+  "broken_port": {
+   "name": "Broken charging port",
+   "part": "port",
+   "story": "A toddler at a party tried to charge it with a banana. The banana is fine."
+  },
+  "water_damage": {
+   "name": "Water damage",
+   "part": null,
+   "story": "The box said waterproof. The lake disagreed."
+  },
+  "software_glitch": {
+   "name": "Software glitch",
+   "part": null,
+   "story": "Since Tuesday it only speaks German. I don't. It seems happy, though."
+  },
+  "stuck_button": {
+   "name": "Stuck button",
+   "part": null,
+   "story": "My cat slept on it all week. The button gave up before the cat did."
+  }
+ },
+ "parts": {
+  "screen": "Replacement screen",
+  "battery": "Replacement battery",
+  "port": "Charging port"
+ },
+ "cutscenes": {
+  "intro": {
+   "captions": [
+    {
+     "id": "cut.intro.1",
+     "speaker": "radio",
+     "text": "Night Shift FM, two a.m. Somewhere out there, a phone just slipped into a bathtub."
+    },
+    {
+     "id": "cut.intro.2",
+     "speaker": "radio",
+     "text": "And somewhere, a few friends are opening a repair shop in a garage. Good luck, night owls."
+    },
+    {
+     "id": "cut.intro.3",
+     "speaker": "narrator",
+     "text": "A quiet street. A rented garage. A hand-painted sign: PHONE REPAIR."
+    },
+    {
+     "id": "cut.intro.4",
+     "speaker": "mira",
+     "text": "The garage is yours, my dears. Rent is cheap: fix my kettle once a month."
+    },
+    {
+     "id": "cut.intro.5",
+     "speaker": "narrator",
+     "text": "Tonight the shop opens. Tomorrow? Nobody knows yet."
+    }
+   ]
+  },
+  "investor": {
+   "captions": [
+    {
+     "id": "cut.investor.1",
+     "speaker": "narrator",
+     "text": "A very quiet car stops outside. Electric, shiny and clearly expensive."
+    },
+    {
+     "id": "cut.investor.2",
+     "speaker": "felix",
+     "text": "Evening! I'm Felix, Mira's brother. She says you fix phones at 2 a.m. and talk to them kindly."
+    },
+    {
+     "id": "cut.investor.3",
+     "speaker": "felix",
+     "text": "I made my fortune on robot vacuums. They kept getting stuck under sofas, so I fixed that."
+    },
+    {
+     "id": "cut.investor.4",
+     "speaker": "felix",
+     "text": "I don't invest in companies. I invest in people who open things up just to see why they broke."
+    },
+    {
+     "id": "cut.investor.5",
+     "speaker": "felix",
+     "text": "Here's {money}. Build a phone I can't break. I'll try very, very hard."
+    },
+    {
+     "id": "cut.investor.6",
+     "speaker": "mira",
+     "text": "He broke three of my kettles. Believe me, he will try."
+    },
+    {
+     "id": "cut.investor.7",
+     "speaker": "narrator",
+     "text": "The calendar starts ticking. Rent, rivals and salaries are real from today."
+    }
+   ]
+  },
+  "sign_swap": {
+   "captions": [
+    {
+     "id": "cut.sign_swap.1",
+     "speaker": "mira",
+     "text": "Careful with the old sign. It's older than your soldering iron."
+    },
+    {
+     "id": "cut.sign_swap.2",
+     "speaker": "narrator",
+     "text": "PHONE REPAIR comes down. {company} goes up."
+    },
+    {
+     "id": "cut.sign_swap.3",
+     "speaker": "felix",
+     "text": "Same garage, bigger plans. I'll be in the car. Crying a little."
+    },
+    {
+     "id": "cut.sign_swap.4",
+     "speaker": "mira",
+     "text": "Keep the counter, though. Old customers will still bring you cracked screens."
+    },
+    {
+     "id": "cut.sign_swap.5",
+     "speaker": "radio",
+     "text": "Night Shift FM: a brand-new phone company on our street. Two a.m. never looked so bright."
+    },
+    {
+     "id": "cut.sign_swap.6",
+     "speaker": "narrator",
+     "text": "The story is over. The garage is yours. Now build something huge."
+    }
+   ]
+  }
+ },
+ "tips": [
+  "The current objective glows softly. When in doubt, follow the glow.",
+  "Left mouse grabs things, right mouse turns them. Yes, you can throw them. Not customers' phones, please.",
+  "F turns on the flashlight. The garage has dark corners on purpose.",
+  "E works on almost everything: doors, the counter, the bench, the PC, the whiteboard and the van.",
+  "Tab opens the quick menu with all the company screens.",
+  "T opens the chat. Every line you type is spoken out loud by your character.",
+  "Invite friends with the room code from the top bar. A company can have up to four founders.",
+  "Playing together? One of you takes orders at the counter, another repairs. Teamwork beats heroics.",
+  "A neat repair pays more: the mini-game score decides how much of the price the customer pays.",
+  "Out of screens or batteries? Call the supplier on the garage phone and buy parts in Purchasing.",
+  "Crates reach the shops only after they're shipped. Carry them to the van for +5% units.",
+  "Crates left in the garage ship by themselves after a week, but without the careful-handling bonus.",
+  "Challenges at the PC, the whiteboard and the workbench speed things up. Each one has a cooldown.",
+  "The Design Studio shows the critics' forecast after every choice. Check it before you publish.",
+  "Supplier contracts can be up to 10% cheaper than buying at the spot price.",
+  "In a co-founder company, big spends need every founder's approval.",
+  "Bugs found during development can be fixed with research points, or by a Bug Fixer over time.",
+  "Hire people at the job board. Happy staff work better; underpaid staff work… creatively.",
+  "The workbench is only the beginning: the second floor has room for real production lines.",
+  "Rivals launch phones too. Look at their prices before you set yours.",
+  "Story mode: the company clock starts in chapter 4. Until then, take all the time you need.",
+  "After the story, repair orders still come in. Small side money until the company outgrows the garage.",
+  "Fact: 90% of repair is unscrewing things. The other 10% is looking for the screw you dropped.",
+  "If a customer says \"I didn't do anything, it just broke\", it fell into water.",
+  "A good phone is one you'd buy yourself. A great one is one your grandma can use.",
+  "Coffee doesn't speed up the game clock. It just feels like it does.",
+  "The bell on the counter has never been repaired. It doesn't need repairs. It's perfect."
+ ],
+ "credits": {
+  "title": "Silicon Overlord Online",
+  "sections": [
+   {
+    "id": "idea",
+    "heading": "Idea & game design",
+    "lines": [
+     "inkoffTTV"
+    ]
+   },
+   {
+    "id": "made",
+    "heading": "Code, art, sound and words",
+    "lines": [
+     "Made by AI agents (Claude by Anthropic), directed by inkoffTTV"
+    ]
+   },
+   {
+    "id": "tech",
+    "heading": "Built with",
+    "lines": [
+     "Godot Engine 4.5 (MIT)",
+     "Python · lupa (Lua) · websockets",
+     "Inter · Noto Sans CJK (SIL OFL 1.1)",
+     "Every sound and song synthesized from scratch for this game"
+    ]
+   },
+   {
+    "id": "cast",
+    "heading": "Starring",
+    "lines": [
+     "Aunt Mira · Uncle Felix · Zip · Vera Benchmark · Night Shift FM",
+     "Every customer of the repair shop, and one very patient goat"
+    ]
+   },
+   {
+    "id": "thanks",
+    "heading": "Thanks",
+    "lines": [
+     "Everyone who ever dropped a phone and still believed it could be fixed"
+    ]
+   }
+  ],
+  "closing": "Thanks for playing. Now go fix something."
+ },
+ "ui": {
+  "chapter": "Chapter {n}",
+  "optional": "Optional",
+  "story_complete": "Story complete",
+  "final_title": "Repair shop → {company}",
+  "final_sub": "Same garage, new sign. Repair orders still come in now and then.",
+  "customer_waiting": "A customer is waiting at the counter"
+ }
+}

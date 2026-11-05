@@ -5,6 +5,9 @@ extends Control
 const U := preload("res://ui/lib/uit.gd")
 const L := preload("res://ui/lib/loc.gd")
 const F := preload("res://ui/lib/fmt.gd")
+const Tracker := preload("res://ui/story/objective_tracker.gd")
+## speed -> hotkey (core/inputs.gd: 1/2/3/4 = 1x/2x/4x/8x, P or 0 = pause)
+const SPEED_KEYS := {0: "P", 1: "1", 2: "2", 4: "3", 8: "4"}
 
 var ui_root: Node = null
 var _bar: PanelContainer
@@ -29,11 +32,23 @@ var _dev_bar: Control
 var _last_cash := -1.0
 var _crate_chip: PanelContainer
 var _crate_label: Label
+## top-left column: story objectives, development, crates (stacked, never overlapping)
+var left_col: VBoxContainer
+var tracker: Control
+var _speed_locked := false
 
 func _ready() -> void:
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_build_bar()
+	left_col = U.vbox(10)
+	left_col.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	left_col.set_anchors_and_offsets_preset(Control.PRESET_TOP_LEFT)
+	left_col.offset_left = 18
+	left_col.offset_top = 92
+	add_child(left_col)
+	tracker = Tracker.new()
+	left_col.add_child(tracker)
 	_build_prompt()
 	_build_banner()
 	_build_hints()
@@ -110,6 +125,15 @@ func _build_bar() -> void:
 			b = U.icon_btn("pause", "BtnSpeed", 36, L.t("Pause"))
 		else:
 			b = U.btn("%d×" % s, "BtnSpeed", "", 40, 36)
+		b.tooltip_text = (L.t("Pause / resume time") if s == 0 else L.f("Game speed {n}×", {"n": s})) + "  [%s]" % SPEED_KEYS[s]
+		var kl := U.lbl(SPEED_KEYS[s], 8, Color(U.TEXT, 0.45), "bold")
+		kl.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		kl.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_RIGHT)
+		kl.grow_horizontal = Control.GROW_DIRECTION_BEGIN
+		kl.grow_vertical = Control.GROW_DIRECTION_BEGIN
+		kl.offset_right = -3
+		kl.offset_bottom = 1
+		b.add_child(kl)
 		b.toggle_mode = true
 		b.button_group = group
 		b.pressed.connect(func() -> void: _set_speed(s))
@@ -171,10 +195,8 @@ func _build_dev_chip() -> void:
 	_dev_chip = PanelContainer.new()
 	_dev_chip.add_theme_stylebox_override("panel", U.card_box(U.GLASS, Color(U.ACCENT_ALT, 0.5), 10, 12))
 	_dev_chip.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	add_child(_dev_chip)
-	_dev_chip.set_anchors_and_offsets_preset(Control.PRESET_TOP_LEFT)
-	_dev_chip.offset_left = 18
-	_dev_chip.offset_top = 92
+	left_col.add_child(_dev_chip)
+	_dev_chip.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
 	_dev_chip.custom_minimum_size = Vector2(240, 0)
 	var v := U.vbox(5)
 	_dev_chip.add_child(v)
@@ -192,10 +214,8 @@ func _build_crate_chip() -> void:
 	_crate_chip = PanelContainer.new()
 	_crate_chip.add_theme_stylebox_override("panel", U.card_box(U.GLASS, Color(U.GOLD, 0.5), 10, 12))
 	_crate_chip.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	add_child(_crate_chip)
-	_crate_chip.set_anchors_and_offsets_preset(Control.PRESET_TOP_LEFT)
-	_crate_chip.offset_left = 18
-	_crate_chip.offset_top = 92
+	left_col.add_child(_crate_chip)
+	_crate_chip.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
 	_crate_chip.custom_minimum_size = Vector2(240, 0)
 	var v := U.vbox(3)
 	_crate_chip.add_child(v)
@@ -218,7 +238,6 @@ func _refresh_crates(s: Dictionary) -> void:
 	for c in crates:
 		units += U.num(c.get("units", 0))
 	_crate_label.text = L.f("{n} crates · {u} units", {"n": crates.size(), "u": F.number(units)})
-	_crate_chip.offset_top = 160 if _dev_chip.visible else 92
 
 # ---------------------------------------------------------------- updates
 func refresh() -> void:
@@ -242,8 +261,15 @@ func refresh() -> void:
 	_team.text = "%d / %d" % [staff, cap] if cap > 0 else str(staff)
 	_rep.text = "%.2f" % (_reputation(s) / 20.0)
 	var speed := int(U.num(t.get("speed", 1), 1))
+	_speed_locked = Tracker.clock_paused(s)
 	for k in _speed_btns:
-		(_speed_btns[k] as Button).set_pressed_no_signal(k == speed)
+		var sb: Button = _speed_btns[k]
+		sb.set_pressed_no_signal(k == speed)
+		sb.disabled = _speed_locked and k != 0
+		var base := (L.t("Pause / resume time") if k == 0 else L.f("Game speed {n}×", {"n": k})) + "  [%s]" % SPEED_KEYS[k]
+		sb.tooltip_text = L.t("Story: time starts at chapter 4") if _speed_locked else base
+	if tracker:
+		tracker.call("refresh")
 	# logo
 	var logo := U.dict(s.get("logo", {}))
 	var ca := U.hex(logo.get("colorA", "#4F8CFF"))
@@ -311,6 +337,10 @@ func set_connection(status: String, detail: String) -> void:
 	_banner_label.text = detail if detail != "" else L.t("Reconnecting…")
 
 func _set_speed(s: int) -> void:
+	if _speed_locked:
+		Net.set_speed(s)   # shows the friendly "time starts at chapter 4" note once, sends nothing
+		refresh()
+		return
 	Net.set_speed(s)
 	# optimistic: the server confirms with a "time" section
 	var t := U.dict(Game.state.get("time", {})).duplicate()

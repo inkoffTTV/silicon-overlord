@@ -29,6 +29,7 @@ MAX_MESSAGE_BYTES = 64 * 1024
 CODE_ALPHABET = "ABCDEFGHJKMNPQRSTUVWXYZ23456789"   # room codes (PROTOCOL.md)
 INVITE_ALPHABET = CODE_ALPHABET + "L"                  # GovernanceService.makeCode (personal invites) also uses L
 SPEEDS = (0, 1, 2, 4, 8)
+LOBBY_ACTIONS = ("listMyCompanies",)   # act names handled in Python without a company (iteration 3)
 MEMBER_COLORS = ["#4FC3F7", "#FFB74D", "#81C784", "#E57373", "#BA68C8", "#FFD54F", "#4DB6AC", "#F06292"]
 
 # limits
@@ -532,6 +533,7 @@ class GameServer:
                 "colorB": color(company.get("colorB"), "#56CCF2"),
                 "shape": company.get("shape") if isinstance(company.get("shape"), str) else None,
                 "founderShare": company.get("founderShare") if isinstance(company.get("founderShare"), (int, float)) else None,
+                "storyMode": company.get("storyMode") is True,  # iteration 3: story start (default: quick start)
                 "seed": int(time.time()) % 1000000 + conn.pid % 1000}
         room = Room(cid, code, conn.pid)
         self.rooms[cid] = room
@@ -553,7 +555,8 @@ class GameServer:
         self.store.set_last_company(conn.pid, cid)
         self.send_joined(conn, room)
         self.dispatch()  # snapshot, profile, members
-        log.info("player %s created company %s %s (%s)", conn.pid, cid, format_code(code), mode)
+        log.info("player %s created company %s %s (%s%s)", conn.pid, cid, format_code(code), mode,
+                 ", story" if args["storyMode"] else "")
 
     def on_join(self, conn, msg):
         code = normalize_code(msg.get("code"))
@@ -632,6 +635,9 @@ class GameServer:
             conn.send({"t": "error", "message": "act needs an integer id"})
             return
         action = msg.get("action")
+        if action in LOBBY_ACTIONS:
+            self.on_lobby_act(conn, aid, action, msg.get("args"))
+            return
         if not isinstance(action, str) or action not in self.lua.action_names:
             conn.send({"t": "res", "id": aid, "ok": False, "error": "Unknown action"})
             return
@@ -660,6 +666,58 @@ class GameServer:
         except Exception:
             log.exception("act %s failed", action)
             conn.send({"t": "res", "id": aid, "ok": False, "error": "Internal error"})
+
+    # ------------------------------------------------------------------------------------------
+    # lobby actions (iteration 3): allowed right after hello, no company needed
+    # ------------------------------------------------------------------------------------------
+    def on_lobby_act(self, conn, aid, action, args):
+        if args is not None and not isinstance(args, dict):
+            conn.send({"t": "res", "id": aid, "ok": False, "error": "args must be an object"})
+            return
+        try:
+            data = self.list_my_companies(conn.pid)
+        except Exception:
+            log.exception("lobby act %s failed", action)
+            conn.send({"t": "res", "id": aid, "ok": False, "error": "Internal error"})
+            return
+        conn.send({"t": "res", "id": aid, "ok": True, "data": data})
+
+    def list_my_companies(self, pid):
+        """Company slots for the title menu: every company where pid is an active owner, newest first.
+        Loaded companies report live values (cash, date, online); others the last save."""
+        rows = {r["id"]: r for r in self.store.companies_of(pid)}
+        for cid in self.rooms:  # joined since the last save: the saved member list is not updated yet
+            if cid not in rows and self.lua.call("isOwner", pid, cid):
+                meta = self.store.company_meta(cid)
+                if meta:
+                    rows[cid] = meta
+        out = []
+        for row in rows.values():
+            cid = row["id"]
+            room = self.rooms.get(cid)
+            state = self.lua.state_py(cid) if room is not None else None
+            if state is None:
+                state = self.store.load_company_state(cid) or {}
+            if state.get("liquidated"):
+                continue
+            owners = state.get("owners") or {}
+            owner = owners.get(str(pid)) if isinstance(owners, dict) else None
+            if not isinstance(owner, dict) or owner.get("left"):
+                continue
+            t = state.get("time") or {}
+            story = state.get("story") if isinstance(state.get("story"), dict) else {}
+            online = len(room.conns) if room is not None else 0
+            out.append({
+                "companyId": cid, "code": format_code(row["code"]), "name": state.get("name") or row["name"],
+                "date": {"year": t.get("year"), "day": t.get("day"), "elapsedDays": t.get("elapsedDays")},
+                "cash": (state.get("finance") or {}).get("cash"), "role": owner.get("role"),
+                "lastPlayed": int(time.time()) if online else int(row["updated"] or 0),
+                "mode": state.get("mode") or row["mode"], "logo": state.get("logo"),
+                "story": {"done": story.get("done", True) is not False, "chapter": story.get("chapter", 7)},
+                "online": online,
+            })
+        out.sort(key=lambda r: (-(r["lastPlayed"] or 0), r["name"] or ""))
+        return out
 
     def on_speed(self, conn, msg):
         speed = msg.get("speed")

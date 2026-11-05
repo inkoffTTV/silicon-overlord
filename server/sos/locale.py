@@ -83,7 +83,8 @@ class Locale:
 
     def notify(self, frame, note):
         """notify frame: key/params for the title, bodyKey/bodyParams for the body (Lua may preset them)."""
-        for src, dst in (("key", "key"), ("params", "params"), ("bodyKey", "bodyKey"), ("bodyParams", "bodyParams")):
+        for src, dst in (("key", "key"), ("params", "params"), ("bodyKey", "bodyKey"), ("bodyParams", "bodyParams"),
+                         ("paramKeys", "paramKeys"), ("bodyParamKeys", "bodyParamKeys")):
             if note.get(src) is not None:
                 frame[dst] = note[src]
         self.add(frame, frame.get("title"), "key", "params", "paramKeys")

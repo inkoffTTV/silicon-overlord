@@ -224,7 +224,35 @@ func _on_state_changed(keys: Array) -> void:
 		_refresh_board()
 
 # ------------------------------------------------------------------ ambience
+## Safety net for physics props / crates / devices: anything that fell out of the world goes back home.
+const PROP_FALL_LIMIT := -8.0
+var _rescue_t := 0.0
+
+func _rescue_props() -> void:
+	if level_node == null:
+		return
+	var floor_y := level_node.global_position.y + PROP_FALL_LIMIT
+	for b in get_tree().get_nodes_in_group("grabbable"):
+		if not (b is RigidBody3D) or not b.is_inside_tree() or b.freeze:
+			continue
+		var rb := b as RigidBody3D
+		if not rb.has_meta("home_xf"):
+			rb.set_meta("home_xf", rb.global_transform)
+		if rb.global_position.y > floor_y and is_finite(rb.global_position.y):
+			continue
+		var home: Transform3D = rb.get_meta("home_xf")
+		if home.origin.y < floor_y + 1.0:
+			home = global_transform * level_node.get("spawn_xform")
+			home.origin += Vector3(0, 1.0, 0)
+		rb.linear_velocity = Vector3.ZERO
+		rb.angular_velocity = Vector3.ZERO
+		rb.global_transform = home.translated(Vector3(0, 0.05, 0))
+
 func _process(delta: float) -> void:
+	_rescue_t -= delta
+	if _rescue_t <= 0.0:
+		_rescue_t = 0.5
+		_rescue_props()
 	_amb_t -= delta
 	if _amb_t > 0.0 or level_node == null or _show_running:
 		return

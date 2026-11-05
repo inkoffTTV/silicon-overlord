@@ -7,7 +7,11 @@ extends SceneTree
 ## Screens: menu, menu_create, menu_join, settings, hud, designer, research, production, shelf, company, launch,
 ##          pause, quick, phone (3D preview only), employees, van, stairs, line (production focused on --line),
 ##          challenge (--source=pc_challenge|whiteboard_challenge|line_qc|negotiation [--game=circuit --play=3.5 | --result=0.82]),
-##          langpick, settings_audio. Iteration-2 state (crates, challenges, no second floor) is faked: --no_floor. --world loads main.tscn behind the UI (default: dark backdrop).
+##          langpick, settings_audio.
+##          Iteration 3: menu_play (company slots), menu_new (story / quick), credits, loading, story (tracker + dialogue,
+##          --chapter=1 --step=take_device), chapter (title card), cutscene (--id=intro), repair (--phase=diagnose|swap|close|result,
+##          --fault=cracked_screen --device=phone --nopart), counter (--status=waiting|ready|paid), skip (pause + skip
+##          confirm), final (Repair shop -> company card), goals, rp (research points popover), daily. Iteration-2 state (crates, challenges, no second floor) is faked: --no_floor. --world loads main.tscn behind the UI (default: dark backdrop).
 
 const D := preload("res://ui/lib/gdata.gd")
 
@@ -72,8 +76,10 @@ func _run() -> void:
 		cl.add_child(tr)
 	# fake company
 	var st := D.sample_state()
-	if screen.begins_with("menu") or screen in ["settings", "settings_audio", "langpick"]:
+	if screen.begins_with("menu") or screen in ["settings", "settings_audio", "langpick", "credits", "loading"]:
 		st = {}
+	if screen in ["story", "chapter", "cutscene", "repair", "counter", "skip", "final"]:
+		_story_state(st)
 	Game.code = "KQ7-4XM"
 	Game.me = {"userId": 1, "role": "Founder", "name": "Alex"}
 	Game.members = [{"userId": 1, "name": "Alex", "color": "#4F8CFF", "role": "Founder", "online": true},
@@ -95,7 +101,64 @@ func _run() -> void:
 			Bus.notify.emit("info", "Мира joined", "")
 			ui.call("debug_chat", ["Мира", "Я в лаборатории, запускаю 7 нм", "Alex", "ok! designing the Nebula Two"])
 		"menu":
-			pass
+			_fake_companies(ui)
+		"menu_play":
+			_fake_companies(ui)
+			ui.menu.show_page("play")
+		"menu_new":
+			ui.menu.show_page("new")
+		"credits":
+			ui.menu.show_page("credits")
+		"loading":
+			_fake_companies(ui)
+			ui.show_loading("Nebula Labs", "Story start: the repair shop opens tonight", Color("#4F8CFF"))
+			await create_timer(0.6).timeout
+			ui.loading.set_status("Opening the garage…", 0.72)
+		"story":
+			ui.story.session_ready()
+			await create_timer(0.2).timeout
+			for c in ui.story.get_children():
+				pass
+			ui.story._director.clear()
+			if ui.story._card:
+				ui.story._card.queue_free()
+				ui.story._card = null
+			ui.story._director_busy = false
+			ui.story._queue.clear()
+			ui.story.say("Grandma Rosa", "It keeps calling my ex-husband all by itself. We split up in 1979! He's very confused.", Color("#38C6D9"), 900575)
+			Bus.focus_changed.emit("Take the device")
+			await create_timer(4.5).timeout
+		"chapter":
+			ui.story.debug_card(int(args.get("chapter", "1")))
+			await create_timer(1.4).timeout
+		"cutscene":
+			ui.story.session_ready()
+			ui.story._director.clear()
+			ui.story.debug_cutscene(str(args.get("id", "intro")))
+			await create_timer(2.6).timeout
+		"repair":
+			Bus.interact.emit("repair_bench", "rep_2")
+			await process_frame
+			await process_frame
+			var rg: Node = ui.get("current")
+			var ph := str(args.get("phase", ""))
+			if ph == "result":
+				rg.call("debug_finish", 0.86)
+			elif ph != "":
+				rg.call("debug_phase", ph)
+		"counter":
+			Bus.interact.emit("counter", "rep_3" if str(args.get("status", "waiting")) != "waiting" else "rep_1")
+			await process_frame
+			if str(args.get("status", "")) == "paid":
+				ui.get("current").call("debug_paid", 92.0)
+		"skip":
+			ui.call("debug_pause", false)
+			for b in ui._pause.find_children("*", "Button", true, false):
+				if b.get_meta("skip_story_btn", false):
+					(b as Button).pressed.emit()
+		"final":
+			ui.story.debug_final(args.has("skipped"))
+			await create_timer(2.6).timeout
 		"menu_create", "menu_join", "settings":
 			ui.call("debug_menu", screen)
 		"designer":
@@ -177,6 +240,50 @@ func _run() -> void:
 	print("saved ", out)
 	quit(0)
 
+## Iteration 3: a story company (chapter --chapter, current step --step) with repair orders.
+func _story_state(st: Dictionary) -> void:
+	var ch := int(args.get("chapter", "1"))
+	var stp := str(args.get("step", "take_device"))
+	var SDs = load("res://ui/story/story_data.gd")
+	var objs := []
+	var done := {}
+	var before := true
+	for s in SDs.chapter(ch).get("steps", []):
+		var id := str(s.get("id", ""))
+		if id == stp:
+			before = false
+		objs.append({"id": id, "done": before, "optional": s.get("optional", false)})
+		if before:
+			done[id] = true
+	st["name"] = "Nebula Labs"
+	st["story"] = {"done": args.has("story_done"), "mode": "story", "chapter": ch, "chapterId": "first_customer", "step": stp, "objectives": objs, "stepsDone": done, "flags": {}, "startedDay": 0}
+	st["repairs"] = {"done": 1, "earned": 60, "orders": [
+		{"id": "rep_1", "customer": "student", "device": "phone", "fault": "stuck_button", "reward": 50, "status": "waiting", "createdDay": 1},
+		{"id": "rep_2", "customer": str(args.get("customer", "courier")), "device": str(args.get("device", "phone")), "fault": str(args.get("fault", "cracked_screen")), "partId": "screen" if str(args.get("fault", "cracked_screen")) == "cracked_screen" else null, "reward": 140, "status": "inRepair", "createdDay": 2},
+		{"id": "rep_3", "customer": "grandma", "device": "phone", "fault": "software_glitch", "reward": 60, "status": "ready", "quality": 0.92, "payout": 56, "createdDay": 0}]}
+	var inv: Dictionary = st.get("inventory", {})
+	var res: Dictionary = inv.get("resources", {})
+	res["repair_screen"] = 0 if args.has("nopart") else 2
+	inv["resources"] = res
+	st["inventory"] = inv
+	st.finance["cash"] = 6240
+	st.time["speed"] = 0
+	if args.has("story_done") or screen_is("final"):
+		st.story["done"] = false
+
+func screen_is(n: String) -> bool:
+	return str(args.get("screen", "")) == n
+
+func _fake_companies(ui: Node) -> void:
+	ui.menu.call("debug_companies", fake_companies())
+
+static func fake_companies() -> Array:
+	var now := Time.get_unix_time_from_system()
+	return [
+		{"companyId": "a", "code": "KQ7-4XM", "name": "Nebula Labs", "date": {"year": 2016, "day": 41, "elapsedDays": 40}, "cash": 6240, "role": "Founder", "lastPlayed": now - 1500, "logo": {"colorA": "#4F8CFF", "colorB": "#B15CFF"}, "colorA": "#4F8CFF", "colorB": "#B15CFF", "story": {"done": false, "chapter": 2}},
+		{"companyId": "b", "code": "ZP3-9QA", "name": "Орбита Мобайл", "date": {"year": 2019, "day": 200, "elapsedDays": 1300}, "cash": 48200000, "role": "CoFounder", "lastPlayed": now - 86400 * 3, "colorA": "#E85CC4", "colorB": "#F2C94C", "story": {"done": true, "chapter": 7}},
+		{"companyId": "c", "code": "MM2-7RT", "name": "Garage Bros", "date": {"year": 2017, "day": 90, "elapsedDays": 455}, "cash": 912000, "role": "Founder", "lastPlayed": now - 86400 * 12, "colorA": "#3DD68C", "colorB": "#38C6D9", "story": {"done": true, "chapter": 7}}]
+
 ## Iteration-2 parts of the state that the exported sample may not have yet.
 func _iter2_state(st: Dictionary) -> void:
 	var prod: Dictionary = st.get("production", {})
@@ -199,6 +306,8 @@ func _iter2_state(st: Dictionary) -> void:
 
 func _mock(action: String, a: Dictionary) -> Dictionary:
 	match action:
+		"listMyCompanies":
+			return {"ok": true, "data": fake_companies()}
 		"getMaterialQuotes":
 			return {"ok": true, "data": D.sample_quotes()}
 		"getRoomCatalog":

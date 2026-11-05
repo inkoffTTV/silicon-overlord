@@ -94,6 +94,7 @@ func _enter_tree() -> void:
 func _ready() -> void:
 	_gravity_vec = Vector3.DOWN * float(ProjectSettings.get_setting("physics/3d/default_gravity", 9.8))
 	floor_snap_length = 0.25
+	safe_margin = 0.01
 	floor_max_angle = deg_to_rad(50)
 	capsule = CapsuleShape3D.new()
 	capsule.radius = RADIUS
@@ -330,7 +331,51 @@ func _apply_look() -> void:
 		head.rotation.x = pitch
 
 # ------------------------------------------------------------------ simulation
+## Safety net: below this height (or far outside the level) the player is put back on the spawn point.
+const FALL_LIMIT := -8.0
+const FAR_LIMIT := 120.0
+var rescues := 0
+
+func out_of_bounds() -> bool:
+	if global_position.y < FALL_LIMIT or not is_finite(global_position.y):
+		return true
+	return Vector2(global_position.x, global_position.z).length() > FAR_LIMIT and global_position.y < 50.0 and _world_level_far()
+
+func _world_level_far() -> bool:
+	var w := get_tree().get_first_node_in_group("world") if is_inside_tree() else null
+	if w and w.has_method("get_level") and w.get_level():
+		return global_position.distance_to((w.get_level() as Node3D).global_position) > FAR_LIMIT
+	return true
+
+## Back to the level's spawn point: drop what we hold, zero velocity, short fade from black.
+func rescue() -> void:
+	rescues += 1
+	release_held()
+	if seated:
+		stand_up()
+	climbing = false
+	velocity = Vector3.ZERO
+	_fall_speed = 0.0
+	var w := get_tree().get_first_node_in_group("world")
+	if w and w.has_method("place_local_player"):
+		w.place_local_player()
+	else:
+		global_position = Vector3(0, 0.1, 0)
+	velocity = Vector3.ZERO
+	if hud:
+		var fade := ColorRect.new()
+		fade.color = Color(0, 0, 0, 1)
+		fade.set_anchors_preset(Control.PRESET_FULL_RECT)
+		fade.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		hud.add_child(fade)
+		var tw := fade.create_tween()
+		tw.tween_property(fade, "color:a", 0.0, 0.6)
+		tw.tween_callback(fade.queue_free)
+
 func _physics_process(dt: float) -> void:
+	if out_of_bounds():
+		rescue()
+		return
 	var ok := _input_allowed()
 	var iv := Vector2.ZERO
 	if ok:
