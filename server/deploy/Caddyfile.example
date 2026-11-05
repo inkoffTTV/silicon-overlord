@@ -1,0 +1,6 @@
+# Optional: secure wss:// with a domain (Caddy gets a free HTTPS certificate automatically).
+# Replace game.example.com with your domain; its DNS "A" record must point to the VPS IP.
+# Clients then connect to wss://game.example.com/ws
+game.example.com {
+	reverse_proxy 127.0.0.1:7350
+}

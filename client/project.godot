@@ -1,0 +1,42 @@
+; Engine configuration file. Owned by lead — see docs/ARCHITECTURE.md
+config_version=5
+
+[application]
+config/name="Silicon Overlord"
+config/description="Build a tech empire from a garage. Online co-op."
+config/version="0.2.0"
+run/main_scene="res://main.tscn"
+config/features=PackedStringArray("4.5", "Forward Plus")
+config/icon="res://brand/icon.png"
+boot_splash/bg_color=Color(0.027, 0.031, 0.047, 1)
+boot_splash/show_image=true
+boot_splash/image="res://brand/splash.png"
+boot_splash/fullsize=true
+boot_splash/use_filter=true
+
+[autoload]
+Updater="*res://core/updater.gd"
+Inputs="*res://core/inputs.gd"
+Bus="*res://core/bus.gd"
+Game="*res://core/game.gd"
+Net="*res://net/net.gd"
+Sfx="*res://audio/sfx.gd"
+
+[display]
+window/size/viewport_width=1600
+window/size/viewport_height=900
+window/stretch/mode="disabled"
+
+[physics]
+common/physics_ticks_per_second=60
+3d/physics_engine="Jolt Physics"
+
+[rendering]
+renderer/rendering_method="forward_plus"
+anti_aliasing/quality/msaa_3d=0
+lights_and_shadows/positional_shadow/atlas_size=4096
+environment/defaults/default_clear_color=Color(0.02, 0.02, 0.03, 1)
+
+[audio]
+
+general/text_to_speech=true
