@@ -28,7 +28,16 @@ func check(cond: bool, what: String) -> void:
 	if not cond:
 		failures.append(what)
 
+var _saved := {}
+
 func _finish(code: int) -> void:
+	# leave the player's real settings/profile as they were
+	var Prefs = load("res://ui/lib/prefs.gd")
+	if not _saved.is_empty():
+		Prefs.set_setting("net", "url", _saved.url)
+		Prefs.set_profile("name", _saved.name)
+		Prefs.set_profile("token", _saved.token)
+		Prefs.set_profile("last_code", _saved.last_code)
 	if pid > 0 and not OS.get_cmdline_user_args().has("--keep-server"):
 		OS.kill(pid)
 	quit(code)
@@ -59,6 +68,9 @@ func _run() -> void:
 		_finish(0)
 		return
 	print("ui_net_test: server pid ", pid, " port ", port)
+	var Prefs = load("res://ui/lib/prefs.gd")
+	_saved = {"url": Prefs.get_setting("net", "url", Prefs.DEFAULT_URL), "name": Prefs.get_profile("name", ""),
+		"token": Prefs.get_profile("token", ""), "last_code": Prefs.get_profile("last_code", "")}
 	Net.set_url("ws://127.0.0.1:%d/ws" % port)
 	Net.set_player_name("Tester")
 	Net.token = ""

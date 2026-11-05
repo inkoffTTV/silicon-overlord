@@ -55,6 +55,8 @@ func _run() -> void:
 		return {"ok": true})
 	var modal_events: Array = []
 	Bus.ui_modal_changed.connect(func(o: bool) -> void: modal_events.append(o))
+	var Prefs = load("res://ui/lib/prefs.gd")
+	var saved_lang: Variant = Prefs.get_setting("ui", "lang", null)
 	print("ui_smoke: menu")
 	var ui: Node = load("res://ui/ui_root.gd").new()
 	ui.set("force_lang", "en")
@@ -229,6 +231,15 @@ func _run() -> void:
 		await frames()
 	ui.set_language("en")
 	await frames()
+	# don't leave the language the test picked in the player's settings
+	var cfg := ConfigFile.new()
+	cfg.load(Prefs.SETTINGS)
+	if saved_lang == null:
+		if cfg.has_section_key("ui", "lang"):
+			cfg.erase_section_key("ui", "lang")
+	else:
+		cfg.set_value("ui", "lang", saved_lang)
+	cfg.save(Prefs.SETTINGS)
 	# leave -> menu
 	Game.apply_snapshot({})
 	await frames(2)

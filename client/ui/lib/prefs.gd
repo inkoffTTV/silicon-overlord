@@ -15,7 +15,10 @@ static func _cfg(path: String) -> ConfigFile:
 	return c
 
 static func get_setting(section: String, key: String, def: Variant = null) -> Variant:
-	return _cfg(SETTINGS).get_value(section, key, def)
+	var c := _cfg(SETTINGS)
+	if not c.has_section_key(section, key):
+		return def
+	return c.get_value(section, key)
 
 static func set_setting(section: String, key: String, value: Variant) -> void:
 	var c := _cfg(SETTINGS)
@@ -23,7 +26,10 @@ static func set_setting(section: String, key: String, value: Variant) -> void:
 	c.save(SETTINGS)
 
 static func get_profile(key: String, def: Variant = null) -> Variant:
-	return _cfg(PROFILE).get_value("profile", key, def)
+	var c := _cfg(PROFILE)
+	if not c.has_section_key("profile", key):
+		return def
+	return c.get_value("profile", key)
 
 static func set_profile(key: String, value: Variant) -> void:
 	var c := _cfg(PROFILE)

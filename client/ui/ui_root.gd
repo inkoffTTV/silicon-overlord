@@ -150,6 +150,13 @@ func _on_state_changed(keys: Array) -> void:
 	if not Game.has_company():
 		return
 	hud.refresh()
+	if keys.is_empty() or "products" in keys:
+		if not was_menu:
+			_watch_launches()
+		else:
+			_lifecycles.clear()
+			for p in U.dict(Game.state.get("products", {})).values():
+				_lifecycles[str(p.get("id", ""))] = str(p.get("lifecycle", ""))
 	if current and current.has_method("on_state_changed"):
 		current.on_state_changed(keys)
 
@@ -202,6 +209,42 @@ func close_screen() -> void:
 	_update_modal()
 
 # ---------------------------------------------------------------- launch overlay
+var _lifecycles := {}
+var _my_launches := {}
+
+## Call before sending launchProduct, so the sections that arrive before the result aren't taken as a co-founder's launch.
+func expect_launch(product_id: String) -> void:
+	_my_launches[product_id] = true
+
+## Our launch succeeded: play the 3D stage show (world) and then the critics overlay.
+func launched(product_id: String) -> void:
+	_my_launches[product_id] = true
+	close_screen()
+	Bus.launch_show.emit(product_id)
+	_overlay_after_show(product_id)
+
+func _overlay_after_show(product_id: String) -> void:
+	var world := get_tree().get_first_node_in_group("world")
+	if world and world.has_signal("launch_finished"):
+		var done := [false]
+		world.launch_finished.connect(func(_n: String) -> void: done[0] = true, CONNECT_ONE_SHOT)
+		var t := 0.0
+		while not done[0] and t < 16.0:
+			await get_tree().create_timer(0.25).timeout
+			t += 0.25
+	show_launch(product_id)
+
+## A co-founder launched something: everyone gets the show.
+func _watch_launches() -> void:
+	for p in U.dict(Game.state.get("products", {})).values():
+		var id := str(p.get("id", ""))
+		var lc := str(p.get("lifecycle", ""))
+		if _lifecycles.get(id, lc) == "Development" and lc == "Launch" and not _my_launches.has(id):
+			_my_launches[id] = true
+			Bus.launch_show.emit(id)
+			_overlay_after_show(id)
+		_lifecycles[id] = lc
+
 func show_launch(product_id: String) -> void:
 	if _launch:
 		_launch.queue_free()

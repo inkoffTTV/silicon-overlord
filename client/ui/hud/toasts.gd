@@ -26,6 +26,19 @@ func _ready() -> void:
 	_stack.custom_minimum_size = Vector2(340, 0)
 
 func show_toast(kind: String, title: String, body: String = "") -> void:
+	# at 8x the same report can arrive every second: bump a counter on the visible card instead of stacking
+	for c in _stack.get_children():
+		if c.get_meta("title", "") == title and not c.has_meta("closing"):
+			var n: int = c.get_meta("count", 1) + 1
+			c.set_meta("count", n)
+			var tl: Label = c.get_meta("title_label")
+			tl.text = "%s  ×%d" % [title, n]
+			var bl: Variant = c.get_meta("body_label", null)
+			if bl is Label:
+				(bl as Label).text = body
+			(c.get_meta("timer") as Timer).start(LIFETIME)
+			U.flash(c, Color(1.25, 1.25, 1.35))
+			return
 	var spec: Array = KINDS.get(kind, KINDS["info"])
 	var col: Color = spec[1]
 	var card := PanelContainer.new()
@@ -45,8 +58,12 @@ func show_toast(kind: String, title: String, body: String = "") -> void:
 	h.add_child(v)
 	var t := U.para(title, U.SM, U.TEXT, "bold", 270)
 	v.add_child(t)
+	card.set_meta("title", title)
+	card.set_meta("title_label", t)
 	if body != "":
-		v.add_child(U.para(body, U.XS + 1, U.MUTED, "medium", 270))
+		var bl := U.para(body, U.XS + 1, U.MUTED, "medium", 270)
+		v.add_child(bl)
+		card.set_meta("body_label", bl)
 	card.gui_input.connect(func(e: InputEvent) -> void:
 		if e is InputEventMouseButton and e.pressed:
 			_dismiss(card))
@@ -58,7 +75,14 @@ func show_toast(kind: String, title: String, body: String = "") -> void:
 	card.modulate.a = 0.0
 	var tw := card.create_tween().set_trans(Tween.TRANS_QUART).set_ease(Tween.EASE_OUT)
 	tw.tween_property(card, "modulate:a", 1.0, 0.2)
-	get_tree().create_timer(LIFETIME + body.length() * 0.02).timeout.connect(func() -> void: _dismiss(card))
+	# the timer lives on the card, so nothing fires after the card is gone
+	var timer := Timer.new()
+	timer.one_shot = true
+	timer.wait_time = LIFETIME + body.length() * 0.02
+	card.add_child(timer)
+	card.set_meta("timer", timer)
+	timer.timeout.connect(_dismiss.bind(card))
+	timer.start()
 
 func _dismiss(card: Control) -> void:
 	if not is_instance_valid(card) or card.has_meta("closing"):

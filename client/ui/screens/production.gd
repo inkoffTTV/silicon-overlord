@@ -144,13 +144,16 @@ func _build_ready() -> void:
 
 ## Shared by the shelf: launches a product, then plays the show + critics overlay.
 func launch(pid: String) -> void:
+	if ui_root and ui_root.has_method("expect_launch"):
+		ui_root.expect_launch(pid)
 	var r: Dictionary = await Net.act("launchProduct", {"productId": pid})
 	if not is_inside_tree():
 		return
 	if r.get("ok", false):
-		Bus.launch_show.emit(pid)
-		if ui_root and ui_root.has_method("show_launch"):
-			ui_root.show_launch(pid)
+		if ui_root and ui_root.has_method("launched"):
+			ui_root.launched(pid)
+		else:
+			Bus.launch_show.emit(pid)
 	else:
 		toast("error", L.t("Something went wrong"), str(r.get("error", "")))
 

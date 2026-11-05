@@ -112,7 +112,13 @@ func add_line(who: String, text: String, system: bool = false) -> void:
 		_schedule_fade(rt, FADE_AFTER)
 
 func _schedule_fade(c: Node, delay: float) -> void:
-	get_tree().create_timer(delay).timeout.connect(func() -> void:
-		if is_instance_valid(c) and not is_open:
+	var timer := Timer.new()
+	timer.one_shot = true
+	timer.wait_time = delay
+	c.add_child(timer)
+	timer.timeout.connect(func() -> void:
+		timer.queue_free()
+		if not is_open:
 			var tw := (c as CanvasItem).create_tween()
 			tw.tween_property(c, "modulate:a", 0.0, 1.0))
+	timer.start()

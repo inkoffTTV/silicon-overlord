@@ -117,8 +117,9 @@ func _build_env(world: Node3D) -> void:
 		disc.radial_segments = 64
 		var dm := StandardMaterial3D.new()
 		dm.albedo_color = Color(0.035, 0.045, 0.08)
-		dm.metallic = 0.3
-		dm.roughness = 0.55
+		dm.metallic = 0.0
+		dm.roughness = 0.92
+		dm.metallic_specular = 0.15
 		var d := MeshInstance3D.new()
 		d.mesh = disc
 		d.material_override = dm

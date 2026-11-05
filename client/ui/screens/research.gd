@@ -59,7 +59,7 @@ func build_body(b: Control) -> void:
 	left.add_child(tabs_wrap)
 	var group := ButtonGroup.new()
 	for br in D.branches():
-		var bb := U.btn(L.t(br), "BtnSeg", RL.BRANCH_ICON.get(br, "flask"), 0, 32)
+		var bb := U.btn(L.t(br), "BtnSeg", "", 0, 32)
 		bb.toggle_mode = true
 		bb.button_group = group
 		bb.button_pressed = br == branch

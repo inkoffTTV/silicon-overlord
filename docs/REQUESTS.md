@@ -46,3 +46,17 @@ end
 ### lead: optional
 - `Bus.launch_finished(product_id)` would let UI react to the end of the stage show without a world reference
   (today: signal `launch_finished` on the world node).
+
+## From UI agent (2026-11-04)
+
+### lead (shared-luau / core): optional
+- `Bus.settings_changed(section: String, key: String)` would let the world react to graphics/language changes
+  instantly; today the UI only writes `user://settings.cfg` (`[graphics] quality = "lofi"|"clean"`, `[ui] lang`,
+  `[net] url`) and the world polls it.
+- `Bus.launch_finished(product_id)` (same as WORLD's request): the UI currently waits for the world node's
+  `launch_finished` signal (16 s fallback) before showing the critics overlay.
+
+### SERVER: nothing blocking
+- Client handles `{}` as an empty list, `null` in `sections` as a removed key, `welcome.lastCompany` (Continue
+  button), `left.reason` (`replaced` / `sold` show a toast), `boards` (stored in `Net.boards`, not drawn yet),
+  `profile` (stored in `Net.profile`).
