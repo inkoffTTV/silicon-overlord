@@ -72,7 +72,7 @@ func _run() -> void:
 		cl.add_child(tr)
 	# fake company
 	var st := D.sample_state()
-	if screen.begins_with("menu") or screen == "settings":
+	if screen.begins_with("menu") or screen in ["settings", "settings_audio", "langpick"]:
 		st = {}
 	Game.code = "KQ7-4XM"
 	Game.me = {"userId": 1, "role": "Founder", "name": "Alex"}
@@ -134,7 +134,7 @@ func _run() -> void:
 		"settings_audio":
 			ui.call("debug_menu", "settings_audio")
 		"pause":
-			ui.call("debug_pause")
+			ui.call("debug_pause", args.has("settings"))
 		"quick":
 			ui.call("debug_quick")
 		"phone":

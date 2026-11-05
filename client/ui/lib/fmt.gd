@@ -94,6 +94,22 @@ static func days(n: int) -> String:
 		return ("%d%s" if L.is_cjk() else "%d %s") % [n, DAYS_UNIT[L.lang]]
 	return "%d day%s" % [n, "" if n == 1 else "s"]
 
+## Short unit names: "h" hours, "g" grams, "mm" millimetres, "in" inches.
+const UNITS := {
+	"ru": {"h": "ч", "g": "г", "mm": "мм", "in": "дюйм."}, "uk": {"h": "год", "g": "г", "mm": "мм", "in": "дюйм."},
+	"de": {"h": "Std."}, "tr": {"h": "sa"}, "pl": {"h": "godz."},
+	"zh": {"h": "小时", "g": "克", "mm": "毫米", "in": "英寸"}, "ja": {"h": "時間"},
+}
+
+static func unit(name: String) -> String:
+	return str(UNITS.get(L.lang, {}).get(name, name))
+
+## Device size: inches in English, millimetres everywhere else.
+static func dims(w_in: float, h_in: float, d_in: float) -> String:
+	if L.lang == "en":
+		return "%.2f × %.2f × %.2f in" % [w_in, h_in, d_in]
+	return "%.0f × %.0f × %.1f %s" % [w_in * 25.4, h_in * 25.4, d_in * 25.4, unit("mm")]
+
 static func plural_ru(n: int, one: String, few: String, many: String) -> String:
 	var n10 := n % 10
 	var n100 := n % 100

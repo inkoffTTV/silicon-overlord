@@ -440,6 +440,8 @@ func sofa(parent: Node3D, pos: Vector3, rot_y: float, mat: Material = null) -> N
 
 func fridge(parent: Node3D, pos: Vector3, rot_y: float) -> Node3D:
 	var g := kit.node(parent, pos, rot_y, "Fridge")
+	if Sfx.has_method("loop"):
+		Sfx.loop("fridge", g, -16.0)
 	var m := Mats.m("plastic_white", Color(0.95, 0.93, 0.85), {"grime": 0.5, "edge_wear": 0.2, "edge_color": Color(0.5, 0.45, 0.35)})
 	kit.box(g, Vector3(0.7, 1.72, 0.66), Vector3(0, 0.88, 0), m, Vector3.ZERO, true, 0.05)
 	kit.box(g, Vector3(0.68, 0.012, 0.01), Vector3(0, 1.28, 0.33), Mats.m("plastic_grey"), Vector3.ZERO, false, 0.0)
@@ -474,6 +476,8 @@ func fluorescent(parent: Node3D, pos: Vector3, rot_y: float, flicker: float = 0.
 	l.position = Vector3(0, -0.08, 0)
 	l.rotation_degrees = Vector3(-90, 0, 0)
 	if flicker > 0.0:
+		if Sfx.has_method("loop"):
+			Sfx.loop("fluorescent", g, -14.0)
 		var f := Flicker.new()
 		f.light = l
 		f.material = tube_mat

@@ -182,7 +182,7 @@ func handle_key(e: InputEventKey) -> bool:
 	return false
 
 func _cell_at(p: Vector2) -> Vector2i:
-	if not _area.has_point(p):
+	if _area.size.x <= 0 or _area.size.y <= 0 or not _area.has_point(p):
 		return Vector2i(-1, -1)
 	var cs := _area.size.x / cols
 	return Vector2i(int((p.x - _area.position.x) / cs), int((p.y - _area.position.y) / cs))

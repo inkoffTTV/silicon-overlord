@@ -260,3 +260,9 @@ Errors (friendly, with `errorKey`/`errorParams`, see docs/LOCALE_KEYS.md):
   `state.projects`: queueProduction (quantity 100..2,000,000) on `line_1` (the garage workbench) → crates appear in
   `production.crates` → shipCrate / shipAll (or launchProduct, which ships that product's crates) → launchProduct →
   sales appear weekly in `products[id].unitsSold` / `finance`.
+
+## Purchasing (materials)
+- `getMaterialQuotes {}` (read-only) → `{materials:[{id,name,unit,stock,basePrice,spotPrice,supplyMult,dailyNeed,daysLeft,usedBy:[productName],offers:[{supplierId,name,reliability,minWeeks,pricePerUnit,pricePerUnitLong}]}], contracts:[{id,supplierId,resourceId,unitsPerWeek,pricePerUnit,weeksLeft}], billPerUnit:{Category:{resourceId:unitsPerDevice}}, supplierDiscount, cash}`.
+  `daysLeft` = -1 when nothing currently consumes it. `spotPrice` already includes events, research and a pending negotiation discount.
+- Buy now: `buyResources {resourceId, units}` (spot price). Contract: `signContract {supplierId, resourceId, unitsPerWeek, weeks}` (weeks ≥ supplier.minWeeks; longer = up to 10% cheaper, delivered weekly). Cancel: `cancelContract {contractId}`.
+- Production jobs block with `blockedReason = "Out of <material>"` when stock is short.

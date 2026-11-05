@@ -206,6 +206,9 @@ handlers.setFactoryLayout = act("setFactoryLayout", { "production" }, function(s
 handlers.queueFabJob = act("queueFabJob", { "production", "inventory" }, function(s, u, p) return CompanyActions.queueFabJob(s, str(p.lineId), str(p.componentId), tonumber(p.wafers) or 0) end)
 handlers.sellComponents = act("sellComponents", { "inventory" }, function(s, u, p) return CompanyActions.sellComponents(s, str(p.offerId), str(p.componentId)) end)
 handlers.buyResources = act("buyResources", { "inventory" }, function(s, u, p) return CompanyActions.buyResources(s, str(p.resourceId), tonumber(p.units) or 0) end, function(p) return str(p.units) .. " " .. str(p.resourceId) end)
+handlers.getMaterialQuotes = function(session: Session, player: Player, payload: any): (boolean, any)
+	return CompanyActions.getMaterialQuotes(session.state)
+end
 handlers.signContract = act("signContract", { "inventory" }, function(s, u, p) return CompanyActions.signContract(s, str(p.supplierId), str(p.resourceId), tonumber(p.unitsPerWeek) or 0, tonumber(p.weeks) or 0) end)
 handlers.cancelContract = act("cancelContract", { "inventory" }, function(s, u, p) return CompanyActions.cancelContract(s, str(p.contractId)) end)
 

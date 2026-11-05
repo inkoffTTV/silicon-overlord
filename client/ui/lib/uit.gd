@@ -552,6 +552,11 @@ static func segmented(items: Array, value: String, on_pick: Callable, min_h: flo
 	for it in items:
 		var id: String = str(it[0])
 		var b := btn(str(it[1]), "BtnSeg", "", 0, min_h)
+		# long labels (German, Russian) shrink with an ellipsis instead of pushing the row off the screen
+		b.clip_text = true
+		b.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+		b.custom_minimum_size.x = 36
+		b.tooltip_text = str(it[1])
 		b.toggle_mode = true
 		b.button_group = group
 		b.button_pressed = id == value

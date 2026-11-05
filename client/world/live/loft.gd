@@ -42,6 +42,8 @@ func _ready() -> void:
 func refresh(s: Dictionary) -> void:
 	unlocked = HQ.has_second_floor(s)
 	if int(unlocked) != _built_state:
+		if _built_state == 0 and unlocked:
+			Sfx.play("door_open", to_global(hole_center()))
 		_built_state = int(unlocked)
 		if dyn:
 			dyn.queue_free()

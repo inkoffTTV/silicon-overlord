@@ -345,6 +345,36 @@ class E2E(unittest.IsolatedAsyncioTestCase):
         r = await a.act("startResearch", {"techId": "nope"})
         self.assertIn("errorKey", r)
 
+    async def test_purchasing_quotes(self):
+        """Purchasing screen data: spot price, stock, suppliers; buying raises stock; contracts listed."""
+        a = await self.client("Buyer")
+        await a.hello()
+        await a.create("Quote Corp")
+        r = await a.act("getMaterialQuotes", {})
+        ok, data = r.get("ok"), r.get("data", r.get("error"))
+        self.assertTrue(ok, data)
+        mats = {m["id"]: m for m in data["materials"]}
+        self.assertIn("glass", mats)
+        g = mats["glass"]
+        self.assertGreater(g["spotPrice"], 0)
+        self.assertTrue(any(o["supplierId"] == "spot_market" for o in g["offers"]))
+        self.assertIn("Smartphone", data["billPerUnit"])
+        before = g["stock"]
+        r = await a.act("buyResources", {"resourceId": "glass", "units": 500})
+        ok, res = r.get("ok"), r.get("data", r.get("error"))
+        self.assertTrue(ok, res)
+        r = await a.act("getMaterialQuotes", {})
+        ok, data = r.get("ok"), r.get("data", r.get("error"))
+        after = {m["id"]: m for m in data["materials"]}["glass"]["stock"]
+        self.assertEqual(after, before + 500)
+        r = await a.act("signContract", {"supplierId": "terra_mining", "resourceId": "copper", "unitsPerWeek": 100, "weeks": 12})
+        ok, res = r.get("ok"), r.get("data", r.get("error"))
+        self.assertTrue(ok, res)
+        r = await a.act("getMaterialQuotes", {})
+        ok, data = r.get("ok"), r.get("data", r.get("error"))
+        contracts = data["contracts"] if isinstance(data["contracts"], list) else list(data["contracts"].values())
+        self.assertEqual(len(contracts), 1)
+
     async def test_safety(self):
         x = await self.client("Иван")
         await x.send({"t": "act", "id": 1, "action": "hire", "args": {}})

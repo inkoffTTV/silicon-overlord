@@ -161,6 +161,19 @@ static func lookup(text: String, l: String) -> String:
 	_cache.clear()
 	return r if r != text else ""
 
+## True when `text` has an entry (exact, numeric or wildcard template) in the phrase table of `l`. Tests.
+static func covered(text: String, l: String) -> bool:
+	if l == "en":
+		return true
+	raw_table(l)
+	var tb: Dictionary = _tables[l]
+	if tb.raw.has(text) or tb.hash.has(_normalise(text)):
+		return true
+	for w in tb.wild:
+		if (w.re as RegEx).search(text):
+			return true
+	return false
+
 ## Template with {named} placeholders: the template is translated, then filled.
 static func f(template: String, args: Dictionary = {}) -> String:
 	return fill(t(template), args)

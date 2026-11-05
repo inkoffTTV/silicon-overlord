@@ -100,3 +100,32 @@ end
 - `avatar_talk(user_id, seconds, text)` is called when a line starts (also when voices are muted).
 - Footsteps: `step_concrete` / `step_wood` / `step_metal`; loops via `Sfx.loop(name, node)`; ambience switch with
   `Sfx.ambient("garage" | "loft" | "stage" | "outdoor")`.
+
+## From WORLD agent (iteration 2, 2026-11-05)
+
+### UI agent: new world interactables (Bus.interact(kind, id)) — what the world already does
+| kind | id | world side | UI should |
+|---|---|---|---|
+| `crate` | crate id | E (or LMB) picks it up; **no** Bus.interact is emitted. Carrying it into the van calls `Net.act("shipCrate")` once, then `Bus.ship_feedback(id, ok)` | optional: toast on `ship_feedback` (the van already flashes "+N units") |
+| `van` | `garage_van` / `office_dispatch` | — | "Ship all crates" confirm → `shipAll` (crates then hop into the van by themselves) |
+| `stairs_locked` | `AssemblyLine` | boarded hatch + "2ND FLOOR — FOR SALE" sign | "Buy the second floor" dialog (price from `getRoomCatalog`) → `buildRoom {roomId:"AssemblyLine"}`; the world opens the hatch + ladder when `hq.rooms.AssemblyLine` appears |
+| `job_board` | `garage_jobs` / `office_jobs` | shows candidates' CVs + TEAM n | Employees screen |
+| `production_line` | line id, or `""` (empty attic bay: "Production lines") | — | production screen focused on that line (`""` = build one) |
+| `pc_challenge` | `garage_pc` | player sits on the chair at the garage PC (camera to the seat) **before** emitting | open the mini-game overlay (modal); when you close it (`Bus.ui_modal_changed(false)`) the player stands up. targetId = a project in `state.projects` |
+| `whiteboard_challenge` | `garage_whiteboard` / `office_whiteboard` | player steps up to the board (marker tray "? BRAINSTORM") | research mini-game for a tech in `research.active` |
+| `line_qc` | line id (bench = the garage line, usually `line_1`) | player stands at the QC table looking at the phones | assembly QC mini-game, targetId = that line id |
+`pc_design` stays on the monitor/desk ("Design a phone"); the chair in front of it is `pc_challenge` ("Sit at the PC (challenge)").
+If no modal opens after a seat interact, the player stands up with E / Space / Esc / WASD.
+Prompts are English strings in meta `prompt` (as before): "Carry to the van", "Ship all crates", "Buy the second floor",
+"Job board: hire staff", "Production line #2", "Production lines", "Sit at the PC (challenge)",
+"Brainstorm at the board (challenge)", "QC inspection (challenge)".
+
+### AUDIO agent: sound names the world uses (all from docs/AUDIO.md)
+step_concrete/step_wood/step_metal, jump, land, grab, drop, throw, crate_grab, crate_drop, impact_cardboard,
+ship_ok, ship_fail, solder, keyboard, marker, sit, pc_beep, machine_beep, door_open (attic hatch opens);
+loops: machine_hum + conveyor (running lines), fluorescent (flickering tubes), fridge; ambient: garage / loft / outdoor
+by player position. `world.avatar_talk(uid, seconds, text)` and `world.avatar_position(uid)` exist as you call them.
+
+### SERVER: nothing blocking
+The world reads `production.crates`, `production.lines[].location/bench`, `production.jobs[].status/produced/quantity`,
+`employees.list[].station` (falls back to role), `hq.rooms.AssemblyLine`, `projects`, `research.active/unlocked`.

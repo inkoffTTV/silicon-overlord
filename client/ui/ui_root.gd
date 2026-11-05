@@ -321,17 +321,20 @@ func _popup_shell(title: String, sub: String, width: float = 440) -> Array:
 func _open_pause() -> void:
 	if _pause:
 		return
-	var r := _popup_shell("Pause", "Paused · the company keeps running on the server")
+	var r := _popup_shell("Pause", "Paused · the company keeps running on the server", 480)
 	_pause = r[0]
 	var v: VBoxContainer = r[1]
 	var resume := U.btn(L.t("Resume"), "BtnPrimary", "play", 0, 46)
 	resume.pressed.connect(_close_pause)
 	v.add_child(resume)
 	var set_btn := U.btn(L.t("Settings"), "", "gear", 0, 42)
+	set_btn.set_meta("settings_btn", true)
 	v.add_child(set_btn)
 	var settings_box := U.vbox(10)
-	settings_box.visible = false
-	v.add_child(settings_box)
+	var settings_scroll := U.scroll(U.margin(settings_box, 0, 0, 10, 0))
+	settings_scroll.custom_minimum_size.y = 300
+	settings_scroll.visible = false
+	v.add_child(settings_scroll)
 	set_btn.pressed.connect(func() -> void:
 		if settings_box.get_child_count() == 0:
 			var s := Settings.new()
@@ -342,7 +345,7 @@ func _open_pause() -> void:
 				s.save()
 				Bus.notify.emit("success", L.t("Saved"), ""))
 			settings_box.add_child(save)
-		settings_box.visible = not settings_box.visible)
+		settings_scroll.visible = not settings_scroll.visible)
 	var leave := U.btn(L.t("Leave company"), "BtnDanger", "exit", 0, 42)
 	leave.pressed.connect(func() -> void:
 		_confirm_leave(v, leave))
@@ -488,8 +491,13 @@ func debug_research(branch: String, tech: String) -> void:
 	if current and current.has_method("debug_select"):
 		current.debug_select(branch, tech)
 
-func debug_pause() -> void:
+func debug_pause(with_settings: bool = false) -> void:
 	_open_pause()
+	if with_settings:
+		Settings.last_tab = "audio"
+		for b in _pause.find_children("*", "Button", true, false):
+			if b.get_meta("settings_btn", false):
+				(b as Button).pressed.emit()
 
 func debug_quick() -> void:
 	_open_quick()

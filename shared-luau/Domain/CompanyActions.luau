@@ -1005,6 +1005,69 @@ function CompanyActions.buyResources(c: Types.CompanyState, resourceId: string, 
 	return true, { cost = cost }
 end
 
+-- Read-only purchasing overview for the client's "Purchasing" screen (online version):
+-- spot prices (same formula as buyResources), stock, daily need of queued/running production and how many days
+-- the stock lasts, which products use each material, supplier contract offers and active contracts.
+function CompanyActions.getMaterialQuotes(c: Types.CompanyState): (boolean, any)
+	local evMods = require(Shared.Domain.EventEngine).modifiers(c.world, c.time.elapsedDays)
+	local mods = ResearchRules.aggregateModifiers(c.research.unlocked)
+	local ch: any = c.challenges
+	local discount = ch and tonumber(ch.supplierDiscount) or 0
+	local need: { [string]: number } = {}
+	local usedBy: { [string]: { string } } = {}
+	local roomAsm = 0
+	local room = c.hq.rooms.AssemblyLine
+	if room then
+		roomAsm = room.level
+	end
+	for _, job in ipairs(c.production.jobs) do
+		if job.status == "Running" or job.status == "Queued" or job.status == "Blocked" then
+			local product = c.products[job.productId]
+			local line = TableUtil.find(c.production.lines, function(l: Types.ProductionLine)
+				return l.id == job.lineId
+			end)
+			if product and line then
+				local perDay = ProductionRules.effectiveCapacity(line, roomAsm, mods.line_capacity_mult or 1, 0, c.time.elapsedDays) / 7
+				local remaining = math.max(0, job.quantity - job.produced - job.defective)
+				local units = math.min(perDay, remaining)
+				for res, per in pairs(Resources.billPerUnit[product.category] or {}) do
+					need[res] = (need[res] or 0) + per * units
+					usedBy[res] = usedBy[res] or {}
+					local list = usedBy[res]
+					if not table.find(list, product.name) then
+						list[#list + 1] = product.name
+					end
+				end
+			end
+		end
+	end
+	local materials = {}
+	for _, r in ipairs(Resources.list) do
+		local spot = r.basePrice * 1.15 * (evMods.supply[r.id] or 1) * (mods.material_cost_mult or 1)
+		local stock = c.inventory.resources[r.id] or 0
+		local daily = need[r.id] or 0
+		local offers = {}
+		for _, sup in ipairs(Resources.materialSuppliers) do
+			for _, rid in ipairs(sup.resources) do
+				if rid == r.id then
+					offers[#offers + 1] = { supplierId = sup.id, name = sup.name, reliability = sup.reliability, minWeeks = sup.minWeeks, pricePerUnit = MathUtil.round(r.basePrice * sup.priceMult, 2), pricePerUnitLong = MathUtil.round(r.basePrice * sup.priceMult * 0.9, 2) }
+				end
+			end
+		end
+		materials[#materials + 1] = {
+			id = r.id, name = r.name, unit = r.unit, stock = stock, basePrice = r.basePrice,
+			spotPrice = MathUtil.round(spot * (1 - discount), 2), supplyMult = evMods.supply[r.id] or 1,
+			dailyNeed = MathUtil.round(daily, 3), daysLeft = daily > 0 and MathUtil.round(stock / daily, 1) or -1,
+			usedBy = usedBy[r.id] or {}, offers = offers,
+		}
+	end
+	local bills = {}
+	for cat, bill in pairs(Resources.billPerUnit) do
+		bills[cat] = bill
+	end
+	return true, { materials = materials, contracts = c.inventory.contracts, billPerUnit = bills, supplierDiscount = discount, cash = c.finance.cash }
+end
+
 function CompanyActions.signContract(c: Types.CompanyState, supplierId: string, resourceId: string, unitsPerWeek: number, weeks: number): (boolean, any)
 	local supplier = TableUtil.find(Resources.materialSuppliers, function(s: any)
 		return s.id == supplierId

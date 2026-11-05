@@ -92,17 +92,53 @@ office chair, stool. Masses are realistic: the hold force is capped at 300 N, so
    Spawn it 1–3 cm above the surface; it settles.
 
 ## Levels
-`res://world/levels/level_base.gd` holds shared furniture builders (desk+PC, whiteboard, assembly table,
-prototype shelf, company board, calendar, door, sofa, fridge, bulb, fluorescent tube, poster, outlet).
+`res://world/levels/level_base.gd` holds shared furniture builders (desk+PC with its challenge chair, office chair,
+whiteboard with live research + challenge tray, assembly table, prototype shelf, job board, company board, calendar,
+door, sofa, fridge, bulb, fluorescent tube, poster, outlet) and the staff slots (`add_slot(station, pos, yaw, pose)`).
 `level_1_garage.gd` (full), `level_2_office.gd` (rough, also used for 3–7 with bigger floors and the city
 dropping away below the windows). Register new levels in `world.gd LEVELS`. Interactables =
 `kit.interactable(parent, kind, id, prompt, pos, rot_y)` + `kit.ia_shape(...)`.
 
-## Avatars
-"Telly": chunky worker with a CRT-monitor head (glowing face in the player's colour, blinking eyes), rabbit-ear
-antenna, hoodie tinted by the player's colour, mitten hands, stubby legs; name tag above. Original design.
+## Avatars and staff (`res://world/actors/`)
+One procedural rig (`worker_rig.gd`): chunky worker, two-segment arms/legs (so it can sit, type, scribble, carry,
+climb), chamfered "toy" boxes, poses driven by `pose` + `move_speed`, mouth flaps on `talk(seconds)`. Two heads:
+- **Players — "Telly"** (`peer_avatar.gd`): beige CRT monitor head with a glowing face (eyes + mouth on the screen,
+  blinking), hard hat + work shirt in the player's colour, little headlamp, rabbit-ear antenna poking out of the hat,
+  name tag. Anim from the network `anim` (idle/walk/run/crouch/carry/air/sit/climb) + measured velocity; head follows
+  pitch. `talk()` = screen-mouth opens + speech bubble (`speech_bubble.gd` + `bubble.gdshader`: warm paper, black
+  border, tail; billboard). `world.avatar_talk(user_id, seconds, text)`; your own avatar is not drawn (no bubble).
+- **Employees — "bean" NPCs** (`npc_worker.gd`): round putty head with googly eyes, hair/cap from the employee id
+  (stable look), clothes by role: researcher = lab coat, worker = hi-vis vest + yellow hard hat, QC = vest + blue cap,
+  software = headset, marketer/analyst = tie; shirt colour by station (design teal, research white/blue, assembly
+  orange/grey, office blue). Name + role tag fades in within ~3 m (fixed screen size). They mutter a short quip
+  bubble now and then when you are close, and make work sounds (keyboard, marker, solder).
+
+## Iteration 2: the HQ shows the company (`res://world/live/`, all read `Game.state` only)
+| What | Script | Where (garage) |
+|---|---|---|
+| Prototypes in development (`projects`) built on the back workbench: parts laid out <30% → open shell + board + screen panel <70% → the real phone (phone_builder, blueprint colours) on a holder; build monitor (name, %, day, bugs), crackling solder light + sparks | `dev_bench.gd` | back workbench, 2 slots |
+| Finished prototypes (products out of Development) on the shelf stands with their names | `proto_shelf.gd` | prototype shelf |
+| Whiteboard: `research.active` names + marker-drawn progress bars + %, sticky notes for recently finished techs | `research_board.gd` | left wall |
+| Hand-assembly bench = garage line (`location:"garage"`): status screen, finished phones pile up in the tray, sparks; QC table (`line_qc`) at its right end | `bench_view.gd` | assembly table |
+| Second floor = attic over the garage (`hq.rooms.AssemblyLine`): boarded hatch + "2ND FLOOR — FOR SALE" sign (`stairs_locked`) → when bought: open hatch, wooden ladder, railing, fluorescent tubes (one flickers) + a warm bulb, one line per upstairs `production.lines[]` | `loft.gd` | ceiling hatch right-front |
+| Production line: parts bins → belt through 1–3 boxy machines (count/size by level, colour by kind) → QC table → open crate that fills up. Running: rollers spin, phones in the product colour ride the belt, sparks + steam, stack light green, hum. Idle amber / blocked blinking amber / down red beacon | `line_view.gd` | attic |
+| Crates (`production.crates`): taped cartons with the product colour band + labels (product × units, FRAGILE) on a pallet in the taped SHIPPING corner; carry one into the van → `shipCrate` | `crate_body.gd`, `shipping.gd` | inside the roll-up door, left |
+| Delivery van (original boxy van, company name + logo-colour stripe, rear doors open, ramp, cargo light, hazard blinkers, roof beacon). Ship OK: crate slides in and stays as cargo, green flash, "+N units", van bounces; fail: crate pushed back out, red flash | `ship_dock.gd` (style "van"; "chute" = DISPATCH hatch in offices) | driveway (the roll-up door is now open) |
+| Staff NPCs on station slots; overflow sits on cardboard boxes | `staff.gd` | desks, whiteboard, bench/lines, sofa |
+| Job board: cork board with pinned CVs (candidates) + TEAM n, clip lamp | `job_board.gd` | back wall by the house door |
+
+Seats (`player.sit_at`): interactables with meta `seat` {pos, yaw, eye, pitch, pose}. `pc_challenge` = the office chair
+at the garage PC (sit, eye 1.14 m), `whiteboard_challenge` = the marker tray ("? BRAINSTORM"), `line_qc` = QC tables
+(stand, look down at the phones). Ladders: nodes in group `ladder` with meta bottom_local/top_local.
+Footsteps by surface (`level.surface_at`): concrete / wood (attic, ladder) / metal (van ramp). Room tone by
+position (`level.ambient_at`): garage / loft / outdoor.
 
 ## Screenshots
 `xvfb-run -a -s "-screen 0 1600x900x24" <godot> --path client -s res://tools/shot.gd -- --scene=res://world/world.tscn --out=tools/shots`
 Options: `--views=a,b`, `--level=2`, `--peers`, `--show=10,2,2,14`, `--quality=clean`, `--hide-ui --player --flashlight`
 and `--grab=box_m` (with `main.tscn`), `--dark`. Viewpoints are `Marker3D`s in group `viewpoint` created by each level/stage.
+
+Iteration 2: `res://tools/shot_iter2.gd -- --shots=all` (or build,whiteboard,loft,van,van_fp,crate_fp,staff,avatars,
+avatar_close,seat,jobs,shelf,locked,office) loads main.tscn with a rich fake company (`fake_state()`: sample state +
+2 projects, 5 crates, bench + 2 upstairs lines, 10 staff) and writes `tools/shots/iter2_*.png` +
+`tools/shots/avatars_showcase.png`.

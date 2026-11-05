@@ -131,6 +131,30 @@ func _run() -> void:
 	Net.chat("привет from test")
 	await _wait(func() -> bool: return not chat.is_empty(), 3.0)
 	check(not chat.is_empty() and str(chat[0][1]).contains("привет"), "chat broadcast (UTF-8)")
+	# iteration 2: staff, second floor, shipping, challenges (skipped quietly on an older server)
+	var cands: Variant = Game.state.get("employees", {}).get("candidates", [])
+	var cand_list: Array = cands if cands is Array else (cands as Dictionary).values()
+	if not cand_list.is_empty():
+		var h: Dictionary = await Net.act("hire", {"candidateId": str(cand_list[0].get("id", ""))})
+		check(h.get("ok", false) or h.has("error"), "hire answered (%s)" % str(h.get("error", "ok")))
+	var cat: Dictionary = await Net.act("getRoomCatalog", {})
+	if cat.get("ok", false):
+		var room: Dictionary = cat.get("data", {}).get("rooms", {}).get("AssemblyLine", {})
+		check(room.has("nextCost"), "getRoomCatalog has the second floor price")
+		var ship: Dictionary = await Net.act("shipAll", {})
+		check(ship.get("ok", false) or str(ship.get("errorKey", "")) == "err.no_crates_to_ship", "shipAll answered (%s)" % str(ship.get("error", "ok")))
+		var L = load("res://ui/lib/loc.gd")
+		if not ship.get("ok", false):
+			L.set_lang("de")
+			check(L.server(ship.get("errorKey"), {}, str(ship.get("errorEn", ""))) == "Keine Kisten zum Versenden", "server error key translated (de)")
+			L.set_lang("en")
+		var cr: Dictionary = await Net.act("challengeReward", {"kind": "research", "targetId": "node_14_research", "score": 0.8})
+		check(cr.get("ok", false) or cr.has("error"), "challengeReward answered (%s)" % str(cr.get("error", "ok")))
+		if cr.get("ok", false):
+			var cr2: Dictionary = await Net.act("challengeReward", {"kind": "research", "targetId": "node_14_research", "score": 0.8})
+			check(not cr2.get("ok", true) and str(cr2.get("errorKey", "")) == "err.challenge_cooldown", "second reward is on cooldown")
+	else:
+		print("  (server has no iteration-2 actions yet: skipped)")
 	# UI: the real designer flow
 	var ui: Node = load("res://ui/ui_root.gd").new()
 	ui.set("force_lang", "en")

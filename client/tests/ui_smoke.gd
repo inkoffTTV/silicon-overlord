@@ -45,9 +45,15 @@ func _run() -> void:
 	var D = load("res://ui/lib/gdata.gd")
 	var L = load("res://ui/lib/loc.gd")
 	var calls: Array = []
+	var last_args := {}
 	Net.set("mock_handler", func(action: String, args: Dictionary) -> Dictionary:
 		calls.append(action)
+		last_args[action] = args
 		match action:
+			"challengeReward":
+				return {"ok": true, "data": {"applied": {"added": 0.05}, "cooldownDays": 5}}
+			"shipAll":
+				return {"ok": true, "data": {"units": 550, "bonusUnits": 27, "premium": 0}}
 			"createBlueprint":
 				return {"ok": true, "data": {"id": "bp_test"}}
 			"updateBlueprint", "evaluateBlueprint":
@@ -187,6 +193,119 @@ func _run() -> void:
 			ui.current.on_state_changed(["products", "finance"])
 		ui.close_screen()
 		await frames(2)
+	# ---------------------------------------------------------------- iteration 2: employees, van, stairs, line focus
+	var st2: Dictionary = Game.state.duplicate(true)
+	var pid0: String = (st2.products as Dictionary).keys()[0]
+	st2.production["crates"] = [{"id": "crate_1", "productId": pid0, "units": 120, "day": 90}, {"id": "crate_2", "productId": pid0, "units": 80, "day": 91}]
+	st2.production.jobs.append({"id": "job_x", "lineId": "line_1", "productId": pid0, "quantity": 500, "produced": 100, "defective": 2, "status": "Running"})
+	st2["challenges"] = {"cooldowns": {}, "history": []}
+	Game.apply_snapshot(st2)
+	await frames(2)
+	check(ui.hud._crate_chip.visible, "hud shows crates waiting")
+	print("ui_smoke: employees")
+	Bus.interact.emit("job_board", "board")
+	await frames(3)
+	var emp: Control = ui.current
+	check(emp != null and ui.current_kind == "job_board", "employees opened")
+	check(emp._board.get_child_count() == U_arr(Game.state.employees.candidates).size(), "one card per candidate")
+	var cand: Dictionary = U_arr(Game.state.employees.candidates)[0]
+	await emp._hire(str(cand.id), str(cand.name))
+	check(calls.has("hire") and last_args.hire.candidateId == cand.id, "hire sent with candidateId")
+	var staff: Dictionary = U_arr(Game.state.employees.list)[0]
+	await emp._set_salary(str(staff.id), 17000.0)
+	check(calls.has("setSalary") and int(last_args.setSalary.salary) == 17000, "setSalary sent")
+	emp._confirm_fire = str(staff.id)
+	emp.refresh()
+	await frames()
+	check(emp.on_escape(), "Esc cancels the fire confirmation first")
+	await emp._fire(str(staff.id), str(staff.name))
+	check(calls.has("fire") and last_args.fire.employeeId == staff.id, "fire sent")
+	ui.close_screen()
+	await frames(2)
+	print("ui_smoke: van / stairs / line")
+	Bus.interact.emit("van", "van")
+	await frames(3)
+	check(ui.current_kind == "van", "van dialog opened")
+	for b in ui.current.find_children("*", "Button", true, false):
+		if (b as Button).get_child_count() > 0 and str((b as Button).tooltip_text) == "" and b.is_visible_in_tree():
+			pass
+	await ui.current._ship_all(Button.new())
+	check(calls.has("shipAll"), "shipAll sent from the van")
+	await frames(3)
+	check(ui.current == null, "van closes after shipping")
+	var st3: Dictionary = Game.state.duplicate(true)
+	(st3.hq.rooms as Dictionary).erase("AssemblyLine")
+	Game.apply_snapshot(st3)
+	Bus.interact.emit("stairs_locked", "stairs")
+	await frames(3)
+	check(ui.current_kind == "stairs_locked", "stairs dialog opened")
+	check(calls.has("getRoomCatalog"), "second floor price asked from the server")
+	await ui.current._buy()
+	check(calls.has("buildRoom") and last_args.buildRoom.roomId == "AssemblyLine", "buildRoom AssemblyLine sent")
+	await frames(3)
+	Game.apply_snapshot(st2)
+	Bus.interact.emit("production_line", "line_1")
+	await frames(3)
+	check(ui.current_kind == "production_line" and ui.current.target_id == "line_1", "production focused on a line")
+	check(ui.current._pick_line == "line_1", "focused line preselected for the batch")
+	ui.close_screen()
+	await frames(2)
+	# ---------------------------------------------------------------- challenges
+	print("ui_smoke: challenges")
+	for spec in [["pc_challenge", "", "circuit"], ["pc_challenge", "", "signal"], ["pc_challenge", "", "bughunt"],
+			["whiteboard_challenge", "", "ideas"], ["line_qc", "line_1", "qc"], ["negotiation", "retailer", "haggle"]]:
+		calls.erase("challengeReward")
+		Bus.interact.emit(spec[0], spec[1])
+		await frames(3)
+		var ch: Control = ui.current
+		check(ch != null and ui.current_kind == spec[0], spec[0] + " opened")
+		check(ch.options.size() > 0, "%s has something to play" % spec[0])
+		ch.debug_play(spec[2])
+		await frames(2)
+		check(ch.phase == "play" and ch.game.running, spec[2] + " running")
+		# play a little with keys and the mouse
+		for k in [KEY_RIGHT, KEY_DOWN, KEY_SPACE, KEY_1, KEY_LEFT, KEY_SPACE, KEY_ENTER]:
+			var ev := InputEventKey.new()
+			ev.keycode = k
+			ev.pressed = true
+			ch.game.handle_key(ev)
+		var click := InputEventMouseButton.new()
+		click.button_index = MOUSE_BUTTON_LEFT
+		click.pressed = true
+		click.position = ch.game.size / 2.0
+		ch.game._gui_input(click)
+		await create_timer(0.3).timeout
+		ch.game.finish(ch.game.on_timeout())
+		await frames(3)
+		check(ch.phase == "result", spec[2] + " shows the result")
+		check(calls.has("challengeReward"), spec[2] + " sends challengeReward")
+		var sc: float = float(last_args.challengeReward.score)
+		check(sc >= 0.0 and sc <= 1.0, "%s score in 0..1 (%s)" % [spec[2], sc])
+		check(last_args.challengeReward.kind == ch.GAMES[spec[2]][1], spec[2] + " reward kind")
+		ui.close_screen()
+		await frames(2)
+		check(modal_events[-1] == false, spec[0] + " releases the modal (player stands up)")
+	# Esc quits without a reward
+	calls.erase("challengeReward")
+	Bus.interact.emit("pc_challenge", "")
+	await frames(3)
+	ui.current.debug_play("circuit")
+	await frames(2)
+	ui._handle_escape()
+	await frames(3)
+	check(ui.current == null and not calls.has("challengeReward"), "Esc leaves a challenge without a reward")
+	# nothing to do -> a message and a way to stand up
+	var st4: Dictionary = Game.state.duplicate(true)
+	st4.research["active"] = []
+	st4["projects"] = {}
+	Game.apply_snapshot(st4)
+	Bus.interact.emit("pc_challenge", "")
+	await frames(3)
+	check(ui.current != null and ui.current.phase == "nothing", "pc challenge with nothing to do explains why")
+	ui.close_screen()
+	await frames(2)
+	Game.apply_snapshot(st)
+	await frames(2)
 	# launch overlay
 	print("ui_smoke: launch")
 	var pid := ""
@@ -229,6 +348,16 @@ func _run() -> void:
 		await frames(3)
 		ui.close_screen()
 		await frames()
+	# every language builds every main screen
+	print("ui_smoke: all languages")
+	for lang in load("res://ui/lib/loc.gd").codes():
+		ui.set_language(lang)
+		await frames(2)
+		for kind in ["board_company", "job_board", "pc_challenge"]:
+			Bus.interact.emit(kind, "x")
+			await frames(2)
+			ui.close_screen()
+			await frames(1)
 	ui.set_language("en")
 	await frames()
 	# don't leave the language the test picked in the player's settings
@@ -249,3 +378,10 @@ func _run() -> void:
 	for e in log_counter.errors.slice(0, 20):
 		print("  ERROR ", e)
 	quit(0 if failures.is_empty() and log_counter.errors.is_empty() else 1)
+
+static func U_arr(v: Variant) -> Array:
+	if v is Array:
+		return v
+	if v is Dictionary:
+		return (v as Dictionary).values()
+	return []

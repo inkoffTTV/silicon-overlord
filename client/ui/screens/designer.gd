@@ -567,7 +567,7 @@ func refresh_cost() -> void:
 	if not disp.is_empty():
 		parts.append("%.1f\" %s" % [U.num(disp.get("sizeInch", 0)), str(disp.get("panel", ""))])
 	parts.append(str(U.dict(draft.options).get("bodyColorHex", "#1E1E22")))
-	_cost_detail.text = " · ".join(parts) + "\n%.2f × %.2f × %.2f in" % [ext.x * 3.6 * 0.95, ext.y * 3.6 * 0.95, thick_in]
+	_cost_detail.text = " · ".join(parts) + "\n" + F.dims(ext.x * 3.6 * 0.95, ext.y * 3.6 * 0.95, thick_in)
 	# compatibility
 	var issues := U.arr(server_eval.get("issues", []))
 	var errors := 0
@@ -616,7 +616,7 @@ func _refresh_ratings() -> void:
 	if bh > 0:
 		var row2 := U.hbox(8)
 		row2.add_child(U.icon("battery", U.SUCCESS, 14))
-		row2.add_child(U.lbl("%.1f h · %d g · %.1f mm" % [bh, int(U.num(r.get("weightG", 0))), U.num(r.get("thicknessMm", 0))], U.XS + 1, U.MUTED))
+		row2.add_child(U.lbl("%.1f %s · %d %s · %.1f %s" % [bh, F.unit("h"), int(U.num(r.get("weightG", 0))), F.unit("g"), U.num(r.get("thicknessMm", 0)), F.unit("mm")], U.XS + 1, U.MUTED))
 		_ratings_box.add_child(row2)
 
 static func _rating_color(v: float) -> Color:
@@ -913,7 +913,7 @@ func _render_chassis(st: Dictionary) -> void:
 		v.add_child(sil)
 		v.add_child(U.clip(L.t(str(d.name)), U.SM, U.TEXT if d.available else U.MUTED, "bold"))
 		var status: String = (L.t("Fresh design") if d.freshness >= 0.99 else "%d%%" % int(d.freshness * 100)) if d.available else (F.money(U.num(d.techCost)) + " · " + L.t("Research it at the whiteboard") if str(d.reasonKind) == "tech" else L.t(str(d.reason)))
-		v.add_child(U.clip(status + ("  ·  " + "%.1f mm" % d.thickness if d.available else ""), U.XS, U.SUCCESS if d.available and d.freshness >= 0.7 else U.WARNING))
+		v.add_child(U.clip(status + ("  ·  " + "%.1f %s" % [d.thickness, F.unit("mm")] if d.available else ""), U.XS, U.SUCCESS if d.available and d.freshness >= 0.7 else U.WARNING))
 		var b := U.content_btn(v, "BtnRow", Vector2(10, 9))
 		b.toggle_mode = true
 		b.button_pressed = d.selected

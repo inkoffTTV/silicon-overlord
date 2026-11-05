@@ -227,11 +227,11 @@ func _build_chute() -> void:
 	am.emission_enabled = true
 	am.emission = Color(1.0, 0.55, 0.05)
 	_blink_mats.append(am)
-	_box(s, Vector3(0.1, 0.1, 0.05), Vector3(0.5, 1.75, -0.02), am, 0.01)
+	_box(s, Vector3(0.1, 0.1, 0.05), Vector3(0.62, 1.95, -0.02), am, 0.01)
 	_flash_mat = StandardMaterial3D.new()
 	_flash_mat.emission_enabled = true
 	_flash_mat.emission = Color(0.3, 1.0, 0.4)
-	_box(s, Vector3(0.1, 0.1, 0.05), Vector3(-0.5, 1.75, -0.02), _flash_mat, 0.01)
+	_box(s, Vector3(0.1, 0.1, 0.05), Vector3(-0.62, 1.95, -0.02), _flash_mat, 0.01)
 	_flash_light = OmniLight3D.new()
 	_flash_light.light_energy = 0.0
 	_flash_light.omni_range = 3.0

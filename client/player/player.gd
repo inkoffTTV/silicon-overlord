@@ -242,6 +242,8 @@ func sit_at(node: Node3D) -> void:
 	tw.tween_method(func(k: float) -> void: set_look(lerp_angle(yaw, gyaw, k), lerpf(pitch, deg_to_rad(float(seat.get("pitch", 0.0))), k)), 0.0, 1.0, 0.35)
 	if _seat_pose == "sit":
 		Sfx.play("sit", gp)
+	if seat_kind == "pc_challenge":
+		Sfx.play("pc_beep", gp + Vector3(0, 0.9, 0), -6.0)
 	Bus.focus_changed.emit("")
 	_focus_prompt = ""
 	Bus.interact.emit(seat_kind, str(node.get_meta("id", "")))

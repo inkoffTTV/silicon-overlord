@@ -140,14 +140,14 @@ func handle_key(e: InputEventKey) -> bool:
 func _gui_input(e: InputEvent) -> void:
 	if e is InputEventMouseButton and e.pressed and e.button_index == MOUSE_BUTTON_LEFT:
 		for i in _cells.size():
-			if (_cells[i] as Rect2).has_point(e.position):
+			if (_cells[i] as Rect2).abs().has_point(e.position):
 				cursor = i
 				_pick(i)
 				accept_event()
 				return
 	elif e is InputEventMouseMotion:
 		for i in _cells.size():
-			if (_cells[i] as Rect2).has_point(e.position):
+			if (_cells[i] as Rect2).abs().has_point(e.position):
 				cursor = i
 
 func _draw_pattern(p: Array, r: Rect2, col: Color) -> void:

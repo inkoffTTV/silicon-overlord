@@ -101,6 +101,17 @@ func _process(delta: float) -> void:
 		if cam:
 			near = cam.global_position.distance_to(global_position + Vector3(0, 1.2, 0)) < 3.2
 		_tag_target = 1.0 if near else 0.0
+		if near and rig:
+			match str(rig.pose):
+				"sit_type":
+					if _rng.randf() < 0.12:
+						Sfx.play("keyboard", global_position + Vector3(0, 0.8, 0), -12.0)
+				"stand_scribble":
+					if _rng.randf() < 0.07:
+						Sfx.play("marker", global_position + Vector3(0, 1.4, 0), -10.0)
+				"stand_assemble":
+					if _rng.randf() < 0.04:
+						Sfx.play("solder", global_position + Vector3(0, 1.0, 0), -14.0)
 		_quip_t -= 0.2
 		if _quip_t <= 0.0:
 			_quip_t = _rng.randf_range(20.0, 45.0)

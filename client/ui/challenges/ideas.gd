@@ -144,14 +144,14 @@ func _gui_input(e: InputEvent) -> void:
 		return
 	if e is InputEventMouseButton and e.pressed and e.button_index == MOUSE_BUTTON_LEFT:
 		for i in _lrects.size():
-			if (_lrects[i] as Rect2).has_point(e.position):
+			if (_lrects[i] as Rect2).abs().has_point(e.position):
 				cur_col = 0
 				cur_row = i
 				_choose_left(i)
 				accept_event()
 				return
 		for j in _rrects.size():
-			if (_rrects[j] as Rect2).has_point(e.position):
+			if (_rrects[j] as Rect2).abs().has_point(e.position):
 				cur_col = 1
 				cur_row = j
 				_choose_right(j)
