@@ -180,7 +180,7 @@ func _process(dt: float) -> void:
 		tw.tween_callback(_show_tip)
 		tw.tween_property(_tip_label, "modulate:a", 1.0, 0.25)
 	var shown := Time.get_ticks_msec() / 1000.0 - _started
-	if _done and not _closing and _progress >= 0.999 and shown >= MIN_SECONDS and Game.has_company():
+	if _done and not _closing and _progress >= 0.999 and shown >= MIN_SECONDS and (Game.has_company() or shown > 15.0):
 		_close(0.5)
 
 func _show_tip() -> void:

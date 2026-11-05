@@ -77,6 +77,7 @@ func _run() -> void:
 	Bus.ui_modal_changed.connect(func(o: bool) -> void: modal_events.append(o))
 	var Prefs = load("res://ui/lib/prefs.gd")
 	var saved_lang: Variant = Prefs.get_setting("ui", "lang", null)
+	var saved_start: Variant = Prefs.get_profile("start_kind", "story")
 	print("ui_smoke: menu")
 	var ui: Node = load("res://ui/ui_root.gd").new()
 	ui.set("force_lang", "en")
@@ -471,6 +472,7 @@ func _run() -> void:
 	else:
 		cfg.set_value("ui", "lang", saved_lang)
 	cfg.save(Prefs.SETTINGS)
+	Prefs.set_profile("start_kind", saved_start)
 	# leave -> menu
 	Game.apply_snapshot({})
 	await frames(2)
@@ -557,8 +559,7 @@ func _story_section(ui: Node, Game: Node, Bus: Node, Net: Node, calls: Array, la
 	var st4 := story_state(base, 4, "investor_seen", [], ["investor_seen", "design_phone", "publish_phone", "develop_phone"])
 	Game.apply_sections({"story": st4.story})
 	await frames(4)
-	check(cuts.has("investor"), "investor cutscene asked from the world")
-	check(ui.story.cutscene_running(), "cutscene captions on screen")
+	check(ui.story.cutscene_running(), "investor cutscene captions on screen (no world: the UI paces them)")
 	ui._handle_escape()
 	await frames(4)
 	Bus.story_cutscene.disconnect(cc)

@@ -46,6 +46,15 @@ func play(id: String) -> void:
 		finished.emit(id)
 		return
 	running = id
+	var base_speed := speed
+	# pace the camera to the UI's captions (same timing formula as ui/story/story_ui.gd) and send beats
+	var caps := caption_times(id)
+	var total := 0.0
+	for c in caps:
+		total += float(c[1])
+	if total > 0.0:
+		speed = base_speed * clampf(DURATION[id] / total, 0.35, 1.0)
+		_beats(id, caps, base_speed)
 	var player := get_tree().get_first_node_in_group("local_player") as Node3D
 	if player and player.has_method("set_controls_enabled"):
 		player.set_controls_enabled(false)
@@ -66,7 +75,49 @@ func play(id: String) -> void:
 		if player.has_method("set_controls_enabled"):
 			player.set_controls_enabled(true)
 	running = ""
+	speed = base_speed
 	finished.emit(id)
+
+## Esc: rush the rest of the cutscene (the camera still lands softly on the player).
+func skip() -> void:
+	if running != "":
+		speed = 40.0
+
+## [[line_id, seconds]] of the cutscene captions in the current language (story JSON), [] if none.
+static func caption_times(id: String) -> Array:
+	var lang := "en"
+	var L: Variant = load("res://ui/lib/loc.gd") if ResourceLoader.exists("res://ui/lib/loc.gd") else null
+	if L != null and str(L.get("lang")) != "":
+		lang = str(L.get("lang"))
+	var path := "res://ui/data/story/%s.json" % lang
+	if not FileAccess.file_exists(path):
+		path = "res://ui/data/story/en.json"
+	var f := FileAccess.open(path, FileAccess.READ)
+	if f == null:
+		return []
+	var j: Variant = JSON.parse_string(f.get_as_text())
+	if not (j is Dictionary):
+		return []
+	var cut: Variant = (j as Dictionary).get("cutscenes", {}).get(id, {}) if (j as Dictionary).get("cutscenes") is Dictionary else {}
+	var out := []
+	var cjk := lang in ["zh", "ja"]
+	if cut is Dictionary:
+		for c in (cut as Dictionary).get("captions", []):
+			if c is Dictionary:
+				var n := str(c.get("text", "")).length()
+				out.append([str(c.get("id", "")), clampf(n / (6.0 if cjk else 14.0) + 1.4, 3.2, 9.0)])
+	return out
+
+## Bus.story_dialogue("cut.<id>.N") when caption N is due (the UI shows the captions; this keeps them in sync).
+func _beats(id: String, caps: Array, base_speed: float) -> void:
+	var t := 0.0
+	for i in caps.size():
+		if i > 0:
+			var line: String = caps[i][0]
+			get_tree().create_timer((t + 0.25) / base_speed).timeout.connect(func() -> void:
+				if running == id and speed < 10.0:
+					Bus.story_dialogue.emit(line))
+		t += float(caps[i][1])
 
 # ------------------------------------------------------------------ helpers
 func _wait(t: float) -> void:
@@ -146,7 +197,7 @@ func _investor(lv: Node3D, _shop: Node3D) -> void:
 		who.set_pose("tip_hat"), 1.25)
 	await _shot(lv, Vector3(-0.3, 1.5, 2.4), Vector3(-0.2, 1.45, 2.6), Vector3(0.6, 1.2, 9.0), Vector3(0.35, 1.35, 5.0), 4.2, 46.0)
 	# 4) close: a tip of the hat at the door
-	await _shot(lv, Vector3(-0.15, 1.55, 2.9), Vector3(-0.1, 1.6, 3.15), Vector3(0.3, 1.5, 4.3), Vector3(0.3, 1.6, 4.3), 2.2, 40.0)
+	await _shot(lv, Vector3(-0.35, 1.5, 2.35), Vector3(-0.3, 1.55, 2.6), Vector3(0.3, 1.45, 4.3), Vector3(0.3, 1.5, 4.3), 2.2, 44.0)
 	# afterwards (not blocking): a short wave, back to the car, drive off
 	get_tree().create_timer(4.0).timeout.connect(func() -> void:
 		if not is_instance_valid(who):
@@ -242,7 +293,8 @@ func _sign_swap(lv: Node3D, shop: Node3D) -> void:
 	var sign: Node3D = shop.sign_node()
 	var home := sign.position
 	cam.fov = 55.0
-	_aim(lv.to_global(Vector3(-1.5, 1.7, 8.2)), lv.to_global(Vector3(-1.5, 3.2, 3.7)))
+	# (the van stands on the driveway from chapter 5 on: film from its right side)
+	_aim(lv.to_global(Vector3(1.6, 1.6, 9.0)), lv.to_global(Vector3(-1.5, 3.2, 3.7)))
 	# 1) the neon dies, the old sign tilts and drops away
 	var dying := create_tween()
 	dying.tween_interval(0.9 / speed)
@@ -256,7 +308,7 @@ func _sign_swap(lv: Node3D, shop: Node3D) -> void:
 	dying.tween_property(sign, "rotation_degrees:z", -14.0, 0.35 / speed).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 	dying.tween_property(sign, "position:y", home.y - 4.0, 0.7 / speed).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
 	dying.tween_callback(func() -> void: Sfx.play("impact_metal", lv.to_global(Vector3(-1.5, 0.2, 4.5)), 0.0))
-	await _move(lv.to_global(Vector3(-1.5, 1.7, 8.2)), lv.to_global(Vector3(-1.5, 1.9, 7.4)), lv.to_global(Vector3(-1.5, 3.2, 3.7)), lv.to_global(Vector3(-1.5, 3.1, 3.7)), 3.2)
+	await _move(lv.to_global(Vector3(1.6, 1.6, 9.0)), lv.to_global(Vector3(1.3, 1.8, 8.2)), lv.to_global(Vector3(-1.5, 3.2, 3.7)), lv.to_global(Vector3(-1.5, 3.1, 3.7)), 3.2)
 	# 2) the new company sign comes down into place, dark, then lights up
 	shop.set_sign_override(nm, cols[0], "company", cols[1], shape)
 	shop.set_sign_lit(false)
@@ -274,7 +326,7 @@ func _sign_swap(lv: Node3D, shop: Node3D) -> void:
 		shop.set_sign_lit(true)
 		_sparks(sign.global_position + Vector3(0, 0.0, 0.3), cols[0])
 		Sfx.play("level_up", sign.global_position, 0.0))
-	await _move(lv.to_global(Vector3(-1.5, 1.9, 7.4)), lv.to_global(Vector3(-1.2, 2.3, 6.2)), lv.to_global(Vector3(-1.5, 3.1, 3.7)), lv.to_global(Vector3(-1.5, 3.4, 3.7)), 3.6, 48.0)
+	await _move(lv.to_global(Vector3(1.3, 1.8, 8.2)), lv.to_global(Vector3(0.9, 2.2, 6.8)), lv.to_global(Vector3(-1.5, 3.1, 3.7)), lv.to_global(Vector3(-1.5, 3.4, 3.7)), 3.6, 46.0)
 	await _wait(0.8)
 	# 3) inside: the counter becomes a reception
 	_aim(lv.to_global(Vector3(-0.4, 1.65, 3.1)), lv.to_global(Vector3(-0.9, 1.1, 1.1)))

@@ -298,10 +298,10 @@ func _build_sign(style: String, text: String, col: Color, col2: Color, shape: St
 		face.albedo_color = Color(0.96, 0.95, 0.92)
 		face.emission_enabled = true
 		face.emission = Color(1.0, 0.97, 0.92)
-		face.emission_energy_multiplier = 1.1
+		face.emission_energy_multiplier = 0.75
 		face.roughness = 0.35
 		_sign_mats.append(face)
-		face.set_meta("base", 1.1)
+		face.set_meta("base", 0.75)
 		_sbox(g, Vector3(bw + 0.08, bh + 0.08, 0.16), Vector3(0, 0, -0.06), Mats.m("plastic_white", Color.WHITE, {"albedo": col.darkened(0.55), "roughness_base": 0.4}), 0.02)
 		_sbox(g, Vector3(bw, bh, 0.02), Vector3(0, 0, 0.03), face, 0.0)
 		# colour bar under the name
@@ -316,14 +316,15 @@ func _build_sign(style: String, text: String, col: Color, col2: Color, shape: St
 		l.font_size = 120
 		l.shaded = false
 		l.outline_size = 0
-		l.modulate = col.darkened(0.15)
+		l.modulate = col.darkened(0.4)
+		l.text = l.text.to_upper()
 		l.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		if kit.font:
 			l.font = kit.font
 		var tw := 1.0
 		for ch in l.text:
 			tw += _char_w(ch, 120)
-		var avail := bw - 0.95
+		var avail := bw - 0.8
 		l.pixel_size = minf(0.0048, avail / tw)
 		l.position = Vector3(0.28, 0.02, 0.045)
 		g.add_child(l)
@@ -895,8 +896,11 @@ func _build_bench() -> void:
 	# magnifier lamp on an arm, light pointed at the holder
 	var arm := kit.node(ia, Vector3(-0.6, top, -0.25), 0.0, "Magnifier")
 	kit.box(arm, Vector3(0.08, 0.05, 0.08), Vector3(0, 0.025, 0), frame, Vector3.ZERO, false, 0.01)
-	kit.box(arm, Vector3(0.025, 0.5, 0.025), Vector3(0.05, 0.27, 0.05), Mats.m("plastic_white", Color(1.3, 1.3, 1.3)), Vector3(0, 0, -15), false, 0.005)
-	kit.box(arm, Vector3(0.025, 0.55, 0.025), Vector3(0.3, 0.46, 0.2), Mats.m("plastic_white", Color(1.3, 1.3, 1.3)), Vector3(55, 0, -55), false, 0.005)
+	var am := Mats.m("plastic_white", Color(1.3, 1.3, 1.3))
+	var elbow := Vector3(-0.5, top + 0.62, -0.12)
+	_stick(ia, Vector3(-0.6, top + 0.04, -0.25), elbow, 0.026, am)
+	_stick(ia, elbow, Vector3(-0.17, top + 0.4, 0.06), 0.024, am)
+	kit.mesh(ia, Meshes.sphere(0.025, 8), elbow, Mats.m("steel_dark"), Vector3.ZERO, false)
 	var head := kit.node(ia, Vector3(-0.05, top + 0.36, 0.1), 0.0, "LampHead")
 	var ring := MeshInstance3D.new()
 	var tm := TorusMesh.new()
@@ -1023,6 +1027,14 @@ func _build_bench() -> void:
 	kit.ia_shape(ia, Vector3(w, top, dp), Vector3(0, top * 0.5, 0))
 	kit.ia_shape(ia, Vector3(w, 0.8, 0.06), Vector3(0, 1.55, -dp * 0.5 + 0.03))
 	kit.ia_shape(ia, Vector3(0.36, 0.64, 0.36), Vector3(0, 0.32, 0.62))
+
+func _stick(parent: Node3D, a: Vector3, b: Vector3, thick: float, mat: Material) -> void:
+	var mi := MeshInstance3D.new()
+	mi.mesh = Meshes.cbox(Vector3(thick, thick, 1.0), 0.0)
+	mi.material_override = mat
+	parent.add_child(mi)
+	var d := b - a
+	mi.transform = Transform3D(Basis.looking_at(d, Vector3.UP if absf(d.normalized().y) < 0.95 else Vector3.RIGHT).scaled_local(Vector3(1, 1, d.length())), (a + b) * 0.5)
 
 func _update_bins(s: Dictionary) -> void:
 	var res := HQ.dict(HQ.section(s, "inventory").get("resources"))

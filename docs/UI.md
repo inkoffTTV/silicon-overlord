@@ -11,11 +11,17 @@ python3 server/main.py --port 7350 --data /tmp/sos
 <godot> --headless --path client -s tests/ui_net_test.gd     # starts server/main.py itself (port 7391), skips if it can't
 <godot> --headless --path client -s tests/ui_i18n_test.gd    # every UI string in 11 languages, placeholders, CJK glyphs, DE/RU/ZH/JA screens fit
 <godot> --headless --path client -s tests/ui_layout_test.gd  # 10 window sizes (1280x720 .. 2560x1440, 21:9, 4:3, 800x600) x 7 languages: nothing off screen
+                                                             # (+ title menu pages in EN/RU/DE/ZH, story HUD / repair / counter / goals / final card / loading in RU)
+<godot> --headless --path client -s tests/ui_net_test.gd -- --port=7473   # + Story start: clock paused, intro captions -> storyEvent,
+                                                             #   chapter 1 with two real repairs (one via the counter + repair bench screens), listMyCompanies
 xvfb-run -a -s "-screen 0 1600x900x24" <godot> --path client --resolution 1600x900 -s tools/ui_shot_playtest.gd
                                                              # full game + server: design -> develop -> build -> launch -> sell
 # screenshots with fake state
 client/tools/ui_shot.sh <screen> <en|ru> <WxH> [--step=N --bp=ID --branch=Silicon ...]   -> client/tools/shots_ui/
 client/tools/ui_shot_all.sh                                  # the whole set (slow under lavapipe)
+client/tools/ui_shot_iter3.sh [ru] ["1920x1080 1366x768"]   # iteration 3: title menu, slots, story/quick, loading, credits, tracker +
+                                                             # dialogue (with the 3D garage), chapter card, captions, repair game,
+                                                             # ticket / receipt, skip story, final card, goals, controls -> tools/shots_ui/iter3/
 <godot> --headless --path client -s tools/ui_shot_check.gd   # compile check of every ui/net/phone/tests script
 python3 client/tools/export_data.py                          # shared-luau data + Roblox Locale -> client/ui/data/*.json
 ```
@@ -33,10 +39,19 @@ python3 client/tools/export_data.py                          # shared-luau data 
 | ui/lib/wizard.gd | port of DesignWizard (steps, option rows, lock reasons, facets, quick picks, finishes) |
 | ui/lib/research_layout.gd | port of ResearchLayout (lanes, tiers, in-lane links only, effect texts EN/RU) |
 | ui/lib/gdata.gd | read-only game data from ui/data/*.json |
-| ui/menu/* | main menu (name, Continue, New company: name + 2 colours + solo/co-op, Join by code, Settings, Quit), settings panel |
-| ui/hud/* | top bar (company, room code + copy, date, cash, RP, team, reputation, speed, members), [E] prompt, dev chip, toasts (coalesced), chat |
+| ui/menu/main_menu.gd | title screen "like a separate game": backdrop + logo + big items Continue / Play / Settings / Credits / Quit; Play = company slots (`listMyCompanies`: name, date, money, role, story chapter, last played) + New company (Story start (recommended) / Quick start -> name, colours, solo/co-op; `create.storyMode`) + Join by code; nickname chip, language, server status + Retry, version + updater state, rolling credits (story file `credits`). Keyboard / gamepad: focus moves with arrows / d-pad, Enter / A selects, Esc / B goes back; hovering a slot / typing a name previews it on the shop sign |
+| ui/menu/title_backdrop.gd | WORLD's `res://world/title/title_scene.tscn` in a SubViewport (threaded load, fades in, root 3D off while it covers the screen); painted rainy-street fallback with a flickering neon sign until it exists |
+| ui/menu/loading_screen.gd | entering a company: name, progress, rotating tips (story file `tips` + key tips, 11 languages); ui_root shows it on `menu.enter_started`, `done()` / `cancel()` |
+| ui/menu/settings_panel.gd | tabs General / Sound / Controls (every key incl. time keys 1-4, P/0, +/-) / Server |
+| ui/story/story_data.gd | read-only story texts `ui/data/story/<lang>.json` (NARRATIVE, docs/STORY_SCRIPT.md): chapters, steps, lines, speakers + voices, customers, devices / faults / parts, cutscene captions, tips, credits; English / built-in fallback |
+| ui/story/story_ui.gd | story director (one thing at a time): chapter cards, cutscene captions (follows the world's camera; alone + storyEvent when no world plays it; Esc skips), dialogue subtitles (typewriter + `Sfx.speak` per character voice), customer lines from `repairs.orders`, story banners for `story.*` notifies, `notice_pattern` dialogue -> storyEvent, the modal "Repair shop -> company" card when the story ends (sections only) |
+| ui/story/objective_tracker.gd | HUD top-left: chapter + steps (server `story.objectives`) with checkmarks, hint, repair orders, "time starts at chapter 4" |
+| ui/story/counter_dialog.gd | `counter` (orderId): paper ticket / receipt, repairTake, repairReturn -> PAID stamp |
+| ui/story/repair_game.gd + repair_board.gd | `repair_bench` (orderId): unscrew -> probe -> swap part (stock, "Order parts" -> Purchasing) or hold to clean / reflash / free -> close up; 30-60 s; score -> repairFinish |
+| ui/screens/goals.gd | "Goals & gifts" (quick menu, HUD RP chip): current goal + all 28 (ui/data/goals.json), daily gift strip + claimDaily, where research points come from (rate per day) |
+| ui/hud/* | top bar (company, room code + copy, date, cash, RP chip (tooltip: RP sources + rate, click = Goals & gifts), team, reputation, speed with key labels P/1-4 (locked with a reason while the story clock is paused), members), left column (objective tracker, goal card, daily gift ready, dev chip, crates), [E] prompt, toasts (coalesced), chat |
 | ui/screens/designer.gd | Design Studio, 13 steps, live 3D model, cost card, critics preview (server evaluateBlueprint), undo/redo, concept shelf, publish |
-| ui/screens/research.gd | research board + details (startResearch / cancelResearch) |
+| ui/screens/research.gd | research board + details (startResearch / cancelResearch, "Boost +25% · 100 RP" = boostResearch) |
 | ui/screens/production.gd | dev projects (finish now / fix bug / add quality / cancel), batches (queueProduction), lines, incidents, launch |
 | ui/screens/shelf.gd | your devices: sales chart, reviews, price (setPrice), launch, discontinue, rivals |
 | ui/screens/company.gd | money, weekly revenue, market share, reputation, team, owners, bank loan, news |
@@ -51,7 +66,13 @@ python3 client/tools/export_data.py                          # shared-luau data 
 ## Bus usage
 - listens: `interact(kind, id)` (pc_design, whiteboard_research, workbench_production, phone_shelf, stage_launch,
   board_company, job_board, van, stairs_locked, production_line, supplier_phone, pc_challenge, whiteboard_challenge,
-  line_qc, door_exit -> pause menu), `focus_changed`, `notify`, `state_changed`.
+  line_qc, counter, repair_bench, door_exit -> pause menu), `focus_changed`, `notify`, `state_changed`,
+  `story_dialogue(line_id)` (step / cutscene / `cust.<id>.<kind>` lines, `customer:<id>:wait`), `story_cutscene(id)` (captions).
+- story events the UI sends (`storyEvent`): `intro_seen` / `investor_seen` / `sign_swapped` only when no world played the
+  cutscene, `pattern_noticed` after the chapter-3 dialogue, `supplier_called` (supplier phone), `reviews_seen` (critics card closed).
+- `Net.set_speed` is not sent while the story clock is paused (chapters 0-3); the first try shows one friendly toast.
+- Pause and quick menus have a game-speed row (the HUD bar is under their dimmer); pause has "Skip story" for the founder
+  (confirm -> `storySkip`).
 - Settings write `[audio] master/music/sfx/ui/voice`, `voice_mode` (tts/robot/off) and `voice_<lang>` (TTS voice id per
   language) and call `Sfx.apply_settings()` + emit `Bus.settings_changed`. Chat lines are spoken by Sfx itself (docs/AUDIO.md).
 - Every UI button gets `Sfx.ui("click")` / `"hover"` through one hook in ui_root; screens play open/close.

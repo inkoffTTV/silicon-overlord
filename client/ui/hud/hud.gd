@@ -204,7 +204,7 @@ func _build_hints() -> void:
 	h.grow_vertical = Control.GROW_DIRECTION_BEGIN
 	h.offset_right = -18
 	h.offset_bottom = -14
-	for pair in [["Tab", "Menu"], ["T", "Chat"], ["Esc", "Pause"]]:
+	for pair in [["1–4", "Speed"], ["Tab", "Menu"], ["T", "Chat"], ["Esc", "Pause"]]:
 		h.add_child(U.keycap(pair[0]))
 		var l := U.lbl(L.t(pair[1]), U.XS, Color(U.MUTED, 0.85))
 		h.add_child(l)

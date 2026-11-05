@@ -114,7 +114,7 @@ func _shot(name: String, cam: Camera3D) -> void:
 			_look(cam, lv.to_global(Vector3(-1.25, 1.62, 0.05)), lv.to_global(Vector3(-0.7, 1.15, 1.9)), 66.0)
 			await _wait(frames + 20)
 			await _save("story_ch1_counter")
-			_look(cam, lv.to_global(Vector3(0.6, 1.75, 3.2)), lv.to_global(Vector3(-1.0, 1.0, 0.9)), 68.0)
+			_look(cam, lv.to_global(Vector3(-2.7, 1.7, 3.2)), lv.to_global(Vector3(-0.8, 1.1, 1.0)), 66.0)
 			await _wait(frames)
 			await _save("story_ch1_counter_front")
 			world.story_stage(-1, "")
@@ -139,7 +139,7 @@ func _shot(name: String, cam: Camera3D) -> void:
 			var fin := Story.fake_state(7, "", [], [], true)
 			game.apply_snapshot(fin)
 			await _wait(4)
-			world.cutscenes.speed = 1.0
+			world.cutscenes.speed = 0.25
 			world.play_cutscene("sign_swap")
 			# frames are slow under software rendering: wait for the company sign to be in place and lit
 			var t := 0
@@ -148,7 +148,6 @@ func _shot(name: String, cam: Camera3D) -> void:
 				t += 1
 				if shop.sign_node().position.distance_to(shop.SIGN_POS) < 0.01 and str(shop.get("_sign_style")) == "company" and bool(shop.get("_sign_lit")):
 					break
-			await _wait(8)
 			await _save("story_sign_swap_new_sign")
 			while world.is_cutscene_running():
 				await process_frame
@@ -161,29 +160,32 @@ func _shot(name: String, cam: Camera3D) -> void:
 		"investor":
 			game.apply_snapshot(Story.fake_state(4, "investor_seen", ["intro_seen", "door_open", "lights_on"]))
 			await _wait(4)
-			world.play_cutscene("investor")
 			var cs: Node = world.cutscenes
+			cs.speed = 0.3
+			world.play_cutscene("investor")
 			var t := 0
 			var n := 0
 			while world.is_cutscene_running() and t < 6000:
 				await process_frame
 				t += 1
-				if t % 90 == 0 and n < 4:
+				if t % 40 == 0 and n < 6:
 					await _save("story_investor_%d" % n)
 					n += 1
 			cs.speed = 1.0
 		"intro":
 			game.apply_snapshot(Story.fake_state(0, "intro_seen", []))
 			await _wait(4)
+			world.cutscenes.speed = 0.3
 			world.play_cutscene("intro")
 			var t := 0
 			var n := 0
 			while world.is_cutscene_running() and t < 6000:
 				await process_frame
 				t += 1
-				if t % 80 == 0 and n < 4:
+				if t % 40 == 0 and n < 6:
 					await _save("story_intro_%d" % n)
 					n += 1
+			world.cutscenes.speed = 1.0
 
 func _title() -> void:
 	var sc: Node = load("res://world/title/title_scene.tscn").instantiate()

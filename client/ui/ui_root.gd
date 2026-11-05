@@ -634,8 +634,8 @@ func debug_menu(which: String) -> void:
 			menu.debug_page("join")
 		"settings":
 			menu.show_page("settings")
-		"settings_audio":
-			Settings.last_tab = "audio"
+		"settings_audio", "settings_controls":
+			Settings.last_tab = "audio" if which == "settings_audio" else "controls"
 			menu.show_page("settings")
 			menu.call("rebuild_settings")
 		"langpick":

@@ -73,6 +73,8 @@ var _companies_error := ""
 var _settings: Node
 var _credits_layer: Control
 var _first_show := true
+## focus moved by code (page opened, list rebuilt): no hover sound
+var _quiet_focus := false
 var _logo_words: Array = []
 var _logo_tv: VBoxContainer
 var _logo_sub: Label
@@ -371,7 +373,8 @@ func _item(text: String, desc: String, icon_name: String, on_press: Callable, bi
 		dl.visible = on and desc != ""
 	b.focus_entered.connect(func() -> void:
 		set_on.call(true)
-		_sfx("hover"))
+		if not _quiet_focus:
+			_sfx("hover"))
 	b.focus_exited.connect(func() -> void: set_on.call(false))
 	b.mouse_entered.connect(func() -> void:
 		if not b.has_focus() and not b.disabled:
@@ -536,7 +539,8 @@ func _slot_card(c: Dictionary, newest: bool) -> Button:
 		if not b.has_focus():
 			b.grab_focus())
 	b.focus_entered.connect(func() -> void:
-		_sfx("hover")
+		if not _quiet_focus:
+			_sfx("hover")
 		if backdrop and name_s != "":
 			backdrop.call("set_company_sign", name_s, col))
 	var cc := c
@@ -626,7 +630,9 @@ func _choice_card(kind: String, icon_name: String, col: Color, title_text: Strin
 	b.mouse_entered.connect(func() -> void:
 		if not b.has_focus():
 			b.grab_focus())
-	b.focus_entered.connect(func() -> void: _sfx("hover"))
+	b.focus_entered.connect(func() -> void:
+		if not _quiet_focus:
+			_sfx("hover"))
 	b.pressed.connect(func() -> void:
 		start_kind = kind
 		Prefs.set_profile("start_kind", kind)
@@ -968,6 +974,11 @@ static func _depth(p: String) -> int:
 func _focus_page(p: String) -> void:
 	if not is_inside_tree() or page != p or not is_visible_in_tree():
 		return
+	_quiet_focus = true
+	_focus_page_now(p)
+	_quiet_focus = false
+
+func _focus_page_now(p: String) -> void:
 	match p:
 		"home":
 			_focus_first(_home_items)

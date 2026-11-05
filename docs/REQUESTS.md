@@ -246,3 +246,9 @@ customer ids, devices/faults = server ids, placeholders, lengths, CJK glyphs in 
 - The title menu shows the updater status by reading `Updater.remote`, `_read_current()`, `_enabled()`,
   `compare_versions`, `_engine_tag()`. A public `Updater.status` ("off|checking|latest|downloading|ready|full") +
   `remote_version` would make that less fragile. The updater's own bottom banner still shows as before.
+- Update (UI, later the same day): the UI no longer emits `Bus.story_cutscene` itself. It follows your auto-start:
+  when the current step is a cutscene step it waits up to 3.5 s for `world.cutscenes.running == id`, shows the
+  captions while your camera runs and leaves the storyEvent to you. Only when no world plays it (no world / not
+  started in time) does the UI show the captions alone and send the storyEvent. Esc ends the captions and calls
+  `world.skip_cutscene()` if you add one (optional). The "Repair shop → company" card appears only when the story
+  ends through a `sections` update (never on a snapshot), so tests that `apply_snapshot` a finished story are not blocked.

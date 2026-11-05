@@ -97,6 +97,7 @@ func _run() -> void:
 	await shot("01_menu_create")
 	# create the company through the menu
 	ui.menu._company_edit.text = "Nebula Labs"
+	ui.menu.start_kind = "quick"   # the playtest runs the sandbox loop (the story start is covered by ui_net_test)
 	ui.menu._on_create()
 	var in_game: bool = await wait_for(func() -> bool: return Game.has_company(), 8.0)
 	step(in_game, "company created, snapshot received (room %s)" % Game.code)

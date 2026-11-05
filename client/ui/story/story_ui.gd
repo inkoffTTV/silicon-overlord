@@ -515,6 +515,9 @@ func _end_cutscene(_natural: bool) -> void:
 ## Esc during a cutscene / card. True when something was skipped.
 func skip() -> bool:
 	if _cut_id != "":
+		var w := _world()
+		if w and w.has_method("skip_cutscene"):
+			w.call("skip_cutscene")
 		_end_cutscene(false)
 		_sfx("back")
 		return true

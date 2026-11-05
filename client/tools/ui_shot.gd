@@ -76,7 +76,7 @@ func _run() -> void:
 		cl.add_child(tr)
 	# fake company
 	var st := D.sample_state()
-	if screen.begins_with("menu") or screen in ["settings", "settings_audio", "langpick", "credits", "loading"]:
+	if screen.begins_with("menu") or screen in ["settings", "settings_audio", "settings_controls", "langpick", "credits", "loading"]:
 		st = {}
 	if screen in ["story", "chapter", "cutscene", "repair", "counter", "skip", "final"]:
 		_story_state(st)
@@ -117,8 +117,11 @@ func _run() -> void:
 			await create_timer(0.6).timeout
 			ui.loading.set_status("Opening the garage…", 0.72)
 		"story":
-			ui.story.say("Grandma Rosa", "It keeps calling my ex-husband all by itself. We split up in 1979! He's very confused.", Color("#38C6D9"), 900575)
-			Bus.focus_changed.emit("Take the device")
+			var SDx = load("res://ui/story/story_data.gd")
+			var who := str(args.get("customer_line", "grandma"))
+			var ln: Dictionary = SDx.line("cust.%s.story" % who)
+			ui.story.say(str(SDx.customer(who).get("name", who)), str(ln.get("text", "…")), Color("#38C6D9"), SDx.voice(who))
+			Bus.focus_changed.emit("Counter")
 			await create_timer(4.5).timeout
 		"chapter":
 			ui.story.debug_quiet()
@@ -193,8 +196,8 @@ func _run() -> void:
 				ch.call("debug_play", str(args.game), float(args.get("play", "0")), float(args.get("result", "-1")))
 		"langpick":
 			ui.call("debug_menu", "langpick")
-		"settings_audio":
-			ui.call("debug_menu", "settings_audio")
+		"settings_audio", "settings_controls":
+			ui.call("debug_menu", screen)
 		"pause":
 			ui.call("debug_pause", args.has("settings"))
 		"quick":

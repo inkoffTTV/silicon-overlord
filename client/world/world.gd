@@ -504,8 +504,9 @@ func _auto_cutscene(dt: float) -> void:
 	if want == "" or _played.has(want):
 		_due_t = 0.0
 		return
+	# the UI's story director normally asks first (Bus.story_cutscene); this is only the fallback
 	_due_t += dt
-	if _due_t >= 1.0:
+	if _due_t >= 8.0:
 		_due_t = 0.0
 		play_cutscene(want)
 
@@ -517,3 +518,8 @@ func _on_cutscene_done(id: String) -> void:
 	if ev != "" and Story.active(Game.state) and not Story.any_done(Game.state, [ev]):
 		Net.act("storyEvent", {"id": ev})
 	cutscene_finished.emit(id)
+
+## Esc during a cutscene (the UI calls this): rush to the end.
+func skip_cutscene() -> void:
+	if cutscenes:
+		cutscenes.skip()

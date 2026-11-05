@@ -282,13 +282,13 @@ func _rain() -> void:
 	r.initial_velocity_min = 10.0
 	r.initial_velocity_max = 13.0
 	var q := QuadMesh.new()
-	q.size = Vector2(0.016, 0.42)
+	q.size = Vector2(0.011, 0.36)
 	var m := StandardMaterial3D.new()
 	m.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 	m.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
 	m.blend_mode = BaseMaterial3D.BLEND_MODE_ADD
 	m.billboard_mode = BaseMaterial3D.BILLBOARD_FIXED_Y
-	m.albedo_color = Color(0.55, 0.62, 0.8, 0.32)
+	m.albedo_color = Color(0.55, 0.62, 0.8, 0.17)
 	m.disable_receive_shadows = true
 	q.material = m
 	r.mesh = q
@@ -384,6 +384,10 @@ func _extras() -> void:
 		level.add_child(f)
 	if shop:
 		shop.set_sign_lit(true)
+	# the street lamp's beam into the garage window is too much from the street: tone it down
+	for sl in level.find_children("*", "SpotLight3D", true, false):
+		if (sl as SpotLight3D).light_energy > 30.0:
+			(sl as SpotLight3D).light_energy = 9.0
 
 # ------------------------------------------------------------------ camera
 func _aim(p: Vector3, at: Vector3, fov: float) -> void:
