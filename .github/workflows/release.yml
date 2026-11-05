@@ -1,6 +1,9 @@
-# Runs on the `builds` branch. tools/release.sh pushes a new SiliconOverlord.zip + version.json here; this workflow
-# then creates the GitHub Release "v<version>" (tag + notes + zip) if it does not exist yet.
-# Release notes are taken from docs/releases/v<version>.md on the main branch when present.
+# Runs on the `builds` branch. tools/release.sh (on online-port/main) pushes the light build (SiliconOverlord.zip
+# without voice/, SiliconOverlord.pck) + version.json here. This workflow then:
+#   1. rebuilds the character-voice folder with `tools/release.sh --voice-only windows` (pinned piper + voices,
+#      sha256-checked) and the GPL-3 source archives with `--sources-only`;
+#   2. packs the FULL zip (game + voice/) — too big for git — and
+#   3. creates the GitHub Release v<version> with the full zip + sources, notes from docs/releases/v<version>.md.
 name: Release from build
 
 on:
@@ -17,19 +20,38 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Create release if missing
-        env:
-          GH_TOKEN: ${{ github.token }}
+      - name: Versions
+        id: v
         run: |
-          version="$(python3 -c 'import json;print(json.load(open("version.json"))["version"])')"
-          tag="v$version"
-          if gh release view "$tag" >/dev/null 2>&1; then
-            echo "release $tag already exists"; exit 0
+          echo "version=$(python3 -c 'import json;print(json.load(open("version.json"))["version"])')" >> "$GITHUB_OUTPUT"
+      - name: Skip if released
+        id: skip
+        env: { GH_TOKEN: "${{ github.token }}" }
+        run: |
+          if gh release view "v${{ steps.v.outputs.version }}" >/dev/null 2>&1; then echo "skip=1" >> "$GITHUB_OUTPUT"; fi
+      - name: Get release tooling and notes from the source branch
+        if: steps.skip.outputs.skip != '1'
+        run: |
+          git fetch --depth=1 origin online-port
+          mkdir -p src && git --work-tree=src checkout FETCH_HEAD -- tools docs client/project.godot
+          sudo apt-get update -qq && sudo apt-get install -y -qq zstd zip unzip >/dev/null
+      - name: Assemble full zip
+        if: steps.skip.outputs.skip != '1'
+        run: |
+          mkdir -p full && cd full && unzip -q ../SiliconOverlord.zip && cd ..
+          test -f full/SiliconOverlord/SiliconOverlord.exe
+          if [ ! -d full/SiliconOverlord/voice ]; then
+            ROOT_OVERRIDE="$PWD/src" bash src/tools/release.sh --voice-only windows "$PWD/full/SiliconOverlord/voice"
           fi
-          notes_args=(--generate-notes)
-          for ref in online-port main; do
-            if git fetch --depth=1 origin "$ref" 2>/dev/null && git show "FETCH_HEAD:docs/releases/$tag.md" > notes.md 2>/dev/null; then
-              notes_args=(--notes-file notes.md); break
-            fi
-          done
-          gh release create "$tag" SiliconOverlord.zip --target builds --title "Silicon Overlord $version" "${notes_args[@]}"
+          bash src/tools/release.sh --sources-only "$PWD/sources"
+          (cd full && zip -9 -qr ../SiliconOverlord-full.zip SiliconOverlord)
+          mkdir -p out && cp SiliconOverlord-full.zip out/SiliconOverlord.zip
+          ls -la out sources
+      - name: Create release
+        if: steps.skip.outputs.skip != '1'
+        env: { GH_TOKEN: "${{ github.token }}" }
+        run: |
+          tag="v${{ steps.v.outputs.version }}"
+          notes="src/docs/releases/$tag.md"
+          args=(--generate-notes); [ -f "$notes" ] && args=(--notes-file "$notes")
+          gh release create "$tag" out/SiliconOverlord.zip sources/*.tar.gz --target builds --title "Silicon Overlord ${{ steps.v.outputs.version }}" "${args[@]}"
