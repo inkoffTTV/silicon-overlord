@@ -143,3 +143,36 @@ Iteration 2: `res://tools/shot_iter2.gd -- --shots=all` (or build,whiteboard,lof
 avatar_close,seat,jobs,shelf,locked,office) loads main.tscn with a rich fake company (`fake_state()`: sample state +
 2 projects, 5 crates, bench + 2 upstairs lines, 10 staff) and writes `tools/shots/iter2_*.png` +
 `tools/shots/avatars_showcase.png`.
+
+## Iteration 3: story start — the garage is a PHONE REPAIR shop (`res://world/live/repair_shop.gd`, `res://world/story/`)
+All driven by `Game.state.story` / `Game.state.repairs` (helpers `world/live/story_state.gd`); no `story` = sandbox.
+| What | Where (garage, level space) | Notes |
+|---|---|---|
+| Outside sign | gable over the roll-up door | story: neon "PHONE REPAIR" (pink letters, cyan tube border + phone/wrench icon, the "I" buzzes); after the story / quick start: backlit company lightbox (name in colour A, logo shape A/B, two gooseneck lamps). `set_sign_override()` for title/cutscenes |
+| Shop door `shop_door` | the roll-up door | chapter 0: closed ("CLOSED — back at 9 (probably)" note inside); E rolls it up + `storyEvent door_open` |
+| Light switch `light_switch` | front wall by the door (x 0.95) | chunky box, red lever, amber pilot lamp in the dark (green when on). Chapter 0 starts dark: every light/emissive inside the room is off except standby LEDs, the light under the house door and the switch. E = fluorescent tubes stutter on, bulbs/strings pop on, `storyEvent lights_on` |
+| Counter `counter` | x[-1.75,-0.05] z≈1.1, faces the door | glass display (cases, cables, earbuds) + teal kick panel, butcher-block top, DROP-OFF tray, grabbable service bell (dings), price stand, candy; hanging lightbox "PHONE REPAIR — while u wait • since last tuesday". Reception look: logo plaque, product on a turntable (real phone model when one exists), plant, "WELCOME!" |
+| Repair bench `repair_bench` | right wall, faces -X | ESD mat + phone holder (devices snap in), magnifier ring lamp (shadowed spot), soldering station (350°), drawers, screwdriver fan, multimeter, heat gun, pegboard, "IF IN DOUBT: TURN IT OFF AND ON AGAIN"; SCREENS / BATTERIES / PORTS bins show `inventory.resources.repair_*` ("— OUT!" in red); stool = seat (sit, look down at the device) |
+| Gadget shelf | right wall next to the bench | decor: phones with tickets, radio, flip phones, cracked tablet, "FIX ME" laptop, cable spaghetti |
+| Customers | from the street | `world/actors/customer_npc.gd`: original bean people, look from the customer id (grandma: bun + glasses + handbag, student: beanie + backpack, courier/taxi: cap, teacher: glasses + briefcase, gamer: kid in a huge hoodie, barista: apron + coffee, musician: beret + scarf, chef: toque, blogger: sunglasses + phone); walk in, ring the bell, hand over the device, wait (phone / tapping foot / crossed arms, "..." after a while), "!" when fixed, cheer + take it when paid, angry exit if the order vanishes |
+| Devices | counter tray / bench holder / carried | `world/live/broken_device.gd`: phone / tablet / watch / laptop; cracked screen (star crack), swollen battery, lint in the port, water drops (+ a noodle), glitchy magenta screen, taped button; paper ticket "#3 SCREEN"; fixed = clean glowing screen + green FIXED sticker |
+| Objective | any target | `world/story/objective.gd`: pulsing amber rim + outline (material_overlay, shaders `rim` + `outline`) and a floating chevron marker (no depth test, constant size) |
+| Van | driveway | hidden in story chapters 0–4 (free driveway for customers / the investor's car) |
+
+Cutscenes (`world/story/cutscenes.gd`, camera paths, paced to the UI captions): intro (night street → the dark sign
+sputters → through the window to the friends by the house door), investor (headlights sweep, a long dark car, a figure
+in a hat tips it at the door), sign_swap (neon dies, the old sign drops, the company lightbox comes down and lights up
+with sparks, counter → reception). The world sends the `*_seen` / `sign_swapped` storyEvent when one ends.
+
+Title screen `res://world/title/title_scene.tscn` (`title_scene.gd`): the same garage built as scenery (`decor_only`:
+no collision, groups or state parts) 3 km off the origin, night sky, SSR on wet asphalt/driveway + mirror puddles,
+CPU rain streaks + splashes + gutter drips, a buzzing street lamp, house next door, trees and a far skyline, four
+"Telly" friends (counter, whiteboard, back workbench, one carrying a box), 72 s Catmull-Rom dolly loop with sway.
+
+Safety nets (0.2.0 "fell out of the world" fix): the outside driveway / sidewalk / street now collide (they did not:
+the hole), a thick slab under the whole lot, extra bounds closing the gaps beside the garage corners and over the
+van roof, thick invisible panes in windows; `player.gd` respawns at the level spawn below y = -8 (fade from black),
+`world.gd` puts fallen props / crates / devices back home. Test: `tests/world_bounds_test.gd`.
+
+Screenshots: `res://tools/shot_story.gd -- --shots=all` (or title,dark,counter,bench,outside,swap,investor,intro) →
+`tools/shots/story_*.png`, `tools/shots/title_*.png`.

@@ -252,3 +252,40 @@ customer ids, devices/faults = server ids, placeholders, lengths, CJK glyphs in 
   started in time) does the UI show the captions alone and send the storyEvent. Esc ends the captions and calls
   `world.skip_cutscene()` if you add one (optional). The "Repair shop → company" card appears only when the story
   ends through a `sections` update (never on a snapshot), so tests that `apply_snapshot` a finished story are not blocked.
+
+## From WORLD agent (iteration 3, 2026-11-05)
+
+### UI agent: story world hooks (all in place)
+| Bus.interact kind | id | world side | UI should |
+|---|---|---|---|
+| `counter` | orderId | the counter (and a device lying on it) is interactable only while an order can be taken (`waiting`) or handed back (`ready` + device on the counter); prompts "Take the order: <fault> (<device>)" / "Hand it back & get paid" | receipt popup → `repairTake` / `repairReturn` |
+| `repair_bench` | orderId | interactable while an order is `inRepair`; the player first sits on the stool looking at the device (seat, like pc_challenge), then Bus.interact fires; stands up when your modal closes | repair mini-game → `repairFinish` |
+| `shop_door` | `garage_rollup` | the world opens the roll-up door and sends `storyEvent door_open` itself | nothing (optional sound/hint) |
+| `light_switch` | `garage_lights` | the world toggles the lights and sends `storyEvent lights_on` itself | nothing |
+| `supplier_phone` | (as before) | in chapter 2 the world also sends `storyEvent supplier_called` | Purchasing screen as before |
+| (device carried around) | — | kind `device`, E picks it up ("Carry to the repair bench" / "Carry back to the counter"), no Bus.interact | — |
+New prompt strings to translate (ui/i18n world table): "Open the shop", "Lights on", "Lights off", "Take the order: %s",
+"Hand it back & get paid", "Repair: %s", "Carry to the repair bench", "Carry back to the counter", "Counter", "Repair bench"
+(`%s` = "<fault> (<device>)" from the order's raw ids, e.g. "cracked_screen (phone)" — translate the ids if you can).
+- Cutscenes: `world.cutscenes.running` is the id while one plays (your `_world_cut()` works); `world.skip_cutscene()`
+  exists (Esc); `world.cutscene_finished(id)` signal; the world sends the `intro_seen` / `investor_seen` /
+  `sign_swapped` storyEvent at the end. The camera is paced to your caption timing (same formula, story JSON of
+  `L.lang`) and emits `Bus.story_dialogue("cut.<id>.N")` when caption N is due. If nobody asks for a due cutscene
+  within 8 s (no modal open), the world plays it itself as a fallback.
+- `Bus.story_dialogue("customer:<customerId>:<moment>")`, moment ∈ arrive / notice / wait / happy / angry, when a
+  customer reaches the counter, notices the fix, gets impatient, takes the phone back or storms off.
+- `world.story_stage(chapter, step)` is called by the world itself from `Game.state.story` (every 0.25 s; repair steps
+  follow the live orders: device → bench → device → counter). `story_stage(-1, "")` clears a manual override.
+- Title scene: `res://world/title/title_scene.tscn` — own camera (+ environment on it) and PostFX layer, no collision
+  and no groups; put it in a SubViewport (own_world_3d) or free it when entering a company. `set_company_sign(text,
+  color)`, `set_shot(0..2)`, `resume_loop()`, `use_post_fx = false` if you post-process yourself.
+
+### AUDIO (whoever owns client/audio now): optional new sounds
+- `counter_bell` (service bell ding) — the world falls back to `notify` meanwhile.
+- `rain` ambience loop for the title scene (light rain on asphalt + gutter drips); not used yet.
+
+### lead
+- `tests/world_bounds_test.gd` (new): walks the player into every edge, out of the door, off the loft and the office;
+  asserts y never < -1 and the respawn safety net. Please add it to the test list.
+- `tests/updater_test.gd` "download with correct sha256" fails here with `Error parsing URL http://127.0.0.1:0/...`
+  (test server port 0) — not caused by world changes.
